@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>핵심 플레이 연구</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="phone-frame">
+        <header class="hud-card hud-top">
+          <div class="hud-pill">
+            <span class="hud-label">홍보</span>
+            <strong id="promo-count">0</strong>
+          </div>
+          <div class="hud-pill">
+            <span class="hud-label">서빙</span>
+            <strong id="served-count">0</strong>
+          </div>
+        </header>
+
+        <section class="scene-card">
+          <div class="scene-header">
+            <div>
+              <p class="scene-kicker">Core Loop</p>
+              <h1>홍보하고, 병아리 손님에게 음식 주기</h1>
+            </div>
+            <button id="reset-btn" class="ghost-btn" type="button">리셋</button>
+          </div>
+
+          <div class="scene-stage">
+            <div class="stage-backdrop">
+              <div class="counter-deco"></div>
+              <img class="stage-protagonist" src="Icon/Chick/Icon_Chick_099.png" alt="요리사 병아리" />
+              <img class="stage-stove" src="assets/facility-icons/Icon_Facility_Stove_Wood.png" alt="화구" />
+              <img class="stage-table" src="assets/facility-icons/Icon_Facility_Table_Wood.png" alt="테이블" />
+              <img id="guest-sprite" class="stage-guest" src="Icon/Chick/Icon_Chick_001.png" alt="손님 병아리" hidden />
+              <img id="food-sprite" class="stage-food" src="assets/recipe-icons/chicken.png" alt="음식" hidden />
+            </div>
+            <div class="stage-copy">
+              <strong id="state-title">홍보로 첫 손님을 불러보세요</strong>
+              <p id="state-description">지금은 가게가 비어 있습니다.</p>
+            </div>
+          </div>
+
+          <div class="action-grid">
+            <button id="promotion-btn" class="primary-btn" type="button">📣 홍보하기</button>
+            <button id="serve-btn" class="accent-btn" type="button" disabled>🍗 음식 주기</button>
+          </div>
+
+          <div class="progress-card">
+            <div class="progress-copy">
+              <span>현재 흐름</span>
+              <strong id="flow-label">대기 중</strong>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <div id="progress-fill" class="progress-fill"></div>
+            </div>
+          </div>
+
+          <section class="log-card">
+            <div class="log-header">
+              <strong>플레이 로그</strong>
+              <span>만족도, 성장, 보상 없이 기본 전달만 확인합니다.</span>
+            </div>
+            <ul id="log-list" class="log-list"></ul>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="game.js"></script>
+  </body>
+</html>

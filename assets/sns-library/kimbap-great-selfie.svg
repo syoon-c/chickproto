@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="88" fill="#f4eee1" />
+  <circle cx="220" cy="186" r="88" fill="#e7dfce" opacity="0.52" />
+  <circle cx="850" cy="212" r="74" fill="#e7dfce" opacity="0.46" />
+  <circle cx="164" cy="820" r="96" fill="#e7dfce" opacity="0.32" />
+  <circle cx="832" cy="788" r="118" fill="#e7dfce" opacity="0.28" />
+  <ellipse cx="512" cy="860" rx="352" ry="72" fill="rgba(130, 111, 79, 0.08)" />
+  <rect x="182" y="398" width="660" height="312" rx="58" fill="#fffaf0" stroke="#d4c5ab" stroke-width="8" />
+  <rect x="216" y="430" width="592" height="248" rx="42" fill="#f8f0df" />
+  <circle cx="510" cy="552" r="168" fill="#a7c89d" opacity="0.18" />
+  <circle cx="510" cy="552" r="134" fill="#fff8ea" />
+  <circle cx="510" cy="552" r="104" fill="#6d8e63" opacity="0.14" />
+  <text x="510" y="564" text-anchor="middle" font-size="146">🍙</text>
+  <circle cx="760" cy="350" r="82" fill="#ffd24c" />
+  <ellipse cx="732" cy="332" rx="12" ry="18" fill="#1f1b18" />
+  <ellipse cx="776" cy="332" rx="12" ry="18" fill="#1f1b18" />
+  <rect x="708" y="356" width="92" height="58" rx="24" fill="#ff6a3d" stroke="#9c3e1d" stroke-width="6" />
+  <rect x="678" y="488" width="164" height="40" rx="20" fill="#f2dfba" />
+  <text x="760" y="504" text-anchor="middle" font-size="50">📸</text>
+  <text x="190" y="812" fill="#6c5631" font-size="44" font-weight="800" font-family="Avenir Next, Pretendard Variable, Apple SD Gothic Neo, sans-serif">김밥 · 만족</text>
+  <text x="190" y="864" fill="#8b7450" font-size="28" font-weight="700" font-family="Avenir Next, Pretendard Variable, Apple SD Gothic Neo, sans-serif">selfie cut</text>
+</svg>

@@ -1,0 +1,370 @@
+:root {
+  --bg-1: #f4f0d8;
+  --bg-2: #d6e6c5;
+  --frame: #fff9ee;
+  --ink: #2f2a21;
+  --muted: #746c58;
+  --line: #d9cfbb;
+  --primary: #f0b540;
+  --primary-deep: #c8871e;
+  --accent: #df7f48;
+  --accent-deep: #b95c2c;
+  --card: rgba(255, 250, 241, 0.96);
+  --shadow: 0 20px 40px rgba(78, 67, 34, 0.18);
+  font-family: "Pretendard Variable", "Noto Sans KR", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.55), transparent 26%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-2));
+}
+
+button {
+  font: inherit;
+  border: 0;
+  cursor: pointer;
+}
+
+.app-shell {
+  width: min(100%, 480px);
+}
+
+.phone-frame {
+  position: relative;
+  padding: 18px;
+  border-radius: 36px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(251, 245, 231, 0.94)),
+    var(--frame);
+  box-shadow: var(--shadow);
+}
+
+.hud-top {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.hud-card,
+.scene-card,
+.progress-card,
+.log-card {
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: 0 10px 24px rgba(97, 77, 33, 0.08);
+}
+
+.hud-pill {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 18px;
+  text-align: center;
+}
+
+.hud-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.hud-pill strong {
+  font-size: 22px;
+}
+
+.scene-card {
+  border-radius: 28px;
+  padding: 18px;
+}
+
+.scene-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.scene-kicker {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.scene-header h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.ghost-btn,
+.primary-btn,
+.accent-btn {
+  border-radius: 16px;
+  font-weight: 800;
+  transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
+}
+
+.ghost-btn {
+  padding: 10px 14px;
+  background: #fff6e3;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.scene-stage {
+  margin-top: 18px;
+}
+
+.stage-backdrop {
+  position: relative;
+  min-height: 330px;
+  border-radius: 26px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, #fff5ca 0%, #ffe7ab 36%, #d2f0c6 36%, #bfdf99 100%);
+  box-shadow: inset 0 -22px 40px rgba(123, 145, 62, 0.22);
+}
+
+.counter-deco {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 88px;
+  background:
+    linear-gradient(180deg, #ad753c 0%, #8d5c2a 100%);
+  box-shadow: inset 0 10px 0 rgba(255, 241, 215, 0.18);
+}
+
+.stage-protagonist,
+.stage-stove,
+.stage-table,
+.stage-guest,
+.stage-food {
+  position: absolute;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.stage-protagonist {
+  width: 124px;
+  left: 34px;
+  bottom: 34px;
+}
+
+.stage-stove {
+  width: 102px;
+  left: 118px;
+  bottom: 44px;
+}
+
+.stage-table {
+  width: 132px;
+  right: 38px;
+  bottom: 42px;
+}
+
+.stage-guest {
+  width: 112px;
+  right: 52px;
+  bottom: 88px;
+  filter: drop-shadow(0 12px 16px rgba(76, 67, 29, 0.18));
+}
+
+.stage-food {
+  width: 66px;
+  right: 122px;
+  bottom: 118px;
+  filter: drop-shadow(0 10px 14px rgba(76, 67, 29, 0.16));
+}
+
+.stage-copy {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #fff8e9;
+  border: 1px solid #eadcb7;
+}
+
+.stage-copy strong {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.stage-copy p {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.primary-btn,
+.accent-btn {
+  padding: 16px 14px;
+  color: #fffdf7;
+}
+
+.primary-btn {
+  background: linear-gradient(180deg, var(--primary), var(--primary-deep));
+  box-shadow: 0 10px 18px rgba(200, 135, 30, 0.28);
+}
+
+.accent-btn {
+  background: linear-gradient(180deg, var(--accent), var(--accent-deep));
+  box-shadow: 0 10px 18px rgba(185, 92, 44, 0.24);
+}
+
+.primary-btn:disabled,
+.accent-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+}
+
+.ghost-btn:hover,
+.primary-btn:hover:not(:disabled),
+.accent-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.progress-card {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 18px;
+}
+
+.progress-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.progress-copy span {
+  color: var(--muted);
+}
+
+.progress-bar {
+  height: 12px;
+  border-radius: 999px;
+  background: #efe6d0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffc542, #ff9e47);
+  transition: width 180ms ease;
+}
+
+.log-card {
+  margin-top: 16px;
+  padding: 14px 16px 16px;
+  border-radius: 18px;
+}
+
+.log-header {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.log-header span {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.log-list li {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff8e8;
+  border: 1px solid #ecdcb0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@media (max-width: 520px) {
+  body {
+    padding: 14px;
+  }
+
+  .phone-frame {
+    padding: 14px;
+    border-radius: 28px;
+  }
+
+  .scene-card {
+    padding: 15px;
+  }
+
+  .scene-header {
+    flex-direction: column;
+  }
+
+  .scene-header h1 {
+    font-size: 21px;
+  }
+
+  .stage-backdrop {
+    min-height: 290px;
+  }
+
+  .stage-protagonist {
+    width: 104px;
+    left: 22px;
+  }
+
+  .stage-stove {
+    width: 88px;
+    left: 92px;
+  }
+
+  .stage-table {
+    width: 116px;
+    right: 22px;
+  }
+
+  .stage-guest {
+    width: 98px;
+    right: 36px;
+  }
+
+  .stage-food {
+    width: 58px;
+    right: 96px;
+  }
+}

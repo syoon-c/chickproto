@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="112" y1="88" x2="930" y2="930" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4E9CF" />
+      <stop offset="1" stop-color="#E8D9B8" />
+    </linearGradient>
+    <radialGradient id="plateGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(512 456) rotate(90) scale(364 364)">
+      <stop stop-color="#FFF9ED" stop-opacity="0.95" />
+      <stop offset="0.58" stop-color="#FFF9ED" stop-opacity="0.16" />
+      <stop offset="1" stop-color="#FFF9ED" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="accent" x1="268" y1="278" x2="756" y2="766" gradientUnits="userSpaceOnUse">
+      <stop stop-color="rgb(230, 172, 181)" />
+      <stop offset="1" stop-color="rgb(218, 133, 147)" />
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="108" fill="url(#bg)" />
+  <circle cx="202" cy="196" r="54" fill="rgba(255,255,255,0.22)" />
+  <circle cx="842" cy="204" r="42" fill="rgba(255,255,255,0.16)" />
+  <circle cx="158" cy="818" r="56" fill="rgba(255,255,255,0.12)" />
+  <circle cx="838" cy="822" r="62" fill="rgba(255,255,255,0.16)" />
+  <rect x="116" y="116" width="792" height="792" rx="84" fill="url(#plateGlow)" />
+  <ellipse cx="512" cy="666" rx="228" ry="66" fill="rgba(77, 64, 39, 0.12)" />
+  <circle cx="512" cy="472" r="252" fill="#FFF8EB" />
+  <circle cx="512" cy="472" r="190" fill="#F6E9D1" />
+  <circle cx="512" cy="472" r="150" fill="url(#accent)" />
+  <circle cx="512" cy="472" r="124" fill="#d87f8d" opacity="0.18" />
+  <text x="512" y="522" text-anchor="middle" font-size="196">🍣</text>
+  <rect x="176" y="776" width="672" height="106" rx="38" fill="rgba(73, 60, 38, 0.12)" />
+  <text x="512" y="842" text-anchor="middle" fill="#5F5033" font-size="56" font-weight="800" font-family="Avenir Next, Pretendard Variable, Apple SD Gothic Neo, sans-serif">초밥</text>
+</svg>
