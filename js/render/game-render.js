@@ -707,10 +707,10 @@ function drawFarmDragPreview() {
 function drawBackground() {
   const backgroundImage = getSpriteImage(RESTAURANT_BACKGROUND_IMAGE_PATH);
   if (backgroundImage?.complete && backgroundImage.naturalWidth) {
-    const scale = Math.max(WORLD_WIDTH / backgroundImage.naturalWidth, GAME_HEIGHT / backgroundImage.naturalHeight);
+    const scale = Math.min(GAME_WIDTH / backgroundImage.naturalWidth, GAME_HEIGHT / backgroundImage.naturalHeight);
     const drawWidth = backgroundImage.naturalWidth * scale;
     const drawHeight = backgroundImage.naturalHeight * scale;
-    const drawX = (WORLD_WIDTH - drawWidth) * 0.5;
+    const drawX = state.camera.x + (GAME_WIDTH - drawWidth) * 0.5;
     const drawY = (GAME_HEIGHT - drawHeight) * 0.5;
     ctx.drawImage(backgroundImage, drawX, drawY, drawWidth, drawHeight);
     return;
