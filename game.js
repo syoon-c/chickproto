@@ -1,979 +1,1451 @@
-// Runtime state, simulation, drawing, and bootstrapping.
-const dom = {
-  topBar: document.querySelector(".top-bar"),
-  utilityTopRight: document.querySelector(".utility-stack-top-right"),
-  topNoticeStack: document.getElementById("top-notice-stack"),
-  menuLaunchBonusBanner: document.getElementById("menu-launch-bonus-banner"),
-  menuLaunchBonusName: document.getElementById("menu-launch-bonus-name"),
-  menuLaunchBonusTimer: document.getElementById("menu-launch-bonus-timer"),
-  acorns: document.getElementById("acorn-count"),
-  acornTestBtn: document.getElementById("acorn-test-btn"),
-  followers: document.getElementById("follower-count"),
-  ingredients: document.getElementById("ingredient-count"),
-  restaurantStatusCard: document.querySelector(".status-card-bottom-left"),
-  promoStack: document.querySelector(".promo-stack"),
-  bottomNav: document.querySelector(".bottom-nav"),
-  utilitySideRight: document.querySelector(".utility-side-right"),
-  promotionFill: document.getElementById("promotion-fill"),
-  promotionText: document.getElementById("promotion-text"),
-  rankCurrentLabel: document.getElementById("rank-current-label"),
-  rankProgressText: document.getElementById("rank-progress-text"),
-  openRankBtn: document.getElementById("open-rank"),
-  studyLevel: document.getElementById("study-level"),
-  studyCost: document.getElementById("study-cost"),
-  studyEffectCopy: document.getElementById("study-effect-copy"),
-  studySkillCopy: document.getElementById("study-skill-copy"),
-  skillList: document.getElementById("skill-list"),
-  studySkillsModal: document.getElementById("study-skills-modal"),
-  studySkillsSummary: document.getElementById("study-skills-summary"),
-  studySkillsList: document.getElementById("study-skills-list"),
-  studySkillsClose: document.getElementById("study-skills-close"),
-  recipeTabMenu: document.getElementById("recipe-tab-menu"),
-  recipeTabIngredients: document.getElementById("recipe-tab-ingredients"),
-  recipeTabBook: document.getElementById("recipe-tab-book"),
-  recipeCopy: document.getElementById("recipe-copy"),
-  recipeList: document.getElementById("recipe-list"),
-  recipeDetailModal: document.getElementById("recipe-detail-modal"),
-  recipeDetailTitle: document.getElementById("recipe-detail-title"),
-  recipeDetailIcon: document.getElementById("recipe-detail-icon"),
-  recipeDetailRarity: document.getElementById("recipe-detail-rarity"),
-  recipeDetailLevel: document.getElementById("recipe-detail-level"),
-  recipeDetailFragments: document.getElementById("recipe-detail-fragments"),
-  recipeDetailMetrics: document.getElementById("recipe-detail-metrics"),
-  recipeDetailEnhance: document.getElementById("recipe-detail-enhance"),
-  recipeDetailClose: document.getElementById("recipe-detail-close"),
-  recipeEventModal: document.getElementById("recipe-event-modal"),
-  recipeEventBurst: document.getElementById("recipe-event-burst"),
-  recipeEventKicker: document.getElementById("recipe-event-kicker"),
-  recipeEventTitle: document.getElementById("recipe-event-title"),
-  recipeEventCopy: document.getElementById("recipe-event-copy"),
-  recipeEventIcon: document.getElementById("recipe-event-icon"),
-  recipeEventRarity: document.getElementById("recipe-event-rarity"),
-  recipeEventName: document.getElementById("recipe-event-name"),
-  recipeEventAbilities: document.getElementById("recipe-event-abilities"),
-  recipeEventCostSection: document.getElementById("recipe-event-cost-section"),
-  recipeEventCostLabel: document.getElementById("recipe-event-cost-label"),
-  recipeEventCosts: document.getElementById("recipe-event-costs"),
-  recipeEventConfirm: document.getElementById("recipe-event-confirm"),
-  expansionList: document.getElementById("expansion-list"),
-  outingPanel: document.getElementById("outing-panel"),
-  outingFarmLevel: document.getElementById("outing-farm-level"),
-  outingFarmCharge: document.getElementById("outing-farm-charge"),
-  outingInterviewLevel: document.getElementById("outing-interview-level"),
-  outingInterviewTicket: document.getElementById("outing-interview-ticket"),
-  outingInterviewLock: document.getElementById("outing-interview-lock"),
-  enterFarmBtn: document.getElementById("enter-farm-btn"),
-  enterInterviewBtn: document.getElementById("enter-interview-btn"),
-  staffInterviewLevel: document.getElementById("staff-interview-level"),
-  staffInterviewTicket: document.getElementById("staff-interview-ticket"),
-  staffOpenInterviewBtn: document.getElementById("staff-open-interview-btn"),
-  staffList: document.getElementById("staff-list"),
-  staffDetailModal: document.getElementById("staff-detail-modal"),
-  staffDetailTitle: document.getElementById("staff-detail-title"),
-  staffDetailAvatar: document.getElementById("staff-detail-avatar"),
-  staffDetailRole: document.getElementById("staff-detail-role"),
-  staffDetailName: document.getElementById("staff-detail-name"),
-  staffDetailStat: document.getElementById("staff-detail-stat"),
-  staffDetailMetrics: document.getElementById("staff-detail-metrics"),
-  staffDetailInterview: document.getElementById("staff-detail-interview"),
-  staffDetailClose: document.getElementById("staff-detail-close"),
-  snsProfileHeader: document.getElementById("sns-profile-header"),
-  snsProfileAvatar: document.getElementById("sns-profile-avatar"),
-  snsProfileHandle: document.getElementById("sns-profile-handle"),
-  snsProfileName: document.getElementById("sns-profile-name"),
-  snsProfilePosts: document.getElementById("sns-profile-posts"),
-  snsProfileFollowers: document.getElementById("sns-profile-followers"),
-  snsProfileBio: document.getElementById("sns-profile-bio"),
-  snsCopyWrap: document.getElementById("sns-copy-wrap"),
-  snsCopy: document.getElementById("sns-copy"),
-  snsTabMy: document.getElementById("sns-tab-my"),
-  snsTabTagged: document.getElementById("sns-tab-tagged"),
-  snsMyTools: document.getElementById("sns-my-tools"),
-  snsCaptureBtn: document.getElementById("sns-capture-btn"),
-  snsCaptureCopy: document.getElementById("sns-capture-copy"),
-  snsFeedList: document.getElementById("sns-feed-list"),
-  snsPostModal: document.getElementById("sns-post-modal"),
-  snsPostBurst: document.getElementById("sns-post-burst"),
-  snsPostKicker: document.getElementById("sns-post-kicker"),
-  snsPostTitle: document.getElementById("sns-post-title"),
-  snsPostCopy: document.getElementById("sns-post-copy"),
-  snsPostPreview: document.getElementById("sns-post-preview"),
-  snsPostReward: document.getElementById("sns-post-reward"),
-  snsPostRewardValue: document.getElementById("sns-post-reward-value"),
-  snsPostConfirm: document.getElementById("sns-post-confirm"),
-  rankMedalIcon: document.getElementById("rank-medal-icon"),
-  rankStageCurrent: document.getElementById("rank-stage-current"),
-  rankStageCurrentCopy: document.getElementById("rank-stage-current-copy"),
-  rankStageNextCard: document.getElementById("rank-stage-next-card"),
-  rankStageNext: document.getElementById("rank-stage-next"),
-  rankStageNextCopy: document.getElementById("rank-stage-next-copy"),
-  rankPanelCopyWrap: document.getElementById("rank-panel-copy-wrap"),
-  rankPanelCopy: document.getElementById("rank-panel-copy"),
-  rankGoalList: document.getElementById("rank-goal-list"),
-  rankPromoteBtn: document.getElementById("rank-promote-btn"),
-  codexDiscovered: document.getElementById("codex-discovered"),
-  codexServed: document.getElementById("codex-served"),
-  codexCopy: document.getElementById("codex-copy"),
-  codexList: document.getElementById("codex-list"),
-  codexDetailModal: document.getElementById("codex-detail-modal"),
-  codexDetailBadge: document.getElementById("codex-detail-badge"),
-  codexDetailTitle: document.getElementById("codex-detail-title"),
-  codexDetailCopy: document.getElementById("codex-detail-copy"),
-  codexDetailState: document.getElementById("codex-detail-state"),
-  codexDetailServed: document.getElementById("codex-detail-served"),
-  codexDetailSatisfied: document.getElementById("codex-detail-satisfied"),
-  codexDetailPreferred: document.getElementById("codex-detail-preferred"),
-  codexDetailUnlock: document.getElementById("codex-detail-unlock"),
-  codexDetailPatron: document.getElementById("codex-detail-patron"),
-  codexDetailPatronReward: document.getElementById("codex-detail-patron-reward"),
-  codexDetailClose: document.getElementById("codex-detail-close"),
-  patronEventModal: document.getElementById("patron-event-modal"),
-  patronEventBurst: document.getElementById("patron-event-burst"),
-  patronEventKicker: document.getElementById("patron-event-kicker"),
-  patronEventTitle: document.getElementById("patron-event-title"),
-  patronEventCopy: document.getElementById("patron-event-copy"),
-  patronEventIcon: document.getElementById("patron-event-icon"),
-  patronEventLevel: document.getElementById("patron-event-level"),
-  patronEventName: document.getElementById("patron-event-name"),
-  patronEventRewards: document.getElementById("patron-event-rewards"),
-  patronEventConfirm: document.getElementById("patron-event-confirm"),
-  specialGuestModal: document.getElementById("special-guest-modal"),
-  rankUpModal: document.getElementById("rank-up-modal"),
-  rankUpStamp: document.getElementById("rank-up-stamp"),
-  rankUpBadge: document.getElementById("rank-up-badge"),
-  rankUpTitle: document.getElementById("rank-up-title"),
-  rankUpCopy: document.getElementById("rank-up-copy"),
-  rankUpRewardList: document.getElementById("rank-up-reward-list"),
-  rankUpUnlockList: document.getElementById("rank-up-unlock-list"),
-  rankUpClose: document.getElementById("rank-up-close"),
-  skillOptions: document.getElementById("skill-options"),
-  studyPanel: document.getElementById("study-panel"),
-  recipePanel: document.getElementById("recipe-panel"),
-  expansionPanel: document.getElementById("expansion-panel"),
-  staffPanel: document.getElementById("staff-panel"),
-  snsPanel: document.getElementById("sns-panel"),
-  snsShortcutBadge: document.getElementById("sns-shortcut-badge"),
-  rankPanel: document.getElementById("rank-panel"),
-  codexPanel: document.getElementById("codex-panel"),
-  codexShortcutBadge: document.getElementById("codex-shortcut-badge"),
-  recipeShortcutBadge: document.getElementById("recipe-shortcut-badge"),
-  farmSceneHud: document.getElementById("farm-scene-hud"),
-  farmBackBtn: document.getElementById("farm-back-btn"),
-  farmLevelLabel: document.getElementById("farm-level-label"),
-  farmExpLabel: document.getElementById("farm-exp-label"),
-  farmExpFill: document.getElementById("farm-exp-fill"),
-  farmChargeLabel: document.getElementById("farm-charge-label"),
-  farmNextCharge: document.getElementById("farm-next-charge"),
-  farmChargeTestBtn: document.getElementById("farm-charge-test-btn"),
-  farmGenerateBtn: document.getElementById("farm-generate-btn"),
-  farmInventoryToggle: document.getElementById("farm-inventory-toggle"),
-  farmInventoryModal: document.getElementById("farm-inventory-modal"),
-  farmInventoryClose: document.getElementById("farm-inventory-close"),
-  farmRewardCopy: document.getElementById("farm-reward-copy"),
-  farmInventoryList: document.getElementById("farm-inventory-list"),
-  interviewSceneHud: document.getElementById("interview-scene-hud"),
-  interviewBackBtn: document.getElementById("interview-back-btn"),
-  interviewLevelLabel: document.getElementById("interview-level-label"),
-  interviewExpLabel: document.getElementById("interview-exp-label"),
-  interviewTicketLabel: document.getElementById("interview-ticket-label"),
-  interviewCopyTitle: document.getElementById("interview-copy-title"),
-  interviewCopy: document.getElementById("interview-copy"),
-  interviewStartArea: document.getElementById("interview-start-area"),
-  interviewStartSlotList: document.getElementById("interview-start-slot-list"),
-  interviewGuide: document.getElementById("interview-guide"),
-  interviewResumeCard: document.getElementById("interview-resume-card"),
-  interviewResumeClose: document.getElementById("interview-resume-close"),
-  interviewResumeAvatar: document.getElementById("interview-resume-avatar"),
-  interviewResumeName: document.getElementById("interview-resume-name"),
-  interviewResumeTag: document.getElementById("interview-resume-tag"),
-  interviewResumeGreeting: document.getElementById("interview-resume-greeting"),
-  interviewResumeStats: document.getElementById("interview-resume-stats"),
-  interviewResumeSlotPreview: document.getElementById("interview-resume-slot-preview"),
-  interviewResumeSelect: document.getElementById("interview-resume-select"),
-  interviewAssignCard: document.getElementById("interview-assign-card"),
-  interviewAssignAvatar: document.getElementById("interview-assign-avatar"),
-  interviewAssignName: document.getElementById("interview-assign-name"),
-    interviewAssignTag: document.getElementById("interview-assign-tag"),
-    interviewCandidateList: document.getElementById("interview-candidate-list"),
-    interviewSlotList: document.getElementById("interview-slot-list"),
-    interviewSkipBtn: document.getElementById("interview-skip-btn"),
-    interviewSkipConfirmModal: document.getElementById("interview-skip-confirm-modal"),
-    interviewSkipConfirmCancel: document.getElementById("interview-skip-confirm-cancel"),
-    interviewSkipConfirmAccept: document.getElementById("interview-skip-confirm-accept"),
-    skillModal: document.getElementById("skill-modal"),
-  startOverlay: document.getElementById("start-overlay"),
-  studyUpgradeBtn: document.getElementById("study-upgrade-btn"),
-  resetDataBtn: document.getElementById("reset-data-btn"),
+// 식당아리 Chick Bistro — 프로토타입
+// 기획서 기준: 핵심 루프 + 설치 + 테마 + 레시피 연구
+//
+// 좌표계: 캔버스 480x900, 원점 좌상단
+
+// ===== 상수 =====
+const GAME_W = 480;
+const GAME_H = 900;
+const FIXED_DT = 1 / 60;
+
+const SAVE_KEY = "chick-bistro-prototype-v1";
+
+// 레시피 카탈로그 (icon_library 기반)
+const RECIPE_LIB = (window.RECIPE_ICON_LIBRARY?.entries || []);
+const RECIPE_NAME_BY_ID = {};
+RECIPE_LIB.forEach((entry) => {
+  RECIPE_NAME_BY_ID[entry.recipeId] = entry.recipeName;
+});
+
+// 등급 분류 (기획서: 평범한 요리 / 멋진 요리 / 특별한 요리)
+const RECIPE_RARITY = {
+  // 평범한 요리 (basic) - 8종, 가중치 높음
+  salad:   { rarity: "basic", weight: 14, basePrice: 60,  baseCook: 4 },
+  sandwich:{ rarity: "basic", weight: 14, basePrice: 80,  baseCook: 5 },
+  hotdog:  { rarity: "basic", weight: 12, basePrice: 90,  baseCook: 5 },
+  soup:    { rarity: "basic", weight: 12, basePrice: 100, baseCook: 6 },
+  omelet:  { rarity: "basic", weight: 12, basePrice: 110, baseCook: 6 },
+  kimbap:  { rarity: "basic", weight: 10, basePrice: 130, baseCook: 7 },
+  friedrice:{ rarity: "basic", weight: 10, basePrice: 150, baseCook: 7 },
+  wedges:  { rarity: "basic", weight: 10, basePrice: 140, baseCook: 6 },
+  // 멋진 요리 (rare) - 9종
+  skewers: { rarity: "rare", weight: 6, basePrice: 200, baseCook: 8 },
+  pizza:   { rarity: "rare", weight: 6, basePrice: 240, baseCook: 9 },
+  burger:  { rarity: "rare", weight: 6, basePrice: 220, baseCook: 8 },
+  bibimbap:{ rarity: "rare", weight: 5, basePrice: 260, baseCook: 9 },
+  pasta:   { rarity: "rare", weight: 5, basePrice: 280, baseCook: 10 },
+  taco:    { rarity: "rare", weight: 5, basePrice: 250, baseCook: 9 },
+  ramen:   { rarity: "rare", weight: 5, basePrice: 290, baseCook: 10 },
+  friednoodles:{ rarity: "rare", weight: 5, basePrice: 270, baseCook: 9 },
+  curry:   { rarity: "rare", weight: 5, basePrice: 300, baseCook: 10 },
+  grilledfish:{ rarity: "rare", weight: 5, basePrice: 280, baseCook: 9 },
+  tonkatsu:{ rarity: "rare", weight: 5, basePrice: 310, baseCook: 10 },
+  dimsum:  { rarity: "rare", weight: 5, basePrice: 260, baseCook: 9 },
+  // 특별한 요리 (epic) - 5종
+  chicken: { rarity: "epic", weight: 2, basePrice: 460, baseCook: 12 },
+  gnocchi: { rarity: "epic", weight: 2, basePrice: 480, baseCook: 12 },
+  sushi:   { rarity: "epic", weight: 2, basePrice: 520, baseCook: 13 },
+  bulgogi: { rarity: "epic", weight: 2, basePrice: 500, baseCook: 13 },
+  steak:   { rarity: "epic", weight: 1, basePrice: 600, baseCook: 14 },
 };
 
-const SAVE_STORAGE_KEY = "chick-restaurant-core-loop-desktop-v2";
-const SAVE_VERSION = 5;
-const AUTO_SAVE_INTERVAL_SECONDS = 3;
+const RECIPE_LIST = Object.keys(RECIPE_RARITY).filter((id) => RECIPE_NAME_BY_ID[id]);
 
-let state;
-let rafId = 0;
-const staffBubbles = {
-  chef:        { line: "", until: 0, nextAt: 0 },
-  server:      { line: "", until: 0, nextAt: 0 },
-  promoter:    { line: "", until: 0, nextAt: 0 },
-  farmer:      { line: "", until: 0, nextAt: 0 },
-  interviewee: { line: "", until: 0 },
-  protagonist: { line: "", until: 0 },
+const RARITY_LABEL = {
+  basic: "평범한 요리",
+  rare:  "멋진 요리",
+  epic:  "특별한 요리",
 };
-let lastTime = 0;
-let lastPersistClock = 0;
-const cameraDragState = {
-  pointerId: null,
-  startClientX: 0,
-  startCameraX: 0,
-  distance: 0,
-  suppressClick: false,
-};
-const farmDragState = {
-  pointerId: null,
-  sourceIndex: null,
-  hoverIndex: null,
-  startClientX: 0,
-  startClientY: 0,
-  currentClientX: 0,
-  currentClientY: 0,
-  distance: 0,
-  suppressClick: false,
-};
-const CHEF_HOME_FALLBACK_POSITION = { x: WORLD_CENTER_X, y: 206 };
-const CHEF_LINE_POOLS = {
-  opening: [
-    "좋아요, 영업 들어가거덩요.",
-    "오늘도 맛으로 가보거덩요.",
-    "주방 준비 끝났거덩요. 손님 받아볼게요.",
-  ],
-  idleEmpty: [
-    "장사가 왜 이렇게 안 되거덩요...",
-    "손님이 없거덩요. 홍보 조금 더 쳐야 돼요.",
-    "지금 좀 한가하거덩요. 손님만 오면 바로 들어가요.",
-  ],
-  idle: [
-    "지금은 숨 돌리는 타이밍이거덩요.",
-    "손님만 들어오면 바로 갈 수 있거덩요.",
-    "주방은 미리 정리돼 있어야 안 꼬이거덩요.",
-  ],
-  start: [
-    "{recipe}, 지금 바로 들어가거덩요.",
-    "{recipe}, 타이밍 늦으면 안 되거덩요.",
-    "{recipe}, 이건 제가 바로 잡을게요.",
-  ],
-  rush: [
-    "엄청 바쁘거덩요.",
-    "지금 주문이 한 번에 들어오거덩요.",
-    "이럴 때 동선 꼬이면 바로 밀리거덩요.",
-  ],
-  finish: [
-    "{recipe}, 지금 딱 좋거덩요.",
-    "이 정도면 바로 나가도 되거덩요.",
-    "{recipe}, 오늘 컨디션 괜찮거덩요.",
-  ],
-};
-const CHEF_RECIPE_COOK_LINES = {
-  salad: [
-    "샐러드는 식감이 먼저거덩요. 숨 죽으면 끝이에요.",
-    "샐러드는 선명해야 되거덩요. 답답하면 바로 티 나요.",
-  ],
-  sandwich: [
-    "샌드위치는 단면이 정직해야 되거덩요.",
-    "샌드위치는 한입 밸런스가 맞아야 되거덩요.",
-  ],
-  hotdog: [
-    "핫도그는 소스가 과하면 바로 질리거덩요.",
-    "핫도그는 빵이 눅눅하면 안 되거덩요.",
-  ],
-  soup: [
-    "수프는 버터랑 크림 텍스처가 중요하거덩요.",
-    "수프는 농도가 한 끗만 어긋나도 바로 느껴지거덩요.",
-  ],
-  omelet: [
-    "오믈렛은 불이 세면 바로 질겨지거덩요.",
-    "오믈렛은 결이 부드러워야 되거덩요.",
-  ],
-  skewers: [
-    "꼬치는 겉만 타면 안 되거덩요. 속까지 맞춰야 돼요.",
-    "꼬치는 굽는 타이밍이 전부거덩요.",
-  ],
-  kimbap: [
-    "김밥은 속재료 밸런스가 틀어지면 바로 퍽퍽하거덩요.",
-    "김밥은 썰었을 때 단면이 깔끔해야 되거덩요.",
-  ],
-  pizza: [
-    "피자는 도우랑 치즈 타이밍이 같이 가야 되거덩요.",
-    "피자는 끝맛까지 무너지면 안 되거덩요.",
-  ],
-  friedrice: [
-    "볶음밥은 팬에서 흩어지는 결이 살아야 되거덩요.",
-    "볶음밥은 센 불인데도 기름지면 안 되거덩요.",
-  ],
-  grilledfish: [
-    "생선구이는 껍질부터 잡아야 되거덩요.",
-    "생선은 비린 끝맛 남으면 바로 티 나거덩요.",
-  ],
-  burger: [
-    "햄버거는 소스보다 패티 온도가 먼저거덩요.",
-    "햄버거는 한입에 재료가 다 들어와야 되거덩요.",
-  ],
-  wedges: [
-    "웨지감자는 겉은 바삭하고 속은 포슬해야 되거덩요.",
-    "감자는 튀김색부터 맞아야 되거덩요.",
-  ],
-  bibimbap: [
-    "비빔밥은 재료가 따로 놀면 안 되거덩요.",
-    "비빔밥은 고추장보다 밥 온도가 중요하거덩요.",
-  ],
-  dimsum: [
-    "딤섬은 피가 두꺼우면 바로 답답하거덩요.",
-    "딤섬은 속이 촉촉해야 되거덩요.",
-  ],
-  pasta: [
-    "파스타는 면 익힘이 반 이상이거덩요.",
-    "파스타는 소스가 면을 눌러버리면 안 되거덩요.",
-  ],
-  taco: [
-    "타코는 한입에 터지는 산뜻함이 있어야 되거덩요.",
-    "타코는 또르띠야 식감부터 잡아야 되거덩요.",
-  ],
-  ramen: [
-    "라멘은 국물 첫 향이 약하면 이미 늦었거덩요.",
-    "라멘은 면이 퍼지는 순간 끝이거덩요.",
-  ],
-  friednoodles: [
-    "볶음면은 불향이 얹혀야 되거덩요.",
-    "볶음면은 면이 떡지면 바로 무거워지거덩요.",
-  ],
-  tonkatsu: [
-    "돈까스는 튀김옷 소리부터 달라야 되거덩요.",
-    "돈까스는 고기 육즙 못 잡으면 바로 퍽퍽하거덩요.",
-  ],
-  curry: [
-    "카레는 향은 진한데 끝은 무거우면 안 되거덩요.",
-    "카레는 한 숟갈 먹고 바로 다음 숟갈 가야 되거덩요.",
-  ],
-  chicken: [
-    "치킨은 첫 한입에 바삭함이 터져야 되거덩요.",
-    "치킨은 속까지 촉촉해야 되는 거거덩요.",
-  ],
-  gnocchi: [
-    "뇨끼는 질감이 무거우면 바로 티 나거덩요.",
-    "뇨끼는 쫀득한데 답답하면 안 되거덩요.",
-  ],
-  sushi: [
-    "초밥은 밥 온도만 틀어져도 밸런스 깨지거덩요.",
-    "초밥은 힘 빼고 잡아야 되거덩요.",
-  ],
-  bulgogi: [
-    "불고기는 단맛만 세면 바로 질리거덩요.",
-    "불고기는 향은 올라오는데 고기는 부드러워야 되거덩요.",
-  ],
-  steak: [
-    "스테이크는 굽기 한 번 놓치면 돌이키기 어렵거덩요.",
-    "스테이크는 육즙이 안에 있어야 되거덩요.",
-  ],
-};
-const LAST_DEPARTURE_BUBBLE_BY_TIER = new Map();
 
-state = loadPersistedState();
-lastPersistClock = state.clock || 0;
-
-function getOutstandingOrderCount() {
-  return (
-    state.restaurant.pendingOrders.length +
-    state.restaurant.tables.filter((table) => table.customer?.state === "awaiting_order").length
-  );
+// 강화 단계별 효과 (기획서: 별 최대까지 상승, 더 이상 연구에서 등장 X)
+const MAX_STARS = 5;
+function priceMultiplierForStars(stars) {
+  return 1 + stars * 0.22;
+}
+function cookMultiplierForStars(stars) {
+  return Math.max(0.4, 1 - stars * 0.1);
 }
 
-function renderGameToText() {
-  const rankStatus = getRankPromotionStatus();
-  const hudSpecialGoal = getHudSpecialSatisfiedGoal(rankStatus);
-  const visibleCustomers = [
-    ...state.restaurant.queue.map((customer) => ({ ...customer, tableId: null })),
-    ...state.restaurant.tables
-      .filter((table) => table.customer)
-      .map((table) => ({ ...table.customer, tableId: table.id })),
-    ...state.restaurant.departingCustomers.map((customer) => ({ ...customer, tableId: null })),
-  ].map((customer) => ({
-    id: customer.id,
-    kind: customer.kind,
-    name: customer.name,
-    badge:
-      customer.kind === "special" ? customer.badge || getCustomerProfileBadge(customer.profileId) : "🐥",
-    profileId: customer.profileId,
-    tableId: customer.tableId,
-    recipe: getRecipe(customer.recipeId)?.name || null,
-    recipeEmoji: getRecipe(customer.recipeId)?.emoji || null,
-    preferredRecipes: (customer.preferredRecipes || []).map(
-      (recipeId) => getRecipe(recipeId)?.name || recipeId
-    ),
-    state: customer.state,
-    satisfaction:
-      customer.satisfaction && {
-        label: customer.satisfaction.label,
-        emoji: customer.satisfaction.emoji,
-        score: Number(customer.satisfaction.score.toFixed(1)),
-        bubbleText: customer.satisfaction.bubbleText,
-      },
-    x: Number(customer.x.toFixed(1)),
-    y: Number(customer.y.toFixed(1)),
-    orderBubble:
-      customer.state === "awaiting_order"
-        ? (() => {
-            const bubble = getOrderBubbleRect(customer);
-            return {
-              x: Number(bubble.x.toFixed(1)),
-              y: Number(bubble.y.toFixed(1)),
-              width: bubble.width,
-              height: bubble.height,
-            };
-          })()
-        : null,
+// 연구 비용: 100 + (5회 구간 × 150) + (현재 구간 순번 × 20)
+function researchCostForCount(count) {
+  const bigStep = Math.floor(count / 5);
+  const smallStep = count % 5;
+  return 100 + bigStep * 150 + smallStep * 20;
+}
+
+// 메뉴별 천장 (기획서: 처음 획득 메뉴에만 천장, 메뉴마다 다른 절대 횟수)
+// 평범한 요리는 일찍, 특별한 요리는 늦게 천장 발동
+const RECIPE_PITY = {
+  // basic 메뉴는 1~2회 안에 거의 다 자연스럽게 뜨지만 보장값
+  salad: 2, sandwich: 3, hotdog: 4, soup: 5, omelet: 6,
+  kimbap: 8, friedrice: 10, wedges: 12,
+  // rare 멋진 요리
+  skewers: 16, pizza: 20, burger: 24, bibimbap: 28, pasta: 32,
+  taco: 36, ramen: 40, friednoodles: 44, curry: 48, grilledfish: 52,
+  tonkatsu: 56, dimsum: 60,
+  // epic 특별한 요리
+  chicken: 70, gnocchi: 82, sushi: 95, bulgogi: 110, steak: 130,
+};
+
+// 시설 좌표 + 설치 시퀀스 (InstallFacility.json 기준: 테이블 4 + 화구 4)
+const TABLE_SLOTS = [
+  { id: "table-1", x: 160, y: 470 },
+  { id: "table-2", x: 320, y: 470 },
+  { id: "table-3", x: 160, y: 620 },
+  { id: "table-4", x: 320, y: 620 },
+];
+const STOVE_SLOTS = [
+  { id: "stove-1", x: 165, y: 218 },
+  { id: "stove-2", x: 240, y: 218 },
+  { id: "stove-3", x: 315, y: 218 },
+  { id: "stove-4", x: 90,  y: 224 },
+];
+const CHEF_HOME = { x: 240, y: 168 };
+const ENTRANCE = { x: 240, y: 850 };
+
+// 설치 시퀀스 — InstallFacility.json sequence 1~8 중 시작 보유분(table-1, stove-1) 제외
+const INSTALL_SEQUENCE = [
+  { kind: "table", slotId: "table-2", title: "2번 테이블", desc: "한 번에 받을 수 있는 손님이 늘어난다.", cost: 150 },
+  { kind: "stove", slotId: "stove-2", title: "2번 조리기구", desc: "동시에 조리할 수 있는 주문이 늘어난다.", cost: 220 },
+  { kind: "table", slotId: "table-3", title: "3번 테이블", desc: "중반 처리량을 받쳐줄 좌석이 추가된다.", cost: 320 },
+  { kind: "stove", slotId: "stove-3", title: "3번 조리기구", desc: "주문이 몰릴 때 대기 시간이 줄어든다.", cost: 460 },
+  { kind: "table", slotId: "table-4", title: "4번 테이블", desc: "한 줄을 더 깔끔하게 채울 수 있다.",       cost: 600 },
+  { kind: "stove", slotId: "stove-4", title: "4번 조리기구", desc: "고급 메뉴까지 동시에 굴린다.",           cost: 800 },
+];
+const INSTALL_VISIBLE_AHEAD = 2; // 한 번에 보이는 후보 수
+
+// 테마 정의 — ThemeFacility.json 기준 (6개 테마, 각 시설 종류마다 분리 구매)
+// 통화: 101=도토리, 102=보석
+const THEME_LIST = [
+  { id: "stone",    name: "대충 돌 식당",   themeNo: 1, costAcorn: 0,   costGem: 0,  boost: 0.0 },
+  { id: "wood",     name: "아늑한 나무 식당", themeNo: 2, costAcorn: 100, costGem: 0,  boost: 0.10 },
+  { id: "camping",  name: "스카우트 캠핑장", themeNo: 3, costAcorn: 100, costGem: 0,  boost: 0.20 },
+  { id: "italy",    name: "이태리 피제리아", themeNo: 4, costAcorn: 100, costGem: 0,  boost: 0.20 },
+  { id: "summer",   name: "초여름 그해",     themeNo: 6, costAcorn: 100, costGem: 0,  boost: 0.20 },
+  { id: "cherry",   name: "벚꽃 떨어질 즈음", themeNo: 7, costAcorn: 0,   costGem: 10, boost: 0.40 },
+];
+
+function buildThemeDefs(prefix) {
+  // prefix = "Table" | "Stove" | "Entrance" | "CounterTop"
+  const suffix = { stone: "Stone", wood: "Wood", camping: "Camping", italy: "Italy", summer: "BlueWhite", cherry: "CherryBlossom" };
+  return THEME_LIST.map((t) => ({
+    id: t.id,
+    name: t.name,
+    icon: `Icon/Facility/Icon_Facility_${prefix}_${suffix[t.id]}.png`,
+    costAcorn: t.costAcorn,
+    costGem: t.costGem,
+    boost: t.boost,
   }));
-
-  const payload = {
-    coordinateSystem: "canvas origin=(0,0) top-left, x rightward, y downward",
-    mode: state.mode,
-    scene: state.scene,
-    resources: {
-      acorns: state.resources.acorns,
-      ingredientTotal: getIngredientTotalCount(),
-    },
-    study: {
-      level: state.study.level,
-      nextCost: getStudyCost(),
-      skillDraftOpen: state.ui.skillDraft.length > 0,
-      skills: Object.fromEntries(
-        Object.entries(state.study.skillLevels).filter(([, level]) => level > 0)
-      ),
-    },
-    restaurant: {
-      cameraX: Number(state.camera.x.toFixed(1)),
-      cameraMaxX: GAME_WORLD_MAX_CAMERA_X,
-      worldWidth: WORLD_WIDTH,
-      promotionProgress: state.restaurant.promotionProgress,
-      promotionThreshold: getPromotionThreshold(),
-      queueCount: state.restaurant.queue.length,
-      pendingOrders: state.restaurant.pendingOrders.length,
-      untappedOrders: state.restaurant.tables.filter(
-        (table) => table.customer?.state === "awaiting_order"
-      ).length,
-      tables: state.restaurant.tables.length,
-      stoves: state.restaurant.stoves.length,
-      served: state.metrics.served,
-      specialSatisfied: getSpecialSatisfiedCount(),
-      satisfactionCounts: state.metrics.satisfactionCounts,
-      latestSatisfaction: state.metrics.latestSatisfaction,
-      nextExpansion: getNextExpansion()?.title || null,
-    },
-    staffs: {
-      chef: {
-        level: getStaffLevel("chef"),
-        priceMultiplier: Number(getChefPriceMultiplier().toFixed(2)),
-        cookMultiplier: Number(getChefCookMultiplier().toFixed(2)),
-        actor: {
-          x: Number(state.chefActor.x.toFixed(1)),
-          y: Number(state.chefActor.y.toFixed(1)),
-          targetX: Number(state.chefActor.targetX.toFixed(1)),
-          targetY: Number(state.chefActor.targetY.toFixed(1)),
-          mode: state.chefActor.mode,
-          stoveId: state.chefActor.stoveId,
-          activeCount: state.chefActor.activeCount,
-          line: state.chefActor.line,
-        },
-      },
-      server: {
-        level: getStaffLevel("server"),
-        mode: state.staffs.server.mode,
-        x: Number(state.staffs.server.x.toFixed(1)),
-        y: Number(state.staffs.server.y.toFixed(1)),
-        speed: Number(getServerMoveSpeed().toFixed(1)),
-        support: Number(getServerSatisfactionSupportForStat(getStaffRelevantStat("server")).toFixed(2)),
-      },
-      promoter: {
-        level: getStaffLevel("promoter"),
-        cooldown: Number(getPromoterCooldown().toFixed(1)),
-        timer: Number((state.staffs.promoter.timer || 0).toFixed(1)),
-        extraChance: Number((getPromoterExtraCustomerChanceForStat(getStaffRelevantStat("promoter")) * 100).toFixed(0)),
-      },
-      farmer: {
-        level: getStaffLevel("farmer"),
-        cooldown: Number(getFarmerCooldown().toFixed(1)),
-        timer: Number((state.staffs.farmer.timer || 0).toFixed(1)),
-        extraChance: Number((getFarmerExtraSpawnChanceForStat(getStaffRelevantStat("farmer")) * 100).toFixed(0)),
-      },
-      interview: {
-        level: state.staffs.interview.level,
-        tickets: state.staffs.interview.tickets,
-        targetStaffId: state.staffs.interview.targetStaffId,
-        candidates: (state.staffs.interview.candidates || []).map((candidate) => ({
-          id: candidate.id,
-          name: candidate.name,
-          staffId: candidate.staffId,
-          staffTitle: candidate.staffTitle,
-          primaryFocus: candidate.primaryFocus,
-          stats: candidate.stats,
-        })),
-      },
-    },
-    codex: {
-      discovered: getCodexCounts().discovered,
-      served: getCodexCounts().served,
-      satisfied: getSpecialSatisfiedCount(),
-      total: CUSTOMER_PROFILES.length,
-      topPatrons: CUSTOMER_PROFILES
-        .map((profile) => {
-          const entry = getCodexEntry(state, profile.id);
-          return {
-            profileId: profile.id,
-            name: profile.name,
-            level: getCustomerPatronLevel(entry),
-            served: entry.servedCount,
-          };
-        })
-        .filter((entry) => entry.served > 0)
-        .sort((left, right) => right.level - left.level || right.served - left.served)
-        .slice(0, 3),
-    },
-    social: {
-      followers: state.social.followers,
-      followerPoints: state.social.followerPoints,
-      activeTab: state.social.activeTab,
-      myPosts: state.social.ownPosts.length,
-      taggedPosts: state.social.taggedPosts.length,
-      growth: state.social.growth,
-      libraryEntries: state.social.library.entriesLoaded,
-      librarySource: state.social.library.sourceSummary,
-      nextCaptureIn: Number(Math.max(0, state.social.nextCaptureAt - state.clock).toFixed(1)),
-      latestTaggedPost:
-        state.social.taggedPosts[0] && {
-          taggedKind: state.social.taggedPosts[0].taggedKind || "review",
-          guestName: state.social.taggedPosts[0].guestName,
-          handle: state.social.taggedPosts[0].handle,
-          recipeName: state.social.taggedPosts[0].recipeName,
-          ratingLabel: state.social.taggedPosts[0].ratingLabel,
-          satisfactionTier: state.social.taggedPosts[0].satisfactionTier || null,
-          followerGain: state.social.taggedPosts[0].followerGain || 0,
-          rewardClaimed: Boolean(state.social.taggedPosts[0].rewardClaimed),
-          imageStatus: state.social.taggedPosts[0].imageStatus,
-        },
-    },
-    farm: {
-      level: state.farm.level,
-      exp: state.farm.exp,
-      expTarget: getFarmExpTarget(state.farm.level),
-      charges: state.farm.charges,
-      maxCharges: state.farm.maxCharges,
-      nextChargeIn:
-        state.farm.charges >= state.farm.maxCharges
-          ? 0
-          : Number(Math.max(0, state.farm.nextChargeAt - state.clock).toFixed(1)),
-      harvests: state.farm.harvests,
-      inventory: state.farm.inventory,
-      items: state.farm.board
-        .map((item, index) =>
-          item
-            ? {
-                index,
-                kind: item.kind,
-                name: FARM_ITEM_META[item.kind]?.name || item.kind,
-                final: Boolean(FARM_ITEM_META[item.kind]?.final),
-              }
-            : null
-        )
-        .filter(Boolean),
-      lastRewardText: state.farm.lastRewardText,
-    },
-    rank: {
-      currentTier: getCurrentRankTier().title,
-      nextTier: getNextRankTier()?.title || null,
-      promotion: {
-        completedCount: rankStatus.completedCount,
-        totalCount: rankStatus.totalCount,
-        eligible: rankStatus.eligible,
-        isMax: rankStatus.isMax,
-      },
-      hudSpecialGoal: hudSpecialGoal
-        ? {
-            scopeLabel: hudSpecialGoal.scopeLabel,
-            current: hudSpecialGoal.current,
-            target: hudSpecialGoal.target,
-            progressText: hudSpecialGoal.progressText,
-            complete: hudSpecialGoal.complete,
-          }
-        : null,
-      celebrationOpen: Boolean(state.ui.rankCelebration),
-      newUnlocks: {
-        recipes: state.ui.newUnlocks.recipeIds.length,
-        guests: state.ui.newUnlocks.guestIds.length,
-      },
-    },
-    customersAtTables: visibleCustomers,
-    ownedRecipes: getOwnedRecipes().map(({ recipe, owned }) => ({
-      name: getRecipeNameByLevel(recipe.id, owned.level),
-      level: owned.level,
-      stage: getRecipeStageLabel(owned.level),
-      enhanceCost: getRecipeUpgradeCost(recipe.id, owned.level),
-      payout: getRecipePayout(recipe.id),
-      cookTime: Number(getRecipeCookTime(recipe.id).toFixed(1)),
-    })),
-    unlockedRecipes: getUnlockedRecipes().map((recipe) => recipe.id),
-    panel: state.ui.openPanel,
-    recipeTab: state.ui.recipeTab,
-    recipeDetail: state.ui.recipeDetailId,
-    staffDetail: state.ui.staffDetailId,
-    recipeCelebration: state.ui.recipeCelebration
-      ? {
-          kind: state.ui.recipeCelebration.kind,
-          recipeId: state.ui.recipeCelebration.recipeId,
-          recipeName: state.ui.recipeCelebration.recipeName,
-        }
-      : null,
-    patronCelebration: state.ui.patronCelebration
-      ? {
-          profileId: state.ui.patronCelebration.profileId,
-          level: state.ui.patronCelebration.level,
-        }
-      : null,
-    codexDetail: state.ui.codexDetailId,
-    specialGuestAlert: state.ui.specialGuestAlert,
-  };
-  return JSON.stringify(payload);
 }
 
-function advanceTime(ms) {
-  const steps = Math.max(1, Math.round(ms / (1000 / 60)));
-  for (let index = 0; index < steps; index += 1) {
-    update(FIXED_DT);
-  }
-  renderDynamicUI();
-  draw();
-}
+const THEME_DEFS = {
+  table: buildThemeDefs("Table"),
+  stove: buildThemeDefs("Stove"),
+  entrance: buildThemeDefs("Entrance"),
+  countertop: buildThemeDefs("CounterTop"),
+};
 
-function isCanvasInteractionLocked() {
-  return (
-    state.mode !== "playing" ||
-    state.scene === SCENE_INTERVIEW ||
-    state.ui.openPanel ||
-    state.ui.skillDraft.length > 0 ||
-    state.ui.recipeCelebration ||
-    state.ui.patronCelebration ||
-    state.ui.specialGuestAlert ||
-    state.ui.rankCelebration
-  );
-}
-
-function getCanvasPointerMetrics(clientX, clientY) {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = GAME_WIDTH / rect.width;
-  const scaleY = GAME_HEIGHT / rect.height;
-  const viewportX = (clientX - rect.left) * scaleX;
-  const viewportY = (clientY - rect.top) * scaleY;
+// ===== 상태 =====
+function createInitialState() {
   return {
-    scaleX,
-    scaleY,
-    viewportX,
-    viewportY,
-    worldX: viewportX + state.camera.x,
-    worldY: viewportY,
+    clock: 0,
+    resources: { acorns: 260, gems: 0 },
+    promo: { progress: 0, threshold: 4, pendingSpawns: 0, lastClick: 0 },
+
+    facilities: {
+      tables: [{ slotId: "table-1" }],   // 시작: 테이블 1개
+      stoves: [{ slotId: "stove-1" }],   // 시작: 화구 1개
+    },
+    installIndex: 0,    // 다음 설치할 시퀀스 번호
+    installCheckpoints: 0, // 클리어한 설치 수
+
+    themes: {
+      table: "stone",
+      stove: "stone",
+      entrance: "stone",
+      countertop: "stone",
+    },
+
+    recipes: (() => {
+      const owned = {};
+      // 시작: 샐러드 1성으로 보유
+      owned.salad = { stars: 1, dupes: 0 };
+      return owned;
+    })(),
+    researchCount: 0,
+
+    customers: [],     // {id, state, x, y, vx, recipeId, tableId, timer, total}
+    cookingTasks: [],  // {stoveId, recipeId, customerId, tableId, progress, duration}
+    customerSeq: 1,
+
+    chef: { x: CHEF_HOME.x, y: CHEF_HOME.y, anim: 0, mode: "idle" }, // mode: idle|cook|research
+
+    metrics: { served: 0, researched: 0 },
+
+    ui: {
+      installCandidateId: null,   // 어느 후보 말풍선이 떠 있나
+      chefBubbleOpen: false,
+      panel: null,                 // 'recipe' | 'theme'
+      eventModal: null,            // { type:'research'|'enhance', payload }
+    },
   };
 }
 
-function beginFarmDrag(event) {
-  if (state.mode !== "playing" || state.scene !== SCENE_FARM || state.ui.openPanel) {
-    return;
-  }
-  const { viewportX, viewportY } = getCanvasPointerMetrics(event.clientX, event.clientY);
-  const sourceIndex = getFarmCellIndexAt(viewportX, viewportY);
-  if (sourceIndex < 0 || !state.farm.board[sourceIndex]) {
-    return;
-  }
-  if (FARM_ITEM_META[state.farm.board[sourceIndex].kind]?.final) {
-    return;
-  }
-  farmDragState.pointerId = event.pointerId;
-  farmDragState.sourceIndex = sourceIndex;
-  farmDragState.hoverIndex = sourceIndex;
-  farmDragState.startClientX = event.clientX;
-  farmDragState.startClientY = event.clientY;
-  farmDragState.currentClientX = event.clientX;
-  farmDragState.currentClientY = event.clientY;
-  farmDragState.distance = 0;
-  farmDragState.suppressClick = false;
-  canvas.setPointerCapture?.(event.pointerId);
-}
+let state = loadState() || createInitialState();
 
-function updateFarmDrag(event) {
-  if (farmDragState.pointerId !== event.pointerId) {
-    return;
-  }
-  const { viewportX, viewportY } = getCanvasPointerMetrics(event.clientX, event.clientY);
-  farmDragState.currentClientX = event.clientX;
-  farmDragState.currentClientY = event.clientY;
-  farmDragState.distance = Math.max(
-    farmDragState.distance,
-    Math.hypot(event.clientX - farmDragState.startClientX, event.clientY - farmDragState.startClientY)
-  );
-  farmDragState.hoverIndex = getFarmCellIndexAt(viewportX, viewportY);
-}
-
-function endFarmDrag(event) {
-  if (farmDragState.pointerId !== event.pointerId) {
-    return;
-  }
-  if (farmDragState.distance > FARM_DRAG_THRESHOLD) {
-    const { viewportX, viewportY } = getCanvasPointerMetrics(event.clientX, event.clientY);
-    const targetIndex = getFarmCellIndexAt(viewportX, viewportY);
-    if (targetIndex >= 0) {
-      moveFarmItem(farmDragState.sourceIndex, targetIndex);
-      refreshAllUI();
-      persistStateNow();
-    }
-    farmDragState.suppressClick = true;
-    window.setTimeout(() => {
-      farmDragState.suppressClick = false;
-    }, 0);
-  }
-
-  canvas.releasePointerCapture?.(event.pointerId);
-  farmDragState.pointerId = null;
-  farmDragState.sourceIndex = null;
-  farmDragState.hoverIndex = null;
-  farmDragState.distance = 0;
-}
-
-function beginCameraDrag(event) {
-  if (isCanvasInteractionLocked()) {
-    return;
-  }
-  cameraDragState.suppressClick = false;
-  cameraDragState.pointerId = event.pointerId;
-  cameraDragState.startClientX = event.clientX;
-  cameraDragState.startCameraX = state.camera.x;
-  cameraDragState.distance = 0;
-  canvas.setPointerCapture?.(event.pointerId);
-}
-
-function handleCanvasPointerDown(event) {
-  if (state.scene === SCENE_INTERVIEW) {
-    const { viewportX, viewportY } = getCanvasPointerMetrics(event.clientX, event.clientY);
-    const interview = state.staffs.interview;
-    const candidates = interview.candidates || [];
-
-    // 주인공 터치 → 교섭권 치트
-    const pdx = viewportX - IV_PROTAGONIST_X;
-    const pdy = viewportY - IV_PROTAGONIST_Y;
-    if (pdx * pdx + pdy * pdy < 45 * 45) {
-      interview.tickets += 1;
-      pushLog("주인공을 톡 건드렸다. 교섭권 1장이 생겼다.");
-      refreshAllUI();
-      persistStateNow();
-      return;
-    }
-
-    // 후보 터치 → 포커스/해제
-    if (candidates.length > 0 && !interview.selectedCandidateId) {
-      const positions = getInterviewCandidatePositions();
-      for (const pos of positions) {
-        const cdx = viewportX - pos.x;
-        const cdy = viewportY - (pos.focused ? pos.y - 10 : pos.y - 10);
-        if (cdx * cdx + cdy * cdy < 40 * 40) {
-          if (pos.focused) {
-            // 이미 포커스된 후보를 다시 터치 → 선택 확정
-            selectInterviewCandidate(pos.candidate.id);
-          } else {
-            // 새 후보 포커스
-            focusInterviewCandidate(pos.candidate.id);
-          }
-          refreshAllUI();
-          return;
+// ===== 유틸 =====
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    // 간단한 머지: 누락 필드는 기본값으로 채움
+    const initial = createInitialState();
+    const merged = Object.assign(initial, data, {
+      ui: createInitialState().ui,    // UI는 매번 초기화
+      customers: [],                  // 손님 진행 상태는 초기화
+      cookingTasks: [],
+      promo: { ...initial.promo, ...(data.promo || {}) },
+      chef: { ...initial.chef },
+    });
+    // 테마 마이그레이션: 신규 THEME_DEFS에 없는 ID는 기본값(stone)으로
+    if (merged.themes) {
+      for (const k of ["table", "stove", "entrance", "countertop"]) {
+        if (!THEME_DEFS[k].some((t) => t.id === merged.themes[k])) {
+          merged.themes[k] = "stone";
         }
       }
-      // 빈 공간 터치 → 포커스 해제
-      if (interview.focusedCandidateId) {
-        clearInterviewCandidateFocus();
-        refreshAllUI();
+    }
+    // 시설 마이그레이션: 4개 초과 슬롯(table-5/6) 정리
+    const validTableIds = new Set(TABLE_SLOTS.map((s) => s.id));
+    const validStoveIds = new Set(STOVE_SLOTS.map((s) => s.id));
+    if (Array.isArray(merged.facilities?.tables)) {
+      merged.facilities.tables = merged.facilities.tables.filter((f) => validTableIds.has(f.slotId));
+    }
+    if (Array.isArray(merged.facilities?.stoves)) {
+      merged.facilities.stoves = merged.facilities.stoves.filter((f) => validStoveIds.has(f.slotId));
+    }
+    // installIndex를 이미 설치된 슬롯 너머로 정렬
+    merged.installIndex = 0;
+    while (
+      merged.installIndex < INSTALL_SEQUENCE.length &&
+      (merged.facilities.tables.some((f) => f.slotId === INSTALL_SEQUENCE[merged.installIndex].slotId) ||
+       merged.facilities.stoves.some((f) => f.slotId === INSTALL_SEQUENCE[merged.installIndex].slotId))
+    ) {
+      merged.installIndex += 1;
+    }
+    // 레시피 필드 마이그레이션: _dupePending → dupes, MAX_STARS 클램프
+    if (merged.recipes && typeof merged.recipes === "object") {
+      for (const id of Object.keys(merged.recipes)) {
+        const r = merged.recipes[id];
+        if (!r || typeof r !== "object") { delete merged.recipes[id]; continue; }
+        if (r._dupePending != null && r.dupes == null) {
+          r.dupes = r._dupePending;
+        }
+        delete r._dupePending;
+        if (typeof r.dupes !== "number" || r.dupes < 0) r.dupes = 0;
+        if (typeof r.stars !== "number") r.stars = 1;
+        if (r.stars > MAX_STARS) r.stars = MAX_STARS;
       }
     }
-    return;
-  }
-  if (state.scene === SCENE_FARM) {
-    beginFarmDrag(event);
-    return;
-  }
-  beginCameraDrag(event);
-}
-
-function handleCanvasPointerMove(event) {
-  if (state.scene === SCENE_FARM) {
-    updateFarmDrag(event);
-    return;
-  }
-  updateCameraDrag(event);
-}
-
-function handleCanvasPointerUp(event) {
-  if (state.scene === SCENE_FARM) {
-    endFarmDrag(event);
-    return;
-  }
-  endCameraDrag(event);
-}
-
-function updateCameraDrag(event) {
-  if (cameraDragState.pointerId !== event.pointerId) {
-    return;
-  }
-  const metrics = getCanvasPointerMetrics(event.clientX, event.clientY);
-  const deltaWorldX = (event.clientX - cameraDragState.startClientX) * metrics.scaleX;
-  cameraDragState.distance = Math.max(cameraDragState.distance, Math.abs(deltaWorldX));
-  if (GAME_WORLD_MAX_CAMERA_X <= 0) {
-    return;
-  }
-  state.camera.x = clampCameraX(cameraDragState.startCameraX - deltaWorldX);
-}
-
-function endCameraDrag(event) {
-  if (cameraDragState.pointerId !== event.pointerId) {
-    return;
-  }
-  cameraDragState.suppressClick = cameraDragState.distance > CAMERA_DRAG_THRESHOLD;
-  if (cameraDragState.suppressClick) {
-    window.setTimeout(() => {
-      cameraDragState.suppressClick = false;
-    }, 0);
-  }
-  canvas.releasePointerCapture?.(event.pointerId);
-  cameraDragState.pointerId = null;
-  cameraDragState.startClientX = 0;
-  cameraDragState.startCameraX = state.camera.x;
-  cameraDragState.distance = 0;
-}
-
-function handleFarmCanvasClick(viewportX, viewportY) {
-  const cellIndex = getFarmCellIndexAt(viewportX, viewportY);
-  if (cellIndex < 0) {
-    return;
-  }
-  if (collectFarmFinal(cellIndex)) {
-    refreshAllUI();
-    persistStateNow();
+    return merged;
+  } catch {
+    return null;
   }
 }
-
-function frame(timestamp) {
-  if (!lastTime) {
-    lastTime = timestamp;
-  }
-
-  const delta = Math.min(0.05, (timestamp - lastTime) / 1000);
-  lastTime = timestamp;
-  update(delta);
-  renderDynamicUI();
-  draw();
-  rafId = requestAnimationFrame(frame);
+function saveState() {
+  try {
+    const snapshot = JSON.parse(JSON.stringify(state));
+    snapshot.customers = [];
+    snapshot.cookingTasks = [];
+    localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
+  } catch {}
+}
+function resetState() {
+  localStorage.removeItem(SAVE_KEY);
+  state = createInitialState();
+  refreshHud();
 }
 
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.();
+function formatNumber(n) {
+  if (!Number.isFinite(n)) return "0";
+  if (n < 1000) return String(Math.floor(n));
+  // 기획서: 4자리 이상은 소문자 알파벳 단위 (a, b, c, ...) 소수 둘째
+  const units = ["", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
+  let unit = 0;
+  let v = n;
+  while (v >= 1000 && unit < units.length - 1) {
+    v /= 1000;
+    unit += 1;
+  }
+  let str = v.toFixed(2);
+  // 0.X 형태 정리
+  if (str.endsWith(".00")) str = str.slice(0, -3);
+  else if (str.endsWith("0")) str = str.slice(0, -1);
+  return str + units[unit];
+}
+
+function rng(min, max) {
+  return Math.random() * (max - min) + min;
+}
+function pickWeighted(items, weightFn) {
+  const total = items.reduce((s, it) => s + weightFn(it), 0);
+  let r = Math.random() * total;
+  for (const it of items) {
+    r -= weightFn(it);
+    if (r <= 0) return it;
+  }
+  return items[items.length - 1];
+}
+
+// ===== 캔버스 =====
+const canvas = document.getElementById("game-canvas");
+const ctx = canvas.getContext("2d");
+let dpr = 1;
+
+function configureCanvas() {
+  dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  canvas.width = GAME_W * dpr;
+  canvas.height = GAME_H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+}
+
+// 이미지 캐시
+const imgCache = new Map();
+function getImage(path) {
+  if (!path) return null;
+  if (imgCache.has(path)) return imgCache.get(path);
+  const img = new Image();
+  img.src = path;
+  imgCache.set(path, img);
+  return img;
+}
+function drawImageScaled(img, x, y, w, h) {
+  if (!img || !img.complete || img.naturalWidth === 0) return false;
+  ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+  return true;
+}
+
+// ===== 좌표/터치 헬퍼 =====
+function getCanvasPoint(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const sx = GAME_W / rect.width;
+  const sy = GAME_H / rect.height;
+  return {
+    x: (clientX - rect.left) * sx,
+    y: (clientY - rect.top) * sy,
+    rect,
+  };
+}
+
+// 캔버스 좌표 → 화면 px 좌표 (오버레이 위치용)
+function canvasToScreen(cx, cy) {
+  const rect = canvas.getBoundingClientRect();
+  const frame = document.querySelector(".phone-frame").getBoundingClientRect();
+  const sx = rect.width / GAME_W;
+  const sy = rect.height / GAME_H;
+  return {
+    x: rect.left - frame.left + cx * sx,
+    y: rect.top - frame.top + cy * sy,
+  };
+}
+
+// ===== 헬퍼: 시설/설치 =====
+function slotMeta(kind, slotId) {
+  const list = kind === "table" ? TABLE_SLOTS : STOVE_SLOTS;
+  return list.find((s) => s.id === slotId);
+}
+function isSlotInstalled(kind, slotId) {
+  const arr = kind === "table" ? state.facilities.tables : state.facilities.stoves;
+  return arr.some((f) => f.slotId === slotId);
+}
+function getInstallCandidates() {
+  // 이미 설치된 슬롯은 건너뛰고 순서상 다음 N개만 노출
+  const out = [];
+  let idx = state.installIndex;
+  while (idx < INSTALL_SEQUENCE.length && out.length < INSTALL_VISIBLE_AHEAD) {
+    const cand = INSTALL_SEQUENCE[idx];
+    if (!isSlotInstalled(cand.kind, cand.slotId)) {
+      out.push({ ...cand, index: idx });
+    }
+    idx += 1;
+  }
+  return out;
+}
+function findCandidateAt(cx, cy) {
+  for (const cand of getInstallCandidates()) {
+    const slot = slotMeta(cand.kind, cand.slotId);
+    if (!slot) continue;
+    const w = cand.kind === "table" ? 90 : 80;
+    const h = cand.kind === "table" ? 70 : 70;
+    if (cx >= slot.x - w / 2 && cx <= slot.x + w / 2 && cy >= slot.y - h / 2 && cy <= slot.y + h / 2) {
+      return cand;
+    }
+  }
+  return null;
+}
+function installCandidate(cand) {
+  if (state.resources.acorns < cand.cost) {
+    showToast("도토리가 부족합니다.");
+    return;
+  }
+  if (isSlotInstalled(cand.kind, cand.slotId)) {
+    state.ui.installCandidateId = null;
+    refreshHud();
+    return;
+  }
+  state.resources.acorns -= cand.cost;
+  if (cand.kind === "table") state.facilities.tables.push({ slotId: cand.slotId });
+  else state.facilities.stoves.push({ slotId: cand.slotId });
+  // installIndex를 이미 설치된 슬롯들 너머로 진전
+  while (
+    state.installIndex < INSTALL_SEQUENCE.length &&
+    isSlotInstalled(INSTALL_SEQUENCE[state.installIndex].kind, INSTALL_SEQUENCE[state.installIndex].slotId)
+  ) {
+    state.installIndex += 1;
+  }
+  state.installCheckpoints += 1;
+  state.ui.installCandidateId = null;
+  saveState();
+  refreshHud();
+  showToast(`${cand.title} 설치 완료!`);
+}
+
+// ===== 헬퍼: 손님/주문 =====
+function findFreeTable() {
+  for (const f of state.facilities.tables) {
+    const occupied = state.customers.some((c) => c.tableId === f.slotId);
+    if (!occupied) return f;
+  }
+  return null;
+}
+function findFreeStove() {
+  for (const f of state.facilities.stoves) {
+    const busy = state.cookingTasks.some((t) => t.stoveId === f.slotId);
+    if (!busy) return f;
+  }
+  return null;
+}
+function spawnCustomer() {
+  const table = findFreeTable();
+  if (!table) {
+    state.promo.pendingSpawns += 1;
+    return;
+  }
+  const slot = slotMeta("table", table.slotId);
+  // 가능한 레시피만 주문 (보유한 메뉴)
+  const ownedIds = Object.keys(state.recipes).filter((id) => state.recipes[id]?.stars > 0);
+  const recipeId = ownedIds[Math.floor(Math.random() * ownedIds.length)] || "salad";
+  state.customers.push({
+    id: `c${state.customerSeq++}`,
+    state: "walking",
+    x: ENTRANCE.x,
+    y: ENTRANCE.y + 30,
+    targetX: slot.x,
+    targetY: slot.y - 24,
+    recipeId,
+    tableId: table.slotId,
+    timer: 0,
+    total: 0,
+    bob: Math.random() * Math.PI * 2,
+    color: pickCustomerColor(),
+  });
+}
+function pickCustomerColor() {
+  const palette = ["#ffd54f", "#ff9e7a", "#94d66d", "#f29bd0", "#8ecdf6", "#f6c14f"];
+  return palette[Math.floor(Math.random() * palette.length)];
+}
+
+function tryStartCooking() {
+  // 주문이 접수된 손님 찾고 비어 있는 화구로 보냄
+  for (const cust of state.customers) {
+    if (cust.state !== "ordered") continue;
+    const stove = findFreeStove();
+    if (!stove) return;
+    const recipe = RECIPE_RARITY[cust.recipeId];
+    const stars = state.recipes[cust.recipeId]?.stars || 1;
+    const duration = Math.max(1.5, recipe.baseCook * cookMultiplierForStars(stars));
+    state.cookingTasks.push({
+      stoveId: stove.slotId,
+      recipeId: cust.recipeId,
+      customerId: cust.id,
+      tableId: cust.tableId,
+      progress: 0,
+      duration,
+    });
+    cust.state = "waiting";
+    cust.timer = 0;
+  }
+}
+
+function acceptOrderAt(cx, cy) {
+  for (const cust of state.customers) {
+    if (cust.state !== "awaiting_order") continue;
+    const slot = slotMeta("table", cust.tableId);
+    const bx = slot.x;
+    const by = slot.y - 70;
+    if (cx >= bx - 38 && cx <= bx + 38 && cy >= by - 28 && cy <= by + 28) {
+      cust.state = "ordered";
+      cust.timer = 0;
+      return true;
+    }
+  }
+  return false;
+}
+
+// ===== 시뮬레이션 =====
+function update(dt) {
+  state.clock += dt;
+  state.chef.anim += dt;
+
+  // 손님 업데이트
+  for (const cust of state.customers) {
+    cust.bob += dt;
+    if (cust.state === "walking") {
+      const dx = cust.targetX - cust.x;
+      const dy = cust.targetY - cust.y;
+      const d = Math.hypot(dx, dy);
+      const speed = 110;
+      if (d <= speed * dt) {
+        cust.x = cust.targetX;
+        cust.y = cust.targetY;
+        cust.state = "awaiting_order";
+        cust.timer = 0;
+      } else {
+        cust.x += (dx / d) * speed * dt;
+        cust.y += (dy / d) * speed * dt;
+      }
+    } else if (cust.state === "awaiting_order") {
+      // 주문 대기 (UI 처리)
+    } else if (cust.state === "waiting") {
+      // 조리 대기
+    } else if (cust.state === "eating") {
+      cust.timer += dt;
+      if (cust.timer >= cust.total) {
+        // 식사 완료 → 결제
+        const recipe = RECIPE_RARITY[cust.recipeId];
+        const stars = state.recipes[cust.recipeId]?.stars || 1;
+        const themeBoost =
+          THEME_DEFS.table.find((t) => t.id === state.themes.table).boost +
+          THEME_DEFS.stove.find((t) => t.id === state.themes.stove).boost +
+          THEME_DEFS.entrance.find((t) => t.id === state.themes.entrance).boost +
+          THEME_DEFS.countertop.find((t) => t.id === state.themes.countertop).boost;
+        const payout = Math.round(recipe.basePrice * priceMultiplierForStars(stars) * (1 + themeBoost));
+        state.resources.acorns += payout;
+        state.metrics.served += 1;
+        spawnPayoutToast(cust, payout);
+        cust.state = "leaving";
+        cust.targetX = ENTRANCE.x;
+        cust.targetY = ENTRANCE.y + 60;
+      }
+    } else if (cust.state === "leaving") {
+      const dx = cust.targetX - cust.x;
+      const dy = cust.targetY - cust.y;
+      const d = Math.hypot(dx, dy);
+      const speed = 130;
+      if (d <= speed * dt) {
+        cust.x = cust.targetX;
+        cust.y = cust.targetY;
+        cust._done = true;
+      } else {
+        cust.x += (dx / d) * speed * dt;
+        cust.y += (dy / d) * speed * dt;
+      }
+    }
+  }
+  state.customers = state.customers.filter((c) => !c._done);
+
+  // 펜딩 스폰 처리
+  if (state.promo.pendingSpawns > 0 && findFreeTable()) {
+    state.promo.pendingSpawns -= 1;
+    spawnCustomer();
+  }
+
+  // 조리 진행
+  for (const task of state.cookingTasks) {
+    task.progress += dt;
+    if (task.progress >= task.duration) {
+      // 자동 서빙
+      const cust = state.customers.find((c) => c.id === task.customerId);
+      if (cust) {
+        cust.state = "eating";
+        cust.timer = 0;
+        cust.total = 3.4; // 식사 시간
+      }
+      task._done = true;
+    }
+  }
+  state.cookingTasks = state.cookingTasks.filter((t) => !t._done);
+
+  // 요리사 모션: 조리 중이면 화구 쪽으로 이동
+  if (state.cookingTasks.length > 0) {
+    const target = state.cookingTasks[0];
+    const slot = slotMeta("stove", target.stoveId);
+    if (slot) {
+      const tx = slot.x;
+      const ty = slot.y - 36;
+      const dx = tx - state.chef.x;
+      const dy = ty - state.chef.y;
+      const d = Math.hypot(dx, dy);
+      const sp = 120;
+      if (d > 1) {
+        state.chef.x += (dx / d) * Math.min(sp * dt, d);
+        state.chef.y += (dy / d) * Math.min(sp * dt, d);
+      }
+      state.chef.mode = "cook";
+    }
   } else {
-    document.exitFullscreen?.();
+    const dx = CHEF_HOME.x - state.chef.x;
+    const dy = CHEF_HOME.y - state.chef.y;
+    const d = Math.hypot(dx, dy);
+    if (d > 0.5) {
+      state.chef.x += (dx / d) * Math.min(120 * dt, d);
+      state.chef.y += (dy / d) * Math.min(120 * dt, d);
+    } else {
+      state.chef.mode = "idle";
+    }
+  }
+
+  tryStartCooking();
+  pruneToasts();
+}
+
+// ===== 토스트 =====
+const toasts = [];
+function showToast(text) {
+  const node = document.createElement("div");
+  node.className = "toast";
+  node.textContent = text;
+  document.getElementById("toast-area").appendChild(node);
+  toasts.push({ node, until: performance.now() + 2200 });
+}
+function pruneToasts() {
+  const now = performance.now();
+  while (toasts.length && toasts[0].until <= now) {
+    const t = toasts.shift();
+    t.node.remove();
   }
 }
 
-document.getElementById("start-btn")?.addEventListener("click", startGame);
-document.getElementById("promotion-btn")?.addEventListener("click", handlePromotion);
-dom.topNoticeStack?.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-top-notice-id]");
-  if (!button) {
+const payoutFx = []; // {x, y, value, age}
+function spawnPayoutToast(cust, value) {
+  payoutFx.push({ x: cust.x, y: cust.y - 60, value, age: 0 });
+}
+
+// ===== 렌더링 =====
+function draw() {
+  ctx.clearRect(0, 0, GAME_W, GAME_H);
+  drawBackground();
+  drawDecorBack();
+  drawStoves();
+  drawCountertop();
+  drawChef();
+  drawTables();
+  drawCustomers();
+  drawCookingFood();
+  drawDottedZones();
+  drawEntrance();
+  drawPayoutFx();
+}
+
+function drawBackground() {
+  // 풀밭
+  const grad = ctx.createLinearGradient(0, 0, 0, GAME_H);
+  grad.addColorStop(0, "#759c4f");
+  grad.addColorStop(1, "#83a85a");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+
+  // 부엌 영역 (위쪽 띠)
+  ctx.fillStyle = "#a99066";
+  ctx.fillRect(0, 110, GAME_W, 140);
+  ctx.fillStyle = "rgba(80, 60, 30, 0.18)";
+  ctx.fillRect(0, 246, GAME_W, 4);
+
+  // 손님 영역 (중간 메인)
+  ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+  ctx.beginPath();
+  ctx.ellipse(GAME_W / 2, 540, 220, 200, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 나무 (왼쪽/오른쪽 가장자리)
+  drawTree(28, 90, 36);
+  drawTree(70, 50, 28);
+  drawTree(120, 80, 32);
+  drawTree(GAME_W - 28, 90, 36);
+  drawTree(GAME_W - 70, 60, 30);
+  drawTree(GAME_W - 130, 80, 30);
+  drawTree(20, 760, 38);
+  drawTree(GAME_W - 22, 770, 38);
+  drawTree(20, 860, 32);
+  drawTree(GAME_W - 22, 860, 34);
+}
+function drawTree(cx, cy, r) {
+  ctx.fillStyle = "#3e6a3a";
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(20, 60, 22, 0.35)";
+  ctx.beginPath();
+  ctx.arc(cx + r * 0.3, cy + r * 0.35, r * 0.7, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawDecorBack() {
+  // 부엌 벽 + 카운터 백라인
+  ctx.fillStyle = "#7d5d36";
+  ctx.fillRect(60, 130, GAME_W - 120, 14);
+}
+
+function drawCountertop() {
+  // 카운터 (도마 테이블) — 부엌 한쪽
+  const theme = THEME_DEFS.countertop.find((t) => t.id === state.themes.countertop);
+  const img = getImage(theme.icon);
+  const w = 70, h = 70;
+  if (!drawImageScaled(img, 410, 165, w, h)) {
+    ctx.fillStyle = "#b8946d";
+    ctx.fillRect(410 - w/2, 165 - h/2, w, h);
+  }
+}
+
+function drawStoves() {
+  const theme = THEME_DEFS.stove.find((t) => t.id === state.themes.stove);
+  const img = getImage(theme.icon);
+  for (const stove of state.facilities.stoves) {
+    const slot = slotMeta("stove", stove.slotId);
+    if (!slot) continue;
+    drawShadow(slot.x, slot.y + 30, 36, 8);
+    if (!drawImageScaled(img, slot.x, slot.y, 78, 78)) {
+      ctx.fillStyle = "#7a5a36";
+      ctx.fillRect(slot.x - 30, slot.y - 30, 60, 60);
+    }
+    // 조리중 불꽃
+    const task = state.cookingTasks.find((t) => t.stoveId === slot.slotId);
+    if (task) {
+      const t = state.clock * 8;
+      ctx.fillStyle = `rgba(255, 160, 50, ${0.6 + Math.sin(t) * 0.2})`;
+      ctx.beginPath();
+      ctx.arc(slot.x, slot.y - 14, 6 + Math.sin(t * 0.7) * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      // 진행 바
+      const w = 44, h = 5, ratio = task.progress / task.duration;
+      ctx.fillStyle = "rgba(0,0,0,0.35)";
+      ctx.fillRect(slot.x - w/2, slot.y + 38, w, h);
+      ctx.fillStyle = "#ffd566";
+      ctx.fillRect(slot.x - w/2, slot.y + 38, w * ratio, h);
+    }
+  }
+}
+
+function drawTables() {
+  const theme = THEME_DEFS.table.find((t) => t.id === state.themes.table);
+  const img = getImage(theme.icon);
+  for (const table of state.facilities.tables) {
+    const slot = slotMeta("table", table.slotId);
+    if (!slot) continue;
+    drawShadow(slot.x, slot.y + 28, 44, 9);
+    if (!drawImageScaled(img, slot.x, slot.y, 96, 80)) {
+      ctx.fillStyle = "#cf9c5b";
+      ctx.fillRect(slot.x - 36, slot.y - 30, 72, 60);
+    }
+  }
+}
+
+function drawShadow(cx, cy, rx, ry) {
+  ctx.fillStyle = "rgba(20, 22, 14, 0.22)";
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawChef() {
+  const x = state.chef.x;
+  const y = state.chef.y;
+  const bob = Math.sin(state.chef.anim * 4) * 1.4;
+  drawShadow(x, y + 28, 22, 6);
+  const img = getImage("Icon/Chick/Icon_Chick_099.png");
+  if (!drawImageScaled(img, x, y - 6 + bob, 76, 76)) {
+    ctx.fillStyle = "#f4cf48";
+    ctx.beginPath();
+    ctx.arc(x, y + bob, 22, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // 조리 중 표시
+  if (state.chef.mode === "cook") {
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillStyle = "#fff";
+    ctx.textAlign = "center";
+    ctx.fillText("🔥", x + 22, y - 26);
+  }
+  // 연구 중 전구
+  if (state.ui.chefBubbleOpen) {
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("💡", x, y - 38 + bob);
+  }
+}
+
+function drawCustomers() {
+  // 손님 정렬 (y기준)
+  const sorted = [...state.customers].sort((a, b) => a.y - b.y);
+  const img = getImage("Icon/Chick/Icon_Chick_001.png");
+  for (const cust of sorted) {
+    const bob = Math.sin(cust.bob * 3.4) * 1.6;
+    drawShadow(cust.x, cust.y + 22, 16, 5);
+    if (!drawImageScaled(img, cust.x, cust.y + bob, 56, 56)) {
+      ctx.fillStyle = cust.color;
+      ctx.beginPath();
+      ctx.arc(cust.x, cust.y + bob, 18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // 주문 말풍선
+    if (cust.state === "awaiting_order") {
+      drawOrderBubble(cust);
+    } else if (cust.state === "eating") {
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.fillText("😋", cust.x, cust.y - 32);
+    }
+  }
+}
+
+function drawOrderBubble(cust) {
+  const slot = slotMeta("table", cust.tableId);
+  const cx = slot.x;
+  const cy = slot.y - 70;
+  const w = 70, h = 56;
+  // 그림자
+  ctx.fillStyle = "rgba(0,0,0,0.18)";
+  roundRect(cx - w/2 + 2, cy - h/2 + 4, w, h, 12);
+  ctx.fill();
+  // 말풍선
+  ctx.fillStyle = "#fffaee";
+  ctx.strokeStyle = "#c2a062";
+  ctx.lineWidth = 2;
+  roundRect(cx - w/2, cy - h/2, w, h, 12);
+  ctx.fill();
+  ctx.stroke();
+  // 꼬리
+  ctx.beginPath();
+  ctx.moveTo(cx - 6, cy + h/2 - 1);
+  ctx.lineTo(cx, cy + h/2 + 10);
+  ctx.lineTo(cx + 6, cy + h/2 - 1);
+  ctx.closePath();
+  ctx.fillStyle = "#fffaee";
+  ctx.fill();
+  ctx.stroke();
+  // 레시피 아이콘
+  const recipeIcon = getImage(`assets/recipe-icons/${cust.recipeId}.png`);
+  if (!drawImageScaled(recipeIcon, cx, cy - 4, 38, 38)) {
+    ctx.fillStyle = "#7a5a36";
+    ctx.font = "bold 11px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(RECIPE_NAME_BY_ID[cust.recipeId] || cust.recipeId, cx, cy);
+  }
+  // 톡 표시 (애니메이션)
+  if (Math.floor(state.clock * 2) % 2 === 0) {
+    ctx.fillStyle = "#d97a1a";
+    ctx.beginPath();
+    ctx.arc(cx + w/2 - 8, cy - h/2 + 8, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawCookingFood() {
+  for (const task of state.cookingTasks) {
+    const slot = slotMeta("stove", task.stoveId);
+    if (!slot) continue;
+    const r = 14 + Math.sin(state.clock * 5) * 1.5;
+    const recipeIcon = getImage(`assets/recipe-icons/${task.recipeId}.png`);
+    if (!drawImageScaled(recipeIcon, slot.x, slot.y - 24, r * 1.6, r * 1.6)) {
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(slot.x, slot.y - 24, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+function drawDottedZones() {
+  if (state.ui.installCandidateId) return; // 말풍선 떠 있을 땐 안 그림 (선택된 것만 강조)
+  for (const cand of getInstallCandidates()) {
+    const slot = slotMeta(cand.kind, cand.slotId);
+    if (!slot) continue;
+    const w = cand.kind === "table" ? 88 : 78;
+    const h = cand.kind === "table" ? 70 : 70;
+    const pulse = 0.5 + 0.5 * Math.sin(state.clock * 3);
+    ctx.save();
+    ctx.translate(slot.x, slot.y);
+    // 점선 사각형
+    ctx.strokeStyle = `rgba(255, 240, 180, ${0.55 + pulse * 0.35})`;
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([6, 5]);
+    roundRect(-w/2, -h/2, w, h, 10);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // 가격 라벨
+    const acornIcon = getImage("Icon/Currency/Icon_Currency_001.png");
+    const lblW = 68;
+    const lx = 0, ly = -h/2 - 12;
+    ctx.fillStyle = "rgba(40, 28, 12, 0.78)";
+    roundRect(lx - lblW/2, ly - 12, lblW, 22, 11);
+    ctx.fill();
+    drawImageScaled(acornIcon, lx - lblW/2 + 12, ly - 1, 16, 16);
+    ctx.fillStyle = "#fff8e3";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(formatNumber(cand.cost), lx - lblW/2 + 22, ly + 4);
+    ctx.restore();
+  }
+}
+
+function drawEntrance() {
+  const theme = THEME_DEFS.entrance.find((t) => t.id === state.themes.entrance);
+  const img = getImage(theme.icon);
+  const x = ENTRANCE.x;
+  const y = ENTRANCE.y - 16;
+  drawShadow(x, y + 50, 60, 10);
+  if (!drawImageScaled(img, x, y, 130, 130)) {
+    ctx.fillStyle = "#7a5a36";
+    ctx.fillRect(x - 50, y - 50, 100, 100);
+  }
+}
+
+function drawPayoutFx() {
+  for (const fx of payoutFx) {
+    fx.age += FIXED_DT;
+    const alpha = Math.max(0, 1 - fx.age / 1.4);
+    const rise = fx.age * 24;
+    ctx.fillStyle = `rgba(80, 50, 12, ${alpha})`;
+    ctx.font = "bold 14px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`🌰 +${formatNumber(fx.value)}`, fx.x, fx.y - rise);
+  }
+  for (let i = payoutFx.length - 1; i >= 0; i -= 1) {
+    if (payoutFx[i].age >= 1.4) payoutFx.splice(i, 1);
+  }
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+}
+
+// ===== HUD 업데이트 =====
+const dom = {
+  acorn: document.getElementById("acorn-count"),
+  gem: document.getElementById("gem-count"),
+  promoFill: document.getElementById("promotion-fill"),
+  promoText: document.getElementById("promotion-text"),
+  installBubble: document.getElementById("install-bubble"),
+  installBubbleIcon: document.getElementById("install-bubble-icon"),
+  installBubbleTitle: document.getElementById("install-bubble-title"),
+  installBubbleDesc: document.getElementById("install-bubble-desc"),
+  installBubbleCost: document.getElementById("install-bubble-cost"),
+  installConfirmBtn: document.getElementById("install-confirm-btn"),
+  recipeBadge: document.getElementById("recipe-badge"),
+  researchBubble: document.getElementById("research-bubble"),
+  researchCost: document.getElementById("research-cost"),
+  researchStartBtn: document.getElementById("research-start-btn"),
+  researchCancelBtn: document.getElementById("research-cancel-btn"),
+  panelOverlay: document.getElementById("panel-overlay"),
+  panelTitle: document.getElementById("panel-title"),
+  panelBody: document.getElementById("panel-body"),
+  panelCloseBtn: document.getElementById("panel-close-btn"),
+  resultOverlay: document.getElementById("research-result-overlay"),
+  resultIcon: document.getElementById("research-result-icon"),
+  resultName: document.getElementById("research-result-name"),
+  resultRarity: document.getElementById("research-result-rarity"),
+  resultKicker: document.getElementById("research-result-kicker"),
+  resultConfirm: document.getElementById("research-result-confirm"),
+  enhanceOverlay: document.getElementById("enhance-overlay"),
+  enhanceIcon: document.getElementById("enhance-icon"),
+  enhanceName: document.getElementById("enhance-name"),
+  enhanceStars: document.getElementById("enhance-stars"),
+  enhanceConfirm: document.getElementById("enhance-confirm"),
+};
+
+function refreshHud() {
+  dom.acorn.textContent = formatNumber(state.resources.acorns);
+  dom.gem.textContent = formatNumber(state.resources.gems);
+  const ratio = Math.max(0, Math.min(1, state.promo.progress / state.promo.threshold));
+  dom.promoFill.style.width = `${ratio * 100}%`;
+  dom.promoText.textContent = `${state.promo.progress} / ${state.promo.threshold}`;
+
+  // 메뉴 배지: 강화 가능(중복 보유) + 미확인 신규 메뉴 합산
+  let badge = 0;
+  for (const id of RECIPE_LIST) {
+    const owned = state.recipes[id];
+    if (!owned) continue;
+    if (owned.dupes > 0 && owned.stars < MAX_STARS) badge += 1;
+  }
+  if (badge > 0) {
+    dom.recipeBadge.hidden = false;
+    dom.recipeBadge.textContent = String(badge);
+  } else {
+    dom.recipeBadge.hidden = true;
+  }
+
+  // 설치 말풍선
+  if (state.ui.installCandidateId !== null) {
+    const cand = INSTALL_SEQUENCE[state.ui.installCandidateId];
+    if (cand && !isSlotInstalled(cand.kind, cand.slotId)) {
+      const slot = slotMeta(cand.kind, cand.slotId);
+      const screen = canvasToScreen(slot.x, slot.y - 24);
+      dom.installBubble.style.left = `${screen.x}px`;
+      dom.installBubble.style.top = `${screen.y}px`;
+      dom.installBubble.hidden = false;
+      dom.installBubbleTitle.textContent = cand.title;
+      dom.installBubbleDesc.textContent = cand.desc;
+      dom.installBubbleCost.textContent = formatNumber(cand.cost);
+      // 현재 적용 테마 아이콘으로 표시 (테마가 입혀진 시설)
+      const themeKey = cand.kind === "table" ? "table" : "stove";
+      const themeId = state.themes[themeKey];
+      const themeDef = THEME_DEFS[themeKey].find((t) => t.id === themeId);
+      dom.installBubbleIcon.innerHTML = `<img src="${themeDef.icon}" alt="" />`;
+      dom.installConfirmBtn.disabled = state.resources.acorns < cand.cost;
+    } else {
+      state.ui.installCandidateId = null;
+      dom.installBubble.hidden = true;
+    }
+  } else {
+    dom.installBubble.hidden = true;
+  }
+
+  // 연구 말풍선
+  if (state.ui.chefBubbleOpen) {
+    const screen = canvasToScreen(state.chef.x, state.chef.y - 50);
+    dom.researchBubble.style.left = `${screen.x}px`;
+    dom.researchBubble.style.top = `${screen.y}px`;
+    dom.researchBubble.hidden = false;
+    const cost = researchCostForCount(state.researchCount);
+    dom.researchCost.textContent = formatNumber(cost);
+    const blocked = !canResearch();
+    dom.researchStartBtn.disabled = blocked || state.resources.acorns < cost;
+  } else {
+    dom.researchBubble.hidden = true;
+  }
+}
+
+// ===== 설치 클릭 처리 =====
+function handleCanvasClick(cx, cy) {
+  // 우선순위: 주문 말풍선 → 설치 후보 → 요리사 → 빈 클릭
+  if (acceptOrderAt(cx, cy)) return;
+
+  // 요리사 클릭
+  const dx = cx - state.chef.x;
+  const dy = cy - (state.chef.y - 6);
+  if (dx * dx + dy * dy < 38 * 38 && !state.ui.panel) {
+    state.ui.chefBubbleOpen = !state.ui.chefBubbleOpen;
+    state.ui.installCandidateId = null;
+    refreshHud();
     return;
   }
-  dismissTopNotice(button.dataset.topNoticeId);
-  refreshAllUI();
-  persistStateNow();
-});
-dom.resetDataBtn?.addEventListener("click", handleResetData);
 
-window.addEventListener("keydown", (event) => {
-  if (event.key === "f") {
-    toggleFullscreen();
+  // 설치 후보 클릭
+  const cand = findCandidateAt(cx, cy);
+  if (cand) {
+    state.ui.installCandidateId = cand.index;
+    state.ui.chefBubbleOpen = false;
+    refreshHud();
+    return;
   }
-  if (event.key === "Escape" && document.fullscreenElement) {
-    document.exitFullscreen?.();
+
+  // 빈 곳 클릭 → 말풍선 닫기
+  if (state.ui.installCandidateId !== null || state.ui.chefBubbleOpen) {
+    state.ui.installCandidateId = null;
+    state.ui.chefBubbleOpen = false;
+    refreshHud();
+  }
+}
+
+// ===== 홍보 =====
+function handlePromotion() {
+  state.promo.progress += 1;
+  if (state.promo.progress >= state.promo.threshold) {
+    state.promo.progress = 0;
+    spawnCustomer();
+    // 게이지 충족 후 다음 임계값 약간 증가 (체감 진행)
+    state.promo.threshold = Math.min(8, state.promo.threshold + (state.metrics.served > 0 && state.metrics.served % 5 === 0 ? 1 : 0));
+  }
+  refreshHud();
+}
+
+// 연구가 가능한지 (기획서: 가능한 모든 메뉴를 최대 강화하면 일시 중지)
+function canResearch() {
+  // 미보유 메뉴가 있거나, 보유 중 별이 MAX 미만인 메뉴가 있으면 가능
+  return RECIPE_LIST.some((id) => {
+    const owned = state.recipes[id];
+    return !owned || owned.stars < MAX_STARS;
+  });
+}
+
+// ===== 레시피 연구 =====
+function startResearch() {
+  if (!canResearch()) {
+    showToast("모든 메뉴를 최대까지 강화했습니다.");
+    return;
+  }
+  const cost = researchCostForCount(state.researchCount);
+  if (state.resources.acorns < cost) {
+    showToast("도토리가 부족합니다.");
+    return;
+  }
+  state.resources.acorns -= cost;
+  state.researchCount += 1;
+  state.metrics.researched += 1;
+
+  // 천장 처리: 처음 획득 메뉴에만 적용 (메뉴별 절대 횟수)
+  // 미획득 메뉴 중 천장 도달한 것이 있으면 그 중 가장 작은 천장을 가진 메뉴 보장
+  const pityHits = RECIPE_LIST
+    .filter((id) => !state.recipes[id])
+    .filter((id) => state.researchCount >= (RECIPE_PITY[id] || 999));
+
+  let pickedId = null;
+  if (pityHits.length > 0) {
+    // 천장 메뉴 중 천장값 가장 작은 것
+    pityHits.sort((a, b) => (RECIPE_PITY[a] || 999) - (RECIPE_PITY[b] || 999));
+    pickedId = pityHits[0];
+  } else {
+    // 가중치 추첨: MAX 강화 메뉴는 풀에서 제외, 미보유 가중치 1.4배
+    const pool = RECIPE_LIST.filter((id) => {
+      const owned = state.recipes[id];
+      return !owned || owned.stars < MAX_STARS;
+    });
+    pickedId = pickWeighted(pool, (id) => {
+      const w = RECIPE_RARITY[id].weight;
+      return state.recipes[id] ? w : w * 1.4;
+    });
+  }
+
+  const isNew = !state.recipes[pickedId];
+  if (isNew) {
+    state.recipes[pickedId] = { stars: 1, dupes: 0 };
+  } else {
+    // 중복 시: 강화 재료 누적 (유저가 패널에서 직접 강화)
+    state.recipes[pickedId].dupes = (state.recipes[pickedId].dupes || 0) + 1;
+  }
+
+  // 결과 모달
+  state.ui.eventModal = { type: "research", recipeId: pickedId, isNew };
+  state.ui.chefBubbleOpen = false;
+  showResearchResultModal();
+  refreshHud();
+  saveState();
+}
+
+function showResearchResultModal() {
+  const evt = state.ui.eventModal;
+  if (!evt || evt.type !== "research") return;
+  const r = RECIPE_RARITY[evt.recipeId];
+  dom.resultIcon.src = `assets/recipe-icons/${evt.recipeId}.png`;
+  dom.resultName.textContent = RECIPE_NAME_BY_ID[evt.recipeId] || evt.recipeId;
+  dom.resultRarity.textContent = RARITY_LABEL[r.rarity];
+  dom.resultRarity.dataset.rarity = r.rarity;
+  dom.resultKicker.textContent = evt.isNew ? "NEW! 새로운 레시피!" : "이미 가진 레시피!";
+  dom.resultOverlay.hidden = false;
+}
+function closeResultModal() {
+  state.ui.eventModal = null;
+  dom.resultOverlay.hidden = true;
+}
+
+// ===== 패널 (레시피 / 테마) =====
+function openPanel(name) {
+  state.ui.panel = name;
+  state.ui.installCandidateId = null;
+  state.ui.chefBubbleOpen = false;
+  dom.panelOverlay.hidden = false;
+  if (name === "recipe") {
+    dom.panelTitle.textContent = "레스토랑 메뉴";
+    renderRecipePanel();
+  } else if (name === "theme") {
+    dom.panelTitle.textContent = "레스토랑 테마";
+    renderThemePanel();
+  }
+  refreshHud();
+}
+function closePanel() {
+  state.ui.panel = null;
+  dom.panelOverlay.hidden = true;
+}
+
+function renderRecipePanel() {
+  // 카테고리 탭 (기획서: 시그니처 / 시즌. 시즌은 추후 기획)
+  const wrap = document.createElement("div");
+  wrap.className = "recipe-wrap";
+  const tabs = document.createElement("div");
+  tabs.className = "recipe-cats";
+  tabs.innerHTML = `
+    <button class="recipe-cat-btn" data-cat="signature" data-active="true" type="button">시그니처</button>
+    <button class="recipe-cat-btn" data-cat="season" type="button">시즌</button>
+  `;
+  wrap.appendChild(tabs);
+
+  const grid = document.createElement("div");
+  grid.className = "recipe-grid";
+  for (const id of RECIPE_LIST) {
+    const meta = RECIPE_RARITY[id];
+    const owned = state.recipes[id];
+    const card = document.createElement("button");
+    card.className = "recipe-card";
+    card.dataset.rarity = meta.rarity;
+    if (!owned) card.dataset.state = "locked";
+    else if (owned.dupes > 0 && owned.stars < MAX_STARS) card.dataset.state = "upgradable";
+    else card.dataset.state = "owned";
+    const stars = owned ? owned.stars : 0;
+    const starRow = stars > 0
+      ? "★".repeat(stars) + "☆".repeat(MAX_STARS - stars)
+      : "";
+    const dupeBadge = owned && owned.dupes > 0
+      ? `<span class="recipe-dupe">+${owned.dupes}</span>` : "";
+    const upgradeTag = (owned && owned.dupes > 0 && owned.stars < MAX_STARS)
+      ? `<span class="recipe-upgrade-tag">Upgrade!</span>` : "";
+    card.innerHTML = `
+      <span class="recipe-rarity-tag"></span>
+      ${dupeBadge}
+      ${upgradeTag}
+      <img class="recipe-icon" src="assets/recipe-icons/${id}.png" alt="" />
+      <div class="recipe-name">${owned ? RECIPE_NAME_BY_ID[id] : "???"}</div>
+      <div class="recipe-stars">${starRow}</div>
+    `;
+    if (owned) {
+      card.addEventListener("click", () => onRecipeCardClick(id));
+    } else {
+      card.addEventListener("click", () => showToast("[요리 연구]로 획득할 수 있어요."));
+    }
+    grid.appendChild(card);
+  }
+  wrap.appendChild(grid);
+
+  // 시즌 탭은 빈 상태
+  const seasonView = document.createElement("div");
+  seasonView.className = "recipe-season";
+  seasonView.hidden = true;
+  seasonView.innerHTML = `<div class="recipe-empty">시즌 메뉴는 추후 업데이트 예정이에요.</div>`;
+  wrap.appendChild(seasonView);
+
+  // 탭 전환
+  tabs.querySelectorAll(".recipe-cat-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const cat = btn.dataset.cat;
+      tabs.querySelectorAll(".recipe-cat-btn").forEach((b) => {
+        b.dataset.active = (b.dataset.cat === cat) ? "true" : "false";
+      });
+      grid.hidden = (cat !== "signature");
+      seasonView.hidden = (cat !== "season");
+    });
+  });
+
+  dom.panelBody.innerHTML = "";
+  dom.panelBody.appendChild(wrap);
+}
+
+function onRecipeCardClick(id) {
+  const owned = state.recipes[id];
+  if (!owned) return;
+  if (owned.stars >= MAX_STARS) {
+    showToast("이미 최대 강화 단계입니다.");
+    return;
+  }
+  // 기획서 규칙: 강화는 중복으로 나온 메뉴 1개를 소비 (도토리 X)
+  if (!owned.dupes || owned.dupes <= 0) {
+    showToast("연구에서 중복으로 나오면 강화할 수 있어요.");
+    return;
+  }
+  owned.dupes -= 1;
+  owned.stars += 1;
+  showEnhanceModal(id);
+  saveState();
+  renderRecipePanel();
+  refreshHud();
+}
+
+function showEnhanceModal(id) {
+  const owned = state.recipes[id];
+  dom.enhanceIcon.src = `assets/recipe-icons/${id}.png`;
+  dom.enhanceName.textContent = RECIPE_NAME_BY_ID[id];
+  dom.enhanceStars.textContent = "★".repeat(owned.stars);
+  dom.enhanceOverlay.hidden = false;
+}
+function closeEnhanceModal() {
+  dom.enhanceOverlay.hidden = true;
+}
+
+function renderThemePanel() {
+  const list = document.createElement("div");
+  list.className = "theme-list";
+  const groups = [
+    { key: "table", label: "식탁" },
+    { key: "stove", label: "조리기구" },
+    { key: "entrance", label: "출입구" },
+    { key: "countertop", label: "도마 테이블" },
+  ];
+  for (const grp of groups) {
+    const currentId = state.themes[grp.key];
+    const themes = THEME_DEFS[grp.key];
+    const currentIdx = themes.findIndex((t) => t.id === currentId);
+    const nextTheme = themes[currentIdx + 1] || null;
+    const showTheme = nextTheme || themes[currentIdx];
+    const isMax = !nextTheme;
+
+    const row = document.createElement("div");
+    row.className = "theme-row";
+    row.dataset.state = isMax ? "owned" : "available";
+    const totalBoost = themes[currentIdx].boost;
+    row.innerHTML = `
+      <img class="theme-icon" src="${showTheme.icon}" alt="" />
+      <div class="theme-info">
+        <div class="theme-name">${grp.label} · ${showTheme.name}</div>
+        <div class="theme-meta">현재 효과: 수익 +${(totalBoost * 100).toFixed(0)}%</div>
+        ${isMax ? "" : `<div class="theme-effect">구매 시 수익 +${(nextTheme.boost * 100).toFixed(0)}%</div>`}
+      </div>
+      <div class="theme-action"></div>
+    `;
+    const actionWrap = row.querySelector(".theme-action");
+    if (isMax) {
+      actionWrap.innerHTML = `<span class="theme-meta">최고 단계</span>`;
+    } else {
+      const btn = document.createElement("button");
+      btn.className = "primary-btn";
+      const useGem = nextTheme.costGem > 0;
+      const cost = useGem ? nextTheme.costGem : nextTheme.costAcorn;
+      const iconPath = useGem ? "Icon/Currency/Icon_Currency_003.png" : "Icon/Currency/Icon_Currency_001.png";
+      const have = useGem ? state.resources.gems : state.resources.acorns;
+      btn.disabled = have < cost;
+      btn.innerHTML = `<img class="cost-icon" src="${iconPath}" alt="" />
+        <span>${formatNumber(cost)}</span>
+        <span class="primary-btn-label">구매</span>`;
+      btn.addEventListener("click", () => onThemeBuy(grp.key, nextTheme.id));
+      actionWrap.appendChild(btn);
+    }
+    list.appendChild(row);
+  }
+  dom.panelBody.innerHTML = "";
+  dom.panelBody.appendChild(list);
+}
+function onThemeBuy(key, themeId) {
+  const themeDef = THEME_DEFS[key].find((t) => t.id === themeId);
+  if (!themeDef) return;
+  if (themeDef.costGem > 0) {
+    if (state.resources.gems < themeDef.costGem) {
+      showToast("보석이 부족합니다.");
+      return;
+    }
+    state.resources.gems -= themeDef.costGem;
+  } else {
+    if (state.resources.acorns < themeDef.costAcorn) {
+      showToast("도토리가 부족합니다.");
+      return;
+    }
+    state.resources.acorns -= themeDef.costAcorn;
+  }
+  state.themes[key] = themeId;
+  showToast(`${themeDef.name} 적용!`);
+  saveState();
+  renderThemePanel();
+  refreshHud();
+}
+
+// ===== 이벤트 바인딩 =====
+document.getElementById("promotion-btn").addEventListener("click", handlePromotion);
+document.getElementById("reset-btn").addEventListener("click", () => {
+  if (confirm("모든 진행도를 초기화할까요?")) {
+    resetState();
   }
 });
+document.querySelectorAll("[data-panel]").forEach((btn) => {
+  btn.addEventListener("click", () => openPanel(btn.dataset.panel));
+});
+dom.panelCloseBtn.addEventListener("click", closePanel);
+dom.panelOverlay.addEventListener("click", (e) => {
+  if (e.target === dom.panelOverlay) closePanel();
+});
+dom.installConfirmBtn.addEventListener("click", () => {
+  if (state.ui.installCandidateId === null) return;
+  const cand = INSTALL_SEQUENCE[state.ui.installCandidateId];
+  installCandidate(cand);
+});
+dom.researchStartBtn.addEventListener("click", startResearch);
+dom.researchCancelBtn.addEventListener("click", () => {
+  state.ui.chefBubbleOpen = false;
+  refreshHud();
+});
+dom.resultConfirm.addEventListener("click", closeResultModal);
+dom.resultOverlay.addEventListener("click", (e) => {
+  if (e.target === dom.resultOverlay) closeResultModal();
+});
+dom.enhanceConfirm.addEventListener("click", closeEnhanceModal);
+dom.enhanceOverlay.addEventListener("click", (e) => {
+  if (e.target === dom.enhanceOverlay) closeEnhanceModal();
+});
 
-window.addEventListener("pagehide", persistStateNow);
-window.addEventListener("beforeunload", persistStateNow);
+canvas.addEventListener("click", (e) => {
+  const p = getCanvasPoint(e.clientX, e.clientY);
+  handleCanvasClick(p.x, p.y);
+});
 window.addEventListener("resize", () => {
-  configureCanvasResolution();
+  configureCanvas();
+  refreshHud();
+});
+
+// ===== 메인 루프 =====
+let lastTime = 0;
+function frame(ts) {
+  if (!lastTime) lastTime = ts;
+  const dt = Math.min(0.05, (ts - lastTime) / 1000);
+  lastTime = ts;
+  update(dt);
   draw();
-});
+  refreshHudIfNeeded();
+  requestAnimationFrame(frame);
+}
 
-canvas.addEventListener("pointerdown", handleCanvasPointerDown);
-canvas.addEventListener("pointermove", handleCanvasPointerMove);
-canvas.addEventListener("pointerup", handleCanvasPointerUp);
-canvas.addEventListener("pointercancel", handleCanvasPointerUp);
-
-canvas.addEventListener("click", (event) => {
-  if (state.scene === SCENE_FARM) {
-    if (farmDragState.suppressClick) {
-      farmDragState.suppressClick = false;
-      return;
-    }
-    if (state.mode !== "playing" || state.ui.openPanel) {
-      return;
-    }
-    const { viewportX, viewportY } = getCanvasPointerMetrics(event.clientX, event.clientY);
-    handleFarmCanvasClick(viewportX, viewportY);
-    return;
+let lastHudAcorns = -1;
+let lastHudThreshold = -1;
+let lastHudProgress = -1;
+function refreshHudIfNeeded() {
+  if (
+    state.resources.acorns !== lastHudAcorns ||
+    state.promo.progress !== lastHudProgress ||
+    state.promo.threshold !== lastHudThreshold
+  ) {
+    lastHudAcorns = state.resources.acorns;
+    lastHudProgress = state.promo.progress;
+    lastHudThreshold = state.promo.threshold;
+    refreshHud();
   }
-
-  if (cameraDragState.suppressClick) {
-    cameraDragState.suppressClick = false;
-    return;
+  // 말풍선 위치는 매 프레임 캔버스가 흔들리지 않으므로 한 번만 갱신해도 OK,
+  // 하지만 요리사가 움직이면 갱신 필요
+  if (state.ui.chefBubbleOpen) {
+    const screen = canvasToScreen(state.chef.x, state.chef.y - 50);
+    dom.researchBubble.style.left = `${screen.x}px`;
+    dom.researchBubble.style.top = `${screen.y}px`;
   }
+}
 
-  if (isCanvasInteractionLocked()) {
-    return;
-  }
+// 자동 저장 (10초마다)
+setInterval(() => {
+  saveState();
+}, 10000);
+window.addEventListener("beforeunload", saveState);
 
-  const { worldX, worldY } = getCanvasPointerMetrics(event.clientX, event.clientY);
+// 부트
+configureCanvas();
+refreshHud();
+requestAnimationFrame(frame);
 
-  for (const table of [...state.restaurant.tables].reverse()) {
-    if (!table.customer || table.customer.state !== "awaiting_order") {
-      continue;
-    }
-
-    const bubble = getOrderBubbleRect(table.customer);
-    const isInside =
-      worldX >= bubble.x &&
-      worldX <= bubble.x + bubble.width &&
-      worldY >= bubble.y &&
-      worldY <= bubble.y + bubble.height;
-
-    if (isInside) {
-      acceptOrder(table.id);
-      break;
-    }
-  }
-});
-
-window.render_game_to_text = renderGameToText;
-window.advanceTime = advanceTime;
-window.resetPrototype = () => resetGame({ clearSave: true });
-
-configureCanvasResolution();
-primeChickIconCache();
-syncStartOverlay();
-renderSkillOptions();
-refreshAllUI();
-setChefLine("opening", null, {
-  force: true,
-  duration: 3.1,
-  nextDelay: 6.1,
-});
-rafId = requestAnimationFrame(frame);
+// 디버그 훅
+window.gameState = () => state;
+window.resetGame = resetState;

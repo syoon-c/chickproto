@@ -3,54 +3,121 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>노란 요리사</title>
+    <title>식당아리 Chick Bistro</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="app-shell">
       <section class="phone-frame">
-        <canvas id="game-canvas" width="390" height="844"></canvas>
+        <canvas id="game-canvas" width="480" height="900"></canvas>
 
+        <!-- 상단 HUD: 도토리 + 보석 + 설정 -->
         <div class="overlay top-bar">
-          <div class="pill resource acorn-pill">
-            <span class="pill-label">
-              <img class="pill-icon-image" src="icon/currency/Icon_Currency_001.png" alt="도토리" />
-              도토리
-            </span>
+          <div class="pill currency-pill" id="acorn-pill">
+            <img class="pill-icon" src="Icon/Currency/Icon_Currency_001.png" alt="도토리" />
             <strong id="acorn-count">0</strong>
+          </div>
+          <div class="pill currency-pill" id="gem-pill">
+            <img class="pill-icon" src="Icon/Currency/Icon_Currency_003.png" alt="보석" />
+            <strong id="gem-count">0</strong>
           </div>
         </div>
 
-        <div class="overlay utility-stack utility-stack-top-right">
-          <button id="reset-data-btn" class="utility-btn utility-btn-compact" type="button">↺ 리셋</button>
+        <div class="overlay top-right">
+          <button id="reset-btn" class="icon-btn" type="button" title="초기화">↺</button>
         </div>
 
+        <!-- 우하단: 홍보 버튼 -->
         <div class="overlay promo-stack">
           <button id="promotion-btn" class="promo-btn" type="button">
-            <span class="promo-btn-kicker">📣</span>
-            <strong>홍보</strong>
-            <div class="promo-progress promo-progress-inline" aria-hidden="true">
-              <div class="promo-progress-bar">
-                <div id="promotion-fill" class="promo-progress-fill"></div>
-              </div>
+            <span class="promo-kicker">📣</span>
+            <strong class="promo-label">홍보</strong>
+            <div class="promo-progress">
+              <div id="promotion-fill" class="promo-progress-fill"></div>
             </div>
-            <span id="promotion-text">0 / 4</span>
+            <span id="promotion-text" class="promo-meter">0 / 4</span>
           </button>
+        </div>
+
+        <!-- 좌하단: 메뉴/테마 버튼 (설치는 패널 없음 - 기획서 규칙) -->
+        <div class="overlay bottom-tabs">
+          <button class="tab-btn" data-panel="recipe" type="button">
+            <span class="tab-icon">📖</span>
+            <span class="tab-label">메뉴</span>
+            <span class="tab-badge" id="recipe-badge" hidden></span>
+          </button>
+          <button class="tab-btn" data-panel="theme" type="button">
+            <span class="tab-icon">🎨</span>
+            <span class="tab-label">테마</span>
+          </button>
+        </div>
+
+        <!-- 토스트 영역 -->
+        <div class="overlay toast-area" id="toast-area"></div>
+
+        <!-- 설치 말풍선 -->
+        <div class="install-bubble" id="install-bubble" hidden>
+          <div class="install-bubble-icon" id="install-bubble-icon"></div>
+          <div class="install-bubble-body">
+            <div class="install-bubble-title" id="install-bubble-title">시설</div>
+            <div class="install-bubble-desc" id="install-bubble-desc">설명</div>
+            <button id="install-confirm-btn" class="primary-btn" type="button">
+              <img class="cost-icon" src="Icon/Currency/Icon_Currency_001.png" alt="" />
+              <span id="install-bubble-cost">0</span>
+              <span class="primary-btn-label">설치하기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 요리사 연구 말풍선 -->
+        <div class="research-bubble" id="research-bubble" hidden>
+          <div class="research-bubble-title">레시피 연구</div>
+          <button id="research-start-btn" class="primary-btn" type="button">
+            <img class="cost-icon" src="Icon/Currency/Icon_Currency_001.png" alt="" />
+            <span id="research-cost">100</span>
+            <span class="primary-btn-label">연구하기</span>
+          </button>
+          <button id="research-cancel-btn" class="ghost-btn" type="button">취소</button>
+        </div>
+
+        <!-- 패널 (레시피 / 테마) -->
+        <div class="panel-overlay" id="panel-overlay" hidden>
+          <div class="panel" id="panel-card">
+            <header class="panel-header">
+              <h2 class="panel-title" id="panel-title">패널</h2>
+              <button id="panel-close-btn" class="icon-btn small" type="button">✕</button>
+            </header>
+            <div class="panel-body" id="panel-body"></div>
+          </div>
+        </div>
+
+        <!-- 연구 결과 모달 -->
+        <div class="event-overlay" id="research-result-overlay" hidden>
+          <div class="event-card" id="research-result-card">
+            <div class="event-burst"></div>
+            <div class="event-kicker" id="research-result-kicker">새로운 레시피!</div>
+            <img class="event-icon" id="research-result-icon" alt="" />
+            <div class="event-rarity" id="research-result-rarity">평범한 요리</div>
+            <div class="event-name" id="research-result-name">샐러드</div>
+            <button id="research-result-confirm" class="primary-btn solo" type="button">확인</button>
+          </div>
+        </div>
+
+        <!-- 강화 토스트 -->
+        <div class="event-overlay" id="enhance-overlay" hidden>
+          <div class="event-card small" id="enhance-card">
+            <div class="event-kicker">메뉴 강화</div>
+            <img class="event-icon medium" id="enhance-icon" alt="" />
+            <div class="event-name" id="enhance-name"></div>
+            <div class="event-stars" id="enhance-stars"></div>
+            <button id="enhance-confirm" class="primary-btn solo" type="button">확인</button>
+          </div>
         </div>
       </section>
     </main>
 
     <script src="tablejson-data.js"></script>
-    <script src="guest-personas.js"></script>
     <script src="recipe-icon-library.js"></script>
-    <script src="js/game-data.js"></script>
-    <script src="js/core/game-utils.js"></script>
-    <script src="js/systems/farm-system.js"></script>
-    <script src="js/core/save-state.js"></script>
-    <script src="js/systems/interview-system.js"></script>
-    <script src="js/systems/gameplay-system.js"></script>
-    <script src="js/game-ui.js"></script>
-    <script src="js/render/game-render.js"></script>
     <script src="game.js"></script>
   </body>
 </html>
