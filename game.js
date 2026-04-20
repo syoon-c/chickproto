@@ -1,11 +1,11 @@
 // 식당아리 Chick Bistro — 프로토타입
 // 기획서 기준: 핵심 루프 + 설치 + 테마 + 레시피 연구
 //
-// 좌표계: 캔버스 480x900, 원점 좌상단
+// 좌표계: 캔버스 480x1040 (모바일 9:19.5), 원점 좌상단
 
 // ===== 상수 =====
 const GAME_W = 480;
-const GAME_H = 900;
+const GAME_H = 1040;
 const FIXED_DT = 1 / 60;
 
 const SAVE_KEY = "chick-bistro-prototype-v1";
@@ -87,30 +87,64 @@ const RECIPE_PITY = {
   chicken: 70, gnocchi: 82, sushi: 95, bulgogi: 110, steak: 130,
 };
 
-// 시설 좌표 + 설치 시퀀스 (InstallFacility.json 기준: 테이블 4 + 화구 4)
-const TABLE_SLOTS = [
-  { id: "table-1", x: 160, y: 470 },
-  { id: "table-2", x: 320, y: 470 },
-  { id: "table-3", x: 160, y: 620 },
-  { id: "table-4", x: 320, y: 620 },
-];
+// 시설 좌표 + 설치 시퀀스 (InstallFacility.json 17종 모두)
+// 부엌 뒷줄 (camera-pan 영역, y ~155)
+const BACKROW_SLOTS = {
+  countertop: { id: "countertop", x: 90,  y: 155, w: 80, h: 80 },  // 도마테이블
+  sink:       { id: "sink",       x: 188, y: 155, w: 80, h: 80 },  // 싱크대
+  fridge:     { id: "fridge",     x: 286, y: 155, w: 80, h: 80 },  // 냉장고
+  toolbox:    { id: "toolbox",    x: 386, y: 155, w: 80, h: 80 },  // 조리도구함
+};
+// 화구 줄 (y ~285)
 const STOVE_SLOTS = [
-  { id: "stove-1", x: 165, y: 218 },
-  { id: "stove-2", x: 240, y: 218 },
-  { id: "stove-3", x: 315, y: 218 },
-  { id: "stove-4", x: 90,  y: 224 },
+  { id: "stove-1", x: 105, y: 285 },
+  { id: "stove-2", x: 197, y: 285 },
+  { id: "stove-3", x: 289, y: 285 },
+  { id: "stove-4", x: 381, y: 285 },
 ];
-const CHEF_HOME = { x: 240, y: 168 };
-const ENTRANCE = { x: 240, y: 850 };
+// 테이블 (2x2, y 530/700)
+const TABLE_SLOTS = [
+  { id: "table-1", x: 160, y: 540 },
+  { id: "table-2", x: 320, y: 540 },
+  { id: "table-3", x: 160, y: 700 },
+  { id: "table-4", x: 320, y: 700 },
+];
+// 단일 시설들
+const SINGLE_SLOTS = {
+  entrance:  { id: "entrance",  x: 240, y: 860, w: 120, h: 120 },
+  stage:     { id: "stage",     x: 80,  y: 850, w: 90,  h: 90 },
+  tipbox:    { id: "tipbox",    x: 400, y: 850, w: 70,  h: 80 },
+  lighting:  { id: "lighting",  x: 420, y: 95,  w: 60,  h: 70 },
+  fence:     { id: "fence",     x: 240, y: 1018, w: 480, h: 22 },
+};
+const CHEF_HOME = { x: 240, y: 380 };
+const ENTRANCE = SINGLE_SLOTS.entrance;
+// 줄서기 큐 위치 — 출입구 바로 앞에 일렬 (x 고정, y만 다름)
+const QUEUE_SLOTS = [
+  { x: 240, y: 945 },
+  { x: 240, y: 970 },
+  { x: 240, y: 995 },
+  { x: 240, y: 1020 },
+];
 
-// 설치 시퀀스 — InstallFacility.json sequence 1~8 중 시작 보유분(table-1, stove-1) 제외
+// 설치 시퀀스 — InstallFacility.json 17종 (시작: stove-1, table-1 보유)
+// sequence 1=table-1, 5=stove-1 은 시작 보유라 제외
 const INSTALL_SEQUENCE = [
-  { kind: "table", slotId: "table-2", title: "2번 테이블", desc: "한 번에 받을 수 있는 손님이 늘어난다.", cost: 150 },
-  { kind: "stove", slotId: "stove-2", title: "2번 조리기구", desc: "동시에 조리할 수 있는 주문이 늘어난다.", cost: 220 },
-  { kind: "table", slotId: "table-3", title: "3번 테이블", desc: "중반 처리량을 받쳐줄 좌석이 추가된다.", cost: 320 },
-  { kind: "stove", slotId: "stove-3", title: "3번 조리기구", desc: "주문이 몰릴 때 대기 시간이 줄어든다.", cost: 460 },
-  { kind: "table", slotId: "table-4", title: "4번 테이블", desc: "한 줄을 더 깔끔하게 채울 수 있다.",       cost: 600 },
-  { kind: "stove", slotId: "stove-4", title: "4번 조리기구", desc: "고급 메뉴까지 동시에 굴린다.",           cost: 800 },
+  { kind: "table",  slotId: "table-2",   title: "2번 테이블",   desc: "한 번에 받을 수 있는 손님이 늘어난다.", cost: 50 },
+  { kind: "table",  slotId: "table-3",   title: "3번 테이블",   desc: "중반 처리량을 받쳐줄 좌석이 추가된다.", cost: 80 },
+  { kind: "table",  slotId: "table-4",   title: "4번 테이블",   desc: "한 줄을 더 깔끔하게 채울 수 있다.",     cost: 120 },
+  { kind: "stove",  slotId: "stove-2",   title: "2번 조리기구", desc: "동시에 조리할 수 있는 주문이 늘어난다.", cost: 150 },
+  { kind: "stove",  slotId: "stove-3",   title: "3번 조리기구", desc: "주문이 몰릴 때 대기 시간이 줄어든다.", cost: 220 },
+  { kind: "stove",  slotId: "stove-4",   title: "4번 조리기구", desc: "고급 메뉴까지 동시에 굴린다.",         cost: 320 },
+  { kind: "single", slotId: "entrance",  title: "출입구",       desc: "손님이 더 자주 찾아온다.",             cost: 200 },
+  { kind: "single", slotId: "stage",     title: "무대",         desc: "수익에 보너스 효과가 추가된다.",       cost: 280 },
+  { kind: "single", slotId: "tipbox",    title: "팁박스",       desc: "추가 도토리를 모을 수 있다.",          cost: 360 },
+  { kind: "back",   slotId: "fridge",    title: "냉장고",       desc: "재료 효율을 올린다.",                  cost: 460 },
+  { kind: "back",   slotId: "sink",      title: "싱크대",       desc: "조리 시간이 단축된다.",                cost: 580 },
+  { kind: "back",   slotId: "countertop",title: "도마 테이블",  desc: "조리 정확도를 높인다.",                cost: 720 },
+  { kind: "back",   slotId: "toolbox",   title: "조리도구함",   desc: "고급 메뉴 해금 속도가 빨라진다.",      cost: 880 },
+  { kind: "single", slotId: "lighting",  title: "조명",         desc: "분위기 보너스가 적용된다.",            cost: 999 },
+  { kind: "single", slotId: "fence",     title: "울타리",       desc: "전체 인테리어 점수가 오른다.",         cost: 1000 },
 ];
 const INSTALL_VISIBLE_AHEAD = 2; // 한 번에 보이는 후보 수
 
@@ -139,22 +173,37 @@ function buildThemeDefs(prefix) {
 }
 
 const THEME_DEFS = {
-  table: buildThemeDefs("Table"),
-  stove: buildThemeDefs("Stove"),
-  entrance: buildThemeDefs("Entrance"),
+  table:      buildThemeDefs("Table"),
+  stove:      buildThemeDefs("Stove"),
+  entrance:   buildThemeDefs("Entrance"),
   countertop: buildThemeDefs("CounterTop"),
+  sink:       buildThemeDefs("Sink"),
+  fridge:     buildThemeDefs("Fridge"),
+  toolbox:    buildThemeDefs("Kitchenware"),
+  stage:      buildThemeDefs("Stage"),
+  tipbox:     buildThemeDefs("TipBox"),
+  lighting:   buildThemeDefs("Lighting"),
+  fence:      buildThemeDefs("Fence"),
 };
+// 슬롯 ID → 테마 키 매핑
+const SLOT_THEME_KEY = {
+  countertop: "countertop", sink: "sink", fridge: "fridge", toolbox: "toolbox",
+  entrance: "entrance", stage: "stage", tipbox: "tipbox", lighting: "lighting", fence: "fence",
+};
+const FACILITY_KEYS_ALL = ["table","stove","entrance","countertop","sink","fridge","toolbox","stage","tipbox","lighting","fence"];
 
 // ===== 상태 =====
 function createInitialState() {
   return {
     clock: 0,
     resources: { acorns: 260, gems: 0 },
-    promo: { progress: 0, threshold: 4, pendingSpawns: 0, lastClick: 0 },
+    promo: { progress: 0, threshold: 5, pendingSpawns: 0, lastClick: 0 },
 
     facilities: {
       tables: [{ slotId: "table-1" }],   // 시작: 테이블 1개
       stoves: [{ slotId: "stove-1" }],   // 시작: 화구 1개
+      singles: [],                       // {slotId} for entrance/stage/tipbox/lighting/fence
+      backrow: [],                       // {slotId} for fridge/sink/countertop/toolbox
     },
     installIndex: 0,    // 다음 설치할 시퀀스 번호
     installCheckpoints: 0, // 클리어한 설치 수
@@ -164,7 +213,19 @@ function createInitialState() {
       stove: "stone",
       entrance: "stone",
       countertop: "stone",
+      sink: "stone",
+      fridge: "stone",
+      toolbox: "stone",
+      stage: "stone",
+      tipbox: "stone",
+      lighting: "stone",
+      fence: "stone",
     },
+    themesOwned: (() => {
+      const o = {};
+      for (const k of FACILITY_KEYS_ALL) o[k] = ["stone"];
+      return o;
+    })(),
 
     recipes: (() => {
       const owned = {};
@@ -205,32 +266,40 @@ function loadState() {
       ui: createInitialState().ui,    // UI는 매번 초기화
       customers: [],                  // 손님 진행 상태는 초기화
       cookingTasks: [],
-      promo: { ...initial.promo, ...(data.promo || {}) },
+      promo: { ...initial.promo, ...(data.promo || {}), threshold: 5 },
       chef: { ...initial.chef },
     });
     // 테마 마이그레이션: 신규 THEME_DEFS에 없는 ID는 기본값(stone)으로
-    if (merged.themes) {
-      for (const k of ["table", "stove", "entrance", "countertop"]) {
-        if (!THEME_DEFS[k].some((t) => t.id === merged.themes[k])) {
-          merged.themes[k] = "stone";
-        }
+    if (!merged.themes) merged.themes = {};
+    if (!merged.themesOwned) merged.themesOwned = {};
+    for (const k of FACILITY_KEYS_ALL) {
+      if (!merged.themes[k] || !THEME_DEFS[k].some((t) => t.id === merged.themes[k])) {
+        merged.themes[k] = "stone";
+      }
+      if (!Array.isArray(merged.themesOwned[k])) merged.themesOwned[k] = ["stone"];
+      if (!merged.themesOwned[k].includes("stone")) merged.themesOwned[k].push("stone");
+      // 현재 적용된 테마는 자동으로 소유에 추가
+      if (!merged.themesOwned[k].includes(merged.themes[k])) {
+        merged.themesOwned[k].push(merged.themes[k]);
       }
     }
-    // 시설 마이그레이션: 4개 초과 슬롯(table-5/6) 정리
+    // 시설 마이그레이션
+    if (!merged.facilities) merged.facilities = { tables: [{slotId:"table-1"}], stoves: [{slotId:"stove-1"}], singles: [], backrow: [] };
+    if (!Array.isArray(merged.facilities.singles)) merged.facilities.singles = [];
+    if (!Array.isArray(merged.facilities.backrow)) merged.facilities.backrow = [];
     const validTableIds = new Set(TABLE_SLOTS.map((s) => s.id));
     const validStoveIds = new Set(STOVE_SLOTS.map((s) => s.id));
-    if (Array.isArray(merged.facilities?.tables)) {
-      merged.facilities.tables = merged.facilities.tables.filter((f) => validTableIds.has(f.slotId));
-    }
-    if (Array.isArray(merged.facilities?.stoves)) {
-      merged.facilities.stoves = merged.facilities.stoves.filter((f) => validStoveIds.has(f.slotId));
-    }
+    const validSingleIds = new Set(Object.keys(SINGLE_SLOTS));
+    const validBackIds = new Set(Object.keys(BACKROW_SLOTS));
+    merged.facilities.tables  = merged.facilities.tables.filter((f) => validTableIds.has(f.slotId));
+    merged.facilities.stoves  = merged.facilities.stoves.filter((f) => validStoveIds.has(f.slotId));
+    merged.facilities.singles = merged.facilities.singles.filter((f) => validSingleIds.has(f.slotId));
+    merged.facilities.backrow = merged.facilities.backrow.filter((f) => validBackIds.has(f.slotId));
     // installIndex를 이미 설치된 슬롯 너머로 정렬
     merged.installIndex = 0;
     while (
       merged.installIndex < INSTALL_SEQUENCE.length &&
-      (merged.facilities.tables.some((f) => f.slotId === INSTALL_SEQUENCE[merged.installIndex].slotId) ||
-       merged.facilities.stoves.some((f) => f.slotId === INSTALL_SEQUENCE[merged.installIndex].slotId))
+      isSlotInstalledIn(merged.facilities, INSTALL_SEQUENCE[merged.installIndex])
     ) {
       merged.installIndex += 1;
     }
@@ -354,12 +423,22 @@ function canvasToScreen(cx, cy) {
 
 // ===== 헬퍼: 시설/설치 =====
 function slotMeta(kind, slotId) {
-  const list = kind === "table" ? TABLE_SLOTS : STOVE_SLOTS;
-  return list.find((s) => s.id === slotId);
+  if (kind === "table") return TABLE_SLOTS.find((s) => s.id === slotId);
+  if (kind === "stove") return STOVE_SLOTS.find((s) => s.id === slotId);
+  if (kind === "single") return SINGLE_SLOTS[slotId];
+  if (kind === "back") return BACKROW_SLOTS[slotId];
+  return null;
+}
+function isSlotInstalledIn(facilities, cand) {
+  const arr = cand.kind === "table" ? facilities.tables
+            : cand.kind === "stove" ? facilities.stoves
+            : cand.kind === "single" ? facilities.singles
+            : cand.kind === "back" ? facilities.backrow
+            : [];
+  return arr.some((f) => f.slotId === cand.slotId);
 }
 function isSlotInstalled(kind, slotId) {
-  const arr = kind === "table" ? state.facilities.tables : state.facilities.stoves;
-  return arr.some((f) => f.slotId === slotId);
+  return isSlotInstalledIn(state.facilities, { kind, slotId });
 }
 function getInstallCandidates() {
   // 이미 설치된 슬롯은 건너뛰고 순서상 다음 N개만 노출
@@ -374,13 +453,21 @@ function getInstallCandidates() {
   }
   return out;
 }
+function candidateBox(cand) {
+  const slot = slotMeta(cand.kind, cand.slotId);
+  if (!slot) return null;
+  let w, h;
+  if (cand.kind === "table") { w = 96; h = 78; }
+  else if (cand.kind === "stove") { w = 78; h = 78; }
+  else if (cand.kind === "back") { w = slot.w; h = slot.h; }
+  else { w = slot.w; h = slot.h; }
+  return { x: slot.x, y: slot.y, w, h };
+}
 function findCandidateAt(cx, cy) {
   for (const cand of getInstallCandidates()) {
-    const slot = slotMeta(cand.kind, cand.slotId);
-    if (!slot) continue;
-    const w = cand.kind === "table" ? 90 : 80;
-    const h = cand.kind === "table" ? 70 : 70;
-    if (cx >= slot.x - w / 2 && cx <= slot.x + w / 2 && cy >= slot.y - h / 2 && cy <= slot.y + h / 2) {
+    const b = candidateBox(cand);
+    if (!b) continue;
+    if (cx >= b.x - b.w/2 && cx <= b.x + b.w/2 && cy >= b.y - b.h/2 && cy <= b.y + b.h/2) {
       return cand;
     }
   }
@@ -398,7 +485,9 @@ function installCandidate(cand) {
   }
   state.resources.acorns -= cand.cost;
   if (cand.kind === "table") state.facilities.tables.push({ slotId: cand.slotId });
-  else state.facilities.stoves.push({ slotId: cand.slotId });
+  else if (cand.kind === "stove") state.facilities.stoves.push({ slotId: cand.slotId });
+  else if (cand.kind === "single") state.facilities.singles.push({ slotId: cand.slotId });
+  else if (cand.kind === "back") state.facilities.backrow.push({ slotId: cand.slotId });
   // installIndex를 이미 설치된 슬롯들 너머로 진전
   while (
     state.installIndex < INSTALL_SEQUENCE.length &&
@@ -414,10 +503,22 @@ function installCandidate(cand) {
 }
 
 // ===== 헬퍼: 손님/주문 =====
+const SEATS_PER_TABLE = 2;
+function tableSeatOffset(seat) {
+  // seat: 0(좌), 1(우) — 테이블 앞쪽(아래) 좌우로 앉음
+  return seat === 0 ? { dx: -24, dy: 32 } : { dx: 24, dy: 32 };
+}
 function findFreeTable() {
+  // 테이블 + 빈 좌석 인덱스 반환
   for (const f of state.facilities.tables) {
-    const occupied = state.customers.some((c) => c.tableId === f.slotId);
-    if (!occupied) return f;
+    const used = new Set(
+      state.customers
+        .filter((c) => c.tableId === f.slotId && c.seat != null)
+        .map((c) => c.seat)
+    );
+    for (let s = 0; s < SEATS_PER_TABLE; s += 1) {
+      if (!used.has(s)) return { table: f, seat: s };
+    }
   }
   return null;
 }
@@ -429,13 +530,13 @@ function findFreeStove() {
   return null;
 }
 function spawnCustomer() {
-  const table = findFreeTable();
-  if (!table) {
+  const found = findFreeTable();
+  if (!found) {
     state.promo.pendingSpawns += 1;
     return;
   }
-  const slot = slotMeta("table", table.slotId);
-  // 가능한 레시피만 주문 (보유한 메뉴)
+  const slot = slotMeta("table", found.table.slotId);
+  const off = tableSeatOffset(found.seat);
   const ownedIds = Object.keys(state.recipes).filter((id) => state.recipes[id]?.stars > 0);
   const recipeId = ownedIds[Math.floor(Math.random() * ownedIds.length)] || "salad";
   state.customers.push({
@@ -443,10 +544,11 @@ function spawnCustomer() {
     state: "walking",
     x: ENTRANCE.x,
     y: ENTRANCE.y + 30,
-    targetX: slot.x,
-    targetY: slot.y - 24,
+    targetX: slot.x + off.dx,
+    targetY: slot.y + off.dy,
     recipeId,
-    tableId: table.slotId,
+    tableId: found.table.slotId,
+    seat: found.seat,
     timer: 0,
     total: 0,
     bob: Math.random() * Math.PI * 2,
@@ -480,13 +582,16 @@ function tryStartCooking() {
   }
 }
 
+function orderBubblePos(cust) {
+  const slot = slotMeta("table", cust.tableId);
+  const off = tableSeatOffset(cust.seat ?? 0);
+  return { x: slot.x + off.dx, y: slot.y + off.dy - 56 };
+}
 function acceptOrderAt(cx, cy) {
   for (const cust of state.customers) {
     if (cust.state !== "awaiting_order") continue;
-    const slot = slotMeta("table", cust.tableId);
-    const bx = slot.x;
-    const by = slot.y - 70;
-    if (cx >= bx - 38 && cx <= bx + 38 && cy >= by - 28 && cy <= by + 28) {
+    const b = orderBubblePos(cust);
+    if (cx >= b.x - 32 && cx <= b.x + 32 && cy >= b.y - 28 && cy <= b.y + 28) {
       cust.state = "ordered";
       cust.timer = 0;
       return true;
@@ -527,11 +632,7 @@ function update(dt) {
         // 식사 완료 → 결제
         const recipe = RECIPE_RARITY[cust.recipeId];
         const stars = state.recipes[cust.recipeId]?.stars || 1;
-        const themeBoost =
-          THEME_DEFS.table.find((t) => t.id === state.themes.table).boost +
-          THEME_DEFS.stove.find((t) => t.id === state.themes.stove).boost +
-          THEME_DEFS.entrance.find((t) => t.id === state.themes.entrance).boost +
-          THEME_DEFS.countertop.find((t) => t.id === state.themes.countertop).boost;
+        const themeBoost = totalThemeBoost();
         const payout = Math.round(recipe.basePrice * priceMultiplierForStars(stars) * (1 + themeBoost));
         state.resources.acorns += payout;
         state.metrics.served += 1;
@@ -579,37 +680,36 @@ function update(dt) {
   }
   state.cookingTasks = state.cookingTasks.filter((t) => !t._done);
 
-  // 요리사 모션: 조리 중이면 화구 쪽으로 이동
-  if (state.cookingTasks.length > 0) {
-    const target = state.cookingTasks[0];
-    const slot = slotMeta("stove", target.stoveId);
-    if (slot) {
-      const tx = slot.x;
-      const ty = slot.y - 36;
-      const dx = tx - state.chef.x;
-      const dy = ty - state.chef.y;
-      const d = Math.hypot(dx, dy);
-      const sp = 120;
-      if (d > 1) {
-        state.chef.x += (dx / d) * Math.min(sp * dt, d);
-        state.chef.y += (dy / d) * Math.min(sp * dt, d);
-      }
-      state.chef.mode = "cook";
-    }
-  } else {
-    const dx = CHEF_HOME.x - state.chef.x;
-    const dy = CHEF_HOME.y - state.chef.y;
-    const d = Math.hypot(dx, dy);
-    if (d > 0.5) {
-      state.chef.x += (dx / d) * Math.min(120 * dt, d);
-      state.chef.y += (dy / d) * Math.min(120 * dt, d);
-    } else {
-      state.chef.mode = "idle";
-    }
+  // 요리사: 항상 정위치 — 조리는 화구가 자동으로 처리
+  // (기획서: 요리사는 연구 전용, 조리는 각 조리기구에서 자동)
+  const dx = CHEF_HOME.x - state.chef.x;
+  const dy = CHEF_HOME.y - state.chef.y;
+  const d = Math.hypot(dx, dy);
+  if (d > 0.5) {
+    state.chef.x += (dx / d) * Math.min(120 * dt, d);
+    state.chef.y += (dy / d) * Math.min(120 * dt, d);
   }
+  state.chef.mode = state.ui.chefBubbleOpen ? "research" : "idle";
 
   tryStartCooking();
   pruneToasts();
+}
+
+function totalThemeBoost() {
+  // 설치된 시설의 테마 보너스 합산 (기획서: 시설별 테마가 곱적용 → 단순 합산으로 근사)
+  let sum = 0;
+  // 항상 카운팅: table, stove, entrance(있을 때), backrow installed, singles installed
+  sum += THEME_DEFS.table.find((t) => t.id === state.themes.table).boost;
+  sum += THEME_DEFS.stove.find((t) => t.id === state.themes.stove).boost;
+  for (const f of state.facilities.singles) {
+    const k = SLOT_THEME_KEY[f.slotId];
+    if (k && THEME_DEFS[k]) sum += THEME_DEFS[k].find((t) => t.id === state.themes[k]).boost;
+  }
+  for (const f of state.facilities.backrow) {
+    const k = SLOT_THEME_KEY[f.slotId];
+    if (k && THEME_DEFS[k]) sum += THEME_DEFS[k].find((t) => t.id === state.themes[k]).boost;
+  }
+  return sum;
 }
 
 // ===== 토스트 =====
@@ -639,11 +739,13 @@ function draw() {
   ctx.clearRect(0, 0, GAME_W, GAME_H);
   drawBackground();
   drawDecorBack();
+  drawBackrow();
   drawStoves();
-  drawCountertop();
   drawChef();
   drawTables();
+  drawSingles();
   drawCustomers();
+  drawQueue();
   drawCookingFood();
   drawDottedZones();
   drawEntrance();
@@ -658,29 +760,33 @@ function drawBackground() {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, GAME_W, GAME_H);
 
-  // 부엌 영역 (위쪽 띠)
+  // 부엌 영역 (위쪽, 뒷줄 + 화구 줄)
   ctx.fillStyle = "#a99066";
-  ctx.fillRect(0, 110, GAME_W, 140);
-  ctx.fillStyle = "rgba(80, 60, 30, 0.18)";
-  ctx.fillRect(0, 246, GAME_W, 4);
+  ctx.fillRect(0, 80, GAME_W, 260);
+  ctx.fillStyle = "rgba(80, 60, 30, 0.22)";
+  ctx.fillRect(0, 336, GAME_W, 4);
 
-  // 손님 영역 (중간 메인)
+  // 부엌-손님 구역 사이 돌길
+  ctx.fillStyle = "#c8b88a";
+  ctx.fillRect(GAME_W/2 - 60, 340, 120, 90);
+
+  // 손님 영역 (중앙)
   ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
   ctx.beginPath();
-  ctx.ellipse(GAME_W / 2, 540, 220, 200, 0, 0, Math.PI * 2);
+  ctx.ellipse(GAME_W / 2, 620, 230, 200, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // 나무 (왼쪽/오른쪽 가장자리)
-  drawTree(28, 90, 36);
-  drawTree(70, 50, 28);
-  drawTree(120, 80, 32);
-  drawTree(GAME_W - 28, 90, 36);
-  drawTree(GAME_W - 70, 60, 30);
-  drawTree(GAME_W - 130, 80, 30);
-  drawTree(20, 760, 38);
-  drawTree(GAME_W - 22, 770, 38);
-  drawTree(20, 860, 32);
-  drawTree(GAME_W - 22, 860, 34);
+  // 출입구로 이어지는 길 — 문 앞 큐 영역까지
+  ctx.fillStyle = "#c8b88a";
+  ctx.fillRect(GAME_W/2 - 36, 800, 72, 220);
+
+  // 나무
+  drawTree(28, 50, 32);
+  drawTree(GAME_W - 28, 50, 32);
+  drawTree(20, 820, 30);
+  drawTree(GAME_W - 22, 820, 32);
+  drawTree(36, 1000, 26);
+  drawTree(GAME_W - 36, 1000, 28);
 }
 function drawTree(cx, cy, r) {
   ctx.fillStyle = "#3e6a3a";
@@ -694,19 +800,41 @@ function drawTree(cx, cy, r) {
 }
 
 function drawDecorBack() {
-  // 부엌 벽 + 카운터 백라인
+  // 부엌 뒷벽
   ctx.fillStyle = "#7d5d36";
-  ctx.fillRect(60, 130, GAME_W - 120, 14);
+  ctx.fillRect(0, 80, GAME_W, 12);
 }
 
-function drawCountertop() {
-  // 카운터 (도마 테이블) — 부엌 한쪽
-  const theme = THEME_DEFS.countertop.find((t) => t.id === state.themes.countertop);
-  const img = getImage(theme.icon);
-  const w = 70, h = 70;
-  if (!drawImageScaled(img, 410, 165, w, h)) {
-    ctx.fillStyle = "#b8946d";
-    ctx.fillRect(410 - w/2, 165 - h/2, w, h);
+function drawBackrow() {
+  // 설치된 뒷줄 시설(도마/싱크/냉장고/조리도구함)
+  for (const f of state.facilities.backrow) {
+    const slot = BACKROW_SLOTS[f.slotId];
+    if (!slot) continue;
+    const themeKey = SLOT_THEME_KEY[f.slotId];
+    const themeDef = THEME_DEFS[themeKey].find((t) => t.id === state.themes[themeKey]);
+    const img = getImage(themeDef.icon);
+    drawShadow(slot.x, slot.y + slot.h/2 - 4, slot.w * 0.45, 7);
+    if (!drawImageScaled(img, slot.x, slot.y, slot.w, slot.h)) {
+      ctx.fillStyle = "#b8946d";
+      ctx.fillRect(slot.x - slot.w/2, slot.y - slot.h/2, slot.w, slot.h);
+    }
+  }
+}
+
+function drawSingles() {
+  // 무대/팁박스/조명/울타리 등 설치된 단일 시설 (출입구는 별도 함수)
+  for (const f of state.facilities.singles) {
+    if (f.slotId === "entrance") continue; // 출입구는 drawEntrance에서
+    const slot = SINGLE_SLOTS[f.slotId];
+    if (!slot) continue;
+    const themeKey = SLOT_THEME_KEY[f.slotId];
+    const themeDef = THEME_DEFS[themeKey].find((t) => t.id === state.themes[themeKey]);
+    const img = getImage(themeDef.icon);
+    if (f.slotId !== "fence") drawShadow(slot.x, slot.y + slot.h/2 - 6, slot.w * 0.4, 8);
+    if (!drawImageScaled(img, slot.x, slot.y, slot.w, slot.h)) {
+      ctx.fillStyle = "#9a7a4c";
+      ctx.fillRect(slot.x - slot.w/2, slot.y - slot.h/2, slot.w, slot.h);
+    }
   }
 }
 
@@ -764,6 +892,16 @@ function drawChef() {
   const x = state.chef.x;
   const y = state.chef.y;
   const bob = Math.sin(state.chef.anim * 4) * 1.4;
+  // 탭 시 강조 링
+  if (state.ui.chefBubbleOpen) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255, 213, 102, 0.85)";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.ellipse(x, y + 28, 38, 12, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
   drawShadow(x, y + 28, 22, 6);
   const img = getImage("Icon/Chick/Icon_Chick_099.png");
   if (!drawImageScaled(img, x, y - 6 + bob, 76, 76)) {
@@ -772,18 +910,30 @@ function drawChef() {
     ctx.arc(x, y + bob, 22, 0, Math.PI * 2);
     ctx.fill();
   }
-  // 조리 중 표시
-  if (state.chef.mode === "cook") {
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillStyle = "#fff";
-    ctx.textAlign = "center";
-    ctx.fillText("🔥", x + 22, y - 26);
-  }
   // 연구 중 전구
   if (state.ui.chefBubbleOpen) {
     ctx.font = "bold 18px sans-serif";
+    ctx.fillStyle = "#fff";
     ctx.textAlign = "center";
     ctx.fillText("💡", x, y - 38 + bob);
+  }
+}
+
+function drawQueue() {
+  // 출입구 앞 줄서기 — pendingSpawns 만큼 보이게
+  const pending = Math.min(QUEUE_SLOTS.length, state.promo.pendingSpawns);
+  if (pending <= 0) return;
+  const img = getImage("Icon/Chick/Icon_Chick_001.png");
+  for (let i = 0; i < pending; i += 1) {
+    const slot = QUEUE_SLOTS[i];
+    const bob = Math.sin((state.clock + i * 0.7) * 3) * 1.5;
+    drawShadow(slot.x, slot.y + 18, 14, 4);
+    if (!drawImageScaled(img, slot.x, slot.y + bob, 48, 48)) {
+      ctx.fillStyle = "#f6c14f";
+      ctx.beginPath();
+      ctx.arc(slot.x, slot.y + bob, 16, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 }
 
@@ -813,10 +963,10 @@ function drawCustomers() {
 }
 
 function drawOrderBubble(cust) {
-  const slot = slotMeta("table", cust.tableId);
-  const cx = slot.x;
-  const cy = slot.y - 70;
-  const w = 70, h = 56;
+  const pos = orderBubblePos(cust);
+  const cx = pos.x;
+  const cy = pos.y;
+  const w = 60, h = 52;
   // 그림자
   ctx.fillStyle = "rgba(0,0,0,0.18)";
   roundRect(cx - w/2 + 2, cy - h/2 + 4, w, h, 12);
@@ -854,6 +1004,34 @@ function drawOrderBubble(cust) {
   }
 }
 
+function drawCookProgress(task) {
+  const slot = slotMeta("stove", task.stoveId);
+  if (!slot) return;
+  const ratio = Math.max(0, Math.min(1, task.progress / task.duration));
+  const remain = Math.max(0, task.duration - task.progress);
+  const cx = slot.x;
+  const cy = slot.y - 56;
+  const w = 56, h = 10;
+  // 배경
+  ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+  roundRect(cx - w/2 - 1, cy - h/2 - 1, w + 2, h + 2, 6);
+  ctx.fill();
+  // 채움
+  const grad = ctx.createLinearGradient(cx - w/2, 0, cx + w/2, 0);
+  grad.addColorStop(0, "#ffd566");
+  grad.addColorStop(1, "#ff9d3a");
+  ctx.fillStyle = grad;
+  roundRect(cx - w/2, cy - h/2, w * ratio, h, 5);
+  ctx.fill();
+  // 남은 초
+  ctx.font = "bold 10px sans-serif";
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(`${remain.toFixed(1)}s`, cx, cy);
+  ctx.textBaseline = "alphabetic";
+}
+
 function drawCookingFood() {
   for (const task of state.cookingTasks) {
     const slot = slotMeta("stove", task.stoveId);
@@ -866,48 +1044,50 @@ function drawCookingFood() {
       ctx.arc(slot.x, slot.y - 24, r, 0, Math.PI * 2);
       ctx.fill();
     }
+    drawCookProgress(task);
   }
 }
 
 function drawDottedZones() {
-  if (state.ui.installCandidateId) return; // 말풍선 떠 있을 땐 안 그림 (선택된 것만 강조)
+  if (state.ui.installCandidateId !== null) return; // 말풍선 떠 있을 땐 안 그림
   for (const cand of getInstallCandidates()) {
-    const slot = slotMeta(cand.kind, cand.slotId);
-    if (!slot) continue;
-    const w = cand.kind === "table" ? 88 : 78;
-    const h = cand.kind === "table" ? 70 : 70;
+    const b = candidateBox(cand);
+    if (!b) continue;
     const pulse = 0.5 + 0.5 * Math.sin(state.clock * 3);
     ctx.save();
-    ctx.translate(slot.x, slot.y);
+    ctx.translate(b.x, b.y);
     // 점선 사각형
     ctx.strokeStyle = `rgba(255, 240, 180, ${0.55 + pulse * 0.35})`;
     ctx.lineWidth = 2.5;
     ctx.setLineDash([6, 5]);
-    roundRect(-w/2, -h/2, w, h, 10);
+    roundRect(-b.w/2, -b.h/2, b.w, b.h, 10);
     ctx.stroke();
     ctx.setLineDash([]);
-    // 가격 라벨
+    // 가격 라벨 + 시설 아이콘 (PDF 기획서: 점선 영역 안에 비용 표시)
     const acornIcon = getImage("Icon/Currency/Icon_Currency_001.png");
-    const lblW = 68;
-    const lx = 0, ly = -h/2 - 12;
-    ctx.fillStyle = "rgba(40, 28, 12, 0.78)";
-    roundRect(lx - lblW/2, ly - 12, lblW, 22, 11);
+    const lblW = Math.max(70, 24 + String(cand.cost).length * 8);
+    const lx = 0, ly = b.h/2 - 14;
+    ctx.fillStyle = "rgba(40, 28, 12, 0.82)";
+    roundRect(lx - lblW/2, ly - 12, lblW, 24, 12);
     ctx.fill();
-    drawImageScaled(acornIcon, lx - lblW/2 + 12, ly - 1, 16, 16);
+    drawImageScaled(acornIcon, lx - lblW/2 + 14, ly, 18, 18);
     ctx.fillStyle = "#fff8e3";
-    ctx.font = "bold 12px sans-serif";
+    ctx.font = "bold 13px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(formatNumber(cand.cost), lx - lblW/2 + 22, ly + 4);
+    ctx.fillText(formatNumber(cand.cost), lx - lblW/2 + 26, ly + 5);
     ctx.restore();
   }
 }
 
 function drawEntrance() {
+  // 출입구는 설치된 경우에만 표시 (없으면 풀밭 길만)
+  const installed = state.facilities.singles.some((f) => f.slotId === "entrance");
+  if (!installed) return;
   const theme = THEME_DEFS.entrance.find((t) => t.id === state.themes.entrance);
   const img = getImage(theme.icon);
   const x = ENTRANCE.x;
-  const y = ENTRANCE.y - 16;
-  drawShadow(x, y + 50, 60, 10);
+  const y = ENTRANCE.y;
+  drawShadow(x, y + 60, 60, 10);
   if (!drawImageScaled(img, x, y, 130, 130)) {
     ctx.fillStyle = "#7a5a36";
     ctx.fillRect(x - 50, y - 50, 100, 100);
@@ -963,6 +1143,7 @@ const dom = {
   panelTitle: document.getElementById("panel-title"),
   panelBody: document.getElementById("panel-body"),
   panelCloseBtn: document.getElementById("panel-close-btn"),
+  researchVignette: document.getElementById("research-vignette"),
   resultOverlay: document.getElementById("research-result-overlay"),
   resultIcon: document.getElementById("research-result-icon"),
   resultName: document.getElementById("research-result-name"),
@@ -1002,15 +1183,22 @@ function refreshHud() {
     const cand = INSTALL_SEQUENCE[state.ui.installCandidateId];
     if (cand && !isSlotInstalled(cand.kind, cand.slotId)) {
       const slot = slotMeta(cand.kind, cand.slotId);
-      const screen = canvasToScreen(slot.x, slot.y - 24);
+      // 위쪽 영역(뒷줄/조명)은 말풍선이 화면 밖으로 나가지 않도록 아래로 뒤집기
+      const flipDown = slot.y < 260;
+      const halfH = slot.h ? slot.h / 2 : 39;
+      const anchorY = flipDown ? (slot.y + halfH + 6) : (slot.y - halfH - 6);
+      const screen = canvasToScreen(slot.x, anchorY);
+      dom.installBubble.dataset.flip = flipDown ? "down" : "up";
       dom.installBubble.style.left = `${screen.x}px`;
       dom.installBubble.style.top = `${screen.y}px`;
       dom.installBubble.hidden = false;
       dom.installBubbleTitle.textContent = cand.title;
       dom.installBubbleDesc.textContent = cand.desc;
       dom.installBubbleCost.textContent = formatNumber(cand.cost);
-      // 현재 적용 테마 아이콘으로 표시 (테마가 입혀진 시설)
-      const themeKey = cand.kind === "table" ? "table" : "stove";
+      // 현재 적용 테마 아이콘으로 표시
+      const themeKey = (cand.kind === "table") ? "table"
+                     : (cand.kind === "stove") ? "stove"
+                     : SLOT_THEME_KEY[cand.slotId];
       const themeId = state.themes[themeKey];
       const themeDef = THEME_DEFS[themeKey].find((t) => t.id === themeId);
       dom.installBubbleIcon.innerHTML = `<img src="${themeDef.icon}" alt="" />`;
@@ -1023,18 +1211,20 @@ function refreshHud() {
     dom.installBubble.hidden = true;
   }
 
-  // 연구 말풍선
+  // 연구 말풍선 — 요리사 아래에 위치 (PDF 기획서)
   if (state.ui.chefBubbleOpen) {
-    const screen = canvasToScreen(state.chef.x, state.chef.y - 50);
+    const screen = canvasToScreen(state.chef.x, state.chef.y + 36);
     dom.researchBubble.style.left = `${screen.x}px`;
     dom.researchBubble.style.top = `${screen.y}px`;
     dom.researchBubble.hidden = false;
+    if (dom.researchVignette) dom.researchVignette.hidden = false;
     const cost = researchCostForCount(state.researchCount);
     dom.researchCost.textContent = formatNumber(cost);
     const blocked = !canResearch();
     dom.researchStartBtn.disabled = blocked || state.resources.acorns < cost;
   } else {
     dom.researchBubble.hidden = true;
+    if (dom.researchVignette) dom.researchVignette.hidden = true;
   }
 }
 
@@ -1076,8 +1266,6 @@ function handlePromotion() {
   if (state.promo.progress >= state.promo.threshold) {
     state.promo.progress = 0;
     spawnCustomer();
-    // 게이지 충족 후 다음 임계값 약간 증가 (체감 진행)
-    state.promo.threshold = Math.min(8, state.promo.threshold + (state.metrics.served > 0 && state.metrics.served % 5 === 0 ? 1 : 0));
   }
   refreshHud();
 }
@@ -1283,76 +1471,193 @@ function closeEnhanceModal() {
   dom.enhanceOverlay.hidden = true;
 }
 
-function renderThemePanel() {
-  const list = document.createElement("div");
-  list.className = "theme-list";
-  const groups = [
-    { key: "table", label: "식탁" },
-    { key: "stove", label: "조리기구" },
-    { key: "entrance", label: "출입구" },
-    { key: "countertop", label: "도마 테이블" },
-  ];
-  for (const grp of groups) {
-    const currentId = state.themes[grp.key];
-    const themes = THEME_DEFS[grp.key];
-    const currentIdx = themes.findIndex((t) => t.id === currentId);
-    const nextTheme = themes[currentIdx + 1] || null;
-    const showTheme = nextTheme || themes[currentIdx];
-    const isMax = !nextTheme;
+// 테마 패널 — PDF 기획서 기반:
+// ① 패널명 ② 수익률 배지 ③ 가로 테마 선택 ④ 시설 그리드 ⑤ 시설 테마 버튼 ⑥ 전체 적용
+const FACILITY_GROUPS = [
+  { key: "table",      label: "식탁" },
+  { key: "stove",      label: "조리기구" },
+  { key: "entrance",   label: "출입구" },
+  { key: "countertop", label: "도마테이블" },
+  { key: "sink",       label: "싱크대" },
+  { key: "fridge",     label: "냉장고" },
+  { key: "toolbox",    label: "조리도구함" },
+  { key: "stage",      label: "무대" },
+  { key: "tipbox",     label: "팁박스" },
+  { key: "lighting",   label: "조명" },
+  { key: "fence",      label: "울타리" },
+];
+let _themePanelSelected = "stone"; // 가로 선택된 테마 id
 
-    const row = document.createElement("div");
-    row.className = "theme-row";
-    row.dataset.state = isMax ? "owned" : "available";
-    const totalBoost = themes[currentIdx].boost;
-    row.innerHTML = `
-      <img class="theme-icon" src="${showTheme.icon}" alt="" />
-      <div class="theme-info">
-        <div class="theme-name">${grp.label} · ${showTheme.name}</div>
-        <div class="theme-meta">현재 효과: 수익 +${(totalBoost * 100).toFixed(0)}%</div>
-        ${isMax ? "" : `<div class="theme-effect">구매 시 수익 +${(nextTheme.boost * 100).toFixed(0)}%</div>`}
-      </div>
-      <div class="theme-action"></div>
+function renderThemePanel() {
+  const wrap = document.createElement("div");
+  wrap.className = "theme-wrap";
+
+  // ② 수익률 배지
+  const totalBoost = totalThemeBoost();
+  const rateBadge = document.createElement("div");
+  rateBadge.className = "theme-rate";
+  rateBadge.innerHTML = `현재 수익 보너스 <strong>+${Math.round(totalBoost * 100)}%</strong>`;
+  wrap.appendChild(rateBadge);
+
+  // ③ 가로 테마 선택
+  const themeStrip = document.createElement("div");
+  themeStrip.className = "theme-strip";
+  for (const t of THEME_LIST) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "theme-strip-btn";
+    btn.dataset.active = (t.id === _themePanelSelected) ? "true" : "false";
+    btn.innerHTML = `
+      <img src="Icon/Facility/Icon_Facility_Table_${themeSuffix(t.id)}.png" alt="" />
+      <span>${t.name}</span>
     `;
-    const actionWrap = row.querySelector(".theme-action");
-    if (isMax) {
-      actionWrap.innerHTML = `<span class="theme-meta">최고 단계</span>`;
-    } else {
-      const btn = document.createElement("button");
-      btn.className = "primary-btn";
-      const useGem = nextTheme.costGem > 0;
-      const cost = useGem ? nextTheme.costGem : nextTheme.costAcorn;
-      const iconPath = useGem ? "Icon/Currency/Icon_Currency_003.png" : "Icon/Currency/Icon_Currency_001.png";
-      const have = useGem ? state.resources.gems : state.resources.acorns;
-      btn.disabled = have < cost;
-      btn.innerHTML = `<img class="cost-icon" src="${iconPath}" alt="" />
-        <span>${formatNumber(cost)}</span>
-        <span class="primary-btn-label">구매</span>`;
-      btn.addEventListener("click", () => onThemeBuy(grp.key, nextTheme.id));
-      actionWrap.appendChild(btn);
-    }
-    list.appendChild(row);
+    btn.addEventListener("click", () => {
+      _themePanelSelected = t.id;
+      renderThemePanel();
+    });
+    themeStrip.appendChild(btn);
   }
+  wrap.appendChild(themeStrip);
+
+  // ④ 시설 그리드
+  const grid = document.createElement("div");
+  grid.className = "theme-facility-grid";
+  for (const grp of FACILITY_GROUPS) {
+    const themeDef = THEME_DEFS[grp.key].find((t) => t.id === _themePanelSelected);
+    if (!themeDef) continue;
+    const owned = state.themesOwned[grp.key]?.includes(_themePanelSelected);
+    const applied = state.themes[grp.key] === _themePanelSelected;
+    const isSpecial = themeDef.costGem > 0;
+
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "theme-facility";
+    card.dataset.state = applied ? "applied" : (owned ? "owned" : "locked");
+    if (isSpecial) card.dataset.special = "true";
+
+    card.innerHTML = `
+      <img src="${themeDef.icon}" alt="" />
+      <span class="theme-facility-label">${grp.label}</span>
+      ${applied ? `<span class="theme-facility-tag">적용중</span>`
+        : owned ? `<span class="theme-facility-tag owned">보유</span>`
+        : `<span class="theme-facility-tag locked">${formatNumber(themeDef.costGem || themeDef.costAcorn)}</span>`}
+    `;
+    card.addEventListener("click", () => onFacilityThemeTap(grp.key, _themePanelSelected));
+    grid.appendChild(card);
+  }
+  wrap.appendChild(grid);
+
+  // ⑥ 전체 적용
+  const applyAll = document.createElement("button");
+  applyAll.type = "button";
+  applyAll.className = "theme-apply-all";
+  applyAll.textContent = "테마 전체 적용";
+  applyAll.addEventListener("click", () => onApplyAll(_themePanelSelected));
+  wrap.appendChild(applyAll);
+
   dom.panelBody.innerHTML = "";
-  dom.panelBody.appendChild(list);
+  dom.panelBody.appendChild(wrap);
 }
-function onThemeBuy(key, themeId) {
-  const themeDef = THEME_DEFS[key].find((t) => t.id === themeId);
-  if (!themeDef) return;
-  if (themeDef.costGem > 0) {
-    if (state.resources.gems < themeDef.costGem) {
-      showToast("보석이 부족합니다.");
-      return;
-    }
-    state.resources.gems -= themeDef.costGem;
-  } else {
-    if (state.resources.acorns < themeDef.costAcorn) {
-      showToast("도토리가 부족합니다.");
-      return;
-    }
-    state.resources.acorns -= themeDef.costAcorn;
+
+function themeSuffix(id) {
+  return { stone: "Stone", wood: "Wood", camping: "Camping", italy: "Italy", summer: "BlueWhite", cherry: "CherryBlossom" }[id];
+}
+
+function onFacilityThemeTap(facilityKey, themeId) {
+  const owned = state.themesOwned[facilityKey]?.includes(themeId);
+  const applied = state.themes[facilityKey] === themeId;
+  if (applied) {
+    showToast("이미 적용 중인 테마입니다.");
+    return;
   }
-  state.themes[key] = themeId;
-  showToast(`${themeDef.name} 적용!`);
+  if (owned) {
+    state.themes[facilityKey] = themeId;
+    saveState();
+    renderThemePanel();
+    refreshHud();
+    return;
+  }
+  // 미보유 → 디테일 팝업
+  showThemeDetail(facilityKey, themeId);
+}
+
+function showThemeDetail(facilityKey, themeId) {
+  const themeDef = THEME_DEFS[facilityKey].find((t) => t.id === themeId);
+  const themeMeta = THEME_LIST.find((t) => t.id === themeId);
+  if (!themeDef || !themeMeta) return;
+  const grp = FACILITY_GROUPS.find((g) => g.key === facilityKey);
+  const useGem = themeDef.costGem > 0;
+  const cost = useGem ? themeDef.costGem : themeDef.costAcorn;
+  const iconPath = useGem ? "Icon/Currency/Icon_Currency_002.png" : "Icon/Currency/Icon_Currency_001.png";
+  const have = useGem ? state.resources.gems : state.resources.acorns;
+
+  // 동적 모달
+  const overlay = document.createElement("div");
+  overlay.className = "event-overlay theme-detail-overlay";
+  overlay.innerHTML = `
+    <div class="event-card theme-detail-card">
+      <div class="theme-detail-name">${grp.label} · ${themeMeta.name}</div>
+      <img class="event-icon" src="${themeDef.icon}" alt="" />
+      <div class="theme-detail-effect">수익 +${Math.round(themeDef.boost * 100)}%</div>
+      <div class="theme-detail-desc">${themeMeta.name} 컨셉의 ${grp.label} 테마</div>
+      <div class="theme-detail-actions">
+        <button class="ghost-btn" data-act="cancel" type="button">취소</button>
+        <button class="primary-btn" data-act="buy" type="button" ${have < cost ? "disabled" : ""}>
+          <img class="cost-icon" src="${iconPath}" alt="" />
+          <span>${formatNumber(cost)}</span>
+          <span class="primary-btn-label">구매하기</span>
+        </button>
+      </div>
+    </div>
+  `;
+  document.querySelector(".phone-frame").appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('[data-act="cancel"]').addEventListener("click", close);
+  overlay.querySelector('[data-act="buy"]').addEventListener("click", () => {
+    if (useGem) {
+      if (!confirm(`보석 ${cost}개를 사용해 구매할까요?`)) return;
+      if (state.resources.gems < cost) { showToast("보석이 부족합니다."); return; }
+      state.resources.gems -= cost;
+    } else {
+      if (state.resources.acorns < cost) { showToast("도토리가 부족합니다."); return; }
+      state.resources.acorns -= cost;
+    }
+    if (!state.themesOwned[facilityKey].includes(themeId)) state.themesOwned[facilityKey].push(themeId);
+    state.themes[facilityKey] = themeId;
+    showToast(`${themeMeta.name} 적용!`);
+    close();
+    saveState();
+    renderThemePanel();
+    refreshHud();
+  });
+}
+
+function onApplyAll(themeId) {
+  // 보유한 시설부터 일괄 적용. 미보유는 비용 합산 후 확인
+  const targets = FACILITY_GROUPS.filter((g) => state.themes[g.key] !== themeId);
+  if (targets.length === 0) { showToast("이미 모두 이 테마입니다."); return; }
+  let acornCost = 0, gemCost = 0;
+  const toBuy = [];
+  for (const g of targets) {
+    if (state.themesOwned[g.key]?.includes(themeId)) continue;
+    const def = THEME_DEFS[g.key].find((t) => t.id === themeId);
+    if (def.costGem > 0) gemCost += def.costGem; else acornCost += def.costAcorn;
+    toBuy.push(g.key);
+  }
+  if (toBuy.length > 0) {
+    const msg = `미보유 ${toBuy.length}개 시설 테마를 ${acornCost > 0 ? `도토리 ${acornCost}` : ""}${acornCost > 0 && gemCost > 0 ? " + " : ""}${gemCost > 0 ? `보석 ${gemCost}` : ""}로 구매하고 전체 적용할까요?`;
+    if (!confirm(msg)) return;
+    if (state.resources.acorns < acornCost) { showToast("도토리가 부족합니다."); return; }
+    if (state.resources.gems < gemCost) { showToast("보석이 부족합니다."); return; }
+    state.resources.acorns -= acornCost;
+    state.resources.gems -= gemCost;
+    for (const key of toBuy) {
+      if (!state.themesOwned[key].includes(themeId)) state.themesOwned[key].push(themeId);
+    }
+  }
+  for (const g of targets) state.themes[g.key] = themeId;
+  showToast("전체 테마가 적용되었습니다!");
   saveState();
   renderThemePanel();
   refreshHud();
@@ -1429,7 +1734,7 @@ function refreshHudIfNeeded() {
   // 말풍선 위치는 매 프레임 캔버스가 흔들리지 않으므로 한 번만 갱신해도 OK,
   // 하지만 요리사가 움직이면 갱신 필요
   if (state.ui.chefBubbleOpen) {
-    const screen = canvasToScreen(state.chef.x, state.chef.y - 50);
+    const screen = canvasToScreen(state.chef.x, state.chef.y + 36);
     dom.researchBubble.style.left = `${screen.x}px`;
     dom.researchBubble.style.top = `${screen.y}px`;
   }
