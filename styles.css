@@ -887,3 +887,256 @@ body {
   color: #d59f23;
   letter-spacing: 4px;
 }
+
+/* === 메뉴 상세 팝업 === */
+.recipe-detail-overlay { z-index: 50; }
+.recipe-detail-card {
+  width: min(80%, 300px);
+  padding: 22px 20px 18px;
+}
+.recipe-detail-rarity {
+  font-size: 11px;
+  font-weight: 800;
+  color: #b88950;
+  letter-spacing: 0.05em;
+}
+.recipe-detail-card[data-rarity="rare"] .recipe-detail-rarity { color: var(--rarity-rare); }
+.recipe-detail-card[data-rarity="epic"] .recipe-detail-rarity { color: var(--rarity-epic); }
+.recipe-detail-locked {
+  width: 80px;
+  height: 80px;
+  margin: 6px 0;
+  border-radius: 50%;
+  background: #e3d6b6;
+  color: #b39764;
+  font-size: 44px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.recipe-detail-name {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #2c1f0a;
+}
+.recipe-detail-stars {
+  margin-top: 4px;
+  font-size: 16px;
+  color: #d59f23;
+  letter-spacing: 3px;
+}
+.recipe-detail-stats {
+  margin-top: 12px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  font-size: 11px;
+  color: #7a6038;
+}
+.recipe-detail-stats > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f7ecd0;
+  padding: 6px 4px;
+  border-radius: 8px;
+}
+.recipe-detail-stats strong {
+  margin-top: 2px;
+  font-size: 13px;
+  color: #2c1f0a;
+}
+.recipe-detail-status {
+  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+.recipe-detail-status[data-state="locked"]   { background: #efe3c2; color: #8b6f3a; }
+.recipe-detail-status[data-state="max"]      { background: #d8efd2; color: #2f7a3b; }
+.recipe-detail-status[data-state="needdupe"] { background: #fce0c4; color: #b35a17; }
+.recipe-detail-card .primary-btn.solo { margin-top: 14px; }
+
+/* === 할 일 패널 === */
+.task-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.task-cats {
+  display: flex;
+  gap: 6px;
+  background: #f4e7c4;
+  padding: 4px;
+  border-radius: 999px;
+}
+.task-cat-btn {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #8b6f3a;
+  cursor: pointer;
+}
+.task-cat-btn[data-active="true"] {
+  background: #fffaee;
+  color: #2c1f0a;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.task-empty {
+  text-align: center;
+  padding: 30px 10px;
+  font-size: 13px;
+  color: #8b6f3a;
+}
+.task-card {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  background: #fffaee;
+  border: 1.5px solid #e6d4a8;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.task-card[data-state="ready"] {
+  background: #fff5d2;
+  border-color: #f0b840;
+  box-shadow: 0 0 0 2px rgba(240, 184, 64, 0.25);
+}
+.task-card[data-state="claimed"] { opacity: 0.55; }
+.task-card[data-state="locked"]  { opacity: 0.55; }
+.task-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f4e7c4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.task-body { min-width: 0; }
+.task-desc {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2c1f0a;
+  margin-bottom: 4px;
+}
+.task-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.task-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #efe3c2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.task-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd566, #f08c1a);
+  transition: width 0.3s ease;
+}
+.task-progress-text {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8b6f3a;
+}
+.task-reward {
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #6b4f1d;
+}
+.task-reward .cost-icon {
+  width: 16px;
+  height: 16px;
+}
+.task-claim-btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  background: #f08c1a;
+  cursor: pointer;
+  min-width: 64px;
+}
+.task-claim-btn:disabled {
+  background: #d5c39b;
+  color: #fff;
+  cursor: default;
+}
+
+/* 일일 보너스 바 */
+.daily-bonus {
+  background: #fffaee;
+  border: 1.5px solid #e6d4a8;
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.daily-bonus-count {
+  font-size: 12px;
+  font-weight: 800;
+  color: #6b4f1d;
+}
+.daily-bonus-bar {
+  height: 8px;
+  background: #efe3c2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.daily-bonus-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd566, #f08c1a);
+}
+.daily-bonus-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #2c1f0a;
+  background: #f4e7c4;
+  cursor: pointer;
+}
+.daily-bonus-btn[data-state="ready"] {
+  background: linear-gradient(90deg, #ffd566, #f08c1a);
+  color: #fff;
+  animation: bonus-pulse 1.4s ease-in-out infinite;
+}
+.daily-bonus-btn[data-state="lock"] { opacity: 0.7; cursor: default; }
+.daily-bonus-btn[data-state="done"] { background: #d8efd2; color: #2f7a3b; cursor: default; }
+.daily-bonus-egg { font-size: 18px; }
+.daily-bonus-label { flex: 1; text-align: left; }
+.daily-bonus-reward { display: inline-flex; align-items: center; gap: 3px; }
+.daily-bonus-reward .cost-icon { width: 16px; height: 16px; }
+@keyframes bonus-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.02); }
+}

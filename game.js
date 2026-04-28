@@ -87,6 +87,65 @@ const RECIPE_PITY = {
   chicken: 70, gnocchi: 82, sushi: 95, bulgogi: 110, steak: 130,
 };
 
+// ===== 할 일 시스템 =====
+// 메인 목표: 순차 진행. mainGoalIndex가 가리키는 한 개만 활성화.
+const MAIN_GOALS = [
+  { id: "served-1",   icon: "🍽️", desc: "첫 손님을 받아보세요",         target: 1,
+    progress: (s) => s.metrics.served, reward: { kind: "acorn", amount: 50 } },
+  { id: "menu-3",     icon: "📖", desc: "메뉴 3개를 모아보세요",          target: 3,
+    progress: (s) => Object.keys(s.recipes).length, reward: { kind: "acorn", amount: 100 } },
+  { id: "upgrade-1",  icon: "⭐", desc: "메뉴를 한 번 강화해보세요",      target: 1,
+    progress: (s) => Math.max(0, totalStarsOf(s) - Object.keys(s.recipes).length), reward: { kind: "acorn", amount: 100 } },
+  { id: "acorn-500",  icon: "🌰", desc: "도토리 500을 모아보세요",        target: 500,
+    progress: (s) => s.resources.acorns, reward: { kind: "gem", amount: 1 } },
+  { id: "install-3",  icon: "🔨", desc: "시설을 3개 설치해보세요",        target: 3,
+    progress: (s) => installedCountOf(s), reward: { kind: "acorn", amount: 200 } },
+  { id: "served-30",  icon: "🐥", desc: "손님을 30명 응대하세요",          target: 30,
+    progress: (s) => s.metrics.served, reward: { kind: "acorn", amount: 300 } },
+  { id: "menu-5",     icon: "📚", desc: "메뉴 5개를 모아보세요",          target: 5,
+    progress: (s) => Object.keys(s.recipes).length, reward: { kind: "acorn", amount: 200 } },
+  { id: "theme-apply",icon: "🎨", desc: "기본이 아닌 테마를 적용해보세요", target: 1,
+    progress: (s) => themeAppliedCountOf(s), reward: { kind: "gem", amount: 1 } },
+];
+
+// 오늘의 할 일: 매일 자정 리셋 (date 키 변경 시)
+const DAILY_TASKS = [
+  { id: "d-served-5",   icon: "🍽️", desc: "오늘 손님 5명 응대하기", target: 5,
+    progress: (s) => s.daily.served, reward: { kind: "acorn", amount: 50 } },
+  { id: "d-research-3", icon: "⚡", desc: "오늘 연구 3회 진행하기", target: 3,
+    progress: (s) => s.daily.researched, reward: { kind: "acorn", amount: 100 } },
+  { id: "d-promo-10",   icon: "📣", desc: "오늘 홍보 10회 누르기", target: 10,
+    progress: (s) => s.daily.promoClicks, reward: { kind: "acorn", amount: 30 } },
+  { id: "d-upgrade-1",  icon: "⭐", desc: "오늘 메뉴 1회 강화하기", target: 1,
+    progress: (s) => s.daily.upgrades, reward: { kind: "acorn", amount: 50 } },
+];
+const DAILY_BONUS = { kind: "gem", amount: 2 };
+
+function totalStarsOf(s) {
+  return Object.values(s.recipes || {}).reduce((a, r) => a + ((r && r.stars) || 0), 0);
+}
+function installedCountOf(s) {
+  const f = s.facilities || {};
+  return (f.tables?.length || 0) + (f.stoves?.length || 0)
+       + (f.singles?.length || 0) + (f.backrow?.length || 0);
+}
+function themeAppliedCountOf(s) {
+  return Object.values(s.themes || {}).filter((t) => t && t !== "stone").length;
+}
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function makeInitialDaily() {
+  return { date: todayKey(), served: 0, researched: 0, promoClicks: 0, upgrades: 0, claimed: {}, bonusClaimed: false };
+}
+function ensureDailyFresh() {
+  const today = todayKey();
+  if (!state.daily || state.daily.date !== today) {
+    state.daily = makeInitialDaily();
+  }
+}
+
 // 시설 좌표 + 설치 시퀀스 (InstallFacility.json 17종 모두)
 // 부엌 뒷줄 (camera-pan 영역, y ~155)
 const BACKROW_SLOTS = {
@@ -241,12 +300,18 @@ function createInitialState() {
 
     chef: { x: CHEF_HOME.x, y: CHEF_HOME.y, anim: 0, mode: "idle" }, // mode: idle|cook|research
 
-    metrics: { served: 0, researched: 0 },
+    metrics: { served: 0, researched: 0, upgrades: 0 },
+
+    // 할 일 시스템
+    mainGoalIndex: 0,
+    mainClaimed: {},   // { goalId: true }
+    daily: makeInitialDaily(),
 
     ui: {
       installCandidateId: null,   // 어느 후보 말풍선이 떠 있나
       chefBubbleOpen: false,
-      panel: null,                 // 'recipe' | 'theme'
+      panel: null,                 // 'recipe' | 'theme' | 'task'
+      taskTab: "main",             // 'main' | 'daily'
       eventModal: null,            // { type:'research'|'enhance', payload }
     },
   };
@@ -268,6 +333,15 @@ function loadState() {
       cookingTasks: [],
       promo: { ...initial.promo, ...(data.promo || {}), threshold: 5 },
       chef: { ...initial.chef },
+      metrics: { served: 0, researched: 0, upgrades: 0, ...(data.metrics || {}) },
+      mainGoalIndex: typeof data.mainGoalIndex === "number" ? data.mainGoalIndex : 0,
+      mainClaimed: (data.mainClaimed && typeof data.mainClaimed === "object") ? data.mainClaimed : {},
+      daily: (() => {
+        const d = data.daily;
+        const today = todayKey();
+        if (!d || d.date !== today) return makeInitialDaily();
+        return { ...makeInitialDaily(), ...d, date: today };
+      })(),
     });
     // 테마 마이그레이션: 신규 THEME_DEFS에 없는 ID는 기본값(stone)으로
     if (!merged.themes) merged.themes = {};
@@ -604,6 +678,7 @@ function acceptOrderAt(cx, cy) {
 function update(dt) {
   state.clock += dt;
   state.chef.anim += dt;
+  ensureDailyFresh();
 
   // 손님 업데이트
   for (const cust of state.customers) {
@@ -636,6 +711,7 @@ function update(dt) {
         const payout = Math.round(recipe.basePrice * priceMultiplierForStars(stars) * (1 + themeBoost));
         state.resources.acorns += payout;
         state.metrics.served += 1;
+        state.daily.served += 1;
         spawnPayoutToast(cust, payout);
         cust.state = "leaving";
         cust.targetX = ENTRANCE.x;
@@ -1135,6 +1211,7 @@ const dom = {
   installBubbleCost: document.getElementById("install-bubble-cost"),
   installConfirmBtn: document.getElementById("install-confirm-btn"),
   recipeBadge: document.getElementById("recipe-badge"),
+  taskBadge: document.getElementById("task-badge"),
   researchBubble: document.getElementById("research-bubble"),
   researchCost: document.getElementById("research-cost"),
   researchStartBtn: document.getElementById("research-start-btn"),
@@ -1176,6 +1253,17 @@ function refreshHud() {
     dom.recipeBadge.textContent = String(badge);
   } else {
     dom.recipeBadge.hidden = true;
+  }
+
+  // 할 일 배지: 보상 수령 가능한 할 일 수
+  const taskBadge = countClaimableTasks();
+  if (dom.taskBadge) {
+    if (taskBadge > 0) {
+      dom.taskBadge.hidden = false;
+      dom.taskBadge.textContent = String(taskBadge);
+    } else {
+      dom.taskBadge.hidden = true;
+    }
   }
 
   // 설치 말풍선
@@ -1262,6 +1350,8 @@ function handleCanvasClick(cx, cy) {
 
 // ===== 홍보 =====
 function handlePromotion() {
+  ensureDailyFresh();
+  state.daily.promoClicks += 1;
   state.promo.progress += 1;
   if (state.promo.progress >= state.promo.threshold) {
     state.promo.progress = 0;
@@ -1293,6 +1383,8 @@ function startResearch() {
   state.resources.acorns -= cost;
   state.researchCount += 1;
   state.metrics.researched += 1;
+  ensureDailyFresh();
+  state.daily.researched += 1;
 
   // 천장 처리: 처음 획득 메뉴에만 적용 (메뉴별 절대 횟수)
   // 미획득 메뉴 중 천장 도달한 것이 있으면 그 중 가장 작은 천장을 가진 메뉴 보장
@@ -1361,6 +1453,9 @@ function openPanel(name) {
   } else if (name === "theme") {
     dom.panelTitle.textContent = "레스토랑 테마";
     renderThemePanel();
+  } else if (name === "task") {
+    dom.panelTitle.textContent = "할 일";
+    renderTaskPanel();
   }
   refreshHud();
 }
@@ -1408,11 +1503,7 @@ function renderRecipePanel() {
       <div class="recipe-name">${owned ? RECIPE_NAME_BY_ID[id] : "???"}</div>
       <div class="recipe-stars">${starRow}</div>
     `;
-    if (owned) {
-      card.addEventListener("click", () => onRecipeCardClick(id));
-    } else {
-      card.addEventListener("click", () => showToast("[요리 연구]로 획득할 수 있어요."));
-    }
+    card.addEventListener("click", () => onRecipeCardClick(id));
     grid.appendChild(card);
   }
   wrap.appendChild(grid);
@@ -1442,18 +1533,24 @@ function renderRecipePanel() {
 
 function onRecipeCardClick(id) {
   const owned = state.recipes[id];
-  if (!owned) return;
+  if (!owned) {
+    showRecipeDetail(id);
+    return;
+  }
   if (owned.stars >= MAX_STARS) {
-    showToast("이미 최대 강화 단계입니다.");
+    showRecipeDetail(id);
     return;
   }
   // 기획서 규칙: 강화는 중복으로 나온 메뉴 1개를 소비 (도토리 X)
   if (!owned.dupes || owned.dupes <= 0) {
-    showToast("연구에서 중복으로 나오면 강화할 수 있어요.");
+    showRecipeDetail(id);
     return;
   }
   owned.dupes -= 1;
   owned.stars += 1;
+  state.metrics.upgrades = (state.metrics.upgrades || 0) + 1;
+  ensureDailyFresh();
+  state.daily.upgrades += 1;
   showEnhanceModal(id);
   saveState();
   renderRecipePanel();
@@ -1469,6 +1566,277 @@ function showEnhanceModal(id) {
 }
 function closeEnhanceModal() {
   dom.enhanceOverlay.hidden = true;
+}
+
+// ===== 메뉴 상세 팝업 =====
+// 강화 가능 상태가 아닐 때(잠김/중복 없음/최대 강화) 띄우는 상세 정보
+function showRecipeDetail(id) {
+  const meta = RECIPE_RARITY[id];
+  if (!meta) return;
+  const owned = state.recipes[id];
+  const stars = owned ? owned.stars : 0;
+  const dupes = owned ? (owned.dupes || 0) : 0;
+  const isLocked = !owned;
+  const isMax = owned && owned.stars >= MAX_STARS;
+  const starRow = stars > 0
+    ? "★".repeat(stars) + "☆".repeat(MAX_STARS - stars)
+    : "☆".repeat(MAX_STARS);
+  const name = isLocked ? "???" : (RECIPE_NAME_BY_ID[id] || id);
+  const iconSrc = isLocked ? "" : `assets/recipe-icons/${id}.png`;
+  const baseStars = Math.max(stars, 1);
+  const price = Math.round(meta.basePrice * priceMultiplierForStars(baseStars));
+  const cookSec = Math.max(1.5, meta.baseCook * cookMultiplierForStars(baseStars)).toFixed(1);
+
+  let statusLabel, statusClass;
+  if (isLocked) { statusLabel = "잠김 — 요리 연구로 획득"; statusClass = "locked"; }
+  else if (isMax) { statusLabel = "최대 강화 단계"; statusClass = "max"; }
+  else { statusLabel = `중복 메뉴가 필요해요 (보유 +${dupes})`; statusClass = "needdupe"; }
+
+  const overlay = document.createElement("div");
+  overlay.className = "event-overlay recipe-detail-overlay";
+  overlay.innerHTML = `
+    <div class="event-card recipe-detail-card" data-rarity="${meta.rarity}">
+      <div class="recipe-detail-rarity">${RARITY_LABEL[meta.rarity]}</div>
+      ${isLocked
+        ? `<div class="recipe-detail-locked">?</div>`
+        : `<img class="event-icon medium" src="${iconSrc}" alt="" />`}
+      <div class="recipe-detail-name">${name}</div>
+      <div class="recipe-detail-stars">${starRow}</div>
+      ${isLocked ? "" : `
+        <div class="recipe-detail-stats">
+          <div><span>가격</span><strong>🌰 ${formatNumber(price)}</strong></div>
+          <div><span>조리</span><strong>${cookSec}s</strong></div>
+          <div><span>중복</span><strong>+${dupes}</strong></div>
+        </div>
+      `}
+      <div class="recipe-detail-status" data-state="${statusClass}">${statusLabel}</div>
+      <button class="primary-btn solo" data-act="close" type="button">확인</button>
+    </div>
+  `;
+  document.querySelector(".phone-frame").appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('[data-act="close"]').addEventListener("click", close);
+}
+
+// ===== 할 일 패널 =====
+function activeMainGoal() {
+  return MAIN_GOALS[state.mainGoalIndex] || null;
+}
+function isMainGoalComplete(goal) {
+  if (!goal) return false;
+  return goal.progress(state) >= goal.target;
+}
+function isDailyTaskComplete(task) {
+  return task.progress(state) >= task.target;
+}
+function countClaimableTasks() {
+  let n = 0;
+  const goal = activeMainGoal();
+  if (goal && isMainGoalComplete(goal) && !state.mainClaimed[goal.id]) n += 1;
+  ensureDailyFresh();
+  for (const t of DAILY_TASKS) {
+    if (!state.daily.claimed[t.id] && isDailyTaskComplete(t)) n += 1;
+  }
+  // 일일 보너스 수령 가능 여부
+  if (allDailyClaimed() && !state.daily.bonusClaimed) n += 1;
+  return n;
+}
+function allDailyClaimed() {
+  return DAILY_TASKS.every((t) => state.daily.claimed[t.id]);
+}
+function grantReward(reward) {
+  if (!reward) return;
+  if (reward.kind === "acorn") state.resources.acorns += reward.amount;
+  else if (reward.kind === "gem") state.resources.gems += reward.amount;
+}
+function rewardLabel(reward) {
+  if (!reward) return "";
+  const icon = reward.kind === "gem" ? "Icon/Currency/Icon_Currency_002.png" : "Icon/Currency/Icon_Currency_001.png";
+  return `<img class="cost-icon" src="${icon}" alt="" /><span>${formatNumber(reward.amount)}</span>`;
+}
+
+function claimMainGoal() {
+  const goal = activeMainGoal();
+  if (!goal) return;
+  if (!isMainGoalComplete(goal)) return;
+  if (state.mainClaimed[goal.id]) return;
+  state.mainClaimed[goal.id] = true;
+  grantReward(goal.reward);
+  state.mainGoalIndex += 1;
+  showToast(`목표 완료! ${goal.reward.kind === "gem" ? "보석" : "도토리"} +${goal.reward.amount}`);
+  saveState();
+  renderTaskPanel();
+  refreshHud();
+}
+function claimDailyTask(taskId) {
+  ensureDailyFresh();
+  const task = DAILY_TASKS.find((t) => t.id === taskId);
+  if (!task) return;
+  if (state.daily.claimed[taskId]) return;
+  if (!isDailyTaskComplete(task)) return;
+  state.daily.claimed[taskId] = true;
+  grantReward(task.reward);
+  showToast(`보상 획득! ${task.reward.kind === "gem" ? "보석" : "도토리"} +${task.reward.amount}`);
+  saveState();
+  renderTaskPanel();
+  refreshHud();
+}
+function claimDailyBonus() {
+  ensureDailyFresh();
+  if (!allDailyClaimed() || state.daily.bonusClaimed) return;
+  state.daily.bonusClaimed = true;
+  grantReward(DAILY_BONUS);
+  showToast(`오늘의 할 일 완료 보너스! 보석 +${DAILY_BONUS.amount}`);
+  saveState();
+  renderTaskPanel();
+  refreshHud();
+}
+
+function renderTaskPanel() {
+  ensureDailyFresh();
+  const wrap = document.createElement("div");
+  wrap.className = "task-wrap";
+
+  // 카테고리 탭
+  const tabs = document.createElement("div");
+  tabs.className = "task-cats";
+  tabs.innerHTML = `
+    <button class="task-cat-btn" data-cat="main"  data-active="${state.ui.taskTab === "main"}"  type="button">메인 목표</button>
+    <button class="task-cat-btn" data-cat="daily" data-active="${state.ui.taskTab === "daily"}" type="button">오늘의 할 일</button>
+  `;
+  wrap.appendChild(tabs);
+
+  if (state.ui.taskTab === "main") {
+    wrap.appendChild(renderMainGoalsView());
+  } else {
+    wrap.appendChild(renderDailyTasksView());
+  }
+
+  tabs.querySelectorAll(".task-cat-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.ui.taskTab = btn.dataset.cat;
+      renderTaskPanel();
+    });
+  });
+
+  dom.panelBody.innerHTML = "";
+  dom.panelBody.appendChild(wrap);
+}
+
+function renderMainGoalsView() {
+  const list = document.createElement("div");
+  list.className = "task-list";
+
+  const goal = activeMainGoal();
+  if (!goal) {
+    list.innerHTML = `<div class="task-empty">모든 메인 목표를 완료했어요! 🎉</div>`;
+    return list;
+  }
+  // 활성 목표
+  list.appendChild(renderTaskCard({
+    icon: goal.icon,
+    desc: goal.desc,
+    progress: Math.min(goal.progress(state), goal.target),
+    target: goal.target,
+    complete: isMainGoalComplete(goal),
+    claimed: !!state.mainClaimed[goal.id],
+    reward: goal.reward,
+    onClaim: claimMainGoal,
+  }));
+  // 다음 목표 미리보기 (잠김)
+  for (let i = state.mainGoalIndex + 1; i < Math.min(MAIN_GOALS.length, state.mainGoalIndex + 4); i += 1) {
+    const next = MAIN_GOALS[i];
+    list.appendChild(renderTaskCard({
+      icon: next.icon, desc: next.desc, target: next.target, progress: 0,
+      complete: false, claimed: false, reward: next.reward, locked: true,
+    }));
+  }
+  return list;
+}
+
+function renderDailyTasksView() {
+  const view = document.createElement("div");
+
+  // 진행 카운트 + 보너스
+  const claimedCount = DAILY_TASKS.filter((t) => state.daily.claimed[t.id]).length;
+  const totalCount = DAILY_TASKS.length;
+  const bonusReady = claimedCount >= totalCount && !state.daily.bonusClaimed;
+  const bonusBar = document.createElement("div");
+  bonusBar.className = "daily-bonus";
+  bonusBar.innerHTML = `
+    <div class="daily-bonus-count">오늘의 할 일 ${claimedCount} / ${totalCount}</div>
+    <div class="daily-bonus-bar"><div class="daily-bonus-fill" style="width:${(claimedCount/totalCount)*100}%"></div></div>
+    <button class="daily-bonus-btn" data-state="${state.daily.bonusClaimed ? "done" : (bonusReady ? "ready" : "lock")}" type="button">
+      <span class="daily-bonus-egg">${state.daily.bonusClaimed ? "✓" : "🥚"}</span>
+      <span class="daily-bonus-label">${state.daily.bonusClaimed ? "수령 완료" : (bonusReady ? "보너스 받기" : "전체 완료 시 오픈")}</span>
+      ${state.daily.bonusClaimed ? "" : `<span class="daily-bonus-reward">${rewardLabel(DAILY_BONUS)}</span>`}
+    </button>
+  `;
+  bonusBar.querySelector(".daily-bonus-btn").addEventListener("click", () => {
+    if (bonusReady) claimDailyBonus();
+  });
+  view.appendChild(bonusBar);
+
+  const list = document.createElement("div");
+  list.className = "task-list";
+  // 정렬: 수령 가능(완료, 미수령) → 미완료 → 수령 완료
+  const sorted = [...DAILY_TASKS].sort((a, b) => {
+    const score = (t) => {
+      if (state.daily.claimed[t.id]) return 2;
+      if (isDailyTaskComplete(t)) return 0;
+      return 1;
+    };
+    return score(a) - score(b);
+  });
+  for (const t of sorted) {
+    list.appendChild(renderTaskCard({
+      icon: t.icon, desc: t.desc,
+      progress: Math.min(t.progress(state), t.target),
+      target: t.target,
+      complete: isDailyTaskComplete(t),
+      claimed: !!state.daily.claimed[t.id],
+      reward: t.reward,
+      onClaim: () => claimDailyTask(t.id),
+    }));
+  }
+  view.appendChild(list);
+  return view;
+}
+
+function renderTaskCard(opts) {
+  const card = document.createElement("div");
+  card.className = "task-card";
+  const ratio = opts.target > 0 ? Math.min(1, opts.progress / opts.target) : 0;
+  let stateAttr = "active";
+  if (opts.locked) stateAttr = "locked";
+  else if (opts.claimed) stateAttr = "claimed";
+  else if (opts.complete) stateAttr = "ready";
+  card.dataset.state = stateAttr;
+
+  const showCounter = opts.target > 1 && !opts.claimed;
+  let btnLabel, btnDisabled;
+  if (opts.locked) { btnLabel = "잠김"; btnDisabled = true; }
+  else if (opts.claimed) { btnLabel = "완료"; btnDisabled = true; }
+  else if (opts.complete) { btnLabel = "보상 받기"; btnDisabled = false; }
+  else { btnLabel = "진행중"; btnDisabled = true; }
+
+  card.innerHTML = `
+    <div class="task-icon">${opts.icon}</div>
+    <div class="task-body">
+      <div class="task-desc">${opts.desc}</div>
+      <div class="task-progress-row">
+        <div class="task-progress-bar"><div class="task-progress-fill" style="width:${ratio*100}%"></div></div>
+        ${showCounter ? `<div class="task-progress-text">${opts.progress} / ${opts.target}</div>` : ""}
+      </div>
+      <div class="task-reward">${rewardLabel(opts.reward)}</div>
+    </div>
+    <button class="task-claim-btn" type="button" ${btnDisabled ? "disabled" : ""}>${btnLabel}</button>
+  `;
+  if (!btnDisabled && opts.onClaim) {
+    card.querySelector(".task-claim-btn").addEventListener("click", opts.onClaim);
+  }
+  return card;
 }
 
 // 테마 패널 — PDF 기획서 기반:
