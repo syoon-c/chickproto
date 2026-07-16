@@ -1,0 +1,362 @@
+[
+  {
+    "id": 1,
+    "recipeGrade": 1,
+    "foodPrice": 30,
+    "cookTime": 4,
+    "maxLevel": 20,
+    "prefab": "recipe_salad",
+    "rewardId": 200001
+  },
+  {
+    "id": 2,
+    "recipeGrade": 1,
+    "foodPrice": 43,
+    "cookTime": 5,
+    "maxLevel": 20,
+    "prefab": "recipe_sandwich",
+    "rewardId": 200002
+  },
+  {
+    "id": 3,
+    "recipeGrade": 1,
+    "foodPrice": 42,
+    "cookTime": 4,
+    "maxLevel": 20,
+    "prefab": "recipe_hotdog",
+    "rewardId": 200003
+  },
+  {
+    "id": 4,
+    "recipeGrade": 1,
+    "foodPrice": 60,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_soup",
+    "rewardId": 200004
+  },
+  {
+    "id": 5,
+    "recipeGrade": 1,
+    "foodPrice": 78,
+    "cookTime": 7,
+    "maxLevel": 20,
+    "prefab": "recipe_grilledskewers",
+    "rewardId": 200005
+  },
+  {
+    "id": 6,
+    "recipeGrade": 1,
+    "foodPrice": 72,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_kimbap",
+    "rewardId": 200006
+  },
+  {
+    "id": 7,
+    "recipeGrade": 1,
+    "foodPrice": 90,
+    "cookTime": 8,
+    "maxLevel": 20,
+    "prefab": "recipe_pizza",
+    "rewardId": 200007
+  },
+  {
+    "id": 8,
+    "recipeGrade": 1,
+    "foodPrice": 65,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_friedrice",
+    "rewardId": 200008
+  },
+  {
+    "id": 9,
+    "recipeGrade": 1,
+    "foodPrice": 70,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_hamburger",
+    "rewardId": 200009
+  },
+  {
+    "id": 10,
+    "recipeGrade": 1,
+    "foodPrice": 62,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_potatowedges",
+    "rewardId": 200010
+  },
+  {
+    "id": 11,
+    "recipeGrade": 1,
+    "foodPrice": 50,
+    "cookTime": 5,
+    "maxLevel": 20,
+    "prefab": "recipe_bibimbap",
+    "rewardId": 200011
+  },
+  {
+    "id": 12,
+    "recipeGrade": 1,
+    "foodPrice": 65,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_dimsum",
+    "rewardId": 200012
+  },
+  {
+    "id": 13,
+    "recipeGrade": 1,
+    "foodPrice": 120,
+    "cookTime": 10,
+    "maxLevel": 20,
+    "prefab": "recipe_pasta",
+    "rewardId": 200013
+  },
+  {
+    "id": 14,
+    "recipeGrade": 1,
+    "foodPrice": 52,
+    "cookTime": 5,
+    "maxLevel": 20,
+    "prefab": "recipe_taco",
+    "rewardId": 200014
+  },
+  {
+    "id": 15,
+    "recipeGrade": 1,
+    "foodPrice": 64,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_ramen",
+    "rewardId": 200015
+  },
+  {
+    "id": 16,
+    "recipeGrade": 1,
+    "foodPrice": 120,
+    "cookTime": 10,
+    "maxLevel": 20,
+    "prefab": "recipe_porkcutlet",
+    "rewardId": 200016
+  },
+  {
+    "id": 17,
+    "recipeGrade": 1,
+    "foodPrice": 73,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_curry",
+    "rewardId": 200017
+  },
+  {
+    "id": 18,
+    "recipeGrade": 1,
+    "foodPrice": 115,
+    "cookTime": 9,
+    "maxLevel": 20,
+    "prefab": "recipe_sushi",
+    "rewardId": 200018
+  },
+  {
+    "id": 19,
+    "recipeGrade": 1,
+    "foodPrice": 144,
+    "cookTime": 11,
+    "maxLevel": 20,
+    "prefab": "recipe_bulgogi",
+    "rewardId": 200019
+  },
+  {
+    "id": 20,
+    "recipeGrade": 1,
+    "foodPrice": 160,
+    "cookTime": 12,
+    "maxLevel": 20,
+    "prefab": "recipe_steak",
+    "rewardId": 200020
+  },
+  {
+    "id": 21,
+    "recipeGrade": 2,
+    "foodPrice": 110,
+    "cookTime": 8,
+    "maxLevel": 20,
+    "prefab": "recipe_smilefried",
+    "rewardId": 200021
+  },
+  {
+    "id": 22,
+    "recipeGrade": 2,
+    "foodPrice": 160,
+    "cookTime": 12,
+    "maxLevel": 20,
+    "prefab": "recipe_omelet",
+    "rewardId": 200022
+  },
+  {
+    "id": 23,
+    "recipeGrade": 2,
+    "foodPrice": 165,
+    "cookTime": 12,
+    "maxLevel": 20,
+    "prefab": "recipe_cartoonbeef",
+    "rewardId": 200023
+  },
+  {
+    "id": 24,
+    "recipeGrade": 2,
+    "foodPrice": 220,
+    "cookTime": 15,
+    "maxLevel": 20,
+    "prefab": "recipe_chicklunchbox",
+    "rewardId": 200024
+  },
+  {
+    "id": 25,
+    "recipeGrade": 2,
+    "foodPrice": 150,
+    "cookTime": 11,
+    "maxLevel": 20,
+    "prefab": "recipe_onigiri",
+    "rewardId": 200025
+  },
+  {
+    "id": 26,
+    "recipeGrade": 2,
+    "foodPrice": 170,
+    "cookTime": 12,
+    "maxLevel": 20,
+    "prefab": "recipe_carrotsalad",
+    "rewardId": 200026
+  },
+  {
+    "id": 27,
+    "recipeGrade": 2,
+    "foodPrice": 90,
+    "cookTime": 6,
+    "maxLevel": 20,
+    "prefab": "recipe_encroutesoup",
+    "rewardId": 200027
+  },
+  {
+    "id": 28,
+    "recipeGrade": 2,
+    "foodPrice": 250,
+    "cookTime": 18,
+    "maxLevel": 20,
+    "prefab": "recipe_steamedeggs",
+    "rewardId": 200028
+  },
+  {
+    "id": 29,
+    "recipeGrade": 2,
+    "foodPrice": 200,
+    "cookTime": 14,
+    "maxLevel": 20,
+    "prefab": "recipe_sunflowerpie",
+    "rewardId": 200029
+  },
+  {
+    "id": 30,
+    "recipeGrade": 2,
+    "foodPrice": 130,
+    "cookTime": 9,
+    "maxLevel": 20,
+    "prefab": "recipe_tornadopotato",
+    "rewardId": 200030
+  },
+  {
+    "id": 31,
+    "recipeGrade": 2,
+    "foodPrice": 150,
+    "cookTime": 10,
+    "maxLevel": 20,
+    "prefab": "recipe_yubuchobap",
+    "rewardId": 200031
+  },
+  {
+    "id": 32,
+    "recipeGrade": 2,
+    "foodPrice": 100,
+    "cookTime": 7,
+    "maxLevel": 20,
+    "prefab": "recipe_dotorimuk",
+    "rewardId": 200032
+  },
+  {
+    "id": 33,
+    "recipeGrade": 2,
+    "foodPrice": 240,
+    "cookTime": 16,
+    "maxLevel": 20,
+    "prefab": "recipe_burgerking",
+    "rewardId": 200033
+  },
+  {
+    "id": 34,
+    "recipeGrade": 2,
+    "foodPrice": 215,
+    "cookTime": 15,
+    "maxLevel": 20,
+    "prefab": "recipe_fruitbasket",
+    "rewardId": 200034
+  },
+  {
+    "id": 35,
+    "recipeGrade": 3,
+    "foodPrice": 340,
+    "cookTime": 20,
+    "maxLevel": 10,
+    "prefab": "recipe_saunaset",
+    "rewardId": 200035
+  },
+  {
+    "id": 36,
+    "recipeGrade": 3,
+    "foodPrice": 360,
+    "cookTime": 21,
+    "maxLevel": 10,
+    "prefab": "recipe_pajeonmakgeolli",
+    "rewardId": 200036
+  },
+  {
+    "id": 37,
+    "recipeGrade": 3,
+    "foodPrice": 400,
+    "cookTime": 23,
+    "maxLevel": 10,
+    "prefab": "recipe_chickcoke",
+    "rewardId": 200037
+  },
+  {
+    "id": 38,
+    "recipeGrade": 3,
+    "foodPrice": 160,
+    "cookTime": 9,
+    "maxLevel": 10,
+    "prefab": "recipe_toast",
+    "rewardId": 200038
+  },
+  {
+    "id": 39,
+    "recipeGrade": 3,
+    "foodPrice": 380,
+    "cookTime": 22,
+    "maxLevel": 10,
+    "prefab": "recipe_hotpottea",
+    "rewardId": 200039
+  },
+  {
+    "id": 40,
+    "recipeGrade": 3,
+    "foodPrice": 150,
+    "cookTime": 8,
+    "maxLevel": 10,
+    "prefab": "recipe_cloudbread",
+    "rewardId": 200040
+  }
+]

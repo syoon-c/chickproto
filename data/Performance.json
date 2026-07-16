@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "performCondition": 1,
+    "abilityType": 1002,
+    "abilityValue": 0.2,
+    "performerAppearWeight": 10,
+    "performanceTime": 60,
+    "price": 0,
+    "prefab": "performance_busking"
+  },
+  {
+    "id": 2,
+    "performCondition": 1,
+    "abilityType": 1002,
+    "abilityValue": 0.2,
+    "performerAppearWeight": 10,
+    "performanceTime": 60,
+    "price": 0,
+    "prefab": "performance_dancecrew"
+  },
+  {
+    "id": 3,
+    "performCondition": 2,
+    "abilityType": 1002,
+    "abilityValue": 1,
+    "performerAppearWeight": 10,
+    "performanceTime": 180,
+    "price": 0,
+    "prefab": "performance_ballet"
+  },
+  {
+    "id": 4,
+    "performCondition": 2,
+    "abilityType": 1002,
+    "abilityValue": 1,
+    "performerAppearWeight": 10,
+    "performanceTime": 180,
+    "price": 0,
+    "prefab": "performance_bodybuilding"
+  },
+  {
+    "id": 5,
+    "performCondition": 2,
+    "abilityType": 1002,
+    "abilityValue": 1,
+    "performerAppearWeight": 10,
+    "performanceTime": 180,
+    "price": 0,
+    "prefab": "performance_cheerleading"
+  },
+  {
+    "id": 6,
+    "performCondition": 2,
+    "abilityType": 1002,
+    "abilityValue": 1,
+    "performerAppearWeight": 10,
+    "performanceTime": 180,
+    "price": 0,
+    "prefab": "performance_schoolfestival"
+  },
+  {
+    "id": 7,
+    "performCondition": 3,
+    "abilityType": 1002,
+    "abilityValue": 2,
+    "performerAppearWeight": 10,
+    "performanceTime": 300,
+    "price": 100,
+    "prefab": "performance_ktrot"
+  },
+  {
+    "id": 8,
+    "performCondition": 3,
+    "abilityType": 1002,
+    "abilityValue": 2,
+    "performerAppearWeight": 10,
+    "performanceTime": 300,
+    "price": 100,
+    "prefab": "performance_musical"
+  },
+  {
+    "id": 9,
+    "performCondition": 3,
+    "abilityType": 1002,
+    "abilityValue": 2,
+    "performerAppearWeight": 10,
+    "performanceTime": 300,
+    "price": 100,
+    "prefab": "performance_magician"
+  },
+  {
+    "id": 10,
+    "performCondition": 3,
+    "abilityType": 1002,
+    "abilityValue": 2,
+    "performerAppearWeight": 10,
+    "performanceTime": 300,
+    "price": 100,
+    "prefab": "performance_aerobics"
+  }
+]

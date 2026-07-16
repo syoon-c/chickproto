@@ -1,0 +1,517 @@
+[
+  {
+    "id": 1001,
+    "tipProbability": 0.8,
+    "tipRatio": 0.1,
+    "waitingTime": 600,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0,
+    "recipeIds": [
+      2,
+      17
+    ]
+  },
+  {
+    "id": 1002,
+    "tipProbability": 0.8,
+    "tipRatio": 0.1,
+    "waitingTime": 60,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      22
+    ]
+  },
+  {
+    "id": 1003,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 70,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      5,
+      23
+    ]
+  },
+  {
+    "id": 1004,
+    "tipProbability": 0.5,
+    "tipRatio": 0.1,
+    "waitingTime": 90,
+    "favoriteProbability": 0.8,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      32
+    ]
+  },
+  {
+    "id": 1005,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 70,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      34
+    ]
+  },
+  {
+    "id": 1006,
+    "tipProbability": 0.5,
+    "tipRatio": 0.2,
+    "waitingTime": 70,
+    "favoriteProbability": 0.3,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      31,
+      39
+    ]
+  },
+  {
+    "id": 1007,
+    "tipProbability": 0.5,
+    "tipRatio": 0.2,
+    "waitingTime": 70,
+    "favoriteProbability": 0.3,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      8
+    ]
+  },
+  {
+    "id": 1008,
+    "tipProbability": 1,
+    "tipRatio": 0.5,
+    "waitingTime": 10,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      9,
+      38
+    ]
+  },
+  {
+    "id": 1009,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 70,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      34
+    ]
+  },
+  {
+    "id": 1010,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      40
+    ]
+  },
+  {
+    "id": 1011,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      29
+    ]
+  },
+  {
+    "id": 1012,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      1
+    ]
+  },
+  {
+    "id": 1013,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      34
+    ]
+  },
+  {
+    "id": 1014,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      28
+    ]
+  },
+  {
+    "id": 1015,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      12,
+      24
+    ]
+  },
+  {
+    "id": 1016,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      4,
+      27
+    ]
+  },
+  {
+    "id": 1017,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      14
+    ]
+  },
+  {
+    "id": 1018,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      26
+    ]
+  },
+  {
+    "id": 1019,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      7,
+      9
+    ]
+  },
+  {
+    "id": 1020,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      19,
+      20
+    ]
+  },
+  {
+    "id": 1021,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      15,
+      18
+    ]
+  },
+  {
+    "id": 1022,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      36
+    ]
+  },
+  {
+    "id": 1023,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      1,
+      29
+    ]
+  },
+  {
+    "id": 1024,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      1,
+      29
+    ]
+  },
+  {
+    "id": 1025,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.8,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      10
+    ]
+  },
+  {
+    "id": 1026,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.8,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      21
+    ]
+  },
+  {
+    "id": 1027,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.8,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      3
+    ]
+  },
+  {
+    "id": 1028,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      33
+    ]
+  },
+  {
+    "id": 1029,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      11,
+      16
+    ]
+  },
+  {
+    "id": 1030,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      1,
+      20
+    ]
+  },
+  {
+    "id": 1031,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      11
+    ]
+  },
+  {
+    "id": 1032,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      38
+    ]
+  },
+  {
+    "id": 1033,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      25
+    ]
+  },
+  {
+    "id": 1034,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      37
+    ]
+  },
+  {
+    "id": 1035,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      4,
+      39
+    ]
+  },
+  {
+    "id": 1036,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      35
+    ]
+  },
+  {
+    "id": 1037,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      18,
+      31
+    ]
+  },
+  {
+    "id": 1038,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      40
+    ]
+  },
+  {
+    "id": 1039,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      20,
+      23
+    ]
+  },
+  {
+    "id": 1040,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      23,
+      24
+    ]
+  },
+  {
+    "id": 1041,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      15
+    ]
+  },
+  {
+    "id": 1042,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      1,
+      35
+    ]
+  },
+  {
+    "id": 1043,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      4,
+      30
+    ]
+  },
+  {
+    "id": 1044,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      13
+    ]
+  },
+  {
+    "id": 1045,
+    "tipProbability": 0.6,
+    "tipRatio": 0.15,
+    "waitingTime": 100,
+    "favoriteProbability": 0.2,
+    "disappointProbability": 0.05,
+    "recipeIds": [
+      6,
+      22
+    ]
+  }
+]

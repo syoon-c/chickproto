@@ -1,0 +1,476 @@
+{
+  "coordinateSystem": "canvas 480x900; origin top-left; x right; y down",
+  "mode": "restaurant",
+  "objective": "홍보 게이지를 채워 손님 부르기",
+  "resources": {
+    "acorns": 900,
+    "gems": 0,
+    "ideas": 0,
+    "stickers": 5
+  },
+  "installedFacilityIds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "installCandidates": [
+    {
+      "id": 11,
+      "name": "팁박스",
+      "cost": 150,
+      "x": 425,
+      "y": 455,
+      "w": 72,
+      "h": 76
+    },
+    {
+      "id": 19,
+      "name": "우체통",
+      "cost": 900,
+      "x": 425,
+      "y": 770,
+      "w": 62,
+      "h": 72
+    }
+  ],
+  "promotion": {
+    "progress": 0,
+    "queued": 0,
+    "totalClicks": 0,
+    "threshold": 5,
+    "enabled": true
+  },
+  "guests": [],
+  "ordersQueued": 0,
+  "cooking": [],
+  "payments": [],
+  "ingredientDrops": [],
+  "tipbox": 0,
+  "metrics": {
+    "visitors": 0,
+    "orders": 0,
+    "served": 0,
+    "collected": 0,
+    "angryLeaves": 0,
+    "ingredientDropAttempts": 0,
+    "ingredientDropMisses": 0,
+    "ingredientsFound": 0,
+    "recipesCrafted": 2
+  },
+  "currentScreen": "recipe",
+  "recipes": {
+    "owned": 3,
+    "globalRevenueBonus": 0.1,
+    "craftable": [],
+    "craftCosts": {
+      "1": 3,
+      "7": 3,
+      "10022": 2,
+      "10023": 2
+    },
+    "craftRequirements": {
+      "1": [
+        {
+          "ingredientId": 30001,
+          "name": "양상추",
+          "count": 3
+        }
+      ],
+      "7": [
+        {
+          "ingredientId": 30002,
+          "name": "토마토",
+          "count": 2
+        },
+        {
+          "ingredientId": 30004,
+          "name": "치즈",
+          "count": 1
+        }
+      ],
+      "10022": [
+        {
+          "ingredientId": 30022,
+          "name": "후추",
+          "count": 1
+        },
+        {
+          "ingredientId": 30008,
+          "name": "고기",
+          "count": 1
+        }
+      ],
+      "10023": [
+        {
+          "ingredientId": 30023,
+          "name": "모둠 채소",
+          "count": 1
+        },
+        {
+          "ingredientId": 30009,
+          "name": "쌀",
+          "count": 1
+        }
+      ]
+    },
+    "levels": {
+      "1": 1,
+      "7": 1,
+      "10": 1
+    },
+    "prices": {
+      "1": 40,
+      "7": 90,
+      "10": 62
+    }
+  },
+  "progression": {
+    "unlockedThemes": [
+      8
+    ],
+    "activeThemeParts": {
+      "1": 8001,
+      "2": 6002,
+      "3": 6005,
+      "4": 6003,
+      "5": 6004,
+      "6": 6006,
+      "7": 6007,
+      "8": 6008,
+      "9": 6009,
+      "10": 6010,
+      "11": 6011,
+      "12": 1012,
+      "13": 1013
+    },
+    "unlockedCustomers": [
+      3,
+      5,
+      10082,
+      10083
+    ],
+    "unlockedChickRoutes": [
+      {
+        "themeId": 1,
+        "slot": 0,
+        "customerId": 3,
+        "ingredientId": 30001,
+        "ingredientName": "양상추",
+        "recipeId": 1,
+        "recipeName": "샐러드",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30001,
+            "name": "양상추"
+          }
+        ]
+      },
+      {
+        "themeId": 8,
+        "slot": 0,
+        "customerId": 5,
+        "ingredientId": 30002,
+        "ingredientName": "토마토",
+        "recipeId": 7,
+        "recipeName": "피자",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30002,
+            "name": "토마토"
+          },
+          {
+            "ingredientId": 30004,
+            "name": "치즈"
+          }
+        ]
+      },
+      {
+        "themeId": 8,
+        "slot": 1,
+        "customerId": 10082,
+        "ingredientId": 30022,
+        "ingredientName": "후추",
+        "recipeId": 10022,
+        "recipeName": "이태리 만화 모양 고기",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30022,
+            "name": "후추"
+          },
+          {
+            "ingredientId": 30008,
+            "name": "고기"
+          }
+        ]
+      },
+      {
+        "themeId": 8,
+        "slot": 2,
+        "customerId": 10083,
+        "ingredientId": 30023,
+        "ingredientName": "모둠 채소",
+        "recipeId": 10023,
+        "recipeName": "이태리 꼬끼오 도시락",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30023,
+            "name": "모둠 채소"
+          },
+          {
+            "ingredientId": 30009,
+            "name": "쌀"
+          }
+        ]
+      }
+    ],
+    "themeChickThresholds": [
+      0.3,
+      0.7,
+      1
+    ],
+    "themeChickProgress": {
+      "1": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": [
+          3
+        ]
+      },
+      "2": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "3": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "4": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "5": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "6": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "7": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "8": {
+        "opened": 11,
+        "total": 11,
+        "ratio": 1,
+        "unlocked": [
+          5,
+          10082,
+          10083
+        ]
+      },
+      "9": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "10": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "11": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "12": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "13": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "14": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "15": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "16": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "17": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "18": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "19": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "20": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "21": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "22": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "23": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "24": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "25": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "26": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      }
+    },
+    "ingredientDropChances": {
+      "30001": 0.5,
+      "30002": 0.5,
+      "30003": 0.5,
+      "30004": 0.5,
+      "30005": 0.5,
+      "30006": 0.5,
+      "30007": 0.5,
+      "30008": 0.5,
+      "30009": 0.5,
+      "30010": 0.5,
+      "30011": 0.5,
+      "30012": 0.5,
+      "30013": 0.5,
+      "30014": 0.5,
+      "30015": 0.5,
+      "30016": 0.5,
+      "30017": 0.5,
+      "30018": 0.5,
+      "30019": 0.5,
+      "30020": 0.5,
+      "30021": 0.5,
+      "30022": 0.5,
+      "30023": 0.5,
+      "30024": 0.5,
+      "30025": 0.5,
+      "30026": 0.5,
+      "30027": 0.5,
+      "30028": 0.5,
+      "30029": 0.5,
+      "30030": 0.5,
+      "30031": 0.5,
+      "30032": 0.5,
+      "30033": 0.5,
+      "30034": 0.5,
+      "30035": 0.5,
+      "30036": 0.5,
+      "30037": 0.5,
+      "30038": 0.5
+    },
+    "ingredients": {
+      "30002": 0,
+      "30004": 0,
+      "30007": 0,
+      "30010": 0
+    },
+    "autoCraft": "click-to-craft-one",
+    "craftedRecipes": [
+      7,
+      10
+    ],
+    "unlockedRegions": [
+      1
+    ]
+  },
+  "missions": {
+    "mainGroup": 1,
+    "rewardReady": true,
+    "dailyClaimed": 0
+  },
+  "collection": {
+    "customers": 0,
+    "specialCustomers": 0,
+    "performers": 0
+  },
+  "specialCustomers": [],
+  "selectedInstallId": null
+}

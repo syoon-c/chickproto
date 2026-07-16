@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "formulaType": 1,
+    "formulaText": "(Param1/(Param2*1.5+15))*8*(1+Param3)*60"
+  },
+  {
+    "id": 2,
+    "formulaType": 2,
+    "formulaText": "Param1*60*0.5"
+  },
+  {
+    "id": 3,
+    "formulaType": 3,
+    "formulaText": "Param1*180*0.5"
+  },
+  {
+    "id": 4,
+    "formulaType": 4,
+    "formulaText": "Param1*360*0.5"
+  },
+  {
+    "id": 5,
+    "formulaType": 5,
+    "formulaText": "Param1*5"
+  }
+]

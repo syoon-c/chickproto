@@ -1,0 +1,404 @@
+{
+  "coordinateSystem": "canvas 480x900; origin top-left; x right; y down",
+  "mode": "restaurant",
+  "objective": "손님의 주문 말풍선 누르기",
+  "resources": {
+    "acorns": 100000,
+    "gems": 0,
+    "ideas": 0,
+    "stickers": 2
+  },
+  "installedFacilityIds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    19
+  ],
+  "installCandidates": [
+    {
+      "id": 9,
+      "name": "출입구",
+      "cost": 500,
+      "x": 240,
+      "y": 830,
+      "w": 128,
+      "h": 120
+    },
+    {
+      "id": 17,
+      "name": "울타리",
+      "cost": 400,
+      "x": 62,
+      "y": 815,
+      "w": 118,
+      "h": 42
+    }
+  ],
+  "promotion": {
+    "progress": 0,
+    "queued": 0,
+    "totalClicks": 5,
+    "threshold": 5,
+    "enabled": true
+  },
+  "guests": [
+    {
+      "id": 1,
+      "customerId": 3,
+      "customerName": "기본 병아리",
+      "icon": "assets/ui/chick/icon_chick_001.png",
+      "state": "awaiting_order",
+      "x": 188,
+      "y": 432,
+      "recipeId": 1,
+      "recipeName": "샐러드",
+      "wait": 0.7,
+      "mood": "normal",
+      "dropIngredient": 30001,
+      "themeId": 1,
+      "chickSlot": 0
+    }
+  ],
+  "ordersQueued": 0,
+  "cooking": [],
+  "payments": [],
+  "ingredientDrops": [],
+  "tipbox": 100,
+  "metrics": {
+    "visitors": 1,
+    "orders": 0,
+    "served": 0,
+    "collected": 0,
+    "angryLeaves": 0,
+    "ingredientDropAttempts": 0,
+    "ingredientDropMisses": 0,
+    "ingredientsFound": 0,
+    "recipesCrafted": 1
+  },
+  "currentScreen": "restaurant",
+  "recipes": {
+    "owned": 1,
+    "globalRevenueBonus": 0,
+    "craftable": [],
+    "craftCosts": {
+      "1": 4,
+      "34": 2
+    },
+    "craftRequirements": {
+      "1": [
+        {
+          "ingredientId": 30001,
+          "name": "양상추",
+          "count": 4
+        }
+      ],
+      "34": [
+        {
+          "ingredientId": 30033,
+          "name": "과일",
+          "count": 2
+        }
+      ]
+    },
+    "levels": {
+      "1": 2
+    },
+    "prices": {
+      "1": 42
+    }
+  },
+  "progression": {
+    "unlockedThemes": [
+      1
+    ],
+    "activeThemeParts": {
+      "1": 6001,
+      "2": 1002,
+      "3": 1005,
+      "4": 1003,
+      "5": 1004,
+      "6": 1006,
+      "7": 1007,
+      "8": 1008,
+      "9": 1009,
+      "10": 1010,
+      "11": 1011,
+      "12": 1012,
+      "13": 1013
+    },
+    "unlockedCustomers": [
+      3,
+      10013
+    ],
+    "unlockedChickRoutes": [
+      {
+        "themeId": 1,
+        "slot": 0,
+        "customerId": 3,
+        "ingredientId": 30001,
+        "ingredientName": "양상추",
+        "recipeId": 1,
+        "recipeName": "샐러드",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30001,
+            "name": "양상추"
+          }
+        ]
+      },
+      {
+        "themeId": 1,
+        "slot": 2,
+        "customerId": 10013,
+        "ingredientId": 30033,
+        "ingredientName": "과일",
+        "recipeId": 34,
+        "recipeName": "과일 가족 모임",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30033,
+            "name": "과일"
+          }
+        ]
+      }
+    ],
+    "themeChickThresholds": [
+      0.3,
+      0.7,
+      1
+    ],
+    "themeChickProgress": {
+      "1": {
+        "opened": 13,
+        "total": 13,
+        "ratio": 1,
+        "unlocked": [
+          3,
+          10013
+        ]
+      },
+      "2": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "3": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "4": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "5": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "6": {
+        "opened": 1,
+        "total": 11,
+        "ratio": 0.09090909090909091,
+        "unlocked": []
+      },
+      "7": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "8": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "9": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "10": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "11": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "12": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "13": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "14": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "15": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "16": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "17": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "18": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "19": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "20": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "21": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "22": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "23": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "24": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "25": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "26": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      }
+    },
+    "ingredientDropChances": {
+      "30001": 0.5,
+      "30002": 0.5,
+      "30003": 0.5,
+      "30004": 0.5,
+      "30005": 0.5,
+      "30006": 0.5,
+      "30007": 0.5,
+      "30008": 0.5,
+      "30009": 0.5,
+      "30010": 0.5,
+      "30011": 0.5,
+      "30012": 0.5,
+      "30013": 0.5,
+      "30014": 0.5,
+      "30015": 0.5,
+      "30016": 0.5,
+      "30017": 0.5,
+      "30018": 0.5,
+      "30019": 0.5,
+      "30020": 0.5,
+      "30021": 0.5,
+      "30022": 0.5,
+      "30023": 0.5,
+      "30024": 0.5,
+      "30025": 0.5,
+      "30026": 0.5,
+      "30027": 0.5,
+      "30028": 0.5,
+      "30029": 0.5,
+      "30030": 0.5,
+      "30031": 0.5,
+      "30032": 0.5,
+      "30033": 0.5,
+      "30034": 0.5,
+      "30035": 0.5,
+      "30036": 0.5,
+      "30037": 0.5,
+      "30038": 0.5
+    },
+    "ingredients": {
+      "30001": 0
+    },
+    "autoCraft": "click-to-craft-one",
+    "craftedRecipes": [
+      1
+    ],
+    "unlockedRegions": []
+  },
+  "missions": {
+    "mainGroup": 1,
+    "rewardReady": true,
+    "dailyClaimed": 1
+  },
+  "collection": {
+    "customers": 1,
+    "specialCustomers": 0,
+    "performers": 1
+  },
+  "specialCustomers": [],
+  "selectedInstallId": null
+}

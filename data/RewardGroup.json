@@ -1,0 +1,659 @@
+[
+  {
+    "id": 1000011,
+    "rewardId": 100001,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 100,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000021,
+    "rewardId": 100002,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 100,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000031,
+    "rewardId": 100003,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 120,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000041,
+    "rewardId": 100004,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 150,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000051,
+    "rewardId": 100005,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 180,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000061,
+    "rewardId": 100006,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 200,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000071,
+    "rewardId": 100007,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 300,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000081,
+    "rewardId": 100008,
+    "assetType": 101,
+    "assetId": 103,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000091,
+    "rewardId": 100009,
+    "assetType": 101,
+    "assetId": 103,
+    "assetCount": 5,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000101,
+    "rewardId": 100010,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 900,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000111,
+    "rewardId": 100011,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 1200,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000121,
+    "rewardId": 100012,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 1600,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000131,
+    "rewardId": 100013,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 1400,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000141,
+    "rewardId": 100014,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 1500,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000151,
+    "rewardId": 100015,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 1000,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000161,
+    "rewardId": 100016,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 2000,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000171,
+    "rewardId": 100017,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 2300,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1000181,
+    "rewardId": 100018,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 2800,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 200031,
+    "rewardId": 20003,
+    "assetType": 101,
+    "assetId": 2001,
+    "assetCount": 1,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 200041,
+    "rewardId": 20004,
+    "assetType": 101,
+    "assetId": 2001,
+    "assetCount": 5,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 200051,
+    "rewardId": 20005,
+    "assetType": 101,
+    "assetId": 2001,
+    "assetCount": 15,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 200061,
+    "rewardId": 20006,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 1,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 200071,
+    "rewardId": 20007,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 200081,
+    "rewardId": 20008,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 100,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000011,
+    "rewardId": 200001,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000021,
+    "rewardId": 200002,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000031,
+    "rewardId": 200003,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000041,
+    "rewardId": 200004,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000051,
+    "rewardId": 200005,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000061,
+    "rewardId": 200006,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000071,
+    "rewardId": 200007,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000081,
+    "rewardId": 200008,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000091,
+    "rewardId": 200009,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000101,
+    "rewardId": 200010,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000111,
+    "rewardId": 200011,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000121,
+    "rewardId": 200012,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000131,
+    "rewardId": 200013,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000141,
+    "rewardId": 200014,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000151,
+    "rewardId": 200015,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000161,
+    "rewardId": 200016,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000171,
+    "rewardId": 200017,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000181,
+    "rewardId": 200018,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000191,
+    "rewardId": 200019,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000201,
+    "rewardId": 200020,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000211,
+    "rewardId": 200021,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000221,
+    "rewardId": 200022,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000231,
+    "rewardId": 200023,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000241,
+    "rewardId": 200024,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000251,
+    "rewardId": 200025,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000261,
+    "rewardId": 200026,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000271,
+    "rewardId": 200027,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000281,
+    "rewardId": 200028,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000291,
+    "rewardId": 200029,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000301,
+    "rewardId": 200030,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000311,
+    "rewardId": 200031,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000321,
+    "rewardId": 200032,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000331,
+    "rewardId": 200033,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000341,
+    "rewardId": 200034,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000351,
+    "rewardId": 200035,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000361,
+    "rewardId": 200036,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000371,
+    "rewardId": 200037,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000381,
+    "rewardId": 200038,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000391,
+    "rewardId": 200039,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 2000401,
+    "rewardId": 200040,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 300011,
+    "rewardId": 30001,
+    "assetType": 101,
+    "assetId": 201,
+    "assetCount": 1,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 300021,
+    "rewardId": 30002,
+    "assetType": 101,
+    "assetId": 101,
+    "assetCount": 800,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 300031,
+    "rewardId": 30003,
+    "assetType": 101,
+    "assetId": 103,
+    "assetCount": 2,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 300041,
+    "rewardId": 30004,
+    "assetType": 101,
+    "assetId": 201,
+    "assetCount": 1,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 300051,
+    "rewardId": 30005,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 300061,
+    "rewardId": 30006,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1011,
+    "rewardId": 101,
+    "assetType": 101,
+    "assetId": 202,
+    "assetCount": 1,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1012,
+    "rewardId": 101,
+    "assetType": 101,
+    "assetId": 103,
+    "assetCount": 4,
+    "weight": 0,
+    "rowProb": 1000000
+  },
+  {
+    "id": 1013,
+    "rewardId": 101,
+    "assetType": 101,
+    "assetId": 102,
+    "assetCount": 10,
+    "weight": 0,
+    "rowProb": 1000000
+  }
+]

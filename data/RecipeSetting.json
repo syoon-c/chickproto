@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "key": "MenuPriceUpNormal",
+    "value": 0.2
+  },
+  {
+    "id": 2,
+    "key": "MenuCoolDownNormal",
+    "value": 0.05
+  },
+  {
+    "id": 3,
+    "key": "MenuPriceUpFancy",
+    "value": 0.4
+  },
+  {
+    "id": 4,
+    "key": "MenuCoolDownFancy",
+    "value": 0.05
+  },
+  {
+    "id": 5,
+    "key": "MenuPriceUpSpecial",
+    "value": 1
+  },
+  {
+    "id": 6,
+    "key": "MenuCoolDownSpecial",
+    "value": 0.25
+  },
+  {
+    "id": 7,
+    "key": "CookTimeLimit",
+    "value": 2
+  },
+  {
+    "id": 8,
+    "key": "ResearchCost",
+    "value": 5
+  }
+]

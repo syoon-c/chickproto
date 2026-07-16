@@ -1,0 +1,134 @@
+[
+  {
+    "id": 101,
+    "staffId": 1,
+    "staffLevel": 1,
+    "sticker": 0,
+    "levelUpPrice": 0,
+    "breakTime": 5,
+    "activeTime": 10,
+    "abilityType": 1003,
+    "abilityValue": 0.2
+  },
+  {
+    "id": 102,
+    "staffId": 1,
+    "staffLevel": 2,
+    "sticker": 3,
+    "levelUpPrice": 100,
+    "breakTime": 5,
+    "activeTime": 11,
+    "abilityType": 1003,
+    "abilityValue": 0.3
+  },
+  {
+    "id": 103,
+    "staffId": 1,
+    "staffLevel": 3,
+    "sticker": 5,
+    "levelUpPrice": 200,
+    "breakTime": 5,
+    "activeTime": 12,
+    "abilityType": 1003,
+    "abilityValue": 0.4
+  },
+  {
+    "id": 104,
+    "staffId": 1,
+    "staffLevel": 4,
+    "sticker": 10,
+    "levelUpPrice": 300,
+    "breakTime": 5,
+    "activeTime": 13,
+    "abilityType": 1003,
+    "abilityValue": 0.5
+  },
+  {
+    "id": 201,
+    "staffId": 2,
+    "staffLevel": 1,
+    "sticker": 0,
+    "levelUpPrice": 0,
+    "breakTime": 5,
+    "activeTime": 10,
+    "abilityType": 1004,
+    "abilityValue": 1
+  },
+  {
+    "id": 202,
+    "staffId": 2,
+    "staffLevel": 2,
+    "sticker": 3,
+    "levelUpPrice": 100,
+    "breakTime": 5,
+    "activeTime": 14,
+    "abilityType": 1004,
+    "abilityValue": 1
+  },
+  {
+    "id": 203,
+    "staffId": 2,
+    "staffLevel": 3,
+    "sticker": 5,
+    "levelUpPrice": 200,
+    "breakTime": 5,
+    "activeTime": 18,
+    "abilityType": 1004,
+    "abilityValue": 1
+  },
+  {
+    "id": 204,
+    "staffId": 2,
+    "staffLevel": 4,
+    "sticker": 10,
+    "levelUpPrice": 300,
+    "breakTime": 5,
+    "activeTime": 22,
+    "abilityType": 1004,
+    "abilityValue": 1
+  },
+  {
+    "id": 301,
+    "staffId": 3,
+    "staffLevel": 1,
+    "sticker": 0,
+    "levelUpPrice": 0,
+    "breakTime": 5,
+    "activeTime": 40,
+    "abilityType": 1005,
+    "abilityValue": 1
+  },
+  {
+    "id": 302,
+    "staffId": 3,
+    "staffLevel": 2,
+    "sticker": 3,
+    "levelUpPrice": 100,
+    "breakTime": 5,
+    "activeTime": 40,
+    "abilityType": 1005,
+    "abilityValue": 2
+  },
+  {
+    "id": 303,
+    "staffId": 3,
+    "staffLevel": 3,
+    "sticker": 5,
+    "levelUpPrice": 200,
+    "breakTime": 5,
+    "activeTime": 30,
+    "abilityType": 1005,
+    "abilityValue": 2
+  },
+  {
+    "id": 304,
+    "staffId": 3,
+    "staffLevel": 4,
+    "sticker": 10,
+    "levelUpPrice": 300,
+    "breakTime": 5,
+    "activeTime": 30,
+    "abilityType": 1005,
+    "abilityValue": 3
+  }
+]

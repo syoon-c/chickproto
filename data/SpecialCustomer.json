@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "areaType": 1,
+    "specialCustomerType": 1,
+    "appearCoolTime": 180,
+    "waitingTime": 0,
+    "appearToast": "appeartoast_thief"
+  },
+  {
+    "id": 2,
+    "areaType": 1,
+    "specialCustomerType": 2,
+    "appearCoolTime": 300,
+    "waitingTime": 180,
+    "appearToast": "appeartoast_rich"
+  }
+]

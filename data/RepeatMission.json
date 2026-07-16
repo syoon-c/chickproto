@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1001,
+    "repeatType": 1,
+    "group": 0,
+    "actionType": 1,
+    "countType": 4,
+    "conditions": [],
+    "count": 1,
+    "rewardId": 30001
+  },
+  {
+    "id": 1002,
+    "repeatType": 1,
+    "group": 0,
+    "actionType": 14,
+    "countType": 4,
+    "conditions": [],
+    "count": 10,
+    "rewardId": 30002
+  },
+  {
+    "id": 1003,
+    "repeatType": 1,
+    "group": 0,
+    "actionType": 3,
+    "countType": 4,
+    "conditions": [],
+    "count": 30,
+    "rewardId": 30003
+  },
+  {
+    "id": 1004,
+    "repeatType": 1,
+    "group": 0,
+    "actionType": 7,
+    "countType": 4,
+    "conditions": [],
+    "count": 1,
+    "rewardId": 30004
+  },
+  {
+    "id": 1005,
+    "repeatType": 1,
+    "group": 0,
+    "actionType": 10,
+    "countType": 4,
+    "conditions": [],
+    "count": 1,
+    "rewardId": 30005
+  },
+  {
+    "id": 1006,
+    "repeatType": 1,
+    "group": 0,
+    "actionType": 6,
+    "countType": 4,
+    "conditions": [],
+    "count": 1,
+    "rewardId": 30006
+  }
+]

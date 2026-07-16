@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "abilityType": 1001,
+    "abilityFormat": 1,
+    "calcType": 0
+  },
+  {
+    "id": 2,
+    "abilityType": 1002,
+    "abilityFormat": 1,
+    "calcType": 1
+  },
+  {
+    "id": 3,
+    "abilityType": 1003,
+    "abilityFormat": 1,
+    "calcType": 1
+  },
+  {
+    "id": 4,
+    "abilityType": 1004,
+    "abilityFormat": 0,
+    "calcType": 1
+  },
+  {
+    "id": 5,
+    "abilityType": 1005,
+    "abilityFormat": 0,
+    "calcType": 1
+  }
+]

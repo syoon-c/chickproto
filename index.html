@@ -3,129 +3,84 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>식당아리 Chick Bistro</title>
+    <meta name="theme-color" content="#f5c864" />
+    <title>식당아리 — 기획 검증 프로토타입</title>
+    <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="app-shell">
-      <section class="phone-frame">
-        <canvas id="game-canvas" width="480" height="900"></canvas>
+      <section class="game-frame" aria-label="식당아리 게임 화면">
+        <div class="world-area">
+          <canvas id="game-canvas" width="480" height="900" aria-label="레스토랑"></canvas>
 
-        <!-- 상단 HUD: 도토리 + 보석 + 설정 -->
-        <div class="overlay top-bar">
-          <div class="pill currency-pill" id="acorn-pill">
-            <img class="pill-icon" src="Icon/Currency/Icon_Currency_001.png" alt="도토리" />
+        <header class="hud-top" aria-label="보유 재화">
+          <div class="currency-pill primary">
+            <img src="assets/ui/currency/icon_currency_001.png" alt="도토리" />
             <strong id="acorn-count">0</strong>
           </div>
-          <div class="pill currency-pill" id="gem-pill">
-            <img class="pill-icon" src="Icon/Currency/Icon_Currency_002.png" alt="보석" />
+          <div class="currency-pill">
+            <img src="assets/ui/currency/icon_currency_003.png" alt="아이디어" />
+            <strong id="idea-count">0</strong>
+          </div>
+          <div class="currency-pill compact">
+            <img src="assets/ui/currency/icon_currency_002.png" alt="보석" />
             <strong id="gem-count">0</strong>
           </div>
-        </div>
+          <button id="collection-btn" class="round-button collection-button" type="button" aria-label="도감 열기"><img src="assets/ui/common/icon_btn_book.png" alt="" /><i id="collection-dot" hidden></i></button>
+          <button id="reset-btn" class="round-button" type="button" aria-label="처음부터 다시 시작">↺</button>
+        </header>
 
-        <div class="overlay top-right">
-          <button id="reset-btn" class="icon-btn" type="button" title="초기화">↺</button>
-        </div>
+        <button id="promotion-btn" class="promotion-button" type="button" disabled>
+          <img class="promotion-icon" src="assets/ui/common/icon_promotion.png" alt="" />
+          <span class="promotion-copy">
+            <strong>홍보하기</strong>
+            <span id="promotion-status">시설을 먼저 설치해 주세요</span>
+          </span>
+          <span class="promotion-gauge" aria-hidden="true">
+            <span id="promotion-fill"></span>
+          </span>
+        </button>
 
-        <!-- 우하단: 홍보 버튼 -->
-        <div class="overlay promo-stack">
-          <button id="promotion-btn" class="promo-btn" type="button">
-            <span class="promo-kicker">📣</span>
-            <strong class="promo-label">홍보</strong>
-            <div class="promo-progress">
-              <div id="promotion-fill" class="promo-progress-fill"></div>
-            </div>
-            <span id="promotion-text" class="promo-meter">0 / 5</span>
-          </button>
-        </div>
+        <section id="menu-screen" class="menu-screen" hidden aria-live="polite">
+          <header class="menu-header">
+            <div><span id="menu-kicker">식당아리</span><h2 id="menu-title">메뉴</h2></div>
+            <button id="menu-close-btn" type="button" aria-label="메뉴 닫기">×</button>
+          </header>
+          <div id="menu-tabs" class="menu-tabs"></div>
+          <div id="menu-content" class="menu-content"></div>
+        </section>
 
-        <!-- 좌하단: 메뉴/테마 버튼 (설치는 패널 없음 - 기획서 규칙) -->
-        <div class="overlay bottom-tabs">
-          <button class="tab-btn" data-panel="recipe" type="button">
-            <span class="tab-icon">📖</span>
-            <span class="tab-label">메뉴</span>
-            <span class="tab-badge" id="recipe-badge" hidden></span>
-          </button>
-          <button class="tab-btn" data-panel="theme" type="button">
-            <span class="tab-icon">🎨</span>
-            <span class="tab-label">테마</span>
-          </button>
-          <button class="tab-btn" data-panel="task" type="button">
-            <span class="tab-icon">📝</span>
-            <span class="tab-label">할 일</span>
-            <span class="tab-badge" id="task-badge" hidden></span>
-          </button>
-        </div>
-
-        <!-- 토스트 영역 -->
-        <div class="overlay toast-area" id="toast-area"></div>
-
-        <!-- 설치 말풍선 -->
-        <div class="install-bubble" id="install-bubble" hidden>
-          <div class="install-bubble-icon" id="install-bubble-icon"></div>
-          <div class="install-bubble-body">
-            <div class="install-bubble-title" id="install-bubble-title">시설</div>
-            <div class="install-bubble-desc" id="install-bubble-desc">설명</div>
-            <button id="install-confirm-btn" class="primary-btn" type="button">
-              <img class="cost-icon" src="Icon/Currency/Icon_Currency_001.png" alt="" />
-              <span id="install-bubble-cost">0</span>
-              <span class="primary-btn-label">설치하기</span>
-            </button>
+        <section id="install-panel" class="install-panel" hidden aria-live="polite">
+          <button id="install-close-btn" class="panel-close" type="button" aria-label="닫기">×</button>
+          <img id="install-icon" class="install-icon" alt="" />
+          <div class="install-copy">
+            <span class="install-kicker">새 설비</span>
+            <strong id="install-name">설비 이름</strong>
+            <span id="install-description">설비 설명</span>
           </div>
-        </div>
-
-        <!-- 연구 모드 비네팅 (카메라 줌 효과) -->
-        <div class="research-vignette" id="research-vignette" hidden></div>
-
-        <!-- 요리사 연구 말풍선 (PDF 기획서: 요리사 아래에 연구하기/취소 버튼) -->
-        <div class="research-bubble" id="research-bubble" hidden>
-          <button id="research-start-btn" class="primary-btn" type="button">
-            <span>⚡</span>
-            <span class="primary-btn-label">연구하기</span>
-            <img class="cost-icon" src="Icon/Currency/Icon_Currency_001.png" alt="" />
-            <span id="research-cost">100</span>
+          <button id="install-confirm-btn" class="install-confirm" type="button">
+            <img src="assets/ui/currency/icon_currency_001.png" alt="" />
+            <span id="install-cost">0</span>
+            <strong>설치하기</strong>
           </button>
-          <button id="research-cancel-btn" class="ghost-btn" type="button">✕ 취소</button>
+        </section>
+
+        <div id="toast" class="toast" hidden></div>
         </div>
 
-        <!-- 패널 (레시피 / 테마) -->
-        <div class="panel-overlay" id="panel-overlay" hidden>
-          <div class="panel" id="panel-card">
-            <header class="panel-header">
-              <h2 class="panel-title" id="panel-title">패널</h2>
-              <button id="panel-close-btn" class="icon-btn small" type="button">✕</button>
-            </header>
-            <div class="panel-body" id="panel-body"></div>
-          </div>
-        </div>
-
-        <!-- 연구 결과 모달 -->
-        <div class="event-overlay" id="research-result-overlay" hidden>
-          <div class="event-card" id="research-result-card">
-            <div class="event-burst"></div>
-            <div class="event-kicker" id="research-result-kicker">새로운 레시피!</div>
-            <img class="event-icon" id="research-result-icon" alt="" />
-            <div class="event-rarity" id="research-result-rarity">평범한 요리</div>
-            <div class="event-name" id="research-result-name">샐러드</div>
-            <button id="research-result-confirm" class="primary-btn solo" type="button">확인</button>
-          </div>
-        </div>
-
-        <!-- 강화 토스트 -->
-        <div class="event-overlay" id="enhance-overlay" hidden>
-          <div class="event-card small" id="enhance-card">
-            <div class="event-kicker">메뉴 강화</div>
-            <img class="event-icon medium" id="enhance-icon" alt="" />
-            <div class="event-name" id="enhance-name"></div>
-            <div class="event-stars" id="enhance-stars"></div>
-            <button id="enhance-confirm" class="primary-btn solo" type="button">확인</button>
-          </div>
-        </div>
+        <nav class="bottom-nav" aria-label="주요 메뉴">
+          <button class="nav-button" type="button" data-screen="recipe"><span><img src="assets/ui/common/icon_mainmenu_recipe.png" alt="" /></span><strong>레시피</strong><i id="recipe-dot" hidden></i></button>
+          <button class="nav-button" type="button" data-screen="missions"><span><img src="assets/ui/common/icon_mainmenu_todo.png" alt="" /></span><strong>할 일</strong><i id="mission-dot" hidden></i></button>
+          <button class="nav-button" type="button" data-screen="staff"><span><img src="assets/ui/common/icon_mainmenu_staff.png" alt="" /></span><strong>직원</strong></button>
+          <button class="nav-button" type="button" data-screen="theme"><span><img src="assets/ui/common/icon_mainmenu_theme.png" alt="" /></span><strong>테마</strong></button>
+        </nav>
       </section>
     </main>
 
-    <script src="tablejson-data.js"></script>
-    <script src="recipe-icon-library.js"></script>
+    <script src="data/runtime-tables.js"></script>
+    <script src="src/game-config.js"></script>
+    <script src="src/data-loader.js"></script>
     <script src="game.js"></script>
   </body>
 </html>

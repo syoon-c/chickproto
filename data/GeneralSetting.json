@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "key": "PromotionTouchCount",
+    "value": 5
+  },
+  {
+    "id": 2,
+    "key": "TipBoxADMultiple",
+    "value": 3
+  },
+  {
+    "id": 3,
+    "key": "AccountFirstAcorn",
+    "value": 100
+  },
+  {
+    "id": 4,
+    "key": "PerformanceCoolTime",
+    "value": 5
+  },
+  {
+    "id": 5,
+    "key": "PerformanceCancelCoolTime",
+    "value": 5
+  },
+  {
+    "id": 6,
+    "key": "TipBoxADCoolTime",
+    "value": 90
+  },
+  {
+    "id": 7,
+    "key": "TipBoxFirstMax",
+    "value": 3000
+  },
+  {
+    "id": 8,
+    "key": "DayNightShiftTime",
+    "value": 120
+  },
+  {
+    "id": 9,
+    "key": "DailyMissionRewardId",
+    "value": 101
+  },
+  {
+    "id": 10,
+    "key": "StaffStickerDaily",
+    "value": 5
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "areaType": 1,
+    "itemId": 101,
+    "areaPrice": 0
+  },
+  {
+    "id": 2,
+    "areaType": 2,
+    "itemId": 101,
+    "areaPrice": 0
+  }
+]

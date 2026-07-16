@@ -1,0 +1,425 @@
+[
+  {
+    "id": 1,
+    "assetType": 107,
+    "assetId": 1,
+    "customerAppearWeight": 20,
+    "unlockConditionType": 1,
+    "unlockConditionValue": 11,
+    "prefab": "specialchick_thief"
+  },
+  {
+    "id": 2,
+    "assetType": 107,
+    "assetId": 2,
+    "customerAppearWeight": 0,
+    "unlockConditionType": 1,
+    "unlockConditionValue": 19,
+    "prefab": "specialchick_rich"
+  },
+  {
+    "id": 3,
+    "assetType": 105,
+    "assetId": 1001,
+    "customerAppearWeight": 1000,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_none"
+  },
+  {
+    "id": 4,
+    "assetType": 105,
+    "assetId": 1002,
+    "customerAppearWeight": 40,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_eggshell"
+  },
+  {
+    "id": 5,
+    "assetType": 105,
+    "assetId": 1003,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_dino"
+  },
+  {
+    "id": 6,
+    "assetType": 105,
+    "assetId": 1004,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_acorn"
+  },
+  {
+    "id": 7,
+    "assetType": 105,
+    "assetId": 1005,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_apple"
+  },
+  {
+    "id": 8,
+    "assetType": 105,
+    "assetId": 1006,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_snowman"
+  },
+  {
+    "id": 9,
+    "assetType": 105,
+    "assetId": 1007,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_summer"
+  },
+  {
+    "id": 10,
+    "assetType": 105,
+    "assetId": 1008,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_car"
+  },
+  {
+    "id": 11,
+    "assetType": 105,
+    "assetId": 1009,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_kiwi"
+  },
+  {
+    "id": 12,
+    "assetType": 105,
+    "assetId": 1010,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_alien"
+  },
+  {
+    "id": 13,
+    "assetType": 105,
+    "assetId": 1011,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_astronaut"
+  },
+  {
+    "id": 14,
+    "assetType": 105,
+    "assetId": 1012,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_avocado"
+  },
+  {
+    "id": 15,
+    "assetType": 105,
+    "assetId": 1013,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_banana"
+  },
+  {
+    "id": 16,
+    "assetType": 105,
+    "assetId": 1014,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_bomb"
+  },
+  {
+    "id": 17,
+    "assetType": 105,
+    "assetId": 1015,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_box"
+  },
+  {
+    "id": 18,
+    "assetType": 105,
+    "assetId": 1016,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_bread"
+  },
+  {
+    "id": 19,
+    "assetType": 105,
+    "assetId": 1017,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_cactus"
+  },
+  {
+    "id": 20,
+    "assetType": 105,
+    "assetId": 1018,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_chicken"
+  },
+  {
+    "id": 21,
+    "assetType": 105,
+    "assetId": 1019,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_coke"
+  },
+  {
+    "id": 22,
+    "assetType": 105,
+    "assetId": 1020,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_cowboy"
+  },
+  {
+    "id": 23,
+    "assetType": 105,
+    "assetId": 1021,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_denfura"
+  },
+  {
+    "id": 24,
+    "assetType": 105,
+    "assetId": 1022,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_dwarf"
+  },
+  {
+    "id": 25,
+    "assetType": 105,
+    "assetId": 1023,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_flower"
+  },
+  {
+    "id": 26,
+    "assetType": 105,
+    "assetId": 1024,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_flowerpot"
+  },
+  {
+    "id": 27,
+    "assetType": 105,
+    "assetId": 1025,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_frenchfry"
+  },
+  {
+    "id": 28,
+    "assetType": 105,
+    "assetId": 1026,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_fryingpan"
+  },
+  {
+    "id": 29,
+    "assetType": 105,
+    "assetId": 1027,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_hotdog"
+  },
+  {
+    "id": 30,
+    "assetType": 105,
+    "assetId": 1028,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_king"
+  },
+  {
+    "id": 31,
+    "assetType": 105,
+    "assetId": 1029,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_landlord"
+  },
+  {
+    "id": 32,
+    "assetType": 105,
+    "assetId": 1030,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_muscle"
+  },
+  {
+    "id": 33,
+    "assetType": 105,
+    "assetId": 1031,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_napacabbage"
+  },
+  {
+    "id": 34,
+    "assetType": 105,
+    "assetId": 1032,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_nurse"
+  },
+  {
+    "id": 35,
+    "assetType": 105,
+    "assetId": 1033,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_onigiri"
+  },
+  {
+    "id": 36,
+    "assetType": 105,
+    "assetId": 1034,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_pajama"
+  },
+  {
+    "id": 37,
+    "assetType": 105,
+    "assetId": 1035,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_redjacket"
+  },
+  {
+    "id": 38,
+    "assetType": 105,
+    "assetId": 1036,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_sauna"
+  },
+  {
+    "id": 39,
+    "assetType": 105,
+    "assetId": 1037,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_sushi"
+  },
+  {
+    "id": 40,
+    "assetType": 105,
+    "assetId": 1038,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_unicorn"
+  },
+  {
+    "id": 41,
+    "assetType": 105,
+    "assetId": 1039,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_viking"
+  },
+  {
+    "id": 42,
+    "assetType": 105,
+    "assetId": 1040,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_miner"
+  },
+  {
+    "id": 43,
+    "assetType": 105,
+    "assetId": 1041,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_ramenmaster"
+  },
+  {
+    "id": 44,
+    "assetType": 105,
+    "assetId": 1042,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_beautyshop"
+  },
+  {
+    "id": 45,
+    "assetType": 105,
+    "assetId": 1043,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_wizard"
+  },
+  {
+    "id": 46,
+    "assetType": 105,
+    "assetId": 1044,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_graduate"
+  },
+  {
+    "id": 47,
+    "assetType": 105,
+    "assetId": 1045,
+    "customerAppearWeight": 10,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "chick_kindergarten"
+  }
+]

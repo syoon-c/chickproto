@@ -1,0 +1,322 @@
+[
+  {
+    "id": 1,
+    "sequence": 2,
+    "areaType": 1,
+    "facilityType": 1,
+    "facilityPrice": 30,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 2,
+    "sequence": 4,
+    "areaType": 1,
+    "facilityType": 1,
+    "facilityPrice": 80,
+    "facilityGroup": 2,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 3,
+    "sequence": 11,
+    "areaType": 1,
+    "facilityType": 1,
+    "facilityPrice": 600,
+    "facilityGroup": 3,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 4,
+    "sequence": 17,
+    "areaType": 1,
+    "facilityType": 1,
+    "facilityPrice": 3000,
+    "facilityGroup": 4,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 5,
+    "sequence": 3,
+    "areaType": 1,
+    "facilityType": 2,
+    "facilityPrice": 50,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 6,
+    "sequence": 5,
+    "areaType": 1,
+    "facilityType": 2,
+    "facilityPrice": 100,
+    "facilityGroup": 2,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 7,
+    "sequence": 12,
+    "areaType": 1,
+    "facilityType": 2,
+    "facilityPrice": 750,
+    "facilityGroup": 3,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 8,
+    "sequence": 18,
+    "areaType": 1,
+    "facilityType": 2,
+    "facilityPrice": 4000,
+    "facilityGroup": 4,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 9,
+    "sequence": 13,
+    "areaType": 1,
+    "facilityType": 4,
+    "facilityPrice": 1000,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 10,
+    "sequence": 15,
+    "areaType": 1,
+    "facilityType": 5,
+    "facilityPrice": 2000,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 11,
+    "sequence": 6,
+    "areaType": 1,
+    "facilityType": 3,
+    "facilityPrice": 300,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 12,
+    "sequence": 9,
+    "areaType": 1,
+    "facilityType": 6,
+    "facilityPrice": 400,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 13,
+    "sequence": 7,
+    "areaType": 1,
+    "facilityType": 7,
+    "facilityPrice": 340,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 14,
+    "sequence": 8,
+    "areaType": 1,
+    "facilityType": 8,
+    "facilityPrice": 360,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 15,
+    "sequence": 16,
+    "areaType": 1,
+    "facilityType": 9,
+    "facilityPrice": 2300,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 16,
+    "sequence": 1,
+    "areaType": 1,
+    "facilityType": 10,
+    "facilityPrice": 20,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 17,
+    "sequence": 13,
+    "areaType": 1,
+    "facilityType": 11,
+    "facilityPrice": 800,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 18,
+    "sequence": 13,
+    "areaType": 1,
+    "facilityType": 11,
+    "facilityPrice": 800,
+    "facilityGroup": 2,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 19,
+    "sequence": 14,
+    "areaType": 1,
+    "facilityType": 14,
+    "facilityPrice": 1800,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 20,
+    "sequence": 19,
+    "areaType": 2,
+    "facilityType": 15,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 21,
+    "sequence": 20,
+    "areaType": 2,
+    "facilityType": 15,
+    "facilityPrice": 100,
+    "facilityGroup": 2,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 22,
+    "sequence": 21,
+    "areaType": 2,
+    "facilityType": 15,
+    "facilityPrice": 100,
+    "facilityGroup": 3,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 23,
+    "sequence": 22,
+    "areaType": 2,
+    "facilityType": 16,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 24,
+    "sequence": 23,
+    "areaType": 2,
+    "facilityType": 17,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 25,
+    "sequence": 24,
+    "areaType": 2,
+    "facilityType": 18,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 26,
+    "sequence": 25,
+    "areaType": 2,
+    "facilityType": 19,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 27,
+    "sequence": 26,
+    "areaType": 2,
+    "facilityType": 11,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 28,
+    "sequence": 27,
+    "areaType": 2,
+    "facilityType": 11,
+    "facilityPrice": 100,
+    "facilityGroup": 2,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 29,
+    "sequence": 28,
+    "areaType": 2,
+    "facilityType": 21,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 30,
+    "sequence": 29,
+    "areaType": 2,
+    "facilityType": 10,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 31,
+    "sequence": 30,
+    "areaType": 2,
+    "facilityType": 10,
+    "facilityPrice": 100,
+    "facilityGroup": 2,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  },
+  {
+    "id": 32,
+    "sequence": 31,
+    "areaType": 2,
+    "facilityType": 20,
+    "facilityPrice": 100,
+    "facilityGroup": 1,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0
+  }
+]

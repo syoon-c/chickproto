@@ -1,2124 +1,1934 @@
-// 식당아리 Chick Bistro — 프로토타입
-// 기획서 기준: 핵심 루프 + 설치 + 테마 + 레시피 연구
-//
-// 좌표계: 캔버스 480x1040 (모바일 9:19.5), 원점 좌상단
+const { loadTables } = window.ChickData;
+const {
+  GAME_W,
+  GAME_H,
+  FIXED_DT,
+  SAVE_KEY,
+  FACILITY_META,
+  facilityPlacement,
+  seatPositions,
+  recipeIcon,
+  recipeName,
+  THEME_NAMES,
+  CORE_PROGRESSION,
+  GAME_INGREDIENTS,
+  THEME_CHICK_THRESHOLDS,
+  themeChickMilestones,
+  allThemeChickMilestones,
+  REGION_UNLOCKS,
+  themeFacilityIcon,
+} = window.CHICK_CONFIG;
 
-// ===== 상수 =====
-const GAME_W = 480;
-const GAME_H = 1040;
-const FIXED_DT = 1 / 60;
-
-const SAVE_KEY = "chick-bistro-prototype-v1";
-
-// 레시피 카탈로그 (icon_library 기반)
-const RECIPE_LIB = (window.RECIPE_ICON_LIBRARY?.entries || []);
-const RECIPE_NAME_BY_ID = {};
-RECIPE_LIB.forEach((entry) => {
-  RECIPE_NAME_BY_ID[entry.recipeId] = entry.recipeName;
-});
-
-// 등급 분류 (기획서: 평범한 요리 / 멋진 요리 / 특별한 요리)
-const RECIPE_RARITY = {
-  // 평범한 요리 (basic) - 8종, 가중치 높음
-  salad:   { rarity: "basic", weight: 14, basePrice: 60,  baseCook: 4 },
-  sandwich:{ rarity: "basic", weight: 14, basePrice: 80,  baseCook: 5 },
-  hotdog:  { rarity: "basic", weight: 12, basePrice: 90,  baseCook: 5 },
-  soup:    { rarity: "basic", weight: 12, basePrice: 100, baseCook: 6 },
-  omelet:  { rarity: "basic", weight: 12, basePrice: 110, baseCook: 6 },
-  kimbap:  { rarity: "basic", weight: 10, basePrice: 130, baseCook: 7 },
-  friedrice:{ rarity: "basic", weight: 10, basePrice: 150, baseCook: 7 },
-  wedges:  { rarity: "basic", weight: 10, basePrice: 140, baseCook: 6 },
-  // 멋진 요리 (rare) - 9종
-  skewers: { rarity: "rare", weight: 6, basePrice: 200, baseCook: 8 },
-  pizza:   { rarity: "rare", weight: 6, basePrice: 240, baseCook: 9 },
-  burger:  { rarity: "rare", weight: 6, basePrice: 220, baseCook: 8 },
-  bibimbap:{ rarity: "rare", weight: 5, basePrice: 260, baseCook: 9 },
-  pasta:   { rarity: "rare", weight: 5, basePrice: 280, baseCook: 10 },
-  taco:    { rarity: "rare", weight: 5, basePrice: 250, baseCook: 9 },
-  ramen:   { rarity: "rare", weight: 5, basePrice: 290, baseCook: 10 },
-  friednoodles:{ rarity: "rare", weight: 5, basePrice: 270, baseCook: 9 },
-  curry:   { rarity: "rare", weight: 5, basePrice: 300, baseCook: 10 },
-  grilledfish:{ rarity: "rare", weight: 5, basePrice: 280, baseCook: 9 },
-  tonkatsu:{ rarity: "rare", weight: 5, basePrice: 310, baseCook: 10 },
-  dimsum:  { rarity: "rare", weight: 5, basePrice: 260, baseCook: 9 },
-  // 특별한 요리 (epic) - 5종
-  chicken: { rarity: "epic", weight: 2, basePrice: 460, baseCook: 12 },
-  gnocchi: { rarity: "epic", weight: 2, basePrice: 480, baseCook: 12 },
-  sushi:   { rarity: "epic", weight: 2, basePrice: 520, baseCook: 13 },
-  bulgogi: { rarity: "epic", weight: 2, basePrice: 500, baseCook: 13 },
-  steak:   { rarity: "epic", weight: 1, basePrice: 600, baseCook: 14 },
+const canvas = document.querySelector("#game-canvas");
+const ctx = canvas.getContext("2d");
+const dom = {
+  acorns: document.querySelector("#acorn-count"),
+  ideas: document.querySelector("#idea-count"),
+  gems: document.querySelector("#gem-count"),
+  promoButton: document.querySelector("#promotion-btn"),
+  promoStatus: document.querySelector("#promotion-status"),
+  promoFill: document.querySelector("#promotion-fill"),
+  resetButton: document.querySelector("#reset-btn"),
+  collectionButton: document.querySelector("#collection-btn"),
+  installPanel: document.querySelector("#install-panel"),
+  installClose: document.querySelector("#install-close-btn"),
+  installIcon: document.querySelector("#install-icon"),
+  installName: document.querySelector("#install-name"),
+  installDescription: document.querySelector("#install-description"),
+  installCost: document.querySelector("#install-cost"),
+  installConfirm: document.querySelector("#install-confirm-btn"),
+  menuScreen: document.querySelector("#menu-screen"),
+  menuTitle: document.querySelector("#menu-title"),
+  menuKicker: document.querySelector("#menu-kicker"),
+  menuTabs: document.querySelector("#menu-tabs"),
+  menuContent: document.querySelector("#menu-content"),
+  menuClose: document.querySelector("#menu-close-btn"),
+  navButtons: [...document.querySelectorAll(".nav-button")],
+  recipeDot: document.querySelector("#recipe-dot"),
+  missionDot: document.querySelector("#mission-dot"),
+  collectionDot: document.querySelector("#collection-dot"),
+  toast: document.querySelector("#toast"),
 };
 
-const RECIPE_LIST = Object.keys(RECIPE_RARITY).filter((id) => RECIPE_NAME_BY_ID[id]);
+let tables;
+let state;
+let lastFrame = performance.now();
+let deterministicStepping = false;
+let toastTimer = 0;
+const imageCache = new Map();
 
-const RARITY_LABEL = {
-  basic: "평범한 요리",
-  rare:  "멋진 요리",
-  epic:  "특별한 요리",
-};
-
-// 강화 단계별 효과 (기획서: 별 최대까지 상승, 더 이상 연구에서 등장 X)
-const MAX_STARS = 5;
-function priceMultiplierForStars(stars) {
-  return 1 + stars * 0.22;
-}
-function cookMultiplierForStars(stars) {
-  return Math.max(0.4, 1 - stars * 0.1);
-}
-
-// 연구 비용: 100 + (5회 구간 × 150) + (현재 구간 순번 × 20)
-function researchCostForCount(count) {
-  const bigStep = Math.floor(count / 5);
-  const smallStep = count % 5;
-  return 100 + bigStep * 150 + smallStep * 20;
+function initialAcorns() {
+  const coreInstallCost = [10, 1, 2].reduce((sum, type) => {
+    const row = tables.installs.find((item) => item.facilityType === type);
+    return sum + Number(row?.facilityPrice || 0);
+  }, 0);
+  const firstThemePart = tables.restaurantThemes.find((row) => row.facilityTheme === 6 && row.facilityType === 1);
+  return Math.max(Number(tables.general.AccountFirstAcorn ?? 100), coreInstallCost + Number(firstThemePart?.facilityPrice || 0));
 }
 
-// 메뉴별 천장 (기획서: 처음 획득 메뉴에만 천장, 메뉴마다 다른 절대 횟수)
-// 평범한 요리는 일찍, 특별한 요리는 늦게 천장 발동
-const RECIPE_PITY = {
-  // basic 메뉴는 1~2회 안에 거의 다 자연스럽게 뜨지만 보장값
-  salad: 2, sandwich: 3, hotdog: 4, soup: 5, omelet: 6,
-  kimbap: 8, friedrice: 10, wedges: 12,
-  // rare 멋진 요리
-  skewers: 16, pizza: 20, burger: 24, bibimbap: 28, pasta: 32,
-  taco: 36, ramen: 40, friednoodles: 44, curry: 48, grilledfish: 52,
-  tonkatsu: 56, dimsum: 60,
-  // epic 특별한 요리
-  chicken: 70, gnocchi: 82, sushi: 95, bulgogi: 110, steak: 130,
-};
-
-// ===== 할 일 시스템 =====
-// 메인 목표: 순차 진행. mainGoalIndex가 가리키는 한 개만 활성화.
-const MAIN_GOALS = [
-  { id: "served-1",   icon: "🍽️", desc: "첫 손님을 받아보세요",         target: 1,
-    progress: (s) => s.metrics.served, reward: { kind: "acorn", amount: 50 } },
-  { id: "menu-3",     icon: "📖", desc: "메뉴 3개를 모아보세요",          target: 3,
-    progress: (s) => Object.keys(s.recipes).length, reward: { kind: "acorn", amount: 100 } },
-  { id: "upgrade-1",  icon: "⭐", desc: "메뉴를 한 번 강화해보세요",      target: 1,
-    progress: (s) => Math.max(0, totalStarsOf(s) - Object.keys(s.recipes).length), reward: { kind: "acorn", amount: 100 } },
-  { id: "acorn-500",  icon: "🌰", desc: "도토리 500을 모아보세요",        target: 500,
-    progress: (s) => s.resources.acorns, reward: { kind: "gem", amount: 1 } },
-  { id: "install-3",  icon: "🔨", desc: "시설을 3개 설치해보세요",        target: 3,
-    progress: (s) => installedCountOf(s), reward: { kind: "acorn", amount: 200 } },
-  { id: "served-30",  icon: "🐥", desc: "손님을 30명 응대하세요",          target: 30,
-    progress: (s) => s.metrics.served, reward: { kind: "acorn", amount: 300 } },
-  { id: "menu-5",     icon: "📚", desc: "메뉴 5개를 모아보세요",          target: 5,
-    progress: (s) => Object.keys(s.recipes).length, reward: { kind: "acorn", amount: 200 } },
-  { id: "theme-apply",icon: "🎨", desc: "기본이 아닌 테마를 적용해보세요", target: 1,
-    progress: (s) => themeAppliedCountOf(s), reward: { kind: "gem", amount: 1 } },
-];
-
-// 오늘의 할 일: 매일 자정 리셋 (date 키 변경 시)
-const DAILY_TASKS = [
-  { id: "d-served-5",   icon: "🍽️", desc: "오늘 손님 5명 응대하기", target: 5,
-    progress: (s) => s.daily.served, reward: { kind: "acorn", amount: 50 } },
-  { id: "d-research-3", icon: "⚡", desc: "오늘 연구 3회 진행하기", target: 3,
-    progress: (s) => s.daily.researched, reward: { kind: "acorn", amount: 100 } },
-  { id: "d-promo-10",   icon: "📣", desc: "오늘 홍보 10회 누르기", target: 10,
-    progress: (s) => s.daily.promoClicks, reward: { kind: "acorn", amount: 30 } },
-  { id: "d-upgrade-1",  icon: "⭐", desc: "오늘 메뉴 1회 강화하기", target: 1,
-    progress: (s) => s.daily.upgrades, reward: { kind: "acorn", amount: 50 } },
-];
-const DAILY_BONUS = { kind: "gem", amount: 2 };
-
-function totalStarsOf(s) {
-  return Object.values(s.recipes || {}).reduce((a, r) => a + ((r && r.stars) || 0), 0);
-}
-function installedCountOf(s) {
-  const f = s.facilities || {};
-  return (f.tables?.length || 0) + (f.stoves?.length || 0)
-       + (f.singles?.length || 0) + (f.backrow?.length || 0);
-}
-function themeAppliedCountOf(s) {
-  return Object.values(s.themes || {}).filter((t) => t && t !== "stone").length;
-}
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-function makeInitialDaily() {
-  return { date: todayKey(), served: 0, researched: 0, promoClicks: 0, upgrades: 0, claimed: {}, bonusClaimed: false };
-}
-function ensureDailyFresh() {
-  const today = todayKey();
-  if (!state.daily || state.daily.date !== today) {
-    state.daily = makeInitialDaily();
-  }
-}
-
-// 시설 좌표 + 설치 시퀀스 (InstallFacility.json 17종 모두)
-// 부엌 뒷줄 (camera-pan 영역, y ~155)
-const BACKROW_SLOTS = {
-  countertop: { id: "countertop", x: 90,  y: 155, w: 80, h: 80 },  // 도마테이블
-  sink:       { id: "sink",       x: 188, y: 155, w: 80, h: 80 },  // 싱크대
-  fridge:     { id: "fridge",     x: 286, y: 155, w: 80, h: 80 },  // 냉장고
-  toolbox:    { id: "toolbox",    x: 386, y: 155, w: 80, h: 80 },  // 조리도구함
-};
-// 화구 줄 (y ~285)
-const STOVE_SLOTS = [
-  { id: "stove-1", x: 105, y: 285 },
-  { id: "stove-2", x: 197, y: 285 },
-  { id: "stove-3", x: 289, y: 285 },
-  { id: "stove-4", x: 381, y: 285 },
-];
-// 테이블 (2x2, y 530/700)
-const TABLE_SLOTS = [
-  { id: "table-1", x: 160, y: 540 },
-  { id: "table-2", x: 320, y: 540 },
-  { id: "table-3", x: 160, y: 700 },
-  { id: "table-4", x: 320, y: 700 },
-];
-// 단일 시설들
-const SINGLE_SLOTS = {
-  entrance:  { id: "entrance",  x: 240, y: 860, w: 120, h: 120 },
-  stage:     { id: "stage",     x: 80,  y: 850, w: 90,  h: 90 },
-  tipbox:    { id: "tipbox",    x: 400, y: 850, w: 70,  h: 80 },
-  lighting:  { id: "lighting",  x: 420, y: 95,  w: 60,  h: 70 },
-  fence:     { id: "fence",     x: 240, y: 1018, w: 480, h: 22 },
-};
-const CHEF_HOME = { x: 240, y: 380 };
-const ENTRANCE = SINGLE_SLOTS.entrance;
-// 줄서기 큐 위치 — 출입구 바로 앞에 일렬 (x 고정, y만 다름)
-const QUEUE_SLOTS = [
-  { x: 240, y: 945 },
-  { x: 240, y: 970 },
-  { x: 240, y: 995 },
-  { x: 240, y: 1020 },
-];
-
-// 설치 시퀀스 — InstallFacility.json 17종 (시작: stove-1, table-1 보유)
-// sequence 1=table-1, 5=stove-1 은 시작 보유라 제외
-const INSTALL_SEQUENCE = [
-  { kind: "table",  slotId: "table-2",   title: "2번 테이블",   desc: "한 번에 받을 수 있는 손님이 늘어난다.", cost: 50 },
-  { kind: "table",  slotId: "table-3",   title: "3번 테이블",   desc: "중반 처리량을 받쳐줄 좌석이 추가된다.", cost: 80 },
-  { kind: "table",  slotId: "table-4",   title: "4번 테이블",   desc: "한 줄을 더 깔끔하게 채울 수 있다.",     cost: 120 },
-  { kind: "stove",  slotId: "stove-2",   title: "2번 조리기구", desc: "동시에 조리할 수 있는 주문이 늘어난다.", cost: 150 },
-  { kind: "stove",  slotId: "stove-3",   title: "3번 조리기구", desc: "주문이 몰릴 때 대기 시간이 줄어든다.", cost: 220 },
-  { kind: "stove",  slotId: "stove-4",   title: "4번 조리기구", desc: "고급 메뉴까지 동시에 굴린다.",         cost: 320 },
-  { kind: "single", slotId: "entrance",  title: "출입구",       desc: "손님이 더 자주 찾아온다.",             cost: 200 },
-  { kind: "single", slotId: "stage",     title: "무대",         desc: "수익에 보너스 효과가 추가된다.",       cost: 280 },
-  { kind: "single", slotId: "tipbox",    title: "팁박스",       desc: "추가 도토리를 모을 수 있다.",          cost: 360 },
-  { kind: "back",   slotId: "fridge",    title: "냉장고",       desc: "재료 효율을 올린다.",                  cost: 460 },
-  { kind: "back",   slotId: "sink",      title: "싱크대",       desc: "조리 시간이 단축된다.",                cost: 580 },
-  { kind: "back",   slotId: "countertop",title: "도마 테이블",  desc: "조리 정확도를 높인다.",                cost: 720 },
-  { kind: "back",   slotId: "toolbox",   title: "조리도구함",   desc: "고급 메뉴 해금 속도가 빨라진다.",      cost: 880 },
-  { kind: "single", slotId: "lighting",  title: "조명",         desc: "분위기 보너스가 적용된다.",            cost: 999 },
-  { kind: "single", slotId: "fence",     title: "울타리",       desc: "전체 인테리어 점수가 오른다.",         cost: 1000 },
-];
-const INSTALL_VISIBLE_AHEAD = 2; // 한 번에 보이는 후보 수
-
-// 테마 정의 — ThemeFacility.json 기준 (6개 테마, 각 시설 종류마다 분리 구매)
-// 통화: 101=도토리, 102=보석
-const THEME_LIST = [
-  { id: "stone",    name: "대충 돌 식당",   themeNo: 1, costAcorn: 0,   costGem: 0,  boost: 0.0 },
-  { id: "wood",     name: "아늑한 나무 식당", themeNo: 2, costAcorn: 100, costGem: 0,  boost: 0.10 },
-  { id: "camping",  name: "스카우트 캠핑장", themeNo: 3, costAcorn: 100, costGem: 0,  boost: 0.20 },
-  { id: "italy",    name: "이태리 피제리아", themeNo: 4, costAcorn: 100, costGem: 0,  boost: 0.20 },
-  { id: "summer",   name: "초여름 그해",     themeNo: 6, costAcorn: 100, costGem: 0,  boost: 0.20 },
-  { id: "cherry",   name: "벚꽃 떨어질 즈음", themeNo: 7, costAcorn: 0,   costGem: 10, boost: 0.40 },
-];
-
-function buildThemeDefs(prefix) {
-  // prefix = "Table" | "Stove" | "Entrance" | "CounterTop"
-  const suffix = { stone: "Stone", wood: "Wood", camping: "Camping", italy: "Italy", summer: "BlueWhite", cherry: "CherryBlossom" };
-  return THEME_LIST.map((t) => ({
-    id: t.id,
-    name: t.name,
-    icon: `Icon/Facility/Icon_Facility_${prefix}_${suffix[t.id]}.png`,
-    costAcorn: t.costAcorn,
-    costGem: t.costGem,
-    boost: t.boost,
-  }));
-}
-
-const THEME_DEFS = {
-  table:      buildThemeDefs("Table"),
-  stove:      buildThemeDefs("Stove"),
-  entrance:   buildThemeDefs("Entrance"),
-  countertop: buildThemeDefs("CounterTop"),
-  sink:       buildThemeDefs("Sink"),
-  fridge:     buildThemeDefs("Fridge"),
-  toolbox:    buildThemeDefs("Kitchenware"),
-  stage:      buildThemeDefs("Stage"),
-  tipbox:     buildThemeDefs("TipBox"),
-  lighting:   buildThemeDefs("Lighting"),
-  fence:      buildThemeDefs("Fence"),
-};
-// 슬롯 ID → 테마 키 매핑
-const SLOT_THEME_KEY = {
-  countertop: "countertop", sink: "sink", fridge: "fridge", toolbox: "toolbox",
-  entrance: "entrance", stage: "stage", tipbox: "tipbox", lighting: "lighting", fence: "fence",
-};
-const FACILITY_KEYS_ALL = ["table","stove","entrance","countertop","sink","fridge","toolbox","stage","tipbox","lighting","fence"];
-
-// ===== 상태 =====
 function createInitialState() {
   return {
+    version: 5,
     clock: 0,
-    resources: { acorns: 260, gems: 0 },
-    promo: { progress: 0, threshold: 5, pendingSpawns: 0, lastClick: 0 },
-
-    facilities: {
-      tables: [{ slotId: "table-1" }],   // 시작: 테이블 1개
-      stoves: [{ slotId: "stove-1" }],   // 시작: 화구 1개
-      singles: [],                       // {slotId} for entrance/stage/tipbox/lighting/fence
-      backrow: [],                       // {slotId} for fridge/sink/countertop/toolbox
+    rng: 20260714,
+    resources: {
+      acorns: initialAcorns(),
+      gems: 0,
+      ideas: 0,
+      stickers: Number(tables.general.StaffStickerDaily || 5),
     },
-    installIndex: 0,    // 다음 설치할 시퀀스 번호
-    installCheckpoints: 0, // 클리어한 설치 수
-
+    installed: [],
+    ownedRecipes: { 1: { level: 1, stack: 0, codexClaimed: false } },
+    totalResearchCount: 0,
+    collections: { customers: {}, specialCustomers: {}, performers: {} },
+    staff: {},
+    staffDayKey: new Date().toISOString().slice(0, 10),
+    performance: { cooldown: Number(tables.general.PerformanceCoolTime || 5), activeId: 0, remaining: 0 },
     themes: {
-      table: "stone",
-      stove: "stone",
-      entrance: "stone",
-      countertop: "stone",
-      sink: "stone",
-      fridge: "stone",
-      toolbox: "stone",
-      stage: "stone",
-      tipbox: "stone",
-      lighting: "stone",
-      fence: "stone",
+      opened: tables.restaurantThemes.filter((row) => row.facilityTheme === 1).map((row) => row.id),
+      activeByFacility: Object.fromEntries(tables.restaurantThemes.filter((row) => row.facilityTheme === 1).map((row) => [row.facilityType, row.id])),
+      unlockedThemeIds: [1],
     },
-    themesOwned: (() => {
-      const o = {};
-      for (const k of FACILITY_KEYS_ALL) o[k] = ["stone"];
-      return o;
-    })(),
-
-    recipes: (() => {
-      const owned = {};
-      // 시작: 샐러드 1성으로 보유
-      owned.salad = { stars: 1, dupes: 0 };
-      return owned;
-    })(),
-    researchCount: 0,
-
-    customers: [],     // {id, state, x, y, vx, recipeId, tableId, timer, total}
-    cookingTasks: [],  // {stoveId, recipeId, customerId, tableId, progress, duration}
-    customerSeq: 1,
-
-    chef: { x: CHEF_HOME.x, y: CHEF_HOME.y, anim: 0, mode: "idle" }, // mode: idle|cook|research
-
-    metrics: { served: 0, researched: 0, upgrades: 0 },
-
-    // 할 일 시스템
-    mainGoalIndex: 0,
-    mainClaimed: {},   // { goalId: true }
-    daily: makeInitialDaily(),
-
-    ui: {
-      installCandidateId: null,   // 어느 후보 말풍선이 떠 있나
-      chefBubbleOpen: false,
-      panel: null,                 // 'recipe' | 'theme' | 'task'
-      taskTab: "main",             // 'main' | 'daily'
-      eventModal: null,            // { type:'research'|'enhance', payload }
+    crafting: { autoEnabled: false, ingredients: {}, history: [] },
+    specialActors: [],
+    specialLastSpawn: {},
+    missions: {
+      dayKey: new Date().toISOString().slice(0, 10),
+      dailyProgress: { 1001: 1 },
+      dailyClaimed: [],
+      dailyBonusClaimed: false,
+      mainGroup: 1,
+      mainProgress: {},
+      mainClaimed: [],
     },
+    promotion: { progress: 0, queued: 0, totalClicks: 0 },
+    guests: [],
+    guestSequence: 1,
+    orders: [],
+    cooking: [],
+    payments: [],
+    ingredientDrops: [],
+    dropSequence: 1,
+    tipbox: 0,
+    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, recipesCrafted: 0 },
+    ui: { selectedInstallId: null, screen: "restaurant", tab: "craft", themeId: 1, lastResearch: null },
   };
 }
 
-let state = loadState() || createInitialState();
-
-// ===== 유틸 =====
 function loadState() {
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    // 간단한 머지: 누락 필드는 기본값으로 채움
-    const initial = createInitialState();
-    const merged = Object.assign(initial, data, {
-      ui: createInitialState().ui,    // UI는 매번 초기화
-      customers: [],                  // 손님 진행 상태는 초기화
-      cookingTasks: [],
-      promo: { ...initial.promo, ...(data.promo || {}), threshold: 5 },
-      chef: { ...initial.chef },
-      metrics: { served: 0, researched: 0, upgrades: 0, ...(data.metrics || {}) },
-      mainGoalIndex: typeof data.mainGoalIndex === "number" ? data.mainGoalIndex : 0,
-      mainClaimed: (data.mainClaimed && typeof data.mainClaimed === "object") ? data.mainClaimed : {},
-      daily: (() => {
-        const d = data.daily;
-        const today = todayKey();
-        if (!d || d.date !== today) return makeInitialDaily();
-        return { ...makeInitialDaily(), ...d, date: today };
-      })(),
-    });
-    // 테마 마이그레이션: 신규 THEME_DEFS에 없는 ID는 기본값(stone)으로
-    if (!merged.themes) merged.themes = {};
-    if (!merged.themesOwned) merged.themesOwned = {};
-    for (const k of FACILITY_KEYS_ALL) {
-      if (!merged.themes[k] || !THEME_DEFS[k].some((t) => t.id === merged.themes[k])) {
-        merged.themes[k] = "stone";
-      }
-      if (!Array.isArray(merged.themesOwned[k])) merged.themesOwned[k] = ["stone"];
-      if (!merged.themesOwned[k].includes("stone")) merged.themesOwned[k].push("stone");
-      // 현재 적용된 테마는 자동으로 소유에 추가
-      if (!merged.themesOwned[k].includes(merged.themes[k])) {
-        merged.themesOwned[k].push(merged.themes[k]);
-      }
-    }
-    // 시설 마이그레이션
-    if (!merged.facilities) merged.facilities = { tables: [{slotId:"table-1"}], stoves: [{slotId:"stove-1"}], singles: [], backrow: [] };
-    if (!Array.isArray(merged.facilities.singles)) merged.facilities.singles = [];
-    if (!Array.isArray(merged.facilities.backrow)) merged.facilities.backrow = [];
-    const validTableIds = new Set(TABLE_SLOTS.map((s) => s.id));
-    const validStoveIds = new Set(STOVE_SLOTS.map((s) => s.id));
-    const validSingleIds = new Set(Object.keys(SINGLE_SLOTS));
-    const validBackIds = new Set(Object.keys(BACKROW_SLOTS));
-    merged.facilities.tables  = merged.facilities.tables.filter((f) => validTableIds.has(f.slotId));
-    merged.facilities.stoves  = merged.facilities.stoves.filter((f) => validStoveIds.has(f.slotId));
-    merged.facilities.singles = merged.facilities.singles.filter((f) => validSingleIds.has(f.slotId));
-    merged.facilities.backrow = merged.facilities.backrow.filter((f) => validBackIds.has(f.slotId));
-    // installIndex를 이미 설치된 슬롯 너머로 정렬
-    merged.installIndex = 0;
-    while (
-      merged.installIndex < INSTALL_SEQUENCE.length &&
-      isSlotInstalledIn(merged.facilities, INSTALL_SEQUENCE[merged.installIndex])
-    ) {
-      merged.installIndex += 1;
-    }
-    // 레시피 필드 마이그레이션: _dupePending → dupes, MAX_STARS 클램프
-    if (merged.recipes && typeof merged.recipes === "object") {
-      for (const id of Object.keys(merged.recipes)) {
-        const r = merged.recipes[id];
-        if (!r || typeof r !== "object") { delete merged.recipes[id]; continue; }
-        if (r._dupePending != null && r.dupes == null) {
-          r.dupes = r._dupePending;
-        }
-        delete r._dupePending;
-        if (typeof r.dupes !== "number" || r.dupes < 0) r.dupes = 0;
-        if (typeof r.stars !== "number") r.stars = 1;
-        if (r.stars > MAX_STARS) r.stars = MAX_STARS;
-      }
-    }
-    return merged;
+    const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!parsed) return null;
+    const defaults = createInitialState();
+    if (![2, 3, 4, 5].includes(parsed.version)) return null;
+    const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
+      typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
+    const openedThemes = parsed.themes?.opened || defaults.themes.opened;
+    const unlockedThemeIds = parsed.themes?.unlockedThemeIds || [...new Set(openedThemes.map((id) =>
+      tables.restaurantThemes.find((row) => row.id === Number(id))?.facilityTheme).filter(Boolean))];
+    return {
+      ...defaults,
+      ...parsed,
+      version: 5,
+      resources: { ...defaults.resources, ...parsed.resources },
+      ownedRecipes,
+      collections: { ...defaults.collections, ...parsed.collections },
+      missions: { ...defaults.missions, ...parsed.missions },
+      metrics: { ...defaults.metrics, ...parsed.metrics },
+      ui: { ...defaults.ui, ...parsed.ui, screen: "restaurant", tab: "craft" },
+      staff: parsed.staff || {},
+      performance: { ...defaults.performance, ...parsed.performance },
+      themes: {
+        ...defaults.themes,
+        ...parsed.themes,
+        opened: openedThemes,
+        unlockedThemeIds,
+        activeByFacility: { ...defaults.themes.activeByFacility, ...parsed.themes?.activeByFacility },
+      },
+      crafting: {
+        ...defaults.crafting,
+        ...parsed.crafting,
+        ingredients: { ...defaults.crafting.ingredients, ...parsed.crafting?.ingredients },
+        history: parsed.crafting?.history || [],
+      },
+      specialActors: parsed.specialActors || [],
+      specialLastSpawn: parsed.specialLastSpawn || {},
+      ingredientDrops: parsed.ingredientDrops || [],
+      dropSequence: Number(parsed.dropSequence || 1),
+    };
   } catch {
     return null;
   }
 }
+
 function saveState() {
-  try {
-    const snapshot = JSON.parse(JSON.stringify(state));
-    snapshot.customers = [];
-    snapshot.cookingTasks = [];
-    localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot));
-  } catch {}
-}
-function resetState() {
-  localStorage.removeItem(SAVE_KEY);
-  state = createInitialState();
-  refreshHud();
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch { /* storage is optional */ }
 }
 
-function formatNumber(n) {
-  if (!Number.isFinite(n)) return "0";
-  if (n < 1000) return String(Math.floor(n));
-  // 기획서: 4자리 이상은 소문자 알파벳 단위 (a, b, c, ...) 소수 둘째
-  const units = ["", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"];
-  let unit = 0;
-  let v = n;
-  while (v >= 1000 && unit < units.length - 1) {
-    v /= 1000;
-    unit += 1;
+function random() {
+  state.rng = (Math.imul(state.rng, 1664525) + 1013904223) >>> 0;
+  return state.rng / 4294967296;
+}
+
+function formatNumber(value) {
+  const amount = Math.max(0, Number(value) || 0);
+  if (amount < 1000) return Math.floor(amount).toLocaleString("ko-KR");
+  let unitIndex = 0;
+  let scaled = amount;
+  while (scaled >= 1000) {
+    scaled /= 1000;
+    unitIndex += 1;
   }
-  let str = v.toFixed(2);
-  // 0.X 형태 정리
-  if (str.endsWith(".00")) str = str.slice(0, -3);
-  else if (str.endsWith("0")) str = str.slice(0, -1);
-  return str + units[unit];
+  const first = String.fromCharCode(96 + ((unitIndex - 1) % 26) + 1);
+  const repeats = Math.floor((unitIndex - 1) / 26) + 1;
+  return `${Number(scaled.toFixed(2))}${first.repeat(repeats)}`;
 }
 
-function rng(min, max) {
-  return Math.random() * (max - min) + min;
-}
-function pickWeighted(items, weightFn) {
-  const total = items.reduce((s, it) => s + weightFn(it), 0);
-  let r = Math.random() * total;
-  for (const it of items) {
-    r -= weightFn(it);
-    if (r <= 0) return it;
-  }
-  return items[items.length - 1];
+const ACTION_LABELS = {
+  1: "게임에 접속하기", 2: "주문 받기", 3: "홍보하기", 4: "아이템 획득하기",
+  6: "공연 진행하기", 7: "팁 수령하기",
+  10: "테마 변경하기", 11: "테마 구매하기", 12: "시설 설치하기", 13: "오늘의 할 일 완료하기", 14: "손님 방문하기",
+};
+const RESOURCE_BY_ITEM = { 101: "acorns", 102: "gems", 103: "ideas", 104: "stickers" };
+const RESOURCE_NAMES = { 101: "도토리", 102: "보석", 103: "아이디어", 104: "스티커", 201: "1시간 도토리 교환권", 202: "3시간 도토리 교환권" };
+
+function recipeData(id) {
+  return state.ownedRecipes[Number(id)] || state.ownedRecipes[String(id)] || null;
 }
 
-// ===== 캔버스 =====
-const canvas = document.getElementById("game-canvas");
-const ctx = canvas.getContext("2d");
-let dpr = 1;
-
-function configureCanvas() {
-  dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-  canvas.width = GAME_W * dpr;
-  canvas.height = GAME_H * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
+function progressionForCustomer(customerId) {
+  return CORE_PROGRESSION.find((entry) => entry.customerId === Number(customerId));
 }
 
-// 이미지 캐시
-const imgCache = new Map();
-function getImage(path) {
-  if (!path) return null;
-  if (imgCache.has(path)) return imgCache.get(path);
-  const img = new Image();
-  img.src = path;
-  imgCache.set(path, img);
-  return img;
+function progressionForRecipe(recipeId) {
+  return CORE_PROGRESSION.find((entry) => entry.recipeId === Number(recipeId));
 }
-function drawImageScaled(img, x, y, w, h) {
-  if (!img || !img.complete || img.naturalWidth === 0) return false;
-  ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
+
+function progressionForIngredient(ingredientId) {
+  return CORE_PROGRESSION.find((entry) => entry.ingredientId === Number(ingredientId));
+}
+
+function isThemeUnlocked(themeId) {
+  const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === Number(themeId));
+  return rows.length > 0 && rows.every((row) => state.themes.opened.includes(row.id));
+}
+
+function themeChickProgress(themeId) {
+  const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === Number(themeId));
+  const opened = rows.filter((row) => state.themes.opened.includes(row.id)).length;
+  return {
+    opened,
+    total: rows.length,
+    ratio: rows.length ? opened / rows.length : 0,
+  };
+}
+
+function unlockedThemeChicks(themeId) {
+  const milestones = themeChickMilestones(themeId);
+  const { ratio } = themeChickProgress(themeId);
+  if (Number(themeId) === 1) return ratio >= 1 ? [milestones[0], milestones[2]] : milestones.slice(0, 1);
+  return milestones.filter((milestone) => ratio + Number.EPSILON >= milestone.threshold);
+}
+
+function allUnlockedThemeChicks() {
+  return Object.keys(THEME_NAMES).flatMap((themeId) => unlockedThemeChicks(Number(themeId)));
+}
+
+function isProgressionRouteUnlocked(route) {
+  return Boolean(route && unlockedThemeChicks(route.themeId).some((chick) => chick.customerId === route.customerId));
+}
+
+function chickMilestoneForCustomer(customerId) {
+  return allThemeChickMilestones().find((milestone) => milestone.customerId === Number(customerId));
+}
+
+function ingredientData(ingredientId) {
+  const custom = Object.values(GAME_INGREDIENTS).find((ingredient) => ingredient.id === Number(ingredientId));
+  return custom ? { id: custom.id, ingredientName: custom.name, emoji: custom.emoji } : null;
+}
+
+function ingredientAmount(ingredientId) {
+  return Number(state.crafting.ingredients[ingredientId] || 0);
+}
+
+function unlockedRecipeCount() {
+  return Object.keys(state.ownedRecipes).filter((id) => recipeData(id)).length;
+}
+
+function unlockedRegions() {
+  const count = unlockedRecipeCount();
+  return REGION_UNLOCKS.filter((region) => count >= region.recipeCount);
+}
+
+function rewardRows(rewardId) { return tables.rewards.get(Number(rewardId)) || []; }
+
+function rewardText(rewardId) {
+  return rewardRows(rewardId).map((row) => `${RESOURCE_NAMES[row.assetId] || `아이템 ${row.assetId}`} ${formatNumber(row.assetCount)}`).join(" · ");
+}
+
+function grantReward(rewardId) {
+  const rows = rewardRows(rewardId);
+  rows.forEach((row) => {
+    const key = RESOURCE_BY_ITEM[row.assetId];
+    if (key) state.resources[key] = (state.resources[key] || 0) + Number(row.assetCount || 0);
+    else {
+      state.inventory ||= {};
+      state.inventory[row.assetId] = (state.inventory[row.assetId] || 0) + Number(row.assetCount || 0);
+    }
+    dispatchAchievement(4, Number(row.assetCount || 0), Number(row.assetType || 0), Number(row.assetId || 0));
+  });
+  return rewardText(rewardId);
+}
+
+function matchesCondition(mission, targetAssetType, targetId) {
+  const conditions = mission.conditions || [];
+  if (!conditions.length) return true;
+  if (mission.actionType === 12) return Number(targetId) === Number(conditions[0]);
+  if (mission.actionType === 4) return Number(targetAssetType) === Number(conditions[0]) && Number(targetId) === Number(conditions[1]);
   return true;
 }
 
-// ===== 좌표/터치 헬퍼 =====
-function getCanvasPoint(clientX, clientY) {
-  const rect = canvas.getBoundingClientRect();
-  const sx = GAME_W / rect.width;
-  const sy = GAME_H / rect.height;
-  return {
-    x: (clientX - rect.left) * sx,
-    y: (clientY - rect.top) * sy,
-    rect,
-  };
-}
-
-// 캔버스 좌표 → 화면 px 좌표 (오버레이 위치용)
-function canvasToScreen(cx, cy) {
-  const rect = canvas.getBoundingClientRect();
-  const frame = document.querySelector(".phone-frame").getBoundingClientRect();
-  const sx = rect.width / GAME_W;
-  const sy = rect.height / GAME_H;
-  return {
-    x: rect.left - frame.left + cx * sx,
-    y: rect.top - frame.top + cy * sy,
-  };
-}
-
-// ===== 헬퍼: 시설/설치 =====
-function slotMeta(kind, slotId) {
-  if (kind === "table") return TABLE_SLOTS.find((s) => s.id === slotId);
-  if (kind === "stove") return STOVE_SLOTS.find((s) => s.id === slotId);
-  if (kind === "single") return SINGLE_SLOTS[slotId];
-  if (kind === "back") return BACKROW_SLOTS[slotId];
-  return null;
-}
-function isSlotInstalledIn(facilities, cand) {
-  const arr = cand.kind === "table" ? facilities.tables
-            : cand.kind === "stove" ? facilities.stoves
-            : cand.kind === "single" ? facilities.singles
-            : cand.kind === "back" ? facilities.backrow
-            : [];
-  return arr.some((f) => f.slotId === cand.slotId);
-}
-function isSlotInstalled(kind, slotId) {
-  return isSlotInstalledIn(state.facilities, { kind, slotId });
-}
-function getInstallCandidates() {
-  // 이미 설치된 슬롯은 건너뛰고 순서상 다음 N개만 노출
-  const out = [];
-  let idx = state.installIndex;
-  while (idx < INSTALL_SEQUENCE.length && out.length < INSTALL_VISIBLE_AHEAD) {
-    const cand = INSTALL_SEQUENCE[idx];
-    if (!isSlotInstalled(cand.kind, cand.slotId)) {
-      out.push({ ...cand, index: idx });
-    }
-    idx += 1;
+function dispatchAchievement(actionType, count = 1, targetAssetType = 0, targetId = 0) {
+  ensureDailyReset();
+  for (const mission of tables.repeatMissions) {
+    if (mission.repeatType !== 1 || state.missions.dailyClaimed.includes(mission.id)) continue;
+    if (mission.actionType !== actionType || !matchesCondition(mission, targetAssetType, targetId)) continue;
+    state.missions.dailyProgress[mission.id] = Math.min(mission.count,
+      Number(state.missions.dailyProgress[mission.id] || 0) + count);
   }
-  return out;
-}
-function candidateBox(cand) {
-  const slot = slotMeta(cand.kind, cand.slotId);
-  if (!slot) return null;
-  let w, h;
-  if (cand.kind === "table") { w = 96; h = 78; }
-  else if (cand.kind === "stove") { w = 78; h = 78; }
-  else if (cand.kind === "back") { w = slot.w; h = slot.h; }
-  else { w = slot.w; h = slot.h; }
-  return { x: slot.x, y: slot.y, w, h };
-}
-function findCandidateAt(cx, cy) {
-  for (const cand of getInstallCandidates()) {
-    const b = candidateBox(cand);
-    if (!b) continue;
-    if (cx >= b.x - b.w/2 && cx <= b.x + b.w/2 && cy >= b.y - b.h/2 && cy <= b.y + b.h/2) {
-      return cand;
-    }
+  for (const mission of tables.mainMissions.filter((row) => row.missionGroup === state.missions.mainGroup)) {
+    if (state.missions.mainClaimed.includes(mission.id) || mission.actionType !== actionType) continue;
+    if (!matchesCondition(mission, targetAssetType, targetId)) continue;
+    state.missions.mainProgress[mission.id] = Math.min(mission.count,
+      Number(state.missions.mainProgress[mission.id] || 0) + count);
   }
-  return null;
-}
-function installCandidate(cand) {
-  if (state.resources.acorns < cand.cost) {
-    showToast("도토리가 부족합니다.");
-    return;
-  }
-  if (isSlotInstalled(cand.kind, cand.slotId)) {
-    state.ui.installCandidateId = null;
-    refreshHud();
-    return;
-  }
-  state.resources.acorns -= cand.cost;
-  if (cand.kind === "table") state.facilities.tables.push({ slotId: cand.slotId });
-  else if (cand.kind === "stove") state.facilities.stoves.push({ slotId: cand.slotId });
-  else if (cand.kind === "single") state.facilities.singles.push({ slotId: cand.slotId });
-  else if (cand.kind === "back") state.facilities.backrow.push({ slotId: cand.slotId });
-  // installIndex를 이미 설치된 슬롯들 너머로 진전
-  while (
-    state.installIndex < INSTALL_SEQUENCE.length &&
-    isSlotInstalled(INSTALL_SEQUENCE[state.installIndex].kind, INSTALL_SEQUENCE[state.installIndex].slotId)
-  ) {
-    state.installIndex += 1;
-  }
-  state.installCheckpoints += 1;
-  state.ui.installCandidateId = null;
   saveState();
-  refreshHud();
-  showToast(`${cand.title} 설치 완료!`);
+  updateHud();
+  if (!dom.menuScreen.hidden && state.ui.screen === "missions") renderMenu();
 }
 
-// ===== 헬퍼: 손님/주문 =====
-const SEATS_PER_TABLE = 2;
-function tableSeatOffset(seat) {
-  // seat: 0(좌), 1(우) — 테이블 앞쪽(아래) 좌우로 앉음
-  return seat === 0 ? { dx: -24, dy: 32 } : { dx: 24, dy: 32 };
+function ensureDailyReset() {
+  const dayKey = new Date().toISOString().slice(0, 10);
+  if (state.missions.dayKey === dayKey) return;
+  state.missions.dayKey = dayKey;
+  state.missions.dailyProgress = { 1001: 1 };
+  state.missions.dailyClaimed = [];
+  state.missions.dailyBonusClaimed = false;
 }
-function findFreeTable() {
-  // 테이블 + 빈 좌석 인덱스 반환
-  for (const f of state.facilities.tables) {
-    const used = new Set(
-      state.customers
-        .filter((c) => c.tableId === f.slotId && c.seat != null)
-        .map((c) => c.seat)
-    );
-    for (let s = 0; s < SEATS_PER_TABLE; s += 1) {
-      if (!used.has(s)) return { table: f, seat: s };
+
+function missionProgress(mission, main = false) {
+  if (main && mission.actionType === 12 && mission.conditions?.length) {
+    return isInstalled(Number(mission.conditions[0])) ? mission.count : Number(state.missions.mainProgress[mission.id] || 0);
+  }
+  return Number((main ? state.missions.mainProgress : state.missions.dailyProgress)[mission.id] || 0);
+}
+
+function missionDescription(mission) {
+  if (mission.actionType === 12 && mission.conditions?.length) {
+    const row = tables.installs.find((item) => item.id === Number(mission.conditions[0]));
+    const name = row ? `${FACILITY_META[row.facilityType]?.name || "시설"}${row.facilityGroup > 1 ? ` ${row.facilityGroup}` : ""}` : "시설";
+    return `${name} 설치하기`;
+  }
+  if (mission.actionType === 4 && mission.conditions?.[1]) return `${RESOURCE_NAMES[mission.conditions[1]] || "아이템"} ${formatNumber(mission.count)} 획득하기`;
+  return `${ACTION_LABELS[mission.actionType] || "목표 달성하기"} ${formatNumber(mission.count)}회`;
+}
+
+function hasMissionReward() {
+  const daily = tables.repeatMissions.some((m) => !state.missions.dailyClaimed.includes(m.id) && missionProgress(m) >= m.count);
+  const main = tables.mainMissions.some((m) => m.missionGroup === state.missions.mainGroup
+    && !state.missions.mainClaimed.includes(m.id) && missionProgress(m, true) >= m.count);
+  return daily || main;
+}
+
+function registerCollection(id, category = "customers") {
+  const dict = state.collections[category];
+  if (!dict[id]) dict[id] = { count: 0, firstSeen: Date.now(), isNew: true };
+  dict[id].count += 1;
+}
+
+function ensureStaffDaily() {
+  const dayKey = new Date().toISOString().slice(0, 10);
+  if (state.staffDayKey === dayKey) return;
+  state.staffDayKey = dayKey;
+  const max = Number(tables.general.StaffStickerDaily || 5);
+  state.resources.stickers = Math.max(state.resources.stickers || 0, max);
+}
+
+function staffLevelRow(staffId, level = null) {
+  const current = state.staff[staffId];
+  return tables.staffLevels.find((row) => row.staffId === staffId && row.staffLevel === (level || current?.level || 1));
+}
+
+function nextStaffLevelRow(staffId) {
+  const current = state.staff[staffId];
+  return current ? staffLevelRow(staffId, current.level + 1) : null;
+}
+
+function hireStaff(staffId) {
+  const row = tables.staff.find((item) => item.id === staffId);
+  if (!row || state.staff[staffId] || state.resources.acorns < row.staffPrice) return;
+  state.resources.acorns -= row.staffPrice;
+  state.staff[staffId] = { level: 1, attached: 0, mode: "active", timer: 0, actionTimer: 0 };
+  dispatchAchievement(4, 1, 104, staffId);
+  showToast(`${row.staffName} 고용 완료!`);
+  saveState(); updateHud(); renderMenu();
+}
+
+function attachStaffSticker(staffId) {
+  const staff = state.staff[staffId];
+  const next = nextStaffLevelRow(staffId);
+  if (!staff || !next || state.resources.stickers < 1 || staff.attached >= next.sticker) return;
+  staff.attached += 1;
+  state.resources.stickers -= 1;
+  saveState(); renderMenu();
+}
+
+function levelUpStaff(staffId) {
+  const staff = state.staff[staffId];
+  const next = nextStaffLevelRow(staffId);
+  if (!staff || !next || staff.attached < next.sticker || state.resources.acorns < next.levelUpPrice) return;
+  state.resources.acorns -= next.levelUpPrice;
+  staff.level += 1;
+  staff.attached = 0;
+  showToast(`${tables.staff.find((row) => row.id === staffId)?.staffName} Lv.${staff.level}!`);
+  saveState(); updateHud(); renderMenu();
+}
+
+function updateStaff(dt) {
+  ensureStaffDaily();
+  for (const [idText, staff] of Object.entries(state.staff)) {
+    const id = Number(idText);
+    const table = tables.staff.find((row) => row.id === id);
+    const level = staffLevelRow(id);
+    if (!table || !level) continue;
+    staff.timer += dt;
+    const duration = staff.mode === "active" ? level.activeTime : level.breakTime;
+    if (staff.timer >= duration) {
+      staff.mode = staff.mode === "active" ? "break" : "active";
+      staff.timer = 0;
+      staff.actionTimer = 0;
+    }
+    if (staff.mode !== "active") continue;
+    if (table.staffType === 2) {
+      for (const task of state.cooking) task.elapsed += dt * Number(level.abilityValue || 0);
+    } else if (table.staffType === 3) {
+      staff.actionTimer += dt;
+      if (staff.actionTimer >= 1) {
+        staff.actionTimer = 0;
+        const waiting = state.guests.find((guest) => guest.state === "awaiting_order");
+        if (waiting) takeOrder(waiting);
+      }
+    } else if (table.staffType === 4) {
+      staff.actionTimer += dt;
+      const interval = level.abilityValue > 0 ? level.activeTime / level.abilityValue : level.activeTime;
+      if (staff.actionTimer >= interval) {
+        staff.actionTimer = 0;
+        state.promotion.queued += 1;
+        trySpawnQueuedGuest();
+      }
     }
   }
-  return null;
 }
-function findFreeStove() {
-  for (const f of state.facilities.stoves) {
-    const busy = state.cookingTasks.some((t) => t.stoveId === f.slotId);
-    if (!busy) return f;
+
+function activePerformance() {
+  return state.performance.activeId ? tables.performances.find((row) => row.id === state.performance.activeId) : null;
+}
+
+function startPerformance() {
+  if (installedRows(5).length === 0 || state.performance.cooldown > 0 || state.performance.activeId) return;
+  const candidates = tables.performances.filter((row) => state.resources.acorns >= row.price);
+  if (!candidates.length) return;
+  const total = candidates.reduce((sum, row) => sum + row.performerAppearWeight, 0);
+  let roll = random() * total;
+  let picked = candidates[0];
+  for (const row of candidates) { roll -= row.performerAppearWeight; if (roll < 0) { picked = row; break; } }
+  state.resources.acorns -= picked.price;
+  state.performance.activeId = picked.id;
+  state.performance.remaining = picked.performanceTime;
+  registerCollection(picked.id, "performers");
+  dispatchAchievement(6);
+  showToast(`공연팀 ${picked.id} 공연 시작!`, 3);
+  saveState(); updateHud(); renderMenu();
+}
+
+function updatePerformance(dt) {
+  if (installedRows(5).length === 0) return;
+  const before = Math.ceil(state.performance.activeId ? state.performance.remaining : state.performance.cooldown);
+  if (state.performance.activeId) {
+    state.performance.remaining = Math.max(0, state.performance.remaining - dt);
+    if (state.performance.remaining <= 0) {
+      state.performance.activeId = 0;
+      state.performance.cooldown = Number(tables.general.PerformanceCoolTime || 5);
+    }
+  } else state.performance.cooldown = Math.max(0, state.performance.cooldown - dt);
+  const after = Math.ceil(state.performance.activeId ? state.performance.remaining : state.performance.cooldown);
+  if (before !== after && !dom.menuScreen.hidden && state.ui.screen === "performance") renderMenu();
+}
+
+function isThemeFacilityAvailable(facilityType) {
+  const installRows = tables.installs.filter((row) => row.facilityType === Number(facilityType));
+  return installRows.length === 0 || installRows.some((row) => isInstalled(row.id));
+}
+
+function checkAndGrantAllCollect(themeId) {
+  const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === Number(themeId));
+  const currencyRows = rows.filter((row) => row.purchaseType === 1);
+  if (!currencyRows.every((row) => state.themes.opened.includes(row.id))) return;
+  for (const row of rows.filter((item) => item.purchaseType === 2)) {
+    if (!state.themes.opened.includes(row.id)) state.themes.opened.push(row.id);
   }
-  return null;
 }
-function spawnCustomer() {
-  const found = findFreeTable();
-  if (!found) {
-    state.promo.pendingSpawns += 1;
+
+function buyTheme(themeId) {
+  const row = tables.restaurantThemes.find((item) => item.id === themeId);
+  if (!row || state.themes.opened.includes(themeId)) return;
+  if (!isThemeFacilityAvailable(row.facilityType) || row.purchaseType === 2) return;
+  const key = RESOURCE_BY_ITEM[row.itemId];
+  if (!key || state.resources[key] < row.facilityPrice) return;
+  const chicksBefore = unlockedThemeChicks(row.facilityTheme).length;
+  state.resources[key] -= row.facilityPrice;
+  state.themes.opened.push(row.id);
+  state.themes.activeByFacility[row.facilityType] = row.id;
+  checkAndGrantAllCollect(row.facilityTheme);
+  if (isThemeUnlocked(row.facilityTheme) && !state.themes.unlockedThemeIds.includes(row.facilityTheme)) {
+    state.themes.unlockedThemeIds.push(row.facilityTheme);
+  }
+  dispatchAchievement(11, 1, 0, themeId);
+  dispatchAchievement(10);
+  const themeRows = tables.restaurantThemes.filter((item) => item.facilityTheme === row.facilityTheme);
+  const openedCount = themeRows.filter((item) => state.themes.opened.includes(item.id)).length;
+  const newlyUnlocked = unlockedThemeChicks(row.facilityTheme).slice(chicksBefore);
+  showToast(newlyUnlocked.length
+    ? `${THEME_NAMES[row.facilityTheme]} 진행! ${newlyUnlocked.map((chick) => chick.customerName).join(", ")} 등장.`
+    : `${FACILITY_META[row.facilityType]?.name || "설비"} 파츠 구매·적용 · ${openedCount}/${themeRows.length}`, 3);
+  saveState(); updateHud(); renderMenu();
+  render();
+}
+
+function applyTheme(themeId) {
+  const row = tables.restaurantThemes.find((item) => item.id === themeId);
+  if (!row || !state.themes.opened.includes(themeId)) return;
+  state.themes.activeByFacility[row.facilityType] = row.id;
+  dispatchAchievement(10);
+  showToast(`${FACILITY_META[row.facilityType]?.name || "설비"}에 ${THEME_NAMES[row.facilityTheme] || "테마"} 적용!`);
+  saveState(); renderMenu(); render();
+}
+
+function applyThemeAll(themeId) {
+  const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === Number(themeId));
+  let changed = 0;
+  for (const row of rows) {
+    if (!state.themes.opened.includes(row.id) || !isThemeFacilityAvailable(row.facilityType)) continue;
+    if (state.themes.activeByFacility[row.facilityType] === row.id) continue;
+    state.themes.activeByFacility[row.facilityType] = row.id;
+    changed += 1;
+  }
+  if (!changed) return;
+  dispatchAchievement(10);
+  showToast(`보유한 ${THEME_NAMES[themeId] || "테마"} 파츠 ${changed}개 전체 적용!`);
+  saveState(); renderMenu(); render();
+}
+
+function installedRows(type = null) {
+  const ids = new Set(state.installed);
+  return tables.installs.filter((row) => ids.has(row.id) && (type === null || row.facilityType === type));
+}
+
+function isInstalled(rowId) { return state.installed.includes(rowId); }
+
+function installCandidates() {
+  return tables.installs.filter((row) => !isInstalled(row.id)).slice(0, 2);
+}
+
+function coreReady() {
+  return installedRows(1).length > 0 && installedRows(2).length > 0;
+}
+
+function availableSeats() {
+  const occupied = new Set(state.guests.filter((guest) => guest.seatId && guest.state !== "leaving").map((guest) => guest.seatId));
+  return installedRows(1).flatMap(seatPositions).filter((seat) => !occupied.has(seat.id));
+}
+
+function getRecipe(id) {
+  const numericId = Number(id);
+  const row = tables.recipes.get(numericId);
+  if (row) return row;
+  const route = progressionForRecipe(numericId);
+  const base = route ? tables.recipes.get(Number(route.baseRecipeId)) : null;
+  return base ? { ...base, id: numericId } : null;
+}
+
+function routeRecipeName(id) {
+  return progressionForRecipe(id)?.recipeName || recipeName(id);
+}
+
+function routeRecipeIcon(id) {
+  const route = progressionForRecipe(id);
+  return recipeIcon(route?.baseRecipeId || id);
+}
+function getGuest(id) { return state.guests.find((guest) => guest.id === id); }
+
+function showToast(message, seconds = 2.4) {
+  dom.toast.textContent = message;
+  dom.toast.hidden = false;
+  toastTimer = seconds;
+}
+
+function closeInstallPanel() {
+  state.ui.selectedInstallId = null;
+  dom.installPanel.hidden = true;
+  render();
+}
+
+function openInstallPanel(row) {
+  const meta = FACILITY_META[row.facilityType] || FACILITY_META[1];
+  state.ui.selectedInstallId = row.id;
+  dom.installIcon.src = meta.icon;
+  dom.installName.textContent = row.facilityGroup > 1 ? `${meta.name} ${row.facilityGroup}` : meta.name;
+  dom.installDescription.textContent = meta.description;
+  dom.installCost.textContent = formatNumber(row.facilityPrice);
+  dom.installConfirm.disabled = state.resources.acorns < row.facilityPrice;
+  dom.installPanel.hidden = false;
+}
+
+function confirmInstall() {
+  const row = tables.installs.find((item) => item.id === state.ui.selectedInstallId);
+  if (!row || isInstalled(row.id)) return closeInstallPanel();
+  if (state.resources.acorns < row.facilityPrice) {
+    showToast("도토리가 부족해요.");
     return;
   }
-  const slot = slotMeta("table", found.table.slotId);
-  const off = tableSeatOffset(found.seat);
-  const ownedIds = Object.keys(state.recipes).filter((id) => state.recipes[id]?.stars > 0);
-  const recipeId = ownedIds[Math.floor(Math.random() * ownedIds.length)] || "salad";
-  state.customers.push({
-    id: `c${state.customerSeq++}`,
-    state: "walking",
-    x: ENTRANCE.x,
-    y: ENTRANCE.y + 30,
-    targetX: slot.x + off.dx,
-    targetY: slot.y + off.dy,
-    recipeId,
-    tableId: found.table.slotId,
-    seat: found.seat,
-    timer: 0,
-    total: 0,
-    bob: Math.random() * Math.PI * 2,
-    color: pickCustomerColor(),
-  });
-}
-function pickCustomerColor() {
-  const palette = ["#ffd54f", "#ff9e7a", "#94d66d", "#f29bd0", "#8ecdf6", "#f6c14f"];
-  return palette[Math.floor(Math.random() * palette.length)];
+  state.resources.acorns -= row.facilityPrice;
+  state.installed.push(row.id);
+  state.installed.sort((a, b) => a - b);
+  dispatchAchievement(12, 1, 0, row.id);
+  closeInstallPanel();
+  const meta = FACILITY_META[row.facilityType] || FACILITY_META[1];
+  showToast(`${meta.name} 설치 완료!`);
+  saveState();
+  updateHud();
 }
 
-function tryStartCooking() {
-  // 주문이 접수된 손님 찾고 비어 있는 화구로 보냄
-  for (const cust of state.customers) {
-    if (cust.state !== "ordered") continue;
-    const stove = findFreeStove();
-    if (!stove) return;
-    const recipe = RECIPE_RARITY[cust.recipeId];
-    const stars = state.recipes[cust.recipeId]?.stars || 1;
-    const duration = Math.max(1.5, recipe.baseCook * cookMultiplierForStars(stars));
-    state.cookingTasks.push({
-      stoveId: stove.slotId,
-      recipeId: cust.recipeId,
-      customerId: cust.id,
-      tableId: cust.tableId,
-      progress: 0,
-      duration,
-    });
-    cust.state = "waiting";
-    cust.timer = 0;
+function promotionThreshold() { return Math.max(1, Number(tables.general.PromotionTouchCount ?? 5)); }
+
+function promote() {
+  if (!coreReady()) return;
+  dispatchAchievement(3);
+  state.promotion.totalClicks += 1;
+  state.promotion.progress += 1;
+  if (state.promotion.progress >= promotionThreshold()) {
+    state.promotion.progress = 0;
+    state.promotion.queued += 1;
+    trySpawnQueuedGuest();
   }
+  saveState();
+  updateHud();
+  render();
 }
 
-function orderBubblePos(cust) {
-  const slot = slotMeta("table", cust.tableId);
-  const off = tableSeatOffset(cust.seat ?? 0);
-  return { x: slot.x + off.dx, y: slot.y + off.dy - 56 };
+function chooseCustomer() {
+  const specialCustomers = tables.customers.filter((row) => {
+    const unlocked = row.unlockConditionType === 0
+      || (row.unlockConditionType === 1 && isInstalled(row.unlockConditionValue));
+    if (!unlocked || row.assetType !== 107 || row.customerAppearWeight <= 0) return false;
+    const sp = tables.specialCustomers.find((item) => item.id === row.assetId);
+    const last = Number(state.specialLastSpawn[row.assetId] || -Infinity);
+    return !state.specialActors.some((actor) => actor.specialId === row.assetId)
+      && state.clock - last >= Number(sp?.appearCoolTime || 0);
+  });
+  const normalCustomers = allUnlockedThemeChicks().map((chick) => ({
+    id: chick.customerId,
+    assetType: 105,
+    assetId: chick.commonId,
+    customerAppearWeight: 100,
+    chickMilestone: chick,
+  }));
+  const eligible = [...normalCustomers, ...specialCustomers];
+  if (!eligible.length) {
+    const chick = themeChickMilestones(1)[0];
+    return { id: chick.customerId, assetType: 105, assetId: chick.commonId, customerAppearWeight: 100, chickMilestone: chick };
+  }
+  const total = eligible.reduce((sum, row) => sum + Math.max(0, row.customerAppearWeight), 0) || eligible.length;
+  let roll = random() * total;
+  for (const row of eligible) {
+    roll -= Math.max(0, row.customerAppearWeight) || 1;
+    if (roll <= 0) return row;
+  }
+  return eligible[0];
 }
-function acceptOrderAt(cx, cy) {
-  for (const cust of state.customers) {
-    if (cust.state !== "awaiting_order") continue;
-    const b = orderBubblePos(cust);
-    if (cx >= b.x - 32 && cx <= b.x + 32 && cy >= b.y - 28 && cy <= b.y + 28) {
-      cust.state = "ordered";
-      cust.timer = 0;
-      return true;
+
+function chooseRecipe(common) {
+  const owned = Object.keys(state.ownedRecipes).map(Number).filter((id) => getRecipe(id));
+  const favorites = (common?.recipeIds || []).filter((id) => owned.includes(id));
+  if (favorites.length && random() < Number(common.favoriteProbability || 0)) {
+    return favorites[Math.floor(random() * favorites.length)];
+  }
+  return owned[Math.floor(random() * owned.length)] || 1;
+}
+
+function trySpawnQueuedGuest() {
+  if (state.promotion.queued <= 0) return;
+  const customer = chooseCustomer();
+  if (customer?.assetType === 107) {
+    spawnSpecialCustomer(customer.assetId);
+    state.promotion.queued -= 1;
+    return;
+  }
+  const seat = availableSeats()[0];
+  if (!seat) {
+    showToast("빈자리가 생기면 손님이 들어와요.");
+    return;
+  }
+  const common = tables.commonCustomers.get(customer.assetId) || tables.raw.CommonCustomer[0];
+  const recipeId = chooseRecipe(common);
+  const guest = {
+    id: state.guestSequence++,
+    customerId: customer.id,
+    commonId: customer.assetId,
+    customerName: customer.chickMilestone?.customerName,
+    ingredientId: customer.chickMilestone?.ingredientId,
+    ingredientEmoji: customer.chickMilestone?.ingredientEmoji,
+    dropChance: customer.chickMilestone?.dropChance,
+    themeId: customer.chickMilestone?.themeId,
+    chickSlot: customer.chickMilestone?.slot,
+    state: "arriving",
+    seatId: seat.id,
+    tableId: seat.tableId,
+    x: 240,
+    y: 880,
+    targetX: seat.x,
+    targetY: seat.y,
+    recipeId,
+    wait: 0,
+    stateTime: 0,
+    mood: "normal",
+    bob: random() * 10,
+  };
+  state.guests.push(guest);
+  state.promotion.queued -= 1;
+  state.metrics.visitors += 1;
+  registerCollection(customer.id, "customers");
+  dispatchAchievement(14);
+  showToast("손님이 레스토랑에 찾아왔어요!");
+}
+
+function spawnSpecialCustomer(specialId) {
+  state.specialLastSpawn[specialId] = state.clock;
+  state.specialActors.push({ specialId, x: 28, y: 470, targetX: 410, targetY: 595, state: "approaching", timer: 0, stolen: 0 });
+  registerCollection(specialId, "specialCustomers");
+  showToast(specialId === 1 ? "도둑이 팁박스를 노리고 있어요! 눌러서 잡으세요." : "특별 손님이 찾아왔어요!", 4);
+}
+
+function catchSpecial(actor) {
+  if (!actor || actor.state === "caught") return;
+  if (actor.stolen > 0) state.tipbox += actor.stolen;
+  actor.state = "caught";
+  actor.targetX = 28;
+  actor.targetY = 470;
+  showToast(actor.specialId === 1 ? "도둑을 잡고 팁을 지켰어요!" : "특별 손님을 만났어요!");
+  saveState();
+}
+
+function updateSpecialCustomers(dt) {
+  for (const actor of state.specialActors) {
+    actor.timer += dt;
+    if (actor.state === "approaching" && moveTowards(actor, actor.targetX, actor.targetY, 90, dt)) {
+      if (actor.specialId === 1) {
+        actor.stolen = Math.floor(state.tipbox * Number(tables.customerSetting.ThiefTipBoxAmount || .5));
+        state.tipbox -= actor.stolen;
+      }
+      actor.state = "escaping";
+      actor.targetX = 28;
+      actor.targetY = 470;
+    } else if ((actor.state === "escaping" || actor.state === "caught") && moveTowards(actor, actor.targetX, actor.targetY, actor.state === "caught" ? 220 : 120, dt)) {
+      actor.state = "gone";
     }
   }
+  state.specialActors = state.specialActors.filter((actor) => actor.state !== "gone");
+}
+
+function moveTowards(entity, x, y, speed, dt) {
+  const dx = x - entity.x;
+  const dy = y - entity.y;
+  const distance = Math.hypot(dx, dy);
+  if (distance <= speed * dt || distance < 0.5) {
+    entity.x = x;
+    entity.y = y;
+    return true;
+  }
+  entity.x += (dx / distance) * speed * dt;
+  entity.y += (dy / distance) * speed * dt;
   return false;
 }
 
-// ===== 시뮬레이션 =====
+function takeOrder(guest) {
+  if (!guest || guest.state !== "awaiting_order") return;
+  guest.state = "waiting_food";
+  guest.stateTime = 0;
+  state.orders.push({ guestId: guest.id, recipeId: guest.recipeId, orderedAt: state.clock });
+  state.metrics.orders += 1;
+  dispatchAchievement(2);
+  showToast(`${routeRecipeName(guest.recipeId)} 주문을 받았어요.`);
+  startCookingIfPossible();
+  saveState();
+}
+
+function startCookingIfPossible() {
+  const stoves = installedRows(2);
+  const busy = new Set(state.cooking.map((task) => task.stoveId));
+  for (const stove of stoves) {
+    if (busy.has(stove.id) || state.orders.length === 0) continue;
+    const order = state.orders.shift();
+    const guest = getGuest(order.guestId);
+    if (!guest || guest.state !== "waiting_food") continue;
+    const recipe = getRecipe(order.recipeId);
+    const owned = recipeData(order.recipeId) || { level: 1 };
+    const reductions = { 1: Number(tables.recipeSetting.MenuCoolDownNormal || 0), 2: Number(tables.recipeSetting.MenuCoolDownFancy || 0), 3: Number(tables.recipeSetting.MenuCoolDownSpecial || 0) };
+    const duration = Number(recipe?.cookTime || 4) * (1 - Math.max(0, owned.level - 1) * (reductions[recipe?.recipeGrade] || 0));
+    state.cooking.push({
+      stoveId: stove.id,
+      guestId: order.guestId,
+      recipeId: order.recipeId,
+      elapsed: 0,
+      duration: Math.max(Number(tables.recipeSetting.CookTimeLimit || 2), duration),
+    });
+  }
+}
+
+function finishCooking(task) {
+  const guest = getGuest(task.guestId);
+  if (!guest || guest.state !== "waiting_food") return;
+  guest.state = "eating";
+  guest.stateTime = 0;
+  showToast(`${routeRecipeName(task.recipeId)} 완성! 음식이 전달됐어요.`);
+}
+
+function commonForGuest(guest) {
+  return tables.commonCustomers.get(guest.commonId) || tables.raw.CommonCustomer[0];
+}
+
+function canCraftRecipe(recipeId) {
+  const route = progressionForRecipe(recipeId);
+  const recipe = getRecipe(recipeId);
+  const owned = recipeData(recipeId);
+  return Boolean(route
+    && recipe
+    && isProgressionRouteUnlocked(route)
+    && (!owned || owned.level < Number(recipe.maxLevel || 20))
+    && craftIngredientRequirements(route).every((requirement) => ingredientAmount(requirement.ingredientId) >= requirement.count));
+}
+
+function craftIngredientRequirements(route) {
+  const ingredients = route?.ingredientRequirements || [];
+  if (!ingredients.length) return [];
+  const owned = recipeData(route.recipeId);
+  const totalCount = Math.max(Number(route.ingredientCount || 1), ingredients.length) + Number(owned?.level || 0);
+  const baseCount = Math.floor(totalCount / ingredients.length);
+  const remainder = totalCount % ingredients.length;
+  return ingredients.map((ingredient, index) => ({
+    ingredientId: ingredient.id,
+    name: ingredient.name,
+    emoji: ingredient.emoji,
+    count: baseCount + (index < remainder ? 1 : 0),
+  }));
+}
+
+function craftIngredientCost(route) {
+  return craftIngredientRequirements(route).reduce((sum, requirement) => sum + requirement.count, 0);
+}
+
+function craftRecipe(recipeId, automatic = false) {
+  const route = progressionForRecipe(recipeId);
+  if (!route || !canCraftRecipe(recipeId)) return false;
+  const regionsBefore = unlockedRegions().length;
+  const existing = recipeData(route.recipeId);
+  const ingredientRequirements = craftIngredientRequirements(route);
+  for (const requirement of ingredientRequirements) {
+    state.crafting.ingredients[requirement.ingredientId] -= requirement.count;
+  }
+  if (existing) existing.level += 1;
+  else state.ownedRecipes[route.recipeId] = { level: 1, stack: 0, codexClaimed: false };
+  const level = recipeData(route.recipeId).level;
+  state.crafting.history.unshift({ recipeId: route.recipeId, automatic, level, at: Math.round(state.clock) });
+  state.crafting.history = state.crafting.history.slice(0, 12);
+  state.metrics.recipesCrafted += 1;
+  if (existing) dispatchAchievement(9, 1, 103, route.recipeId);
+  const newlyUnlockedRegion = unlockedRegions()[regionsBefore];
+  showToast(newlyUnlockedRegion
+    ? `${routeRecipeName(route.recipeId)} 제작! ${newlyUnlockedRegion.name} 해금!`
+    : existing
+      ? `${routeRecipeName(route.recipeId)} Lv.${level}! 판매 가격 +5%`
+      : `${automatic ? "자동 선택 제작" : "수동 제작"} · ${routeRecipeName(route.recipeId)} 완성!`, 3);
+  saveState();
+  updateHud();
+  if (!dom.menuScreen.hidden && state.ui.screen === "recipe") renderMenu();
+  return true;
+}
+
+function tryAutoCraft() {
+  const route = CORE_PROGRESSION.find((entry) => canCraftRecipe(entry.recipeId));
+  return route ? craftRecipe(route.recipeId, true) : false;
+}
+
+function grantGuestIngredient(guest) {
+  if (guest.itemGranted) return;
+  const route = progressionForCustomer(guest.customerId);
+  const ingredientId = Number(guest.ingredientId || route?.ingredientId || 0);
+  const ingredientEmoji = guest.ingredientEmoji || route?.ingredientEmoji;
+  const dropChance = Number(guest.dropChance ?? route?.dropChance ?? .5);
+  const customerName = guest.customerName || route?.customerName || `손님 ${guest.customerId}`;
+  if (!ingredientId) return;
+  guest.itemGranted = true;
+  state.metrics.ingredientDropAttempts += 1;
+  if (random() >= dropChance) {
+    state.metrics.ingredientDropMisses += 1;
+    saveState();
+    return;
+  }
+  const table = tables.installs.find((row) => row.id === guest.tableId);
+  const seat = table ? seatPositions(table).find((item) => item.id === guest.seatId) : null;
+  const tablePosition = table ? facilityPlacement(table) : { x: guest.x };
+  const side = Number(seat?.x ?? guest.x) < tablePosition.x ? -1 : 1;
+  state.ingredientDrops.push({
+    id: `ingredient-${state.dropSequence++}`,
+    ingredientId,
+    emoji: ingredientEmoji,
+    x: Math.max(32, Math.min(GAME_W - 32, Number(seat?.x ?? guest.x) + side * 18)),
+    y: Math.max(90, Math.min(GAME_H - 70, Number(seat?.y ?? guest.y) - 58)),
+  });
+  const ingredient = ingredientData(ingredientId);
+  showToast(`${customerName}가 ${ingredient?.ingredientName || "재료"}를 떨어뜨렸어요!`);
+  saveState();
+}
+
+function collectIngredientDrop(drop) {
+  state.crafting.ingredients[drop.ingredientId] = ingredientAmount(drop.ingredientId) + 1;
+  state.ingredientDrops = state.ingredientDrops.filter((item) => item.id !== drop.id);
+  state.metrics.ingredientsFound += 1;
+  const ingredient = ingredientData(drop.ingredientId);
+  showToast(`${ingredient?.ingredientName || "재료"} 1개 획득!`);
+  saveState();
+  updateHud();
+  render();
+}
+
+function resolveMeal(guest, forcedSatisfied = false) {
+  const recipe = getRecipe(guest.recipeId);
+  const common = commonForGuest(guest);
+  const favorite = (common.recipeIds || []).includes(guest.recipeId);
+  const specialRecipe = Number(recipe?.recipeGrade) === 3;
+  let mood = guest.mood;
+  if (forcedSatisfied || favorite || specialRecipe) mood = "satisfied";
+  else if (mood === "normal" && random() < Number(common.disappointProbability || 0)) mood = "disappointed";
+
+  if (mood === "disappointed" && !forcedSatisfied) {
+    guest.state = "disappointed";
+    guest.mood = "disappointed";
+    guest.stateTime = 0;
+    showToast("손님의 불만 말풍선을 눌러 달래 주세요.", 3);
+    return;
+  }
+
+  const multiplier = mood === "satisfied" ? Number(tables.customerSetting.FoodPriceSatisfactionMultiple || 1.5) : 1;
+  const owned = recipeData(guest.recipeId) || { level: 1 };
+  const performanceBonus = Number(activePerformance()?.abilityValue || 0);
+  const themeBonus = Object.values(state.themes.activeByFacility || {}).reduce((sum, id) => {
+    const row = tables.restaurantThemes.find((item) => item.id === Number(id));
+    return sum + Number(row?.abilityValue || 0);
+  }, 0);
+  const recipeCollectionBonus = Math.max(0, unlockedRecipeCount() - 1) * .05;
+  const upgradedPrice = Number(recipe?.foodPrice || 1)
+    * (1 + Math.max(0, owned.level - 1) * .05)
+    * (1 + performanceBonus + themeBonus + recipeCollectionBonus);
+  const mealPrice = Math.max(1, Math.round(upgradedPrice * multiplier));
+  addPayment(guest, mealPrice);
+  grantGuestIngredient(guest);
+
+  const hasTipbox = installedRows(3).length > 0;
+  if (hasTipbox && (mood === "satisfied" || random() < Number(common.tipProbability || 0))) {
+    state.tipbox += Math.max(1, Math.round(Number(recipe?.foodPrice || 1) * Number(common.tipRatio || 0)));
+  }
+
+  guest.mood = mood;
+  guest.state = "leaving";
+  guest.targetX = 240;
+  guest.targetY = 900;
+  guest.stateTime = 0;
+  state.metrics.served += 1;
+  saveState();
+}
+
+function addPayment(guest, amount) {
+  const table = tables.installs.find((row) => row.id === guest.tableId);
+  const seat = table ? seatPositions(table).find((item) => item.id === guest.seatId) : null;
+  const x = seat?.payX ?? guest.x;
+  const y = seat?.payY ?? guest.y + 50;
+  const existing = state.payments.find((payment) => payment.seatId === guest.seatId);
+  if (existing) {
+    existing.amount += amount;
+    existing.models = Math.min(20, existing.models + 1);
+  } else {
+    state.payments.push({ id: `pay-${guest.id}`, seatId: guest.seatId, x, y, amount, models: 1 });
+  }
+}
+
+function calmGuest(guest) {
+  if (guest.state !== "disappointed") return;
+  guest.mood = "satisfied";
+  resolveMeal(guest, true);
+  showToast("손님이 기분을 풀었어요!", 2);
+}
+
+function collectPayment(payment) {
+  state.resources.acorns += payment.amount;
+  state.metrics.collected += payment.amount;
+  state.payments = state.payments.filter((item) => item.id !== payment.id);
+  showToast(`도토리 ${formatNumber(payment.amount)} 획득!`);
+  saveState();
+  updateHud();
+}
+
+function collectTipbox() {
+  if (state.tipbox <= 0) return;
+  const amount = state.tipbox;
+  state.tipbox = 0;
+  state.resources.acorns += amount;
+  dispatchAchievement(7);
+  showToast(`팁 ${formatNumber(amount)} 획득!`);
+  saveState();
+  updateHud();
+}
+
+function updateGuests(dt) {
+  for (const guest of state.guests) {
+    guest.bob += dt;
+    guest.stateTime += dt;
+    if (guest.state === "arriving") {
+      if (moveTowards(guest, guest.targetX, guest.targetY, 165, dt)) {
+        guest.state = "awaiting_order";
+        guest.stateTime = 0;
+        guest.wait = 0;
+      }
+    } else if (guest.state === "awaiting_order") {
+      const common = commonForGuest(guest);
+      guest.wait += dt;
+      const angryStart = Number(common.waitingTime || 60);
+      const angryDuration = Number(tables.customerSetting.AngryTime || 10);
+      if (guest.wait >= angryStart + angryDuration) {
+        guest.state = "leaving";
+        guest.mood = "angry";
+        guest.targetX = 240;
+        guest.targetY = 900;
+        state.metrics.angryLeaves += 1;
+        showToast("주문을 기다리던 손님이 화가 나서 떠났어요.");
+      }
+    } else if (guest.state === "eating" && guest.stateTime >= 3.2) {
+      resolveMeal(guest);
+    } else if (guest.state === "disappointed" && guest.stateTime >= 6) {
+      guest.mood = "disappointed";
+      const recipe = getRecipe(guest.recipeId);
+      addPayment(guest, Math.max(1, Math.round(Number(recipe?.foodPrice || 1))));
+      grantGuestIngredient(guest);
+      guest.state = "leaving";
+      guest.targetX = 240;
+      guest.targetY = 900;
+      state.metrics.served += 1;
+    } else if (guest.state === "leaving") {
+      moveTowards(guest, guest.targetX, guest.targetY, guest.mood === "angry" ? 230 : 155, dt);
+    }
+  }
+
+  const before = state.guests.length;
+  state.guests = state.guests.filter((guest) => !(guest.state === "leaving" && guest.y >= 896));
+  if (state.guests.length !== before) {
+    trySpawnQueuedGuest();
+    saveState();
+  }
+}
+
+function updateCooking(dt) {
+  for (const task of state.cooking) task.elapsed += dt;
+  const completed = state.cooking.filter((task) => task.elapsed >= task.duration);
+  if (completed.length) {
+    completed.forEach(finishCooking);
+    const completeIds = new Set(completed.map((task) => `${task.stoveId}-${task.guestId}`));
+    state.cooking = state.cooking.filter((task) => !completeIds.has(`${task.stoveId}-${task.guestId}`));
+    startCookingIfPossible();
+    saveState();
+  }
+}
+
 function update(dt) {
   state.clock += dt;
-  state.chef.anim += dt;
-  ensureDailyFresh();
-
-  // 손님 업데이트
-  for (const cust of state.customers) {
-    cust.bob += dt;
-    if (cust.state === "walking") {
-      const dx = cust.targetX - cust.x;
-      const dy = cust.targetY - cust.y;
-      const d = Math.hypot(dx, dy);
-      const speed = 110;
-      if (d <= speed * dt) {
-        cust.x = cust.targetX;
-        cust.y = cust.targetY;
-        cust.state = "awaiting_order";
-        cust.timer = 0;
-      } else {
-        cust.x += (dx / d) * speed * dt;
-        cust.y += (dy / d) * speed * dt;
-      }
-    } else if (cust.state === "awaiting_order") {
-      // 주문 대기 (UI 처리)
-    } else if (cust.state === "waiting") {
-      // 조리 대기
-    } else if (cust.state === "eating") {
-      cust.timer += dt;
-      if (cust.timer >= cust.total) {
-        // 식사 완료 → 결제
-        const recipe = RECIPE_RARITY[cust.recipeId];
-        const stars = state.recipes[cust.recipeId]?.stars || 1;
-        const themeBoost = totalThemeBoost();
-        const payout = Math.round(recipe.basePrice * priceMultiplierForStars(stars) * (1 + themeBoost));
-        state.resources.acorns += payout;
-        state.metrics.served += 1;
-        state.daily.served += 1;
-        spawnPayoutToast(cust, payout);
-        cust.state = "leaving";
-        cust.targetX = ENTRANCE.x;
-        cust.targetY = ENTRANCE.y + 60;
-      }
-    } else if (cust.state === "leaving") {
-      const dx = cust.targetX - cust.x;
-      const dy = cust.targetY - cust.y;
-      const d = Math.hypot(dx, dy);
-      const speed = 130;
-      if (d <= speed * dt) {
-        cust.x = cust.targetX;
-        cust.y = cust.targetY;
-        cust._done = true;
-      } else {
-        cust.x += (dx / d) * speed * dt;
-        cust.y += (dy / d) * speed * dt;
-      }
-    }
+  if (toastTimer > 0) {
+    toastTimer -= dt;
+    if (toastTimer <= 0) dom.toast.hidden = true;
   }
-  state.customers = state.customers.filter((c) => !c._done);
-
-  // 펜딩 스폰 처리
-  if (state.promo.pendingSpawns > 0 && findFreeTable()) {
-    state.promo.pendingSpawns -= 1;
-    spawnCustomer();
-  }
-
-  // 조리 진행
-  for (const task of state.cookingTasks) {
-    task.progress += dt;
-    if (task.progress >= task.duration) {
-      // 자동 서빙
-      const cust = state.customers.find((c) => c.id === task.customerId);
-      if (cust) {
-        cust.state = "eating";
-        cust.timer = 0;
-        cust.total = 3.4; // 식사 시간
-      }
-      task._done = true;
-    }
-  }
-  state.cookingTasks = state.cookingTasks.filter((t) => !t._done);
-
-  // 요리사: 항상 정위치 — 조리는 화구가 자동으로 처리
-  // (기획서: 요리사는 연구 전용, 조리는 각 조리기구에서 자동)
-  const dx = CHEF_HOME.x - state.chef.x;
-  const dy = CHEF_HOME.y - state.chef.y;
-  const d = Math.hypot(dx, dy);
-  if (d > 0.5) {
-    state.chef.x += (dx / d) * Math.min(120 * dt, d);
-    state.chef.y += (dy / d) * Math.min(120 * dt, d);
-  }
-  state.chef.mode = state.ui.chefBubbleOpen ? "research" : "idle";
-
-  tryStartCooking();
-  pruneToasts();
+  updateGuests(dt);
+  updateSpecialCustomers(dt);
+  updateCooking(dt);
+  updateStaff(dt);
+  updatePerformance(dt);
+  startCookingIfPossible();
+  updateHud();
 }
 
-function totalThemeBoost() {
-  // 설치된 시설의 테마 보너스 합산 (기획서: 시설별 테마가 곱적용 → 단순 합산으로 근사)
-  let sum = 0;
-  // 항상 카운팅: table, stove, entrance(있을 때), backrow installed, singles installed
-  sum += THEME_DEFS.table.find((t) => t.id === state.themes.table).boost;
-  sum += THEME_DEFS.stove.find((t) => t.id === state.themes.stove).boost;
-  for (const f of state.facilities.singles) {
-    const k = SLOT_THEME_KEY[f.slotId];
-    if (k && THEME_DEFS[k]) sum += THEME_DEFS[k].find((t) => t.id === state.themes[k]).boost;
+function getImage(src) {
+  if (!imageCache.has(src)) {
+    const image = new Image();
+    image.onload = render;
+    image.src = src;
+    imageCache.set(src, image);
   }
-  for (const f of state.facilities.backrow) {
-    const k = SLOT_THEME_KEY[f.slotId];
-    if (k && THEME_DEFS[k]) sum += THEME_DEFS[k].find((t) => t.id === state.themes[k]).boost;
-  }
-  return sum;
+  return imageCache.get(src);
 }
 
-// ===== 토스트 =====
-const toasts = [];
-function showToast(text) {
-  const node = document.createElement("div");
-  node.className = "toast";
-  node.textContent = text;
-  document.getElementById("toast-area").appendChild(node);
-  toasts.push({ node, until: performance.now() + 2200 });
-}
-function pruneToasts() {
-  const now = performance.now();
-  while (toasts.length && toasts[0].until <= now) {
-    const t = toasts.shift();
-    t.node.remove();
-  }
+function drawImage(src, x, y, width, height, alpha = 1) {
+  const image = getImage(src);
+  if (!image.complete || !image.naturalWidth) return false;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(image, x - width / 2, y - height / 2, width, height);
+  ctx.restore();
+  return true;
 }
 
-const payoutFx = []; // {x, y, value, age}
-function spawnPayoutToast(cust, value) {
-  payoutFx.push({ x: cust.x, y: cust.y - 60, value, age: 0 });
-}
-
-// ===== 렌더링 =====
-function draw() {
-  ctx.clearRect(0, 0, GAME_W, GAME_H);
-  drawBackground();
-  drawDecorBack();
-  drawBackrow();
-  drawStoves();
-  drawChef();
-  drawTables();
-  drawSingles();
-  drawCustomers();
-  drawQueue();
-  drawCookingFood();
-  drawDottedZones();
-  drawEntrance();
-  drawPayoutFx();
+function roundRect(x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, width, height, radius);
 }
 
 function drawBackground() {
-  // 풀밭
-  const grad = ctx.createLinearGradient(0, 0, 0, GAME_H);
-  grad.addColorStop(0, "#759c4f");
-  grad.addColorStop(1, "#83a85a");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, GAME_W, GAME_H);
-
-  // 부엌 영역 (위쪽, 뒷줄 + 화구 줄)
-  ctx.fillStyle = "#a99066";
-  ctx.fillRect(0, 80, GAME_W, 260);
-  ctx.fillStyle = "rgba(80, 60, 30, 0.22)";
-  ctx.fillRect(0, 336, GAME_W, 4);
-
-  // 부엌-손님 구역 사이 돌길
-  ctx.fillStyle = "#c8b88a";
-  ctx.fillRect(GAME_W/2 - 60, 340, 120, 90);
-
-  // 손님 영역 (중앙)
-  ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-  ctx.beginPath();
-  ctx.ellipse(GAME_W / 2, 620, 230, 200, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 출입구로 이어지는 길 — 문 앞 큐 영역까지
-  ctx.fillStyle = "#c8b88a";
-  ctx.fillRect(GAME_W/2 - 36, 800, 72, 220);
-
-  // 나무
-  drawTree(28, 50, 32);
-  drawTree(GAME_W - 28, 50, 32);
-  drawTree(20, 820, 30);
-  drawTree(GAME_W - 22, 820, 32);
-  drawTree(36, 1000, 26);
-  drawTree(GAME_W - 36, 1000, 28);
-}
-function drawTree(cx, cy, r) {
-  ctx.fillStyle = "#3e6a3a";
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "rgba(20, 60, 22, 0.35)";
-  ctx.beginPath();
-  ctx.arc(cx + r * 0.3, cy + r * 0.35, r * 0.7, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function drawDecorBack() {
-  // 부엌 뒷벽
-  ctx.fillStyle = "#7d5d36";
-  ctx.fillRect(0, 80, GAME_W, 12);
-}
-
-function drawBackrow() {
-  // 설치된 뒷줄 시설(도마/싱크/냉장고/조리도구함)
-  for (const f of state.facilities.backrow) {
-    const slot = BACKROW_SLOTS[f.slotId];
-    if (!slot) continue;
-    const themeKey = SLOT_THEME_KEY[f.slotId];
-    const themeDef = THEME_DEFS[themeKey].find((t) => t.id === state.themes[themeKey]);
-    const img = getImage(themeDef.icon);
-    drawShadow(slot.x, slot.y + slot.h/2 - 4, slot.w * 0.45, 7);
-    if (!drawImageScaled(img, slot.x, slot.y, slot.w, slot.h)) {
-      ctx.fillStyle = "#b8946d";
-      ctx.fillRect(slot.x - slot.w/2, slot.y - slot.h/2, slot.w, slot.h);
-    }
+  const background = getImage("assets/BG.png");
+  if (background.complete && background.naturalWidth) {
+    const scale = Math.max(GAME_W / background.naturalWidth, GAME_H / background.naturalHeight);
+    const width = background.naturalWidth * scale;
+    const height = background.naturalHeight * scale;
+    ctx.drawImage(background, (GAME_W - width) / 2, (GAME_H - height) / 2, width, height);
+  } else {
+    ctx.fillStyle = "#9aaf67";
+    ctx.fillRect(0, 0, GAME_W, GAME_H);
   }
 }
 
-function drawSingles() {
-  // 무대/팁박스/조명/울타리 등 설치된 단일 시설 (출입구는 별도 함수)
-  for (const f of state.facilities.singles) {
-    if (f.slotId === "entrance") continue; // 출입구는 drawEntrance에서
-    const slot = SINGLE_SLOTS[f.slotId];
-    if (!slot) continue;
-    const themeKey = SLOT_THEME_KEY[f.slotId];
-    const themeDef = THEME_DEFS[themeKey].find((t) => t.id === state.themes[themeKey]);
-    const img = getImage(themeDef.icon);
-    if (f.slotId !== "fence") drawShadow(slot.x, slot.y + slot.h/2 - 6, slot.w * 0.4, 8);
-    if (!drawImageScaled(img, slot.x, slot.y, slot.w, slot.h)) {
-      ctx.fillStyle = "#9a7a4c";
-      ctx.fillRect(slot.x - slot.w/2, slot.y - slot.h/2, slot.w, slot.h);
-    }
-  }
-}
-
-function drawStoves() {
-  const theme = THEME_DEFS.stove.find((t) => t.id === state.themes.stove);
-  const img = getImage(theme.icon);
-  for (const stove of state.facilities.stoves) {
-    const slot = slotMeta("stove", stove.slotId);
-    if (!slot) continue;
-    drawShadow(slot.x, slot.y + 30, 36, 8);
-    if (!drawImageScaled(img, slot.x, slot.y, 78, 78)) {
-      ctx.fillStyle = "#7a5a36";
-      ctx.fillRect(slot.x - 30, slot.y - 30, 60, 60);
-    }
-    // 조리중 불꽃
-    const task = state.cookingTasks.find((t) => t.stoveId === slot.slotId);
-    if (task) {
-      const t = state.clock * 8;
-      ctx.fillStyle = `rgba(255, 160, 50, ${0.6 + Math.sin(t) * 0.2})`;
-      ctx.beginPath();
-      ctx.arc(slot.x, slot.y - 14, 6 + Math.sin(t * 0.7) * 1.5, 0, Math.PI * 2);
-      ctx.fill();
-      // 진행 바
-      const w = 44, h = 5, ratio = task.progress / task.duration;
-      ctx.fillStyle = "rgba(0,0,0,0.35)";
-      ctx.fillRect(slot.x - w/2, slot.y + 38, w, h);
-      ctx.fillStyle = "#ffd566";
-      ctx.fillRect(slot.x - w/2, slot.y + 38, w * ratio, h);
-    }
-  }
-}
-
-function drawTables() {
-  const theme = THEME_DEFS.table.find((t) => t.id === state.themes.table);
-  const img = getImage(theme.icon);
-  for (const table of state.facilities.tables) {
-    const slot = slotMeta("table", table.slotId);
-    if (!slot) continue;
-    drawShadow(slot.x, slot.y + 28, 44, 9);
-    if (!drawImageScaled(img, slot.x, slot.y, 96, 80)) {
-      ctx.fillStyle = "#cf9c5b";
-      ctx.fillRect(slot.x - 36, slot.y - 30, 72, 60);
-    }
-  }
-}
-
-function drawShadow(cx, cy, rx, ry) {
-  ctx.fillStyle = "rgba(20, 22, 14, 0.22)";
+function drawShadow(x, y, rx, ry) {
+  ctx.fillStyle = "rgba(44,35,19,.24)";
   ctx.beginPath();
-  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
   ctx.fill();
+}
+
+function drawFacility(row) {
+  const meta = FACILITY_META[row.facilityType] || FACILITY_META[1];
+  const p = facilityPlacement(row);
+  const activeThemeId = state.themes.activeByFacility[row.facilityType];
+  const activeTheme = tables.restaurantThemes.find((item) => item.id === Number(activeThemeId));
+  const icon = activeTheme ? themeFacilityIcon(activeTheme) : meta.icon;
+  if (row.facilityType !== 10 && row.facilityType !== 11) drawShadow(p.x, p.y + p.h * .38, p.w * .33, 7);
+  if (!drawImage(icon, p.x, p.y, p.w, p.h)) {
+    ctx.fillStyle = "#a77a46";
+    roundRect(p.x - p.w / 2, p.y - p.h / 2, p.w, p.h, 14);
+    ctx.fill();
+  }
+}
+
+function drawInstallZone(row) {
+  const p = facilityPlacement(row);
+  const pulse = .72 + Math.sin(state.clock * 3 + row.id) * .18;
+  ctx.save();
+  ctx.fillStyle = `rgba(255,247,214,${.88 + pulse * .08})`;
+  ctx.strokeStyle = "rgba(105,67,31,.78)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 23, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#9c632a";
+  ctx.font = "900 27px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("+", p.x, p.y - 1);
+  ctx.fillStyle = "rgba(61,43,24,.88)";
+  roundRect(p.x - 37, p.y + 27, 74, 25, 13);
+  ctx.fill();
+  drawImage("assets/ui/currency/icon_currency_001.png", p.x - 23, p.y + 39, 20, 20);
+  ctx.fillStyle = "#fff8df";
+  ctx.font = "900 12px sans-serif";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText(formatNumber(row.facilityPrice), p.x + 10, p.y + 43);
+  ctx.restore();
 }
 
 function drawChef() {
-  const x = state.chef.x;
-  const y = state.chef.y;
-  const bob = Math.sin(state.chef.anim * 4) * 1.4;
-  // 탭 시 강조 링
-  if (state.ui.chefBubbleOpen) {
-    ctx.save();
-    ctx.strokeStyle = "rgba(255, 213, 102, 0.85)";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.ellipse(x, y + 28, 38, 12, 0, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-  }
-  drawShadow(x, y + 28, 22, 6);
-  const img = getImage("Icon/Chick/Icon_Chick_099.png");
-  if (!drawImageScaled(img, x, y - 6 + bob, 76, 76)) {
-    ctx.fillStyle = "#f4cf48";
-    ctx.beginPath();
-    ctx.arc(x, y + bob, 22, 0, Math.PI * 2);
+  const x = 400;
+  const y = 330;
+  const bob = Math.sin(state.clock * 3.4) * 2;
+  drawShadow(x, y + 31, 25, 7);
+  drawImage("assets/ui/chick/icon_chick_chef.png", x, y + bob, 82, 82);
+}
+
+function drawStoveProgress() {
+  for (const task of state.cooking) {
+    const stove = tables.installs.find((row) => row.id === task.stoveId);
+    if (!stove) continue;
+    const p = facilityPlacement(stove);
+    const ratio = Math.min(1, task.elapsed / task.duration);
+    drawImage(routeRecipeIcon(task.recipeId), p.x, p.y - 36, 34, 34);
+    ctx.fillStyle = "rgba(55,37,20,.72)";
+    roundRect(p.x - 31, p.y + 38, 62, 10, 5);
+    ctx.fill();
+    const gradient = ctx.createLinearGradient(p.x - 29, 0, p.x + 29, 0);
+    gradient.addColorStop(0, "#ffe86b");
+    gradient.addColorStop(1, "#ff8b36");
+    ctx.fillStyle = gradient;
+    roundRect(p.x - 29, p.y + 40, 58 * ratio, 6, 3);
     ctx.fill();
   }
-  // 연구 중 전구
-  if (state.ui.chefBubbleOpen) {
-    ctx.font = "bold 18px sans-serif";
-    ctx.fillStyle = "#fff";
-    ctx.textAlign = "center";
-    ctx.fillText("💡", x, y - 38 + bob);
-  }
 }
 
-function drawQueue() {
-  // 출입구 앞 줄서기 — pendingSpawns 만큼 보이게
-  const pending = Math.min(QUEUE_SLOTS.length, state.promo.pendingSpawns);
-  if (pending <= 0) return;
-  const img = getImage("Icon/Chick/Icon_Chick_001.png");
-  for (let i = 0; i < pending; i += 1) {
-    const slot = QUEUE_SLOTS[i];
-    const bob = Math.sin((state.clock + i * 0.7) * 3) * 1.5;
-    drawShadow(slot.x, slot.y + 18, 14, 4);
-    if (!drawImageScaled(img, slot.x, slot.y + bob, 48, 48)) {
-      ctx.fillStyle = "#f6c14f";
-      ctx.beginPath();
-      ctx.arc(slot.x, slot.y + bob, 16, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
+function guestIcon(guest) {
+  const customer = tables.customers.find((row) => row.id === Number(guest.customerId));
+  const commonId = Number(guest.commonId || (customer?.assetType === 105 ? customer.assetId : 1001));
+  const index = Math.max(1, Math.min(45, commonId - 1000));
+  return `assets/ui/chick/icon_chick_${String(index).padStart(3, "0")}.png`;
 }
 
-function drawCustomers() {
-  // 손님 정렬 (y기준)
-  const sorted = [...state.customers].sort((a, b) => a.y - b.y);
-  const img = getImage("Icon/Chick/Icon_Chick_001.png");
-  for (const cust of sorted) {
-    const bob = Math.sin(cust.bob * 3.4) * 1.6;
-    drawShadow(cust.x, cust.y + 22, 16, 5);
-    if (!drawImageScaled(img, cust.x, cust.y + bob, 56, 56)) {
-      ctx.fillStyle = cust.color;
-      ctx.beginPath();
-      ctx.arc(cust.x, cust.y + bob, 18, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    // 주문 말풍선
-    if (cust.state === "awaiting_order") {
-      drawOrderBubble(cust);
-    } else if (cust.state === "eating") {
-      ctx.font = "bold 14px sans-serif";
-      ctx.fillStyle = "#fff";
-      ctx.textAlign = "center";
-      ctx.fillText("😋", cust.x, cust.y - 32);
-    }
-  }
-}
-
-function drawOrderBubble(cust) {
-  const pos = orderBubblePos(cust);
-  const cx = pos.x;
-  const cy = pos.y;
-  const w = 60, h = 52;
-  // 그림자
-  ctx.fillStyle = "rgba(0,0,0,0.18)";
-  roundRect(cx - w/2 + 2, cy - h/2 + 4, w, h, 12);
+function drawSpeechBubble(x, y, width = 64, height = 58) {
+  ctx.fillStyle = "rgba(66,45,24,.2)";
+  roundRect(x - width / 2 + 2, y - height / 2 + 4, width, height, 15);
   ctx.fill();
-  // 말풍선
-  ctx.fillStyle = "#fffaee";
-  ctx.strokeStyle = "#c2a062";
+  ctx.fillStyle = "#fffaf0";
+  ctx.strokeStyle = "#8c6337";
   ctx.lineWidth = 2;
-  roundRect(cx - w/2, cy - h/2, w, h, 12);
+  roundRect(x - width / 2, y - height / 2, width, height, 15);
   ctx.fill();
   ctx.stroke();
-  // 꼬리
   ctx.beginPath();
-  ctx.moveTo(cx - 6, cy + h/2 - 1);
-  ctx.lineTo(cx, cy + h/2 + 10);
-  ctx.lineTo(cx + 6, cy + h/2 - 1);
+  ctx.moveTo(x - 7, y + height / 2 - 2);
+  ctx.lineTo(x, y + height / 2 + 9);
+  ctx.lineTo(x + 7, y + height / 2 - 2);
   ctx.closePath();
-  ctx.fillStyle = "#fffaee";
   ctx.fill();
   ctx.stroke();
-  // 레시피 아이콘
-  const recipeIcon = getImage(`assets/recipe-icons/${cust.recipeId}.png`);
-  if (!drawImageScaled(recipeIcon, cx, cy - 4, 38, 38)) {
-    ctx.fillStyle = "#7a5a36";
-    ctx.font = "bold 11px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(RECIPE_NAME_BY_ID[cust.recipeId] || cust.recipeId, cx, cy);
-  }
-  // 톡 표시 (애니메이션)
-  if (Math.floor(state.clock * 2) % 2 === 0) {
-    ctx.fillStyle = "#d97a1a";
-    ctx.beginPath();
-    ctx.arc(cx + w/2 - 8, cy - h/2 + 8, 4, 0, Math.PI * 2);
-    ctx.fill();
-  }
 }
 
-function drawCookProgress(task) {
-  const slot = slotMeta("stove", task.stoveId);
-  if (!slot) return;
-  const ratio = Math.max(0, Math.min(1, task.progress / task.duration));
-  const remain = Math.max(0, task.duration - task.progress);
-  const cx = slot.x;
-  const cy = slot.y - 56;
-  const w = 56, h = 10;
-  // 배경
-  ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
-  roundRect(cx - w/2 - 1, cy - h/2 - 1, w + 2, h + 2, 6);
-  ctx.fill();
-  // 채움
-  const grad = ctx.createLinearGradient(cx - w/2, 0, cx + w/2, 0);
-  grad.addColorStop(0, "#ffd566");
-  grad.addColorStop(1, "#ff9d3a");
-  ctx.fillStyle = grad;
-  roundRect(cx - w/2, cy - h/2, w * ratio, h, 5);
-  ctx.fill();
-  // 남은 초
-  ctx.font = "bold 10px sans-serif";
-  ctx.fillStyle = "#fff";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(`${remain.toFixed(1)}s`, cx, cy);
-  ctx.textBaseline = "alphabetic";
-}
-
-function drawCookingFood() {
-  for (const task of state.cookingTasks) {
-    const slot = slotMeta("stove", task.stoveId);
-    if (!slot) continue;
-    const r = 14 + Math.sin(state.clock * 5) * 1.5;
-    const recipeIcon = getImage(`assets/recipe-icons/${task.recipeId}.png`);
-    if (!drawImageScaled(recipeIcon, slot.x, slot.y - 24, r * 1.6, r * 1.6)) {
-      ctx.fillStyle = "#fff";
+function drawGuest(guest) {
+  const bob = Math.sin(guest.bob * 4) * 2;
+  drawShadow(guest.x, guest.y + 25, 18, 5);
+  if (guest.state === "awaiting_order") {
+    const common = commonForGuest(guest);
+    const angryStart = Number(common.waitingTime || 60);
+    const angryDuration = Number(tables.customerSetting.AngryTime || 10);
+    const anger = Math.max(0, Math.min(1, (guest.wait - angryStart) / angryDuration));
+    if (anger > 0) {
+      ctx.fillStyle = `rgba(224,54,38,${anger * .42})`;
       ctx.beginPath();
-      ctx.arc(slot.x, slot.y - 24, r, 0, Math.PI * 2);
+      ctx.arc(guest.x, guest.y, 31, 0, Math.PI * 2);
       ctx.fill();
     }
-    drawCookProgress(task);
   }
-}
+  drawImage(guestIcon(guest), guest.x, guest.y + bob, 61, 61);
 
-function drawDottedZones() {
-  if (state.ui.installCandidateId !== null) return; // 말풍선 떠 있을 땐 안 그림
-  for (const cand of getInstallCandidates()) {
-    const b = candidateBox(cand);
-    if (!b) continue;
-    const pulse = 0.5 + 0.5 * Math.sin(state.clock * 3);
-    ctx.save();
-    ctx.translate(b.x, b.y);
-    // 점선 사각형
-    ctx.strokeStyle = `rgba(255, 240, 180, ${0.55 + pulse * 0.35})`;
-    ctx.lineWidth = 2.5;
-    ctx.setLineDash([6, 5]);
-    roundRect(-b.w/2, -b.h/2, b.w, b.h, 10);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    // 가격 라벨 + 시설 아이콘 (PDF 기획서: 점선 영역 안에 비용 표시)
-    const acornIcon = getImage("Icon/Currency/Icon_Currency_001.png");
-    const lblW = Math.max(70, 24 + String(cand.cost).length * 8);
-    const lx = 0, ly = b.h/2 - 14;
-    ctx.fillStyle = "rgba(40, 28, 12, 0.82)";
-    roundRect(lx - lblW/2, ly - 12, lblW, 24, 12);
-    ctx.fill();
-    drawImageScaled(acornIcon, lx - lblW/2 + 14, ly, 18, 18);
-    ctx.fillStyle = "#fff8e3";
-    ctx.font = "bold 13px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(formatNumber(cand.cost), lx - lblW/2 + 26, ly + 5);
-    ctx.restore();
-  }
-}
-
-function drawEntrance() {
-  // 출입구는 설치된 경우에만 표시 (없으면 풀밭 길만)
-  const installed = state.facilities.singles.some((f) => f.slotId === "entrance");
-  if (!installed) return;
-  const theme = THEME_DEFS.entrance.find((t) => t.id === state.themes.entrance);
-  const img = getImage(theme.icon);
-  const x = ENTRANCE.x;
-  const y = ENTRANCE.y;
-  drawShadow(x, y + 60, 60, 10);
-  if (!drawImageScaled(img, x, y, 130, 130)) {
-    ctx.fillStyle = "#7a5a36";
-    ctx.fillRect(x - 50, y - 50, 100, 100);
-  }
-}
-
-function drawPayoutFx() {
-  for (const fx of payoutFx) {
-    fx.age += FIXED_DT;
-    const alpha = Math.max(0, 1 - fx.age / 1.4);
-    const rise = fx.age * 24;
-    ctx.fillStyle = `rgba(80, 50, 12, ${alpha})`;
-    ctx.font = "bold 14px sans-serif";
+  if (guest.state === "awaiting_order") {
+    const bx = guest.x;
+    const by = guest.y - 58;
+    drawSpeechBubble(bx, by);
+    drawImage(routeRecipeIcon(guest.recipeId), bx, by - 2, 40, 40);
+  } else if (guest.state === "waiting_food") {
+    ctx.font = "900 20px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(`🌰 +${formatNumber(fx.value)}`, fx.x, fx.y - rise);
-  }
-  for (let i = payoutFx.length - 1; i >= 0; i -= 1) {
-    if (payoutFx[i].age >= 1.4) payoutFx.splice(i, 1);
+    ctx.fillText("…", guest.x, guest.y - 40);
+  } else if (guest.state === "eating") {
+    drawImage(routeRecipeIcon(guest.recipeId), guest.x, guest.y - 42, 34, 34);
+  } else if (guest.state === "disappointed") {
+    drawSpeechBubble(guest.x, guest.y - 58, 58, 52);
+    drawImage("assets/ui/common/icon_feel_angry.png", guest.x, guest.y - 50, 30, 30);
+  } else if (guest.mood === "satisfied") {
+    ctx.font = "900 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("♥", guest.x, guest.y - 38);
   }
 }
 
-function roundRect(x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-}
-
-// ===== HUD 업데이트 =====
-const dom = {
-  acorn: document.getElementById("acorn-count"),
-  gem: document.getElementById("gem-count"),
-  promoFill: document.getElementById("promotion-fill"),
-  promoText: document.getElementById("promotion-text"),
-  installBubble: document.getElementById("install-bubble"),
-  installBubbleIcon: document.getElementById("install-bubble-icon"),
-  installBubbleTitle: document.getElementById("install-bubble-title"),
-  installBubbleDesc: document.getElementById("install-bubble-desc"),
-  installBubbleCost: document.getElementById("install-bubble-cost"),
-  installConfirmBtn: document.getElementById("install-confirm-btn"),
-  recipeBadge: document.getElementById("recipe-badge"),
-  taskBadge: document.getElementById("task-badge"),
-  researchBubble: document.getElementById("research-bubble"),
-  researchCost: document.getElementById("research-cost"),
-  researchStartBtn: document.getElementById("research-start-btn"),
-  researchCancelBtn: document.getElementById("research-cancel-btn"),
-  panelOverlay: document.getElementById("panel-overlay"),
-  panelTitle: document.getElementById("panel-title"),
-  panelBody: document.getElementById("panel-body"),
-  panelCloseBtn: document.getElementById("panel-close-btn"),
-  researchVignette: document.getElementById("research-vignette"),
-  resultOverlay: document.getElementById("research-result-overlay"),
-  resultIcon: document.getElementById("research-result-icon"),
-  resultName: document.getElementById("research-result-name"),
-  resultRarity: document.getElementById("research-result-rarity"),
-  resultKicker: document.getElementById("research-result-kicker"),
-  resultConfirm: document.getElementById("research-result-confirm"),
-  enhanceOverlay: document.getElementById("enhance-overlay"),
-  enhanceIcon: document.getElementById("enhance-icon"),
-  enhanceName: document.getElementById("enhance-name"),
-  enhanceStars: document.getElementById("enhance-stars"),
-  enhanceConfirm: document.getElementById("enhance-confirm"),
-};
-
-function refreshHud() {
-  dom.acorn.textContent = formatNumber(state.resources.acorns);
-  dom.gem.textContent = formatNumber(state.resources.gems);
-  const ratio = Math.max(0, Math.min(1, state.promo.progress / state.promo.threshold));
-  dom.promoFill.style.width = `${ratio * 100}%`;
-  dom.promoText.textContent = `${state.promo.progress} / ${state.promo.threshold}`;
-
-  // 메뉴 배지: 강화 가능(중복 보유) + 미확인 신규 메뉴 합산
-  let badge = 0;
-  for (const id of RECIPE_LIST) {
-    const owned = state.recipes[id];
-    if (!owned) continue;
-    if (owned.dupes > 0 && owned.stars < MAX_STARS) badge += 1;
-  }
-  if (badge > 0) {
-    dom.recipeBadge.hidden = false;
-    dom.recipeBadge.textContent = String(badge);
-  } else {
-    dom.recipeBadge.hidden = true;
-  }
-
-  // 할 일 배지: 보상 수령 가능한 할 일 수
-  const taskBadge = countClaimableTasks();
-  if (dom.taskBadge) {
-    if (taskBadge > 0) {
-      dom.taskBadge.hidden = false;
-      dom.taskBadge.textContent = String(taskBadge);
-    } else {
-      dom.taskBadge.hidden = true;
+function drawSpecialCustomers() {
+  for (const actor of state.specialActors) {
+    drawShadow(actor.x, actor.y + 26, 20, 6);
+    const icon = actor.specialId === 2 ? "assets/ui/chick/icon_chick_rich.png" : "assets/ui/chick/icon_chick_007.png";
+    drawImage(icon, actor.x, actor.y, 68, 68);
+    if (actor.specialId === 1 && actor.state !== "caught") {
+      ctx.fillStyle = "#e63e32";
+      ctx.font = "900 22px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("!", actor.x, actor.y - 42);
     }
   }
+}
 
-  // 설치 말풍선
-  if (state.ui.installCandidateId !== null) {
-    const cand = INSTALL_SEQUENCE[state.ui.installCandidateId];
-    if (cand && !isSlotInstalled(cand.kind, cand.slotId)) {
-      const slot = slotMeta(cand.kind, cand.slotId);
-      // 위쪽 영역(뒷줄/조명)은 말풍선이 화면 밖으로 나가지 않도록 아래로 뒤집기
-      const flipDown = slot.y < 260;
-      const halfH = slot.h ? slot.h / 2 : 39;
-      const anchorY = flipDown ? (slot.y + halfH + 6) : (slot.y - halfH - 6);
-      const screen = canvasToScreen(slot.x, anchorY);
-      dom.installBubble.dataset.flip = flipDown ? "down" : "up";
-      dom.installBubble.style.left = `${screen.x}px`;
-      dom.installBubble.style.top = `${screen.y}px`;
-      dom.installBubble.hidden = false;
-      dom.installBubbleTitle.textContent = cand.title;
-      dom.installBubbleDesc.textContent = cand.desc;
-      dom.installBubbleCost.textContent = formatNumber(cand.cost);
-      // 현재 적용 테마 아이콘으로 표시
-      const themeKey = (cand.kind === "table") ? "table"
-                     : (cand.kind === "stove") ? "stove"
-                     : SLOT_THEME_KEY[cand.slotId];
-      const themeId = state.themes[themeKey];
-      const themeDef = THEME_DEFS[themeKey].find((t) => t.id === themeId);
-      dom.installBubbleIcon.innerHTML = `<img src="${themeDef.icon}" alt="" />`;
-      dom.installConfirmBtn.disabled = state.resources.acorns < cand.cost;
-    } else {
-      state.ui.installCandidateId = null;
-      dom.installBubble.hidden = true;
+function drawPayments() {
+  for (const payment of state.payments) {
+    const visible = Math.min(4, payment.models);
+    for (let i = 0; i < visible; i += 1) {
+      const angle = (i / Math.max(1, visible)) * Math.PI * 2;
+      drawImage("assets/ui/currency/icon_currency_001.png", payment.x + Math.cos(angle) * 11, payment.y + Math.sin(angle) * 5, 29, 29);
     }
-  } else {
-    dom.installBubble.hidden = true;
-  }
-
-  // 연구 말풍선 — 요리사 아래에 위치 (PDF 기획서)
-  if (state.ui.chefBubbleOpen) {
-    const screen = canvasToScreen(state.chef.x, state.chef.y + 36);
-    dom.researchBubble.style.left = `${screen.x}px`;
-    dom.researchBubble.style.top = `${screen.y}px`;
-    dom.researchBubble.hidden = false;
-    if (dom.researchVignette) dom.researchVignette.hidden = false;
-    const cost = researchCostForCount(state.researchCount);
-    dom.researchCost.textContent = formatNumber(cost);
-    const blocked = !canResearch();
-    dom.researchStartBtn.disabled = blocked || state.resources.acorns < cost;
-  } else {
-    dom.researchBubble.hidden = true;
-    if (dom.researchVignette) dom.researchVignette.hidden = true;
+    ctx.fillStyle = "rgba(57,39,20,.88)";
+    roundRect(payment.x - 31, payment.y + 17, 62, 22, 11);
+    ctx.fill();
+    ctx.fillStyle = "white";
+    ctx.font = "900 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(formatNumber(payment.amount), payment.x, payment.y + 32);
   }
 }
 
-// ===== 설치 클릭 처리 =====
-function handleCanvasClick(cx, cy) {
-  // 우선순위: 주문 말풍선 → 설치 후보 → 요리사 → 빈 클릭
-  if (acceptOrderAt(cx, cy)) return;
-
-  // 요리사 클릭
-  const dx = cx - state.chef.x;
-  const dy = cy - (state.chef.y - 6);
-  if (dx * dx + dy * dy < 38 * 38 && !state.ui.panel) {
-    state.ui.chefBubbleOpen = !state.ui.chefBubbleOpen;
-    state.ui.installCandidateId = null;
-    refreshHud();
-    return;
-  }
-
-  // 설치 후보 클릭
-  const cand = findCandidateAt(cx, cy);
-  if (cand) {
-    state.ui.installCandidateId = cand.index;
-    state.ui.chefBubbleOpen = false;
-    refreshHud();
-    return;
-  }
-
-  // 빈 곳 클릭 → 말풍선 닫기
-  if (state.ui.installCandidateId !== null || state.ui.chefBubbleOpen) {
-    state.ui.installCandidateId = null;
-    state.ui.chefBubbleOpen = false;
-    refreshHud();
-  }
+function drawIngredientDrops() {
+  state.ingredientDrops.forEach((drop, index) => {
+    const bob = Math.sin(state.clock * 3.2 + index) * 3;
+    drawShadow(drop.x, drop.y + 16, 22, 8);
+    ctx.fillStyle = "rgba(255,250,231,.96)";
+    ctx.strokeStyle = "#80532f";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(drop.x, drop.y + bob, 24, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.font = "26px 'Segoe UI Emoji', sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(drop.emoji || "🥛", drop.x, drop.y + bob + 1);
+    ctx.textBaseline = "alphabetic";
+  });
 }
 
-// ===== 홍보 =====
-function handlePromotion() {
-  ensureDailyFresh();
-  state.daily.promoClicks += 1;
-  state.promo.progress += 1;
-  if (state.promo.progress >= state.promo.threshold) {
-    state.promo.progress = 0;
-    spawnCustomer();
-  }
-  refreshHud();
+function drawTipboxValue() {
+  if (!installedRows(3).length || state.tipbox <= 0) return;
+  const tipbox = installedRows(3)[0];
+  const p = facilityPlacement(tipbox);
+  ctx.fillStyle = "rgba(57,39,20,.88)";
+  roundRect(p.x - 37, p.y - 59, 74, 28, 14);
+  ctx.fill();
+  drawImage("assets/ui/currency/icon_currency_001.png", p.x - 23, p.y - 45, 23, 23);
+  ctx.fillStyle = "white";
+  ctx.font = "900 12px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(formatNumber(state.tipbox), p.x + 11, p.y - 41);
 }
 
-// 연구가 가능한지 (기획서: 가능한 모든 메뉴를 최대 강화하면 일시 중지)
+function render() {
+  if (!tables || !state) return;
+  ctx.clearRect(0, 0, GAME_W, GAME_H);
+  drawBackground();
+
+  const installed = installedRows().sort((a, b) => facilityPlacement(a).y - facilityPlacement(b).y);
+  installed.forEach(drawFacility);
+  if (!state.ui.selectedInstallId) installCandidates().forEach(drawInstallZone);
+  drawChef();
+  drawStoveProgress();
+  [...state.guests].sort((a, b) => a.y - b.y).forEach(drawGuest);
+  drawSpecialCustomers();
+  drawIngredientDrops();
+  drawPayments();
+  drawTipboxValue();
+}
+
+function currentObjective() {
+  const required = [10, 1, 2].map((type) => tables.installs.find((row) => row.facilityType === type));
+  const missing = required.find((row) => row && !isInstalled(row.id));
+  if (missing) return `${FACILITY_META[missing.facilityType].name} 설치하기`;
+  if (state.ingredientDrops.length) return "필드의 병아리 아이템을 눌러 수집하기";
+  if (state.payments.length) return "테이블의 도토리를 눌러 회수하기";
+  const disappointed = state.guests.find((guest) => guest.state === "disappointed");
+  if (disappointed) return "불만 말풍선을 눌러 손님 달래기";
+  const order = state.guests.find((guest) => guest.state === "awaiting_order");
+  if (order) return "손님의 주문 말풍선 누르기";
+  if (state.cooking.length) return "조리기구에서 자동 요리 중";
+  if (state.guests.some((guest) => guest.state === "eating")) return "손님이 식사하는 중";
+  if (state.promotion.queued > 0) return "빈자리가 생기면 손님 입장";
+  return "홍보 게이지를 채워 손님 부르기";
+}
+
+function updateHud() {
+  if (!state) return;
+  ensureDailyReset();
+  dom.acorns.textContent = formatNumber(state.resources.acorns);
+  dom.ideas.textContent = formatNumber(state.resources.ideas);
+  dom.gems.textContent = formatNumber(state.resources.gems);
+  const threshold = promotionThreshold();
+  dom.promoButton.disabled = !coreReady();
+  dom.promoStatus.textContent = coreReady()
+    ? `${state.promotion.progress} / ${threshold}`
+    : "테이블과 조리기구가 필요해요";
+  dom.promoFill.style.width = `${(state.promotion.progress / threshold) * 100}%`;
+  dom.missionDot.hidden = !hasMissionReward();
+  dom.recipeDot.hidden = !CORE_PROGRESSION.some((route) => canCraftRecipe(route.recipeId))
+    && !Object.values(state.ownedRecipes).some((owned) => !owned.codexClaimed || owned.stack > 0);
+  dom.collectionDot.hidden = !Object.values(state.collections).some((dict) => Object.values(dict).some((entry) => entry.isNew));
+}
+
+function pointerPosition(event) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) * (GAME_W / rect.width),
+    y: (event.clientY - rect.top) * (GAME_H / rect.height),
+  };
+}
+
+function insideBox(point, box, padding = 0) {
+  return point.x >= box.x - box.w / 2 - padding && point.x <= box.x + box.w / 2 + padding
+    && point.y >= box.y - box.h / 2 - padding && point.y <= box.y + box.h / 2 + padding;
+}
+
+function canvasPointerDown(event) {
+  if (!dom.installPanel.hidden) return;
+  const point = pointerPosition(event);
+
+  const special = state.specialActors.find((actor) => Math.hypot(point.x - actor.x, point.y - actor.y) <= 48);
+  if (special) return catchSpecial(special);
+
+  const ingredientDrop = state.ingredientDrops.find((item) => Math.hypot(point.x - item.x, point.y - item.y) <= 38);
+  if (ingredientDrop) return collectIngredientDrop(ingredientDrop);
+
+  const payment = state.payments.find((item) => Math.hypot(point.x - item.x, point.y - item.y) <= 42);
+  if (payment) return collectPayment(payment);
+
+  const tipbox = installedRows(3)[0];
+  if (tipbox && state.tipbox > 0 && insideBox(point, facilityPlacement(tipbox), 16)) return collectTipbox();
+
+  const unhappy = state.guests.find((guest) => guest.state === "disappointed" && Math.hypot(point.x - guest.x, point.y - (guest.y - 40)) <= 58);
+  if (unhappy) return calmGuest(unhappy);
+
+  const waiting = state.guests.find((guest) => guest.state === "awaiting_order" && Math.hypot(point.x - guest.x, point.y - (guest.y - 40)) <= 66);
+  if (waiting) return takeOrder(waiting);
+
+  const stage = installedRows(5)[0];
+  if (stage && insideBox(point, facilityPlacement(stage), 16)) return openMenu("performance");
+
+  const candidate = installCandidates().find((row) => insideBox(point, facilityPlacement(row), 8));
+  if (candidate) openInstallPanel(candidate);
+  render();
+}
+
+function setActiveNav(screen) {
+  dom.navButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.screen === screen));
+}
+
+function closeMenu() {
+  state.ui.screen = "restaurant";
+  dom.menuScreen.hidden = true;
+  setActiveNav("");
+  saveState();
+}
+
+function openMenu(screen) {
+  state.ui.screen = screen;
+  state.ui.tab = screen === "recipe" ? "craft" : screen === "missions" ? "main" : screen === "collection" ? "customers" : screen;
+  dom.menuScreen.hidden = false;
+  setActiveNav(screen);
+  renderMenu();
+}
+
+function renderTabs(items) {
+  dom.menuTabs.innerHTML = items.map(([id, label]) => `<button type="button" data-tab="${id}" class="${state.ui.tab === id ? "is-active" : ""}">${label}</button>`).join("");
+}
+
+function researchRequirement() {
+  const missing = [8, 7, 6].filter((type) => installedRows(type).length === 0).map((type) => FACILITY_META[type].name);
+  if (missing.length) return `${missing.join(" · ")} 설치 필요`;
+  const cost = Number(tables.recipeSetting.ResearchCost || 5);
+  if (state.resources.ideas < cost) return `아이디어 ${cost - state.resources.ideas} 부족`;
+  return "연구 준비 완료";
+}
+
 function canResearch() {
-  // 미보유 메뉴가 있거나, 보유 중 별이 MAX 미만인 메뉴가 있으면 가능
-  return RECIPE_LIST.some((id) => {
-    const owned = state.recipes[id];
-    return !owned || owned.stars < MAX_STARS;
+  const hasTarget = tables.recipeResearch.some((entry) => {
+    const recipe = getRecipe(entry.recipeId);
+    const owned = recipeData(entry.recipeId);
+    return recipe && (!owned || owned.level < recipe.maxLevel);
   });
+  return hasTarget && [8, 7, 6].every((type) => installedRows(type).length > 0)
+    && state.resources.ideas >= Number(tables.recipeSetting.ResearchCost || 5);
 }
 
-// ===== 레시피 연구 =====
-function startResearch() {
-  if (!canResearch()) {
-    showToast("모든 메뉴를 최대까지 강화했습니다.");
-    return;
+function doResearch() {
+  if (!canResearch()) return showToast(researchRequirement());
+  const cost = Number(tables.recipeSetting.ResearchCost || 5);
+  state.resources.ideas -= cost;
+  const pity = [...tables.recipeResearch]
+    .filter((row) => state.totalResearchCount + 1 >= row.pityCount && !recipeData(row.recipeId))
+    .sort((a, b) => a.pityCount - b.pityCount || a.id - b.id)[0];
+  let recipeId = pity?.recipeId;
+  if (!recipeId) {
+    const candidates = tables.recipeResearch.filter((row) => {
+      const recipe = getRecipe(row.recipeId);
+      const owned = recipeData(row.recipeId);
+      return recipe && (!owned || owned.level < recipe.maxLevel);
+    });
+    const total = candidates.reduce((sum, row) => sum + row.recipeWeight, 0);
+    let roll = random() * total;
+    recipeId = candidates[0]?.recipeId;
+    for (const row of candidates) {
+      roll -= row.recipeWeight;
+      if (roll < 0) { recipeId = row.recipeId; break; }
+    }
   }
-  const cost = researchCostForCount(state.researchCount);
-  if (state.resources.acorns < cost) {
-    showToast("도토리가 부족합니다.");
-    return;
-  }
-  state.resources.acorns -= cost;
-  state.researchCount += 1;
-  state.metrics.researched += 1;
-  ensureDailyFresh();
-  state.daily.researched += 1;
+  if (!recipeId) { state.resources.ideas += cost; return; }
+  const existing = recipeData(recipeId);
+  const isNew = !existing;
+  if (existing) existing.stack += 1;
+  else state.ownedRecipes[recipeId] = { level: 1, stack: 0, codexClaimed: false };
+  state.totalResearchCount += 1;
+  state.ui.lastResearch = { recipeId, isNew };
+  dispatchAchievement(8);
+  showToast(`${isNew ? "새 레시피" : "중복 레시피"} · ${routeRecipeName(recipeId)} 획득!`, 3);
+  saveState();
+  renderMenu();
+}
 
-  // 천장 처리: 처음 획득 메뉴에만 적용 (메뉴별 절대 횟수)
-  // 미획득 메뉴 중 천장 도달한 것이 있으면 그 중 가장 작은 천장을 가진 메뉴 보장
-  const pityHits = RECIPE_LIST
-    .filter((id) => !state.recipes[id])
-    .filter((id) => state.researchCount >= (RECIPE_PITY[id] || 999));
+function upgradeRecipe(recipeId) {
+  const owned = recipeData(recipeId);
+  const recipe = getRecipe(recipeId);
+  if (!owned || !recipe || owned.stack <= 0 || owned.level >= recipe.maxLevel) return;
+  owned.stack -= 1;
+  owned.level += 1;
+  dispatchAchievement(9, 1, 103, recipeId);
+  showToast(`${routeRecipeName(recipeId)} Lv.${owned.level} 강화 완료!`);
+  saveState();
+  renderMenu();
+}
 
-  let pickedId = null;
-  if (pityHits.length > 0) {
-    // 천장 메뉴 중 천장값 가장 작은 것
-    pityHits.sort((a, b) => (RECIPE_PITY[a] || 999) - (RECIPE_PITY[b] || 999));
-    pickedId = pityHits[0];
+function claimCodexReward(recipeId) {
+  const owned = recipeData(recipeId);
+  const recipe = getRecipe(recipeId);
+  if (!owned || !recipe || owned.codexClaimed) return;
+  owned.codexClaimed = true;
+  const result = grantReward(recipe.rewardId);
+  showToast(`도감 보상 · ${result}`);
+  saveState();
+  updateHud();
+  renderMenu();
+}
+
+function recipeCard(recipe) {
+  const owned = recipeData(recipe.id);
+  const locked = !owned;
+  const grade = ["", "평범", "멋진", "특별한"][recipe.recipeGrade] || "레시피";
+  let action = "";
+  if (owned && !owned.codexClaimed) action = `<button class="card-action" data-action="codex" data-id="${recipe.id}">도감 보상</button>`;
+  const currentPrice = owned ? Math.round(Number(recipe.foodPrice) * (1 + Math.max(0, owned.level - 1) * .05)) : Number(recipe.foodPrice);
+  return `<article class="feature-card ${locked ? "is-locked" : ""}">
+    <img class="feature-icon" src="${routeRecipeIcon(recipe.id)}" alt="" />
+    <div class="feature-copy"><strong>${locked ? "???" : routeRecipeName(recipe.id)}</strong>
+    <small class="grade">${grade} · ${locked ? "미획득" : `Lv.${owned.level}/${recipe.maxLevel}`}</small>
+    <small>${locked ? "병아리가 준 아이템으로 제작할 수 있어요" : `중복 제작 시 Lv.UP · 현재 가격 ${formatNumber(currentPrice)}`}</small></div>${action}</article>`;
+}
+
+function craftingRouteCard(route) {
+  const routeUnlocked = isProgressionRouteUnlocked(route);
+  const owned = recipeData(route.recipeId);
+  const recipe = getRecipe(route.recipeId);
+  const requirements = craftIngredientRequirements(route);
+  const requirementText = requirements.map((requirement) => `${requirement.emoji} ${requirement.name} ${ingredientAmount(requirement.ingredientId)}/${requirement.count}`).join(" + ");
+  const canCraft = canCraftRecipe(route.recipeId);
+  return `<article class="feature-card crafting-card ${routeUnlocked ? "" : "is-locked"}">
+    <div class="craft-chain" aria-hidden="true"><img src="${guestIcon({ customerId: route.customerId, commonId: route.commonId })}" alt=""/><span>${requirements.map((requirement) => requirement.emoji).join("+")}</span><b>→</b><img src="${routeRecipeIcon(route.recipeId)}" alt=""/></div>
+    <div class="feature-copy"><strong>${routeUnlocked ? routeRecipeName(route.recipeId) : "새 테마에서 발견"}</strong>
+    <small>${THEME_NAMES[route.themeId]} · ${route.customerName}</small>
+    <small>${requirementText} · ${owned ? `현재 Lv.${owned.level} · 총 ${craftIngredientCost(route)}개` : `${requirements.length}종 조합`}</small></div>
+    <button class="card-action" data-action="craft-recipe" data-id="${route.recipeId}" ${canCraft ? "" : "disabled"}>${owned ? owned.level >= Number(recipe?.maxLevel || 20) ? "최고 레벨" : `Lv.${owned.level + 1} 제작` : routeUnlocked ? "수동 제작" : "병아리 필요"}</button></article>`;
+}
+
+function renderRecipeMenu() {
+  dom.menuKicker.textContent = "아이템 주방";
+  dom.menuTitle.textContent = "레시피";
+  renderTabs([["craft", "아이템 제작"], ["owned", `보유 ${unlockedRecipeCount()}`], ["regions", "지역 해금"]]);
+  if (state.ui.tab === "craft") {
+    const visibleRoutes = CORE_PROGRESSION.filter(isProgressionRouteUnlocked);
+    const visibleIngredients = [...new Map(visibleRoutes.flatMap((route) => route.ingredientRequirements).map((ingredient) => [ingredient.id, ingredient])).values()];
+    dom.menuContent.innerHTML = `<section class="research-box"><h3>병아리 아이템으로 레시피 만들기</h3>
+      <p>초반 음식은 재료 1종, 중반은 2종, 후반은 3종을 조합합니다. 같은 레시피를 다시 만들면 레벨과 판매 가격이 5%씩 오르고, 다음 제작의 총 재료 수도 1개씩 늘어납니다.</p>
+      <div class="ingredient-strip">${visibleIngredients.map((ingredient) => `<span>${ingredient.emoji}<b>${ingredient.name}</b> ${ingredientAmount(ingredient.id)}</span>`).join("")}</div>
+      <button class="research-button" data-action="auto-craft">남은 재료로 자동 선택 제작</button></section>
+      ${visibleRoutes.map(craftingRouteCard).join("")}`;
+  } else if (state.ui.tab === "owned") {
+    const owned = Object.keys(state.ownedRecipes).map((id) => getRecipe(Number(id))).filter(Boolean);
+    dom.menuContent.innerHTML = `<p class="section-note">해금 레시피 ${owned.length}개 · 레시피 1개가 늘 때마다 전체 음식 수익이 5% 증가합니다.</p>${owned.map(recipeCard).join("")}`;
   } else {
-    // 가중치 추첨: MAX 강화 메뉴는 풀에서 제외, 미보유 가중치 1.4배
-    const pool = RECIPE_LIST.filter((id) => {
-      const owned = state.recipes[id];
-      return !owned || owned.stars < MAX_STARS;
-    });
-    pickedId = pickWeighted(pool, (id) => {
-      const w = RECIPE_RARITY[id].weight;
-      return state.recipes[id] ? w : w * 1.4;
-    });
+    const count = unlockedRecipeCount();
+    dom.menuContent.innerHTML = `<p class="section-note">해금된 레시피 수에 따라 새로운 지역이 열립니다. 지역명과 실제 공간은 다음 단계에서 확정합니다.</p>
+      ${REGION_UNLOCKS.map((region) => { const opened = count >= region.recipeCount; return `<article class="feature-card ${opened ? "" : "is-locked"}"><div class="feature-icon region-icon"><img class="region-frame" src="assets/ui/common/bg_frame_expansion_01.png" alt="" /><img class="region-status" src="assets/ui/common/${opened ? "icon_check" : "icon_lock"}.png" alt="" /></div><div class="feature-copy"><strong>${region.name}</strong><small>필요 레시피 ${region.recipeCount}개</small><div class="progress-track"><span style="width:${Math.min(100, count / region.recipeCount * 100)}%"></span></div><small>${count}/${region.recipeCount}${opened ? " · 해금 완료" : ""}</small></div></article>`; }).join("")}`;
   }
+}
 
-  const isNew = !state.recipes[pickedId];
-  if (isNew) {
-    state.recipes[pickedId] = { stars: 1, dupes: 0 };
+function claimMission(kind, missionId) {
+  const main = kind === "main";
+  const mission = (main ? tables.mainMissions : tables.repeatMissions).find((row) => row.id === missionId);
+  if (!mission || missionProgress(mission, main) < mission.count) return;
+  const claimed = main ? state.missions.mainClaimed : state.missions.dailyClaimed;
+  if (claimed.includes(missionId)) return;
+  claimed.push(missionId);
+  const result = grantReward(mission.rewardId);
+  if (!main) dispatchAchievement(13);
+  if (main) {
+    const groupRows = tables.mainMissions.filter((row) => row.missionGroup === state.missions.mainGroup);
+    if (groupRows.every((row) => state.missions.mainClaimed.includes(row.id))) state.missions.mainGroup += 1;
+  }
+  showToast(`보상 수령 · ${result}`);
+  saveState();
+  updateHud();
+  renderMenu();
+}
+
+function missionCard(mission, main) {
+  const progress = Math.min(mission.count, missionProgress(mission, main));
+  const claimed = (main ? state.missions.mainClaimed : state.missions.dailyClaimed).includes(mission.id);
+  const ready = !claimed && progress >= mission.count;
+  const missionIndex = main ? Number(mission.iconIndex || 1) : Number(mission.id) - 1000;
+  const missionType = main ? "mainmission" : "repeatmission";
+  const missionIcon = `assets/ui/mission/icon_${missionType}_${String(Math.max(1, missionIndex)).padStart(3, "0")}.png`;
+  return `<article class="feature-card ${claimed ? "is-claimed" : ""}"><img class="feature-icon" src="${missionIcon}" alt="" />
+    <div class="feature-copy"><strong>${missionDescription(mission)}</strong><small>${rewardText(mission.rewardId)}</small>
+    <div class="progress-track"><span style="width:${Math.min(100, progress / mission.count * 100)}%"></span></div><small>${formatNumber(progress)} / ${formatNumber(mission.count)}</small></div>
+    <button class="card-action" data-action="claim-mission" data-kind="${main ? "main" : "daily"}" data-id="${mission.id}" ${ready ? "" : "disabled"}>${claimed ? "완료" : "받기"}</button></article>`;
+}
+
+function renderMissionMenu() {
+  dom.menuKicker.textContent = "성장 목표";
+  dom.menuTitle.textContent = "할 일";
+  renderTabs([["main", "메인 임무"], ["daily", "오늘의 할 일"]]);
+  if (state.ui.tab === "main") {
+    const rows = tables.mainMissions.filter((row) => row.missionGroup === state.missions.mainGroup);
+    dom.menuContent.innerHTML = `<div class="mission-group-title"><h3>메인 임무 ${state.missions.mainGroup}단계</h3><small>단계별 순차 진행</small></div>${rows.map((m) => missionCard(m, true)).join("") || `<p class="section-note">모든 메인 임무를 완료했습니다.</p>`}`;
   } else {
-    // 중복 시: 강화 재료 누적 (유저가 패널에서 직접 강화)
-    state.recipes[pickedId].dupes = (state.recipes[pickedId].dupes || 0) + 1;
+    ensureDailyReset();
+    const rows = tables.repeatMissions.filter((row) => row.repeatType === 1 && row.group === 0);
+    const allClaimed = rows.every((row) => state.missions.dailyClaimed.includes(row.id));
+    dom.menuContent.innerHTML = `<div class="mission-group-title"><h3>오늘의 할 일</h3><small>${state.missions.dailyClaimed.length}/${rows.length} 완료</small></div>
+      ${rows.map((m) => missionCard(m, false)).join("")}
+      <button class="bonus-button" data-action="daily-bonus" ${allClaimed && !state.missions.dailyBonusClaimed ? "" : "disabled"}>${state.missions.dailyBonusClaimed ? "오늘의 완주 보상 수령 완료" : `전체 완료 보상 · ${rewardText(Number(tables.general.DailyMissionRewardId || 101))}`}</button>`;
   }
-
-  // 결과 모달
-  state.ui.eventModal = { type: "research", recipeId: pickedId, isNew };
-  state.ui.chefBubbleOpen = false;
-  showResearchResultModal();
-  refreshHud();
-  saveState();
 }
 
-function showResearchResultModal() {
-  const evt = state.ui.eventModal;
-  if (!evt || evt.type !== "research") return;
-  const r = RECIPE_RARITY[evt.recipeId];
-  dom.resultIcon.src = `assets/recipe-icons/${evt.recipeId}.png`;
-  dom.resultName.textContent = RECIPE_NAME_BY_ID[evt.recipeId] || evt.recipeId;
-  dom.resultRarity.textContent = RARITY_LABEL[r.rarity];
-  dom.resultRarity.dataset.rarity = r.rarity;
-  dom.resultKicker.textContent = evt.isNew ? "NEW! 새로운 레시피!" : "이미 가진 레시피!";
-  dom.resultOverlay.hidden = false;
-}
-function closeResultModal() {
-  state.ui.eventModal = null;
-  dom.resultOverlay.hidden = true;
-}
-
-// ===== 패널 (레시피 / 테마) =====
-function openPanel(name) {
-  state.ui.panel = name;
-  state.ui.installCandidateId = null;
-  state.ui.chefBubbleOpen = false;
-  dom.panelOverlay.hidden = false;
-  if (name === "recipe") {
-    dom.panelTitle.textContent = "레스토랑 메뉴";
-    renderRecipePanel();
-  } else if (name === "theme") {
-    dom.panelTitle.textContent = "레스토랑 테마";
-    renderThemePanel();
-  } else if (name === "task") {
-    dom.panelTitle.textContent = "할 일";
-    renderTaskPanel();
-  }
-  refreshHud();
-}
-function closePanel() {
-  state.ui.panel = null;
-  dom.panelOverlay.hidden = true;
-}
-
-function renderRecipePanel() {
-  // 카테고리 탭 (기획서: 시그니처 / 시즌. 시즌은 추후 기획)
-  const wrap = document.createElement("div");
-  wrap.className = "recipe-wrap";
-  const tabs = document.createElement("div");
-  tabs.className = "recipe-cats";
-  tabs.innerHTML = `
-    <button class="recipe-cat-btn" data-cat="signature" data-active="true" type="button">시그니처</button>
-    <button class="recipe-cat-btn" data-cat="season" type="button">시즌</button>
-  `;
-  wrap.appendChild(tabs);
-
-  const grid = document.createElement("div");
-  grid.className = "recipe-grid";
-  for (const id of RECIPE_LIST) {
-    const meta = RECIPE_RARITY[id];
-    const owned = state.recipes[id];
-    const card = document.createElement("button");
-    card.className = "recipe-card";
-    card.dataset.rarity = meta.rarity;
-    if (!owned) card.dataset.state = "locked";
-    else if (owned.dupes > 0 && owned.stars < MAX_STARS) card.dataset.state = "upgradable";
-    else card.dataset.state = "owned";
-    const stars = owned ? owned.stars : 0;
-    const starRow = stars > 0
-      ? "★".repeat(stars) + "☆".repeat(MAX_STARS - stars)
-      : "";
-    const dupeBadge = owned && owned.dupes > 0
-      ? `<span class="recipe-dupe">+${owned.dupes}</span>` : "";
-    const upgradeTag = (owned && owned.dupes > 0 && owned.stars < MAX_STARS)
-      ? `<span class="recipe-upgrade-tag">Upgrade!</span>` : "";
-    card.innerHTML = `
-      <span class="recipe-rarity-tag"></span>
-      ${dupeBadge}
-      ${upgradeTag}
-      <img class="recipe-icon" src="assets/recipe-icons/${id}.png" alt="" />
-      <div class="recipe-name">${owned ? RECIPE_NAME_BY_ID[id] : "???"}</div>
-      <div class="recipe-stars">${starRow}</div>
-    `;
-    card.addEventListener("click", () => onRecipeCardClick(id));
-    grid.appendChild(card);
-  }
-  wrap.appendChild(grid);
-
-  // 시즌 탭은 빈 상태
-  const seasonView = document.createElement("div");
-  seasonView.className = "recipe-season";
-  seasonView.hidden = true;
-  seasonView.innerHTML = `<div class="recipe-empty">시즌 메뉴는 추후 업데이트 예정이에요.</div>`;
-  wrap.appendChild(seasonView);
-
-  // 탭 전환
-  tabs.querySelectorAll(".recipe-cat-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const cat = btn.dataset.cat;
-      tabs.querySelectorAll(".recipe-cat-btn").forEach((b) => {
-        b.dataset.active = (b.dataset.cat === cat) ? "true" : "false";
-      });
-      grid.hidden = (cat !== "signature");
-      seasonView.hidden = (cat !== "season");
-    });
-  });
-
-  dom.panelBody.innerHTML = "";
-  dom.panelBody.appendChild(wrap);
-}
-
-function onRecipeCardClick(id) {
-  const owned = state.recipes[id];
-  if (!owned) {
-    showRecipeDetail(id);
-    return;
-  }
-  if (owned.stars >= MAX_STARS) {
-    showRecipeDetail(id);
-    return;
-  }
-  // 기획서 규칙: 강화는 중복으로 나온 메뉴 1개를 소비 (도토리 X)
-  if (!owned.dupes || owned.dupes <= 0) {
-    showRecipeDetail(id);
-    return;
-  }
-  owned.dupes -= 1;
-  owned.stars += 1;
-  state.metrics.upgrades = (state.metrics.upgrades || 0) + 1;
-  ensureDailyFresh();
-  state.daily.upgrades += 1;
-  showEnhanceModal(id);
-  saveState();
-  renderRecipePanel();
-  refreshHud();
-}
-
-function showEnhanceModal(id) {
-  const owned = state.recipes[id];
-  dom.enhanceIcon.src = `assets/recipe-icons/${id}.png`;
-  dom.enhanceName.textContent = RECIPE_NAME_BY_ID[id];
-  dom.enhanceStars.textContent = "★".repeat(owned.stars);
-  dom.enhanceOverlay.hidden = false;
-}
-function closeEnhanceModal() {
-  dom.enhanceOverlay.hidden = true;
-}
-
-// ===== 메뉴 상세 팝업 =====
-// 강화 가능 상태가 아닐 때(잠김/중복 없음/최대 강화) 띄우는 상세 정보
-function showRecipeDetail(id) {
-  const meta = RECIPE_RARITY[id];
-  if (!meta) return;
-  const owned = state.recipes[id];
-  const stars = owned ? owned.stars : 0;
-  const dupes = owned ? (owned.dupes || 0) : 0;
-  const isLocked = !owned;
-  const isMax = owned && owned.stars >= MAX_STARS;
-  const starRow = stars > 0
-    ? "★".repeat(stars) + "☆".repeat(MAX_STARS - stars)
-    : "☆".repeat(MAX_STARS);
-  const name = isLocked ? "???" : (RECIPE_NAME_BY_ID[id] || id);
-  const iconSrc = isLocked ? "" : `assets/recipe-icons/${id}.png`;
-  const baseStars = Math.max(stars, 1);
-  const price = Math.round(meta.basePrice * priceMultiplierForStars(baseStars));
-  const cookSec = Math.max(1.5, meta.baseCook * cookMultiplierForStars(baseStars)).toFixed(1);
-
-  let statusLabel, statusClass;
-  if (isLocked) { statusLabel = "잠김 — 요리 연구로 획득"; statusClass = "locked"; }
-  else if (isMax) { statusLabel = "최대 강화 단계"; statusClass = "max"; }
-  else { statusLabel = `중복 메뉴가 필요해요 (보유 +${dupes})`; statusClass = "needdupe"; }
-
-  const overlay = document.createElement("div");
-  overlay.className = "event-overlay recipe-detail-overlay";
-  overlay.innerHTML = `
-    <div class="event-card recipe-detail-card" data-rarity="${meta.rarity}">
-      <div class="recipe-detail-rarity">${RARITY_LABEL[meta.rarity]}</div>
-      ${isLocked
-        ? `<div class="recipe-detail-locked">?</div>`
-        : `<img class="event-icon medium" src="${iconSrc}" alt="" />`}
-      <div class="recipe-detail-name">${name}</div>
-      <div class="recipe-detail-stars">${starRow}</div>
-      ${isLocked ? "" : `
-        <div class="recipe-detail-stats">
-          <div><span>가격</span><strong>🌰 ${formatNumber(price)}</strong></div>
-          <div><span>조리</span><strong>${cookSec}s</strong></div>
-          <div><span>중복</span><strong>+${dupes}</strong></div>
-        </div>
-      `}
-      <div class="recipe-detail-status" data-state="${statusClass}">${statusLabel}</div>
-      <button class="primary-btn solo" data-act="close" type="button">확인</button>
-    </div>
-  `;
-  document.querySelector(".phone-frame").appendChild(overlay);
-  const close = () => overlay.remove();
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
-  overlay.querySelector('[data-act="close"]').addEventListener("click", close);
-}
-
-// ===== 할 일 패널 =====
-function activeMainGoal() {
-  return MAIN_GOALS[state.mainGoalIndex] || null;
-}
-function isMainGoalComplete(goal) {
-  if (!goal) return false;
-  return goal.progress(state) >= goal.target;
-}
-function isDailyTaskComplete(task) {
-  return task.progress(state) >= task.target;
-}
-function countClaimableTasks() {
-  let n = 0;
-  const goal = activeMainGoal();
-  if (goal && isMainGoalComplete(goal) && !state.mainClaimed[goal.id]) n += 1;
-  ensureDailyFresh();
-  for (const t of DAILY_TASKS) {
-    if (!state.daily.claimed[t.id] && isDailyTaskComplete(t)) n += 1;
-  }
-  // 일일 보너스 수령 가능 여부
-  if (allDailyClaimed() && !state.daily.bonusClaimed) n += 1;
-  return n;
-}
-function allDailyClaimed() {
-  return DAILY_TASKS.every((t) => state.daily.claimed[t.id]);
-}
-function grantReward(reward) {
-  if (!reward) return;
-  if (reward.kind === "acorn") state.resources.acorns += reward.amount;
-  else if (reward.kind === "gem") state.resources.gems += reward.amount;
-}
-function rewardLabel(reward) {
-  if (!reward) return "";
-  const icon = reward.kind === "gem" ? "Icon/Currency/Icon_Currency_002.png" : "Icon/Currency/Icon_Currency_001.png";
-  return `<img class="cost-icon" src="${icon}" alt="" /><span>${formatNumber(reward.amount)}</span>`;
-}
-
-function claimMainGoal() {
-  const goal = activeMainGoal();
-  if (!goal) return;
-  if (!isMainGoalComplete(goal)) return;
-  if (state.mainClaimed[goal.id]) return;
-  state.mainClaimed[goal.id] = true;
-  grantReward(goal.reward);
-  state.mainGoalIndex += 1;
-  showToast(`목표 완료! ${goal.reward.kind === "gem" ? "보석" : "도토리"} +${goal.reward.amount}`);
-  saveState();
-  renderTaskPanel();
-  refreshHud();
-}
-function claimDailyTask(taskId) {
-  ensureDailyFresh();
-  const task = DAILY_TASKS.find((t) => t.id === taskId);
-  if (!task) return;
-  if (state.daily.claimed[taskId]) return;
-  if (!isDailyTaskComplete(task)) return;
-  state.daily.claimed[taskId] = true;
-  grantReward(task.reward);
-  showToast(`보상 획득! ${task.reward.kind === "gem" ? "보석" : "도토리"} +${task.reward.amount}`);
-  saveState();
-  renderTaskPanel();
-  refreshHud();
-}
 function claimDailyBonus() {
-  ensureDailyFresh();
-  if (!allDailyClaimed() || state.daily.bonusClaimed) return;
-  state.daily.bonusClaimed = true;
-  grantReward(DAILY_BONUS);
-  showToast(`오늘의 할 일 완료 보너스! 보석 +${DAILY_BONUS.amount}`);
+  const rows = tables.repeatMissions.filter((row) => row.repeatType === 1 && row.group === 0);
+  if (state.missions.dailyBonusClaimed || !rows.every((row) => state.missions.dailyClaimed.includes(row.id))) return;
+  state.missions.dailyBonusClaimed = true;
+  const result = grantReward(Number(tables.general.DailyMissionRewardId || 101));
+  showToast(`오늘의 완주 보상 · ${result}`, 3);
+  saveState(); updateHud(); renderMenu();
+}
+
+function renderCollectionMenu() {
+  dom.menuKicker.textContent = "만남의 기록";
+  dom.menuTitle.textContent = "도감";
+  renderTabs([["customers", "손님"], ["specialCustomers", "특별 손님"], ["performers", "공연팀"]]);
+  const category = state.ui.tab;
+  const dict = state.collections[category];
+  Object.values(dict).forEach((entry) => { entry.isNew = false; });
+  let rows = [];
+  if (category === "customers") rows = allThemeChickMilestones().map((chick) => ({ id: chick.customerId, name: chick.customerName, icon: guestIcon({ customerId: chick.customerId, commonId: chick.commonId }) }));
+  if (category === "specialCustomers") rows = tables.specialCustomers.map((item) => ({ id: item.id, name: item.specialCustomerType === 1 ? "도둑" : "투자자", icon: "assets/ui/chick/icon_chick_007.png" }));
+  if (category === "performers") rows = tables.performances.map((item) => ({ id: item.id, name: `공연팀 ${item.id}`, icon: "assets/ui/chick/icon_chick_006.png" }));
+  dom.menuContent.innerHTML = `<p class="section-note">처음 만난 대상은 NEW로 기록되며, 방문·공연 횟수가 누적됩니다.</p><div class="collection-grid">${rows.map((item) => {
+    const entry = dict[item.id];
+    return `<div class="collection-cell ${entry ? "" : "locked"}">${entry?.isNew ? `<span class="new-badge">NEW</span>` : ""}<img src="${item.icon}" alt="" /><strong>${entry ? item.name : "???"}</strong><small>${entry ? `${entry.count}회 만남` : "미등록"}</small></div>`;
+  }).join("")}</div>`;
   saveState();
-  renderTaskPanel();
-  refreshHud();
 }
 
-function renderTaskPanel() {
-  ensureDailyFresh();
-  const wrap = document.createElement("div");
-  wrap.className = "task-wrap";
-
-  // 카테고리 탭
-  const tabs = document.createElement("div");
-  tabs.className = "task-cats";
-  tabs.innerHTML = `
-    <button class="task-cat-btn" data-cat="main"  data-active="${state.ui.taskTab === "main"}"  type="button">메인 목표</button>
-    <button class="task-cat-btn" data-cat="daily" data-active="${state.ui.taskTab === "daily"}" type="button">오늘의 할 일</button>
-  `;
-  wrap.appendChild(tabs);
-
-  if (state.ui.taskTab === "main") {
-    wrap.appendChild(renderMainGoalsView());
-  } else {
-    wrap.appendChild(renderDailyTasksView());
-  }
-
-  tabs.querySelectorAll(".task-cat-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      state.ui.taskTab = btn.dataset.cat;
-      renderTaskPanel();
-    });
-  });
-
-  dom.panelBody.innerHTML = "";
-  dom.panelBody.appendChild(wrap);
+function staffDescription(table, level) {
+  if (table.staffType === 2) return `${level.activeTime}초 동안 조리 속도 +${Math.round(level.abilityValue * 100)}%`;
+  if (table.staffType === 3) return `${level.activeTime}초 동안 주문을 하나씩 자동 처리`;
+  return `${level.activeTime / Math.max(1, level.abilityValue)}초마다 손님 1명 소환`;
 }
 
-function renderMainGoalsView() {
-  const list = document.createElement("div");
-  list.className = "task-list";
-
-  const goal = activeMainGoal();
-  if (!goal) {
-    list.innerHTML = `<div class="task-empty">모든 메인 목표를 완료했어요! 🎉</div>`;
-    return list;
-  }
-  // 활성 목표
-  list.appendChild(renderTaskCard({
-    icon: goal.icon,
-    desc: goal.desc,
-    progress: Math.min(goal.progress(state), goal.target),
-    target: goal.target,
-    complete: isMainGoalComplete(goal),
-    claimed: !!state.mainClaimed[goal.id],
-    reward: goal.reward,
-    onClaim: claimMainGoal,
-  }));
-  // 다음 목표 미리보기 (잠김)
-  for (let i = state.mainGoalIndex + 1; i < Math.min(MAIN_GOALS.length, state.mainGoalIndex + 4); i += 1) {
-    const next = MAIN_GOALS[i];
-    list.appendChild(renderTaskCard({
-      icon: next.icon, desc: next.desc, target: next.target, progress: 0,
-      complete: false, claimed: false, reward: next.reward, locked: true,
-    }));
-  }
-  return list;
-}
-
-function renderDailyTasksView() {
-  const view = document.createElement("div");
-
-  // 진행 카운트 + 보너스
-  const claimedCount = DAILY_TASKS.filter((t) => state.daily.claimed[t.id]).length;
-  const totalCount = DAILY_TASKS.length;
-  const bonusReady = claimedCount >= totalCount && !state.daily.bonusClaimed;
-  const bonusBar = document.createElement("div");
-  bonusBar.className = "daily-bonus";
-  bonusBar.innerHTML = `
-    <div class="daily-bonus-count">오늘의 할 일 ${claimedCount} / ${totalCount}</div>
-    <div class="daily-bonus-bar"><div class="daily-bonus-fill" style="width:${(claimedCount/totalCount)*100}%"></div></div>
-    <button class="daily-bonus-btn" data-state="${state.daily.bonusClaimed ? "done" : (bonusReady ? "ready" : "lock")}" type="button">
-      <span class="daily-bonus-egg">${state.daily.bonusClaimed ? "✓" : "🥚"}</span>
-      <span class="daily-bonus-label">${state.daily.bonusClaimed ? "수령 완료" : (bonusReady ? "보너스 받기" : "전체 완료 시 오픈")}</span>
-      ${state.daily.bonusClaimed ? "" : `<span class="daily-bonus-reward">${rewardLabel(DAILY_BONUS)}</span>`}
-    </button>
-  `;
-  bonusBar.querySelector(".daily-bonus-btn").addEventListener("click", () => {
-    if (bonusReady) claimDailyBonus();
-  });
-  view.appendChild(bonusBar);
-
-  const list = document.createElement("div");
-  list.className = "task-list";
-  // 정렬: 수령 가능(완료, 미수령) → 미완료 → 수령 완료
-  const sorted = [...DAILY_TASKS].sort((a, b) => {
-    const score = (t) => {
-      if (state.daily.claimed[t.id]) return 2;
-      if (isDailyTaskComplete(t)) return 0;
-      return 1;
-    };
-    return score(a) - score(b);
-  });
-  for (const t of sorted) {
-    list.appendChild(renderTaskCard({
-      icon: t.icon, desc: t.desc,
-      progress: Math.min(t.progress(state), t.target),
-      target: t.target,
-      complete: isDailyTaskComplete(t),
-      claimed: !!state.daily.claimed[t.id],
-      reward: t.reward,
-      onClaim: () => claimDailyTask(t.id),
-    }));
-  }
-  view.appendChild(list);
-  return view;
-}
-
-function renderTaskCard(opts) {
-  const card = document.createElement("div");
-  card.className = "task-card";
-  const ratio = opts.target > 0 ? Math.min(1, opts.progress / opts.target) : 0;
-  let stateAttr = "active";
-  if (opts.locked) stateAttr = "locked";
-  else if (opts.claimed) stateAttr = "claimed";
-  else if (opts.complete) stateAttr = "ready";
-  card.dataset.state = stateAttr;
-
-  const showCounter = opts.target > 1 && !opts.claimed;
-  let btnLabel, btnDisabled;
-  if (opts.locked) { btnLabel = "잠김"; btnDisabled = true; }
-  else if (opts.claimed) { btnLabel = "완료"; btnDisabled = true; }
-  else if (opts.complete) { btnLabel = "보상 받기"; btnDisabled = false; }
-  else { btnLabel = "진행중"; btnDisabled = true; }
-
-  card.innerHTML = `
-    <div class="task-icon">${opts.icon}</div>
-    <div class="task-body">
-      <div class="task-desc">${opts.desc}</div>
-      <div class="task-progress-row">
-        <div class="task-progress-bar"><div class="task-progress-fill" style="width:${ratio*100}%"></div></div>
-        ${showCounter ? `<div class="task-progress-text">${opts.progress} / ${opts.target}</div>` : ""}
-      </div>
-      <div class="task-reward">${rewardLabel(opts.reward)}</div>
-    </div>
-    <button class="task-claim-btn" type="button" ${btnDisabled ? "disabled" : ""}>${btnLabel}</button>
-  `;
-  if (!btnDisabled && opts.onClaim) {
-    card.querySelector(".task-claim-btn").addEventListener("click", opts.onClaim);
-  }
-  return card;
-}
-
-// 테마 패널 — PDF 기획서 기반:
-// ① 패널명 ② 수익률 배지 ③ 가로 테마 선택 ④ 시설 그리드 ⑤ 시설 테마 버튼 ⑥ 전체 적용
-const FACILITY_GROUPS = [
-  { key: "table",      label: "식탁" },
-  { key: "stove",      label: "조리기구" },
-  { key: "entrance",   label: "출입구" },
-  { key: "countertop", label: "도마테이블" },
-  { key: "sink",       label: "싱크대" },
-  { key: "fridge",     label: "냉장고" },
-  { key: "toolbox",    label: "조리도구함" },
-  { key: "stage",      label: "무대" },
-  { key: "tipbox",     label: "팁박스" },
-  { key: "lighting",   label: "조명" },
-  { key: "fence",      label: "울타리" },
-];
-let _themePanelSelected = "stone"; // 가로 선택된 테마 id
-
-function renderThemePanel() {
-  const wrap = document.createElement("div");
-  wrap.className = "theme-wrap";
-
-  // ② 수익률 배지
-  const totalBoost = totalThemeBoost();
-  const rateBadge = document.createElement("div");
-  rateBadge.className = "theme-rate";
-  rateBadge.innerHTML = `현재 수익 보너스 <strong>+${Math.round(totalBoost * 100)}%</strong>`;
-  wrap.appendChild(rateBadge);
-
-  // ③ 가로 테마 선택
-  const themeStrip = document.createElement("div");
-  themeStrip.className = "theme-strip";
-  for (const t of THEME_LIST) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "theme-strip-btn";
-    btn.dataset.active = (t.id === _themePanelSelected) ? "true" : "false";
-    btn.innerHTML = `
-      <img src="Icon/Facility/Icon_Facility_Table_${themeSuffix(t.id)}.png" alt="" />
-      <span>${t.name}</span>
-    `;
-    btn.addEventListener("click", () => {
-      _themePanelSelected = t.id;
-      renderThemePanel();
-    });
-    themeStrip.appendChild(btn);
-  }
-  wrap.appendChild(themeStrip);
-
-  // ④ 시설 그리드
-  const grid = document.createElement("div");
-  grid.className = "theme-facility-grid";
-  for (const grp of FACILITY_GROUPS) {
-    const themeDef = THEME_DEFS[grp.key].find((t) => t.id === _themePanelSelected);
-    if (!themeDef) continue;
-    const owned = state.themesOwned[grp.key]?.includes(_themePanelSelected);
-    const applied = state.themes[grp.key] === _themePanelSelected;
-    const isSpecial = themeDef.costGem > 0;
-
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "theme-facility";
-    card.dataset.state = applied ? "applied" : (owned ? "owned" : "locked");
-    if (isSpecial) card.dataset.special = "true";
-
-    card.innerHTML = `
-      <img src="${themeDef.icon}" alt="" />
-      <span class="theme-facility-label">${grp.label}</span>
-      ${applied ? `<span class="theme-facility-tag">적용중</span>`
-        : owned ? `<span class="theme-facility-tag owned">보유</span>`
-        : `<span class="theme-facility-tag locked">${formatNumber(themeDef.costGem || themeDef.costAcorn)}</span>`}
-    `;
-    card.addEventListener("click", () => onFacilityThemeTap(grp.key, _themePanelSelected));
-    grid.appendChild(card);
-  }
-  wrap.appendChild(grid);
-
-  // ⑥ 전체 적용
-  const applyAll = document.createElement("button");
-  applyAll.type = "button";
-  applyAll.className = "theme-apply-all";
-  applyAll.textContent = "테마 전체 적용";
-  applyAll.addEventListener("click", () => onApplyAll(_themePanelSelected));
-  wrap.appendChild(applyAll);
-
-  dom.panelBody.innerHTML = "";
-  dom.panelBody.appendChild(wrap);
-}
-
-function themeSuffix(id) {
-  return { stone: "Stone", wood: "Wood", camping: "Camping", italy: "Italy", summer: "BlueWhite", cherry: "CherryBlossom" }[id];
-}
-
-function onFacilityThemeTap(facilityKey, themeId) {
-  const owned = state.themesOwned[facilityKey]?.includes(themeId);
-  const applied = state.themes[facilityKey] === themeId;
-  if (applied) {
-    showToast("이미 적용 중인 테마입니다.");
-    return;
-  }
-  if (owned) {
-    state.themes[facilityKey] = themeId;
-    saveState();
-    renderThemePanel();
-    refreshHud();
-    return;
-  }
-  // 미보유 → 디테일 팝업
-  showThemeDetail(facilityKey, themeId);
-}
-
-function showThemeDetail(facilityKey, themeId) {
-  const themeDef = THEME_DEFS[facilityKey].find((t) => t.id === themeId);
-  const themeMeta = THEME_LIST.find((t) => t.id === themeId);
-  if (!themeDef || !themeMeta) return;
-  const grp = FACILITY_GROUPS.find((g) => g.key === facilityKey);
-  const useGem = themeDef.costGem > 0;
-  const cost = useGem ? themeDef.costGem : themeDef.costAcorn;
-  const iconPath = useGem ? "Icon/Currency/Icon_Currency_002.png" : "Icon/Currency/Icon_Currency_001.png";
-  const have = useGem ? state.resources.gems : state.resources.acorns;
-
-  // 동적 모달
-  const overlay = document.createElement("div");
-  overlay.className = "event-overlay theme-detail-overlay";
-  overlay.innerHTML = `
-    <div class="event-card theme-detail-card">
-      <div class="theme-detail-name">${grp.label} · ${themeMeta.name}</div>
-      <img class="event-icon" src="${themeDef.icon}" alt="" />
-      <div class="theme-detail-effect">수익 +${Math.round(themeDef.boost * 100)}%</div>
-      <div class="theme-detail-desc">${themeMeta.name} 컨셉의 ${grp.label} 테마</div>
-      <div class="theme-detail-actions">
-        <button class="ghost-btn" data-act="cancel" type="button">취소</button>
-        <button class="primary-btn" data-act="buy" type="button" ${have < cost ? "disabled" : ""}>
-          <img class="cost-icon" src="${iconPath}" alt="" />
-          <span>${formatNumber(cost)}</span>
-          <span class="primary-btn-label">구매하기</span>
-        </button>
-      </div>
-    </div>
-  `;
-  document.querySelector(".phone-frame").appendChild(overlay);
-  const close = () => overlay.remove();
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
-  overlay.querySelector('[data-act="cancel"]').addEventListener("click", close);
-  overlay.querySelector('[data-act="buy"]').addEventListener("click", () => {
-    if (useGem) {
-      if (!confirm(`보석 ${cost}개를 사용해 구매할까요?`)) return;
-      if (state.resources.gems < cost) { showToast("보석이 부족합니다."); return; }
-      state.resources.gems -= cost;
-    } else {
-      if (state.resources.acorns < cost) { showToast("도토리가 부족합니다."); return; }
-      state.resources.acorns -= cost;
+function renderStaffManagement() {
+  const cards = tables.staff.map((table) => {
+    const owned = state.staff[table.id];
+    const level = staffLevelRow(table.id, owned?.level || 1);
+    const next = owned ? nextStaffLevelRow(table.id) : null;
+    let action = `<button class="card-action" data-action="hire-staff" data-id="${table.id}" ${state.resources.acorns >= table.staffPrice ? "" : "disabled"}>${formatNumber(table.staffPrice)} 고용</button>`;
+    let extra = "";
+    if (owned) {
+      action = next ? `<button class="card-action" data-action="level-staff" data-id="${table.id}" ${owned.attached >= next.sticker && state.resources.acorns >= next.levelUpPrice ? "" : "disabled"}>Lv.UP</button>` : `<button class="card-action" disabled>최고 레벨</button>`;
+      extra = next ? `<button class="card-action" data-action="attach-sticker" data-id="${table.id}" ${owned.attached < next.sticker && state.resources.stickers > 0 ? "" : "disabled"}>스티커 ${owned.attached}/${next.sticker}</button>` : "";
     }
-    if (!state.themesOwned[facilityKey].includes(themeId)) state.themesOwned[facilityKey].push(themeId);
-    state.themes[facilityKey] = themeId;
-    showToast(`${themeMeta.name} 적용!`);
-    close();
-    saveState();
-    renderThemePanel();
-    refreshHud();
+    return `<article class="feature-card"><img class="feature-icon" src="assets/ui/staff/icon_staff_${String(table.id).padStart(3, "0")}.png" alt="" />
+      <div class="feature-copy"><strong>${table.staffName}${owned ? ` · Lv.${owned.level}` : ""}</strong><small>${staffDescription(table, level)}</small><small>휴식 ${level.breakTime}초${owned ? ` · 현재 ${owned.mode === "active" ? "근무 중" : "휴식 중"}` : ""}</small>${extra}</div>${action}</article>`;
+  }).join("");
+  dom.menuContent.innerHTML = `<p class="section-note">보유 스티커 ${state.resources.stickers} · 매일 보유량이 ${Number(tables.general.StaffStickerDaily || 5)}개가 되도록 충전됩니다.</p>${cards}`;
+}
+
+function renderPerformanceManagement() {
+  const current = activePerformance();
+  const stageReady = installedRows(5).length > 0;
+  dom.menuContent.innerHTML = `<section class="research-box"><h3>${current ? `공연팀 ${current.id} 공연 중` : "공연 무대"}</h3>
+    <p>${!stageReady ? "무대 시설을 먼저 설치해 주세요." : current ? `식당 가격 +${Math.round(current.abilityValue * 100)}% · ${Math.ceil(state.performance.remaining)}초 남음` : `다음 공연까지 ${Math.ceil(state.performance.cooldown)}초`}<br>공연 시작 시 할 일과 공연팀 도감이 함께 갱신됩니다.</p>
+    <button class="research-button" data-action="start-performance" ${stageReady && !current && state.performance.cooldown <= 0 ? "" : "disabled"}>공연 시작</button></section>
+    ${tables.performances.map((row) => `<article class="feature-card ${state.collections.performers[row.id] ? "" : "is-locked"}"><img class="feature-icon" src="assets/ui/performance/icon_performance_${String(row.id).padStart(3, "0")}.png" alt="" /><div class="feature-copy"><strong>${state.collections.performers[row.id] ? `공연팀 ${row.id}` : "???"}</strong><small>가격 +${Math.round(row.abilityValue * 100)}% · ${row.performanceTime}초</small><small>${row.price ? `공연료 도토리 ${row.price}` : "무료 공연"}</small></div></article>`).join("")}`;
+}
+
+function renderThemeManagement() {
+  const themeIds = [...new Set(tables.restaurantThemes.map((row) => row.facilityTheme))].sort((a, b) => a - b);
+  const selectedTheme = themeIds.includes(Number(state.ui.themeId)) ? Number(state.ui.themeId) : themeIds[0];
+  state.ui.themeId = selectedTheme;
+  const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === selectedTheme);
+  const openedCount = rows.filter((row) => state.themes.opened.includes(row.id)).length;
+  const applicableCount = rows.filter((row) => state.themes.opened.includes(row.id)
+    && isThemeFacilityAvailable(row.facilityType)
+    && state.themes.activeByFacility[row.facilityType] !== row.id).length;
+  const totalBonus = state.themes.opened.reduce((sum, id) => {
+    const row = tables.restaurantThemes.find((item) => item.id === Number(id));
+    return sum + Number(row?.abilityValue || 0);
+  }, 0);
+  const milestones = themeChickMilestones(selectedTheme);
+  const unlockedChicks = unlockedThemeChicks(selectedTheme);
+  const milestoneCards = (selectedTheme === 1 ? [milestones[0], milestones[2]] : milestones).map((chick) => {
+    const requiredCount = Math.ceil(rows.length * chick.threshold);
+    const unlocked = unlockedChicks.some((item) => item.customerId === chick.customerId);
+    const milestoneLabel = selectedTheme === 1 && chick.slot === 0 ? "기본" : `${Math.round(chick.threshold * 100)}%`;
+    return `<div class="theme-chick-chip ${unlocked ? "is-unlocked" : "is-locked"}"><img src="${guestIcon({ customerId: chick.customerId, commonId: chick.commonId })}" alt=""/><div><b>${milestoneLabel}</b><small>${unlocked ? chick.customerName : `${requiredCount}개 보유 시 등장`}</small><em>${chick.ingredientEmoji} ${chick.ingredientName} → ${chick.recipeName}</em></div></div>`;
+  }).join("");
+
+  dom.menuContent.innerHTML = `<div class="theme-tabs" aria-label="테마 선택">${themeIds.map((themeId) => {
+    const representative = tables.restaurantThemes.find((row) => row.facilityTheme === themeId && row.facilityType === 1)
+      || tables.restaurantThemes.find((row) => row.facilityTheme === themeId);
+    return `<button type="button" data-action="theme-select" data-id="${themeId}" class="${themeId === selectedTheme ? "is-active" : ""}"><img src="${themeFacilityIcon(representative)}" alt=""/><span>${THEME_NAMES[themeId] || `테마 ${themeId}`}</span></button>`;
+  }).join("")}</div>
+    <section class="theme-summary"><div><strong>${THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`}</strong><span>보유 ${openedCount}/${rows.length} · 누적 식당 수익 +${Math.round(totalBonus * 100)}%</span><small>${selectedTheme === 1 ? "기본 병아리와 100% 보너스 사과 병아리가 등장합니다." : "파츠 보유율 30% · 70% · 100%에서 병아리가 한 마리씩 등장합니다."}</small></div><button class="card-action" data-action="apply-theme-all" data-id="${selectedTheme}" ${applicableCount ? "" : "disabled"}>보유 파츠 전체 적용</button></section>
+    <div class="theme-chick-milestones">${milestoneCards}</div>
+    <p class="section-note">유니티와 동일하게 선택한 테마의 설비 파츠를 종류별로 구매하고 적용합니다. 아직 설치하지 않은 설비 파츠는 잠겨 있습니다.</p>
+    ${rows.map((row) => {
+    const opened = state.themes.opened.includes(row.id);
+    const active = state.themes.activeByFacility[row.facilityType] === row.id;
+    const available = isThemeFacilityAvailable(row.facilityType);
+    const collectible = row.purchaseType === 2;
+    const canBuy = available && !collectible && state.resources.acorns >= row.facilityPrice;
+    let label = `${formatNumber(row.facilityPrice)} 구매`;
+    let action = "buy-theme";
+    let disabled = !canBuy;
+    if (!available) label = "설비 필요";
+    else if (collectible && !opened) label = "전체 수집 보상";
+    if (opened) { action = "apply-theme"; label = active ? "적용 중" : "적용"; disabled = active; }
+    return `<article class="feature-card ${available ? "" : "is-locked"}"><img class="feature-icon" src="${themeFacilityIcon(row)}" alt=""/><div class="feature-copy"><strong>${FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`}</strong><small>${THEME_NAMES[selectedTheme]} 파츠</small><small>식당 수익 +${Math.round(row.abilityValue * 100)}% · ${opened ? "보유 중" : available ? RESOURCE_NAMES[row.itemId] || "재화" : "미설치"}</small></div><button class="card-action" data-action="${action}" data-id="${row.id}" ${disabled ? "disabled" : ""}>${label}</button></article>`;
+  }).join("")}`;
+  requestAnimationFrame(() => {
+    const tabs = dom.menuContent.querySelector(".theme-tabs");
+    const selected = tabs?.querySelector(`[data-id="${selectedTheme}"]`);
+    if (tabs && selected) tabs.scrollLeft = Math.max(0, selected.offsetLeft - (tabs.clientWidth - selected.clientWidth) / 2);
   });
 }
 
-function onApplyAll(themeId) {
-  // 보유한 시설부터 일괄 적용. 미보유는 비용 합산 후 확인
-  const targets = FACILITY_GROUPS.filter((g) => state.themes[g.key] !== themeId);
-  if (targets.length === 0) { showToast("이미 모두 이 테마입니다."); return; }
-  let acornCost = 0, gemCost = 0;
-  const toBuy = [];
-  for (const g of targets) {
-    if (state.themesOwned[g.key]?.includes(themeId)) continue;
-    const def = THEME_DEFS[g.key].find((t) => t.id === themeId);
-    if (def.costGem > 0) gemCost += def.costGem; else acornCost += def.costAcorn;
-    toBuy.push(g.key);
+function renderMenu() {
+  if (state.ui.screen === "recipe") renderRecipeMenu();
+  else if (state.ui.screen === "missions") renderMissionMenu();
+  else if (state.ui.screen === "collection") renderCollectionMenu();
+  else if (state.ui.screen === "staff") {
+    dom.menuKicker.textContent = "레스토랑 관리";
+    dom.menuTitle.textContent = "직원";
+    dom.menuTabs.innerHTML = "";
+    renderStaffManagement();
+  } else if (state.ui.screen === "theme") {
+    dom.menuKicker.textContent = "시설 꾸미기";
+    dom.menuTitle.textContent = "테마";
+    dom.menuTabs.innerHTML = "";
+    renderThemeManagement();
+  } else if (state.ui.screen === "performance") {
+    dom.menuKicker.textContent = "무대";
+    dom.menuTitle.textContent = "공연";
+    dom.menuTabs.innerHTML = "";
+    renderPerformanceManagement();
   }
-  if (toBuy.length > 0) {
-    const msg = `미보유 ${toBuy.length}개 시설 테마를 ${acornCost > 0 ? `도토리 ${acornCost}` : ""}${acornCost > 0 && gemCost > 0 ? " + " : ""}${gemCost > 0 ? `보석 ${gemCost}` : ""}로 구매하고 전체 적용할까요?`;
-    if (!confirm(msg)) return;
-    if (state.resources.acorns < acornCost) { showToast("도토리가 부족합니다."); return; }
-    if (state.resources.gems < gemCost) { showToast("보석이 부족합니다."); return; }
-    state.resources.acorns -= acornCost;
-    state.resources.gems -= gemCost;
-    for (const key of toBuy) {
-      if (!state.themesOwned[key].includes(themeId)) state.themesOwned[key].push(themeId);
-    }
-  }
-  for (const g of targets) state.themes[g.key] = themeId;
-  showToast("전체 테마가 적용되었습니다!");
+}
+
+function resetGame() {
+  if (!window.confirm("현재 진행을 지우고 처음부터 다시 시작할까요?")) return;
+  localStorage.removeItem(SAVE_KEY);
+  state = createInitialState();
+  dom.installPanel.hidden = true;
+  closeMenu();
+  showToast("새 식당을 시작합니다.");
   saveState();
-  renderThemePanel();
-  refreshHud();
+  updateHud();
+  render();
 }
 
-// ===== 이벤트 바인딩 =====
-document.getElementById("promotion-btn").addEventListener("click", handlePromotion);
-document.getElementById("reset-btn").addEventListener("click", () => {
-  if (confirm("모든 진행도를 초기화할까요?")) {
-    resetState();
-  }
-});
-document.querySelectorAll("[data-panel]").forEach((btn) => {
-  btn.addEventListener("click", () => openPanel(btn.dataset.panel));
-});
-dom.panelCloseBtn.addEventListener("click", closePanel);
-dom.panelOverlay.addEventListener("click", (e) => {
-  if (e.target === dom.panelOverlay) closePanel();
-});
-dom.installConfirmBtn.addEventListener("click", () => {
-  if (state.ui.installCandidateId === null) return;
-  const cand = INSTALL_SEQUENCE[state.ui.installCandidateId];
-  installCandidate(cand);
-});
-dom.researchStartBtn.addEventListener("click", startResearch);
-dom.researchCancelBtn.addEventListener("click", () => {
-  state.ui.chefBubbleOpen = false;
-  refreshHud();
-});
-dom.resultConfirm.addEventListener("click", closeResultModal);
-dom.resultOverlay.addEventListener("click", (e) => {
-  if (e.target === dom.resultOverlay) closeResultModal();
-});
-dom.enhanceConfirm.addEventListener("click", closeEnhanceModal);
-dom.enhanceOverlay.addEventListener("click", (e) => {
-  if (e.target === dom.enhanceOverlay) closeEnhanceModal();
-});
-
-canvas.addEventListener("click", (e) => {
-  const p = getCanvasPoint(e.clientX, e.clientY);
-  handleCanvasClick(p.x, p.y);
-});
-window.addEventListener("resize", () => {
-  configureCanvas();
-  refreshHud();
-});
-
-// ===== 메인 루프 =====
-let lastTime = 0;
-function frame(ts) {
-  if (!lastTime) lastTime = ts;
-  const dt = Math.min(0.05, (ts - lastTime) / 1000);
-  lastTime = ts;
-  update(dt);
-  draw();
-  refreshHudIfNeeded();
+function frame(now) {
+  const elapsed = Math.min(.05, (now - lastFrame) / 1000);
+  lastFrame = now;
+  if (!deterministicStepping) update(elapsed);
+  render();
   requestAnimationFrame(frame);
 }
 
-let lastHudAcorns = -1;
-let lastHudThreshold = -1;
-let lastHudProgress = -1;
-function refreshHudIfNeeded() {
-  if (
-    state.resources.acorns !== lastHudAcorns ||
-    state.promo.progress !== lastHudProgress ||
-    state.promo.threshold !== lastHudThreshold
-  ) {
-    lastHudAcorns = state.resources.acorns;
-    lastHudProgress = state.promo.progress;
-    lastHudThreshold = state.promo.threshold;
-    refreshHud();
-  }
-  // 말풍선 위치는 매 프레임 캔버스가 흔들리지 않으므로 한 번만 갱신해도 OK,
-  // 하지만 요리사가 움직이면 갱신 필요
-  if (state.ui.chefBubbleOpen) {
-    const screen = canvasToScreen(state.chef.x, state.chef.y + 36);
-    dom.researchBubble.style.left = `${screen.x}px`;
-    dom.researchBubble.style.top = `${screen.y}px`;
+function renderGameToText() {
+  const candidates = installCandidates().map((row) => ({
+    id: row.id,
+    name: FACILITY_META[row.facilityType]?.name,
+    cost: row.facilityPrice,
+    ...facilityPlacement(row),
+  }));
+  return JSON.stringify({
+    coordinateSystem: "canvas 480x900; origin top-left; x right; y down",
+    mode: "restaurant",
+    objective: currentObjective(),
+    resources: state.resources,
+    installedFacilityIds: state.installed,
+    installCandidates: candidates,
+    promotion: { ...state.promotion, threshold: promotionThreshold(), enabled: coreReady() },
+    guests: state.guests.map((guest) => ({
+      id: guest.id,
+      customerId: guest.customerId,
+      customerName: guest.customerName || progressionForCustomer(guest.customerId)?.customerName || `손님 ${guest.customerId}`,
+      icon: guestIcon(guest),
+      state: guest.state,
+      x: Math.round(guest.x),
+      y: Math.round(guest.y),
+      recipeId: guest.recipeId,
+      recipeName: routeRecipeName(guest.recipeId),
+      wait: Number(guest.wait.toFixed(1)),
+      mood: guest.mood,
+      dropIngredient: guest.ingredientId || progressionForCustomer(guest.customerId)?.ingredientId || null,
+      themeId: guest.themeId || chickMilestoneForCustomer(guest.customerId)?.themeId || null,
+      chickSlot: Number.isInteger(guest.chickSlot) ? guest.chickSlot : chickMilestoneForCustomer(guest.customerId)?.slot ?? null,
+    })),
+    ordersQueued: state.orders.length,
+    cooking: state.cooking.map((task) => ({
+      guestId: task.guestId,
+      recipe: routeRecipeName(task.recipeId),
+      elapsed: Number(task.elapsed.toFixed(1)),
+      duration: task.duration,
+    })),
+    payments: state.payments.map((payment) => ({ x: payment.x, y: payment.y, amount: payment.amount })),
+    ingredientDrops: state.ingredientDrops.map((drop) => ({
+      id: drop.id,
+      ingredientId: drop.ingredientId,
+      emoji: drop.emoji,
+      x: Math.round(drop.x),
+      y: Math.round(drop.y),
+    })),
+    tipbox: state.tipbox,
+    metrics: state.metrics,
+    currentScreen: state.ui.screen,
+    recipes: {
+      owned: Object.keys(state.ownedRecipes).length,
+      globalRevenueBonus: Math.max(0, unlockedRecipeCount() - 1) * .05,
+      craftable: CORE_PROGRESSION.filter((route) => canCraftRecipe(route.recipeId)).map((route) => route.recipeId),
+      craftCosts: Object.fromEntries(CORE_PROGRESSION.filter(isProgressionRouteUnlocked).map((route) => [route.recipeId, craftIngredientCost(route)])),
+      craftRequirements: Object.fromEntries(CORE_PROGRESSION.filter(isProgressionRouteUnlocked).map((route) => [route.recipeId,
+        craftIngredientRequirements(route).map((requirement) => ({ ingredientId: requirement.ingredientId, name: requirement.name, count: requirement.count }))])),
+      levels: Object.fromEntries(Object.entries(state.ownedRecipes).map(([id, owned]) => [id, owned.level])),
+      prices: Object.fromEntries(Object.entries(state.ownedRecipes).map(([id, owned]) => {
+        const recipe = getRecipe(Number(id));
+        return [id, Math.round(Number(recipe?.foodPrice || 0) * (1 + Math.max(0, owned.level - 1) * .05))];
+      })),
+    },
+    progression: {
+      unlockedThemes: [...new Set(CORE_PROGRESSION.filter((route) => isThemeUnlocked(route.themeId)).map((route) => route.themeId))],
+      activeThemeParts: { ...state.themes.activeByFacility },
+      unlockedCustomers: allUnlockedThemeChicks().map((chick) => chick.customerId),
+      unlockedChickRoutes: allUnlockedThemeChicks().map((chick) => ({
+        themeId: chick.themeId,
+        slot: chick.slot,
+        customerId: chick.customerId,
+        ingredientId: chick.ingredientId,
+        ingredientName: chick.ingredientName,
+        recipeId: chick.recipeId,
+        recipeName: chick.recipeName,
+        recipeIngredients: chick.ingredientRequirements.map((ingredient) => ({ ingredientId: ingredient.id, name: ingredient.name })),
+      })),
+      themeChickThresholds: THEME_CHICK_THRESHOLDS,
+      themeChickProgress: Object.fromEntries(Object.keys(THEME_NAMES).map((themeId) => {
+        const progress = themeChickProgress(Number(themeId));
+        return [themeId, { ...progress, unlocked: unlockedThemeChicks(Number(themeId)).map((chick) => chick.customerId) }];
+      })),
+      ingredientDropChances: Object.fromEntries(CORE_PROGRESSION.map((route) => [route.ingredientId, route.dropChance])),
+      ingredients: { ...state.crafting.ingredients },
+      autoCraft: "click-to-craft-one",
+      craftedRecipes: state.crafting.history.map((entry) => entry.recipeId),
+      unlockedRegions: unlockedRegions().map((region) => region.id),
+    },
+    missions: {
+      mainGroup: state.missions.mainGroup,
+      rewardReady: hasMissionReward(),
+      dailyClaimed: state.missions.dailyClaimed.length,
+    },
+    collection: {
+      customers: Object.keys(state.collections.customers).length,
+      specialCustomers: Object.keys(state.collections.specialCustomers).length,
+      performers: Object.keys(state.collections.performers).length,
+    },
+    specialCustomers: state.specialActors.map((actor) => ({ id: actor.specialId, state: actor.state, x: Math.round(actor.x), y: Math.round(actor.y), stolen: actor.stolen })),
+    selectedInstallId: state.ui.selectedInstallId,
+  });
+}
+
+async function init() {
+  try {
+    tables = await loadTables();
+    state = loadState() || createInitialState();
+    state.ui.screen = "restaurant";
+    dom.menuScreen.hidden = true;
+    setActiveNav("");
+    updateHud();
+    render();
+    requestAnimationFrame(frame);
+  } catch (error) {
+    console.error(error);
+    showToast(error.message, 60);
   }
 }
 
-// 자동 저장 (10초마다)
-setInterval(() => {
-  saveState();
-}, 10000);
-window.addEventListener("beforeunload", saveState);
+canvas.addEventListener("pointerdown", canvasPointerDown);
+dom.promoButton.addEventListener("click", promote);
+dom.resetButton.addEventListener("click", resetGame);
+dom.collectionButton.addEventListener("click", () => openMenu("collection"));
+dom.installClose.addEventListener("click", closeInstallPanel);
+dom.installConfirm.addEventListener("click", confirmInstall);
+dom.menuClose.addEventListener("click", closeMenu);
+dom.navButtons.forEach((button) => button.addEventListener("click", () => openMenu(button.dataset.screen)));
+dom.menuTabs.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-tab]");
+  if (!button) return;
+  state.ui.tab = button.dataset.tab;
+  renderMenu();
+});
+dom.menuContent.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-action]");
+  if (!button || button.disabled) return;
+  const id = Number(button.dataset.id);
+  if (button.dataset.action === "research") doResearch();
+  if (button.dataset.action === "craft-recipe") craftRecipe(id, false);
+  if (button.dataset.action === "auto-craft") {
+    if (!tryAutoCraft()) showToast("현재 재료로 제작할 수 있는 레시피가 없어요.");
+    renderMenu();
+  }
+  if (button.dataset.action === "codex") claimCodexReward(id);
+  if (button.dataset.action === "claim-mission") claimMission(button.dataset.kind, id);
+  if (button.dataset.action === "daily-bonus") claimDailyBonus();
+  if (button.dataset.action === "hire-staff") hireStaff(id);
+  if (button.dataset.action === "attach-sticker") attachStaffSticker(id);
+  if (button.dataset.action === "level-staff") levelUpStaff(id);
+  if (button.dataset.action === "start-performance") startPerformance();
+  if (button.dataset.action === "buy-theme") buyTheme(id);
+  if (button.dataset.action === "apply-theme") applyTheme(id);
+  if (button.dataset.action === "apply-theme-all") applyThemeAll(id);
+  if (button.dataset.action === "theme-select") { state.ui.themeId = id; renderMenu(); }
+  if (button.dataset.action === "theme-filter") { state.ui.themeFacilityType = id; renderMenu(); }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key.toLowerCase() === "f") {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.querySelector(".game-frame").requestFullscreen();
+  }
+});
 
-// 부트
-configureCanvas();
-refreshHud();
-requestAnimationFrame(frame);
+window.render_game_to_text = renderGameToText;
+window.advanceTime = (milliseconds) => {
+  deterministicStepping = true;
+  const steps = Math.max(1, Math.round(milliseconds / (1000 / 60)));
+  for (let i = 0; i < steps; i += 1) update(FIXED_DT);
+  render();
+  return renderGameToText();
+};
 
-// 디버그 훅
-window.gameState = () => state;
-window.resetGame = resetState;
+init();

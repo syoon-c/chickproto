@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "areaType": 1,
+    "staffName": "주우방",
+    "staffType": 2,
+    "staffPrice": 100,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "Chick_FryingPan"
+  },
+  {
+    "id": 2,
+    "areaType": 1,
+    "staffName": "정서빙",
+    "staffType": 3,
+    "staffPrice": 100,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "Chick_Robo"
+  },
+  {
+    "id": 3,
+    "areaType": 1,
+    "staffName": "강홍보",
+    "staffType": 4,
+    "staffPrice": 100,
+    "unlockConditionType": 0,
+    "unlockConditionValue": 0,
+    "prefab": "Chick_Magnet"
+  }
+]
