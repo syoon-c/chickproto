@@ -56,6 +56,89 @@ let lastFrame = performance.now();
 let deterministicStepping = false;
 let toastTimer = 0;
 const imageCache = new Map();
+const DRAG_SCROLL_THRESHOLD = 6;
+let dragScrollGesture = null;
+let suppressedDragClick = null;
+
+function scrollableAncestors(target) {
+  const result = { x: null, y: null };
+  let element = target instanceof Element ? target : null;
+  while (element && element !== document.body) {
+    const style = getComputedStyle(element);
+    const scrollsX = /(auto|scroll)/.test(style.overflowX) && element.scrollWidth > element.clientWidth + 1;
+    const scrollsY = /(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight + 1;
+    if (!result.x && scrollsX) result.x = element;
+    if (!result.y && scrollsY) result.y = element;
+    if (result.x && result.y) break;
+    element = element.parentElement;
+  }
+  return result;
+}
+
+function beginDragScroll(event) {
+  if (!event.isPrimary || event.pointerType !== "mouse" || event.button !== 0) return;
+  if (!(event.target instanceof Element) || event.target.closest("input, textarea, select, [contenteditable='true']")) return;
+  const scrollers = scrollableAncestors(event.target);
+  if (!scrollers.x && !scrollers.y) return;
+  dragScrollGesture = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    xScroller: scrollers.x,
+    yScroller: scrollers.y,
+    startScrollLeft: scrollers.x?.scrollLeft || 0,
+    startScrollTop: scrollers.y?.scrollTop || 0,
+    axis: null,
+    scroller: null,
+    moved: false,
+  };
+}
+
+function moveDragScroll(event) {
+  const gesture = dragScrollGesture;
+  if (!gesture || event.pointerId !== gesture.pointerId) return;
+  const deltaX = event.clientX - gesture.startX;
+  const deltaY = event.clientY - gesture.startY;
+  if (!gesture.axis) {
+    if (Math.hypot(deltaX, deltaY) < DRAG_SCROLL_THRESHOLD) return;
+    const wantsX = Math.abs(deltaX) > Math.abs(deltaY);
+    gesture.axis = wantsX && gesture.xScroller ? "x" : !wantsX && gesture.yScroller ? "y" : gesture.xScroller ? "x" : "y";
+    gesture.scroller = gesture.axis === "x" ? gesture.xScroller : gesture.yScroller;
+    gesture.moved = true;
+    gesture.scroller.classList.add("is-drag-scrolling");
+    try { gesture.scroller.setPointerCapture(event.pointerId); } catch {}
+  }
+  if (gesture.axis === "x") gesture.scroller.scrollLeft = gesture.startScrollLeft - deltaX;
+  else gesture.scroller.scrollTop = gesture.startScrollTop - deltaY;
+  event.preventDefault();
+}
+
+function endDragScroll(event) {
+  const gesture = dragScrollGesture;
+  if (!gesture || event.pointerId !== gesture.pointerId) return;
+  if (gesture.moved) {
+    suppressedDragClick = { scroller: gesture.scroller, until: performance.now() + 350 };
+    event.preventDefault();
+  }
+  gesture.scroller?.classList.remove("is-drag-scrolling");
+  try { gesture.scroller?.releasePointerCapture(event.pointerId); } catch {}
+  dragScrollGesture = null;
+}
+
+document.addEventListener("pointerdown", beginDragScroll, true);
+window.addEventListener("pointermove", moveDragScroll, { capture: true, passive: false });
+window.addEventListener("pointerup", endDragScroll, true);
+window.addEventListener("pointercancel", endDragScroll, true);
+document.addEventListener("click", (event) => {
+  if (!suppressedDragClick) return;
+  const shouldSuppress = performance.now() <= suppressedDragClick.until
+    && event.target instanceof Node
+    && suppressedDragClick.scroller.contains(event.target);
+  suppressedDragClick = null;
+  if (!shouldSuppress) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}, true);
 
 function initialAcorns() {
   const coreInstallCost = [10, 1, 2].reduce((sum, type) => {

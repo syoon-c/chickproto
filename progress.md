@@ -500,3 +500,19 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
   - `node tools/verify-file-open.mjs` → `FILE_OPEN_CORE_LOOP_OK`
   - 공식 develop-web-game 클라이언트: 시작 `themeChickProgress[1]=0/18`, `unlockedCustomers=[3]`, 테마 키 1~15, 콘솔 오류 없음.
   - 화면: `output/theme-chick-milestones/00b-stone-completion-locked.png`, `00c-stone-completion-unlocked.png`, `00d-wood-half-prices.png`, `output/all-ingredient-drops/1-bread.png`.
+
+## 2026-07-16 전체 스크롤 마우스 드래그 지원
+
+- 동적으로 생성되는 모든 스크롤 영역을 공통 탐색하는 드래그 스크롤 처리를 추가했다.
+  - 세로: 레시피·할 일·직원·테마·도감 등 `menu-content` 목록.
+  - 가로: 상단 메뉴 탭, 설비 필터, 테마 선택 탭.
+- 가로 탭 안에서 세로로 드래그하면 바깥 목록이 세로로 움직이고, 가로로 드래그하면 해당 탭이 가로로 움직이도록 방향을 판정한다.
+- 6px 이상 움직였을 때만 드래그로 판정하며, 드래그 직후 발생하는 클릭을 차단해 버튼이 잘못 눌리지 않게 했다. 짧게 누른 정상 버튼 클릭은 그대로 동작한다.
+- 터치 기기의 기존 네이티브 스크롤은 유지하고, 마우스 드래그 중에는 잡는 손 모양 커서를 표시한다.
+- 검증 결과:
+  - `node tools/verify-drag-scroll.mjs` → `DRAG_SCROLL_OK horizontal=0->357 vertical=0->488`
+  - 드래그 중 테마가 선택되지 않음, 드래그 후 정상 테마 선택 및 닫기 버튼 클릭 확인.
+  - `node tools/verify-theme-chick-milestones.mjs` → `THEME_CHICK_MILESTONES_OK total=11 thresholds=4/8/11`
+  - `node tools/verify-file-open.mjs` → `FILE_OPEN_CORE_LOOP_OK`
+  - 공식 develop-web-game 클라이언트 상태 출력 및 콘솔 오류 없음 확인.
+  - 화면: `output/drag-scroll/dragged-theme-menu.png`, `output/official-drag-scroll/shot-0.png`.
