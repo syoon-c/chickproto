@@ -473,3 +473,30 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
   - `node tools/verify-unity-features.mjs` → `UNITY_FEATURES_OK`
   - `node tools/verify-file-open.mjs` → `FILE_OPEN_CORE_LOOP_OK`
   - 화면: `output/theme-chick-milestones/00b-stone-completion-chick.png`, `output/official-stone-bonus/shot-0.png`.
+
+## 2026-07-16 테마 범위 축소 및 돌 테마 완료 조건 수정
+
+- 사용할 레스토랑 테마를 돌(1)부터 우주 점성술(15)까지로 제한했다.
+  - `ThemeFacility` 로딩 단계에서 16~26번 테마를 제외했다.
+  - 설정의 테마 이름·리소스 슬러그와 병아리 진행 경로도 15번까지만 생성한다(총 45경로).
+  - 이전 저장 데이터에 남은 16번 이후 보유/적용/해금 정보는 로드시 제거한다.
+- 돌 테마 보너스 병아리의 해금 기준을 돌 파츠 보유율에서 실제 설비 설치 완료로 변경했다.
+  - 우체통을 제외하고 돌 테마가 지원하는 실제 레스토랑 설비 18개를 모두 설치해야 100%가 된다.
+  - 시작 상태는 0/18이며 기본 병아리만 등장한다.
+  - 18/18 완료 후에만 두 번째 병아리가 손님·드랍·레시피 경로에 추가된다.
+- 돌 테마 완료 보상을 사과 병아리/과일 가족 모임에서 알껍질 병아리/샌드위치로 교체했다.
+  - 실제 복사 리소스 `icon_chick_002.png` 사용.
+  - 알껍질 병아리 → 빵 필드 드랍(50%) → 샌드위치 발견.
+  - 캠핑 테마에서 중복 사용하던 알 병아리는 `icon_chick_020.png` 카우보이 병아리로 교체했다.
+- 나무 테마 파츠 11종의 가격을 모두 기존 데이터 값의 50%로 조정했다.
+  - 예: 테이블 2,600→1,300, 조리기구 2,800→1,400, 출입구 3,600→1,800.
+- 검증 결과:
+  - `node tools/verify-theme-chick-milestones.mjs` → `THEME_CHICK_MILESTONES_OK total=11 thresholds=4/8/11`
+  - `node tools/verify-recipe-combinations.mjs` → `RECIPE_COMBINATIONS_OK single=1 middle=2 late=3`
+  - `node tools/verify-balance-items.mjs` → `BALANCE_ITEMS_OK`
+  - `node tools/verify-progression-loop.mjs` → `PROGRESSION_LOOP_OK`
+  - `node tools/verify-all-ingredient-drops.mjs` → `ALL_INGREDIENT_DROPS_OK`
+  - `node tools/verify-unity-features.mjs` → `UNITY_FEATURES_OK`
+  - `node tools/verify-file-open.mjs` → `FILE_OPEN_CORE_LOOP_OK`
+  - 공식 develop-web-game 클라이언트: 시작 `themeChickProgress[1]=0/18`, `unlockedCustomers=[3]`, 테마 키 1~15, 콘솔 오류 없음.
+  - 화면: `output/theme-chick-milestones/00b-stone-completion-locked.png`, `00c-stone-completion-unlocked.png`, `00d-wood-half-prices.png`, `output/all-ingredient-drops/1-bread.png`.

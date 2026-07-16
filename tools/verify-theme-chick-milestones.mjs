@@ -37,16 +37,27 @@ try {
   await page.locator("#reset-btn").click();
 
   let current = await state();
-  if (current.progression.themeChickProgress[1].unlocked.length !== 2) {
-    throw new Error("The completed starting Stone theme must unlock the base chick and one completion bonus chick");
+  const availableThemeIds = Object.keys(current.progression.themeChickProgress).map(Number);
+  if (availableThemeIds.length !== 15 || Math.max(...availableThemeIds) !== 15) {
+    throw new Error(`Only themes through Astrology (15) may be available: ${JSON.stringify(availableThemeIds)}`);
+  }
+  if (current.progression.themeChickProgress[1].unlocked.length !== 1) {
+    throw new Error("The starting Stone theme must only unlock the base chick before all facilities are installed");
   }
   const baseRoute = current.progression.unlockedChickRoutes.find((route) => route.customerId === 3);
-  const stoneBonusRoute = current.progression.unlockedChickRoutes.find((route) => route.customerId === 10013);
   if (baseRoute?.ingredientId !== 30001 || baseRoute?.recipeId !== 1 || current.recipes.craftCosts[1] !== 3) {
     throw new Error(`The base chick must upgrade the starting salad with lettuce: ${JSON.stringify(baseRoute)}`);
   }
-  if (stoneBonusRoute?.ingredientId !== 30033 || stoneBonusRoute?.recipeId !== 34 || stoneBonusRoute?.recipeName !== "과일 가족 모임") {
-    throw new Error(`The Stone completion chick must provide the fruit recipe bridge: ${JSON.stringify(stoneBonusRoute)}`);
+  if (current.progression.unlockedChickRoutes.some((route) => route.customerId === 10013)) {
+    throw new Error("The Stone completion chick must remain locked before all facilities are installed");
+  }
+  const woodPrices = await page.evaluate(async () => {
+    const source = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === 2);
+    const loaded = (await window.ChickData.loadTables()).restaurantThemes;
+    return source.map((row) => ({ raw: row.facilityPrice, expected: Math.max(1, Math.ceil(row.facilityPrice / 2)), loaded: loaded.find((item) => item.id === row.id)?.facilityPrice }));
+  });
+  if (woodPrices.some((row) => row.loaded !== row.expected)) {
+    throw new Error(`Wood theme prices were not halved: ${JSON.stringify(woodPrices)}`);
   }
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
@@ -61,7 +72,39 @@ try {
   await page.locator("#menu-close-btn").click();
   await page.locator('[data-screen="theme"]').click();
   await page.waitForTimeout(200);
-  await page.locator("#menu-screen").screenshot({ path: path.join(out, "00b-stone-completion-chick.png") });
+  await page.locator("#menu-content").evaluate((element) => { element.scrollTop = 0; });
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "00b-stone-completion-locked.png") });
+  await page.evaluate(() => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    const stoneTypes = new Set(window.CHICK_TABLE_SOURCE.ThemeFacility
+      .filter((row) => row.areaType === 1 && row.facilityTheme === 1)
+      .map((row) => row.facilityType));
+    saved.installed = window.CHICK_TABLE_SOURCE.InstallFacility
+      .filter((row) => row.areaType === 1 && stoneTypes.has(row.facilityType))
+      .map((row) => row.id);
+    saved.resources.acorns = 100000;
+    localStorage.setItem(key, JSON.stringify(saved));
+  });
+  await page.reload({ waitUntil: "load" });
+  current = await state();
+  if (current.progression.themeChickProgress[1].unlocked.length !== 2) {
+    throw new Error("Installing every Stone facility must unlock the completion chick");
+  }
+  const stoneBonusRoute = current.progression.unlockedChickRoutes.find((route) => route.customerId === 10013);
+  if (stoneBonusRoute?.ingredientId !== 30003 || stoneBonusRoute?.recipeId !== 2 || stoneBonusRoute?.recipeName !== "샌드위치") {
+    throw new Error(`The Stone completion chick must provide the sandwich route: ${JSON.stringify(stoneBonusRoute)}`);
+  }
+  await page.locator('[data-screen="theme"]').click();
+  await page.locator('[data-action="theme-select"][data-id="2"]').click();
+  await page.waitForTimeout(150);
+  await page.locator("#menu-content").evaluate((element) => { element.scrollTop = 0; });
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "00d-wood-half-prices.png") });
+  await page.locator('[data-action="theme-select"][data-id="1"]').click();
+  await page.waitForFunction(() => [...document.images].every((image) => image.complete));
+  await page.waitForTimeout(500);
+  await page.locator("#menu-content").evaluate((element) => { element.scrollTop = 0; });
+  await page.screenshot({ path: path.join(out, "00c-stone-completion-unlocked.png"), fullPage: true });
 
   const total = current.progression.themeChickProgress[6].total;
   const required30 = Math.ceil(total * .3);
@@ -108,7 +151,8 @@ try {
       const stoneRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === 1);
       const campingRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === 6);
       saved.themes.opened = [...stoneRows, ...campingRows].map((row) => row.id);
-      saved.installed = [10, 1, 2].map((type) => window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => row.areaType === 1 && row.facilityType === type)?.id).filter(Boolean);
+      const stoneTypes = new Set(stoneRows.map((row) => row.facilityType));
+      saved.installed = window.CHICK_TABLE_SOURCE.InstallFacility.filter((row) => row.areaType === 1 && stoneTypes.has(row.facilityType)).map((row) => row.id);
       saved.rng = rngSeed;
       saved.guests = [];
       saved.orders = [];
@@ -131,7 +175,7 @@ try {
   if (seenCampingChicks.size !== 3 || new Set(seenCampingChicks.values()).size !== 3) {
     throw new Error(`All three camping chicks must actually visit with distinct icons: ${JSON.stringify([...seenCampingChicks])}`);
   }
-  if (!stoneBonusVisit?.icon.endsWith("icon_chick_005.png") || stoneBonusVisit.dropIngredient !== 30033) {
+  if (!stoneBonusVisit?.icon.endsWith("icon_chick_002.png") || stoneBonusVisit.dropIngredient !== 30003) {
     throw new Error(`Stone completion bonus chick did not visit correctly: ${JSON.stringify(stoneBonusVisit)}`);
   }
 

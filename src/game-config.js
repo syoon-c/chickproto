@@ -39,25 +39,12 @@ const THEME_NAMES = {
   13: "연금술 테마",
   14: "목욕탕 테마",
   15: "우주 점성술 테마",
-  16: "한식당 테마",
-  17: "게임장 테마",
-  18: "빡도날드 테마",
-  19: "양반집 테마",
-  20: "바닷속 테마",
-  21: "톨게이트 테마",
-  22: "버섯 늪지대 테마",
-  23: "초등학교 테마",
-  24: "공동묘지 테마",
-  25: "채소 테마",
-  26: "해적선 테마",
 };
 
 const THEME_SLUGS = {
   1: "stone", 2: "wood", 3: "greenstripe", 4: "bluewhite", 5: "greenpink", 6: "camping",
   7: "bluepolkadots", 8: "italy", 9: "cherryblossom", 10: "loafbread", 11: "chickhouse",
-  12: "retrooffice", 13: "alchemical", 14: "bathhouse", 15: "astrology", 16: "krestaurant",
-  17: "arcade", 18: "chickdonalds", 19: "yangbanhouse", 20: "underthesea", 21: "tallgate",
-  22: "mushroomswamp", 23: "elementaryschool", 24: "cemetery", 25: "vegetable", 26: "pirateship",
+  12: "retrooffice", 13: "alchemical", 14: "bathhouse", 15: "astrology",
 };
 
 const THEME_CHICK_THRESHOLDS = [0.3, 0.7, 1];
@@ -99,18 +86,17 @@ const RECIPE_INGREDIENT_KEYS = [
 
 const PRIMARY_ROUTE_OVERRIDES = {
   1: { customerId: 3, commonId: 1001, customerName: "기본 병아리", recipeId: 1, baseRecipeId: 1, recipeName: "샐러드" },
-  6: { customerId: 4, commonId: 1002, customerName: "알 병아리", recipeId: 10, baseRecipeId: 10, recipeName: "웨지감자" },
+  6: { customerId: 4, commonId: 1020, customerName: "카우보이 병아리", recipeId: 10, baseRecipeId: 10, recipeName: "웨지감자" },
   8: { customerId: 5, commonId: 1003, customerName: "공룡 병아리", recipeId: 7, baseRecipeId: 7, recipeName: "피자" },
-  25: { customerId: 6, commonId: 1004, customerName: "도토리 병아리", recipeId: 26, baseRecipeId: 26, recipeName: "둥지 당근 라페" },
 };
 
 const STONE_COMPLETION_BONUS = {
   customerId: 10013,
-  commonId: 1005,
-  customerName: "사과 병아리",
-  recipeId: 34,
-  baseRecipeId: 34,
-  recipeName: "과일 가족 모임",
+  commonId: 1002,
+  customerName: "알껍질 병아리",
+  recipeId: 2,
+  baseRecipeId: 2,
+  recipeName: "샌드위치",
 };
 
 function shortThemeName(themeId) {

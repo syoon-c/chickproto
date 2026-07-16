@@ -93,8 +93,7 @@
     "globalRevenueBonus": 0,
     "craftable": [],
     "craftCosts": {
-      "1": 4,
-      "34": 2
+      "1": 4
     },
     "craftRequirements": {
       "1": [
@@ -102,13 +101,6 @@
           "ingredientId": 30001,
           "name": "양상추",
           "count": 4
-        }
-      ],
-      "34": [
-        {
-          "ingredientId": 30033,
-          "name": "과일",
-          "count": 2
         }
       ]
     },
@@ -139,8 +131,7 @@
       "13": 1013
     },
     "unlockedCustomers": [
-      3,
-      10013
+      3
     ],
     "unlockedChickRoutes": [
       {
@@ -157,21 +148,6 @@
             "name": "양상추"
           }
         ]
-      },
-      {
-        "themeId": 1,
-        "slot": 2,
-        "customerId": 10013,
-        "ingredientId": 30033,
-        "ingredientName": "과일",
-        "recipeId": 34,
-        "recipeName": "과일 가족 모임",
-        "recipeIngredients": [
-          {
-            "ingredientId": 30033,
-            "name": "과일"
-          }
-        ]
       }
     ],
     "themeChickThresholds": [
@@ -181,12 +157,11 @@
     ],
     "themeChickProgress": {
       "1": {
-        "opened": 13,
-        "total": 13,
-        "ratio": 1,
+        "opened": 15,
+        "total": 18,
+        "ratio": 0.8333333333333334,
         "unlocked": [
-          3,
-          10013
+          3
         ]
       },
       "2": {
@@ -272,72 +247,6 @@
         "total": 13,
         "ratio": 0,
         "unlocked": []
-      },
-      "16": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "17": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "18": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "19": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "20": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "21": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "22": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "23": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "24": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "25": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "26": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
       }
     },
     "ingredientDropChances": {
@@ -355,7 +264,6 @@
       "30012": 0.5,
       "30013": 0.5,
       "30014": 0.5,
-      "30015": 0.5,
       "30016": 0.5,
       "30017": 0.5,
       "30018": 0.5,

@@ -244,9 +244,9 @@
     ],
     "themeChickProgress": {
       "1": {
-        "opened": 0,
-        "total": 13,
-        "ratio": 0,
+        "opened": 17,
+        "total": 18,
+        "ratio": 0.9444444444444444,
         "unlocked": [
           3
         ]
@@ -338,72 +338,6 @@
         "total": 13,
         "ratio": 0,
         "unlocked": []
-      },
-      "16": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "17": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "18": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "19": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "20": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "21": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "22": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "23": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "24": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "25": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
-      },
-      "26": {
-        "opened": 0,
-        "total": 11,
-        "ratio": 0,
-        "unlocked": []
       }
     },
     "ingredientDropChances": {
@@ -421,7 +355,6 @@
       "30012": 0.5,
       "30013": 0.5,
       "30014": 0.5,
-      "30015": 0.5,
       "30016": 0.5,
       "30017": 0.5,
       "30018": 0.5,

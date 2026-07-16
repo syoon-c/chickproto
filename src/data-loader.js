@@ -40,7 +40,11 @@
       staffLevels: raw.StaffLevelUp,
       performances: raw.Performance,
       specialCustomers: raw.SpecialCustomer.filter((row) => row.areaType === 1),
-      restaurantThemes: raw.ThemeFacility.filter((row) => row.areaType === 1),
+      restaurantThemes: raw.ThemeFacility
+        .filter((row) => row.areaType === 1 && Number(row.facilityTheme) <= 15)
+        .map((row) => Number(row.facilityTheme) === 2
+          ? { ...row, facilityPrice: Math.max(1, Math.ceil(Number(row.facilityPrice) / 2)) }
+          : row),
       installs: raw.InstallFacility
         .filter((row) => row.areaType === 1)
         .map((row) => ({ ...row, facilityPrice: Math.max(1, Math.ceil(Number(row.facilityPrice) / 2)) }))

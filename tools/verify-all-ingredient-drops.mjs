@@ -12,9 +12,9 @@ fs.mkdirSync(out, { recursive: true });
 
 const routes = [
   { themeId: 1, customerId: 3, ingredientId: 30001, emoji: "🥬", name: "lettuce" },
+  { themeId: 1, customerId: 10013, ingredientId: 30003, emoji: "🍞", name: "bread" },
   { themeId: 6, customerId: 4, ingredientId: 30007, emoji: "🥔", name: "potato" },
   { themeId: 8, customerId: 5, ingredientId: 30002, emoji: "🍅", name: "tomato" },
-  { themeId: 25, customerId: 6, ingredientId: 30025, emoji: "🥕", name: "carrot" },
 ];
 
 const browser = await chromium.launch({ headless: true });
@@ -41,7 +41,7 @@ try {
       const saved = JSON.parse(localStorage.getItem(key));
       saved.rng = 1;
       saved.installed = window.CHICK_TABLE_SOURCE.InstallFacility
-        .filter((row) => row.areaType === 1 && ![11, 19].includes(row.id))
+        .filter((row) => row.areaType === 1 && row.id !== 19)
         .map((row) => row.id);
       const themeRows = window.CHICK_TABLE_SOURCE.ThemeFacility
         .filter((row) => row.areaType === 1 && row.facilityTheme === themeId);

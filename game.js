@@ -123,9 +123,19 @@ function loadState() {
     if (![2, 3, 4, 5].includes(parsed.version)) return null;
     const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
       typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
-    const openedThemes = parsed.themes?.opened || defaults.themes.opened;
-    const unlockedThemeIds = parsed.themes?.unlockedThemeIds || [...new Set(openedThemes.map((id) =>
-      tables.restaurantThemes.find((row) => row.id === Number(id))?.facilityTheme).filter(Boolean))];
+    const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
+    const openedThemes = (parsed.themes?.opened || defaults.themes.opened)
+      .filter((id) => availableThemePartIds.has(Number(id)));
+    const activeByFacility = Object.fromEntries(Object.entries({
+      ...defaults.themes.activeByFacility,
+      ...parsed.themes?.activeByFacility,
+    }).map(([facilityType, partId]) => [facilityType,
+      availableThemePartIds.has(Number(partId)) ? partId : defaults.themes.activeByFacility[facilityType]])
+      .filter(([, partId]) => partId != null));
+    const unlockedThemeIds = (parsed.themes?.unlockedThemeIds || [...new Set(openedThemes.map((id) =>
+      tables.restaurantThemes.find((row) => row.id === Number(id))?.facilityTheme).filter(Boolean))])
+      .map(Number)
+      .filter((themeId) => Object.hasOwn(THEME_NAMES, themeId));
     return {
       ...defaults,
       ...parsed,
@@ -143,7 +153,7 @@ function loadState() {
         ...parsed.themes,
         opened: openedThemes,
         unlockedThemeIds,
-        activeByFacility: { ...defaults.themes.activeByFacility, ...parsed.themes?.activeByFacility },
+        activeByFacility,
       },
       crafting: {
         ...defaults.crafting,
@@ -214,6 +224,18 @@ function isThemeUnlocked(themeId) {
 }
 
 function themeChickProgress(themeId) {
+  if (Number(themeId) === 1) {
+    const stoneFacilityTypes = new Set(tables.restaurantThemes
+      .filter((row) => Number(row.facilityTheme) === 1)
+      .map((row) => Number(row.facilityType)));
+    const requiredInstalls = tables.installs.filter((row) => stoneFacilityTypes.has(Number(row.facilityType)));
+    const opened = requiredInstalls.filter((row) => isInstalled(row.id)).length;
+    return {
+      opened,
+      total: requiredInstalls.length,
+      ratio: requiredInstalls.length ? opened / requiredInstalls.length : 0,
+    };
+  }
   const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === Number(themeId));
   const opened = rows.filter((row) => state.themes.opened.includes(row.id)).length;
   return {
@@ -1682,11 +1704,13 @@ function renderThemeManagement() {
   }, 0);
   const milestones = themeChickMilestones(selectedTheme);
   const unlockedChicks = unlockedThemeChicks(selectedTheme);
+  const progress = themeChickProgress(selectedTheme);
   const milestoneCards = (selectedTheme === 1 ? [milestones[0], milestones[2]] : milestones).map((chick) => {
-    const requiredCount = Math.ceil(rows.length * chick.threshold);
+    const requiredCount = Math.ceil(progress.total * chick.threshold);
     const unlocked = unlockedChicks.some((item) => item.customerId === chick.customerId);
     const milestoneLabel = selectedTheme === 1 && chick.slot === 0 ? "기본" : `${Math.round(chick.threshold * 100)}%`;
-    return `<div class="theme-chick-chip ${unlocked ? "is-unlocked" : "is-locked"}"><img src="${guestIcon({ customerId: chick.customerId, commonId: chick.commonId })}" alt=""/><div><b>${milestoneLabel}</b><small>${unlocked ? chick.customerName : `${requiredCount}개 보유 시 등장`}</small><em>${chick.ingredientEmoji} ${chick.ingredientName} → ${chick.recipeName}</em></div></div>`;
+    const lockedLabel = selectedTheme === 1 ? `${requiredCount}개 설비 설치 시 등장` : `${requiredCount}개 보유 시 등장`;
+    return `<div class="theme-chick-chip ${unlocked ? "is-unlocked" : "is-locked"}"><img src="${guestIcon({ customerId: chick.customerId, commonId: chick.commonId })}" alt=""/><div><b>${milestoneLabel}</b><small>${unlocked ? chick.customerName : lockedLabel}</small><em>${chick.ingredientEmoji} ${chick.ingredientName} → ${chick.recipeName}</em></div></div>`;
   }).join("");
 
   dom.menuContent.innerHTML = `<div class="theme-tabs" aria-label="테마 선택">${themeIds.map((themeId) => {
@@ -1694,7 +1718,7 @@ function renderThemeManagement() {
       || tables.restaurantThemes.find((row) => row.facilityTheme === themeId);
     return `<button type="button" data-action="theme-select" data-id="${themeId}" class="${themeId === selectedTheme ? "is-active" : ""}"><img src="${themeFacilityIcon(representative)}" alt=""/><span>${THEME_NAMES[themeId] || `테마 ${themeId}`}</span></button>`;
   }).join("")}</div>
-    <section class="theme-summary"><div><strong>${THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`}</strong><span>보유 ${openedCount}/${rows.length} · 누적 식당 수익 +${Math.round(totalBonus * 100)}%</span><small>${selectedTheme === 1 ? "기본 병아리와 100% 보너스 사과 병아리가 등장합니다." : "파츠 보유율 30% · 70% · 100%에서 병아리가 한 마리씩 등장합니다."}</small></div><button class="card-action" data-action="apply-theme-all" data-id="${selectedTheme}" ${applicableCount ? "" : "disabled"}>보유 파츠 전체 적용</button></section>
+    <section class="theme-summary"><div><strong>${THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`}</strong><span>${selectedTheme === 1 ? `설비 설치 ${progress.opened}/${progress.total}` : `보유 ${openedCount}/${rows.length}`} · 누적 식당 수익 +${Math.round(totalBonus * 100)}%</span><small>${selectedTheme === 1 ? `모든 설비를 설치하면 ${milestones[2].customerName}와 ${milestones[2].recipeName}가 열립니다.` : "파츠 보유율 30% · 70% · 100%에서 병아리가 한 마리씩 등장합니다."}</small></div><button class="card-action" data-action="apply-theme-all" data-id="${selectedTheme}" ${applicableCount ? "" : "disabled"}>보유 파츠 전체 적용</button></section>
     <div class="theme-chick-milestones">${milestoneCards}</div>
     <p class="section-note">유니티와 동일하게 선택한 테마의 설비 파츠를 종류별로 구매하고 적용합니다. 아직 설치하지 않은 설비 파츠는 잠겨 있습니다.</p>
     ${rows.map((row) => {
