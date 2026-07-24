@@ -68,8 +68,8 @@ try {
   current = await state();
   if (current.resources.acorns !== 100) throw new Error(`Core installation should leave 100 acorns, got ${current.resources.acorns}`);
   if (current.recipes.prices[1] !== 40) throw new Error(`Salad price should be 40, got ${current.recipes.prices[1]}`);
-  if (Object.values(current.progression.ingredientDropChances).some((chance) => chance !== 0.5)) {
-    throw new Error(`Ingredient drop chances should all be 50%: ${JSON.stringify(current.progression.ingredientDropChances)}`);
+  if (Object.values(current.progression.ingredientDropChances).some((chance) => chance !== 1)) {
+    throw new Error(`Guest gifts should be guaranteed: ${JSON.stringify(current.progression.ingredientDropChances)}`);
   }
 
   await page.evaluate(() => {
@@ -88,27 +88,12 @@ try {
   await clickCanvas(waiting.x, waiting.y - 40);
   await page.evaluate(() => window.advanceTime(12000));
   current = await state();
-  if (current.ingredientDrops.length !== 0 || current.metrics.ingredientDropAttempts !== 1 || current.metrics.ingredientDropMisses !== 1) {
-    throw new Error(`50% drop miss was not applied: ${JSON.stringify(current.metrics)}`);
-  }
-
-  await page.evaluate(() => {
-    const key = "chick-bistro-planning-prototype-v2";
-    const saved = JSON.parse(localStorage.getItem(key));
-    saved.rng = 1;
-    localStorage.setItem(key, JSON.stringify(saved));
-  });
-  await page.reload({ waitUntil: "load" });
-  for (let i = 0; i < 5; i += 1) await page.locator("#promotion-btn").click();
-  await page.evaluate(() => window.advanceTime(4000));
-  waiting = (await state()).guests.find((guest) => guest.state === "awaiting_order");
-  if (!waiting || waiting.customerId !== 3) throw new Error(`Expected base chick after drop miss: ${JSON.stringify(waiting)}`);
-  await clickCanvas(waiting.x, waiting.y - 40);
-  await page.evaluate(() => window.advanceTime(12000));
-  current = await state();
   if (current.progression.ingredients[30001]) throw new Error("Lettuce entered inventory before field collection");
-  if (current.ingredientDrops.length !== 1 || current.ingredientDrops[0].emoji !== "🥬") throw new Error("Lettuce field drop is missing");
-  if (current.metrics.ingredientDropAttempts !== 2 || current.metrics.ingredientDropMisses !== 1) throw new Error("50% success/miss counters are incorrect");
+  if (current.ingredientDrops.length !== 1 || current.ingredientDrops[0].emoji !== "🥬"
+    || current.ingredientDrops[0].totalCount !== 1 || current.ingredientDrops[0].items[0].count !== 1) {
+    throw new Error(`First-visit lettuce gift is incorrect: ${JSON.stringify(current.ingredientDrops)}`);
+  }
+  if (current.metrics.ingredientDropAttempts !== 1 || current.metrics.ingredientDropMisses !== 0) throw new Error("Guaranteed gift counters are incorrect");
   await page.screenshot({ path: path.join(out, "01-lettuce-field-drop.png"), fullPage: true });
   await clickCanvas(current.ingredientDrops[0].x, current.ingredientDrops[0].y);
 

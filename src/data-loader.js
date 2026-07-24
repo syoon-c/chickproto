@@ -45,9 +45,14 @@
         .map((row) => Number(row.facilityTheme) === 2
           ? { ...row, facilityPrice: Math.max(1, Math.ceil(Number(row.facilityPrice) / 2)) }
           : row),
+      cafeThemes: raw.ThemeFacility.filter((row) => row.areaType === 2),
       installs: raw.InstallFacility
         .filter((row) => row.areaType === 1)
         .map((row) => ({ ...row, facilityPrice: Math.max(1, Math.ceil(Number(row.facilityPrice) / 2)) }))
+        .sort((a, b) => a.sequence - b.sequence || a.id - b.id),
+      cafeInstalls: raw.InstallFacility
+        .filter((row) => row.areaType === 2)
+        .map((row) => ({ ...row, facilityPrice: Math.max(25, Math.ceil(Number(row.facilityPrice) * 0.25)) }))
         .sort((a, b) => a.sequence - b.sequence || a.id - b.id),
     });
   }

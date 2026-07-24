@@ -6,13 +6,26 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리 — 기획 검증 프로토타입</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20260723-cafe7" />
   </head>
   <body>
     <main class="app-shell">
       <section class="game-frame" aria-label="식당아리 게임 화면">
         <div class="world-area">
           <canvas id="game-canvas" width="480" height="900" aria-label="레스토랑"></canvas>
+
+          <div id="world-area-switch" class="world-area-switch" aria-label="공간 이동">
+            <button type="button" data-world-area="restaurant" class="is-active">레스토랑</button>
+            <button type="button" data-world-area="cafe">카페 <small id="cafe-lock-badge">잠김</small></button>
+          </div>
+
+          <button id="cafe-expand-btn" class="cafe-expand-button" type="button" hidden>
+            <span>🌳</span>
+            <strong>카페 구역 확장</strong>
+            <small>무료 · Unity AreaExpansion 2 기준</small>
+          </button>
+
+          <div id="cafe-install-targets" class="cafe-install-targets" aria-label="카페 설치 지점" hidden></div>
 
         <header class="hud-top" aria-label="보유 재화">
           <div class="currency-pill primary">
@@ -36,9 +49,6 @@
           <span class="promotion-copy">
             <strong>홍보하기</strong>
             <span id="promotion-status">시설을 먼저 설치해 주세요</span>
-          </span>
-          <span class="promotion-gauge" aria-hidden="true">
-            <span id="promotion-fill"></span>
           </span>
         </button>
 
@@ -78,9 +88,9 @@
       </section>
     </main>
 
-    <script src="data/runtime-tables.js"></script>
-    <script src="src/game-config.js"></script>
-    <script src="src/data-loader.js"></script>
-    <script src="game.js"></script>
+    <script src="data/runtime-tables.js?v=20260723-cafe7"></script>
+    <script src="src/game-config.js?v=20260723-cafe7"></script>
+    <script src="src/data-loader.js?v=20260723-cafe7"></script>
+    <script src="game.js?v=20260723-cafe7"></script>
   </body>
 </html>

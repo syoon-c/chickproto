@@ -7,8 +7,11 @@
 - 시작 도토리 100
 - 테이블 순서에 따른 설비 설치 후보 2개 표시
 - 조명, 테이블, 조리기구 설치 후 핵심 영업 루프 해금
-- 홍보 5회 → 손님 입장 → 주문 터치 → 자동 조리 → 식사 → 수동 도토리 회수
+- 홍보 1회 → 손님 1마리 입장 → 주문 터치 → 자동 조리 → 식사 → 수동 도토리 회수
 - 손님별 주문 대기 시간, 선호 메뉴, 실망 확률, 팁 확률 반영
+- 병아리별 누적 방문 등급과 주·보조·희귀 공유 재료 선물 꾸러미
+- 레스토랑과 독립된 카페 구역 확장 화면, 카페 전용 13개 설비 설치
+- 카페 테마 파츠 30%·70%·100% 수집에 따른 케이크 시트·크림·토핑 해금
 - 테이블당 2석, 조리기구별 주문 1개 처리
 - 레시피 연구(가중치/천장), 중복 강화 재료, 강화 가격·시간 보정, 레시피 도감 보상
 - 메인 임무, 오늘의 할 일, 개별 보상, 오늘의 완주 보상
@@ -21,9 +24,10 @@
 
 ## 데이터와 리소스
 
-- 테이블 원본: `C:\Users\Soyoon Bang\Documents\tables_chick\json`
-- 구현 기준 스크립트: `C:\Users\Soyoon Bang\Documents\projectchick\Assets\90_Script`
-- UI 원본: `C:\Users\Soyoon Bang\Documents\projectchick\Assets\98_UI`
+- 구현 기준 Unity 프로젝트: `C:\Users\laure\Desktop\Concrit\Assets`
+- 카페 데이터: `02_Data\TableJson\AreaExpansion.json`, `InstallFacility.json`, `ThemeFacility.json`
+- 카페 동작 스크립트: `90_Script\Client\Domain\Customer\Handler\CafeHandler.cs`
+- 카페 UI 원본: `98_UI\Sprite\Facility2`
 - 프로젝트에서는 복사된 `data/`, `assets/ui/` 파일만 사용합니다.
 - 유니티 프로젝트 원본은 수정하지 않습니다.
 
