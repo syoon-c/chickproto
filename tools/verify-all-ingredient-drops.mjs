@@ -63,7 +63,7 @@ try {
     await page.reload({ waitUntil: "load" });
 
     let drop = null;
-    for (let attempt = 0; attempt < 20 && !drop; attempt += 1) {
+    for (let attempt = 0; attempt < 150 && !drop; attempt += 1) {
       for (let i = 0; i < 5; i += 1) await page.locator("#promotion-btn").click();
       await page.evaluate(() => window.advanceTime(4000));
       const waiting = (await state()).guests.find((guest) => guest.state === "awaiting_order");

@@ -26,7 +26,7 @@ async function serveOneCustomer(expectedCustomerId) {
   const initial = await state();
   let ingredientId = null;
   let before = 0;
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  for (let attempt = 0; attempt < 60; attempt += 1) {
     for (let i = 0; i < 5; i += 1) await page.locator("#promotion-btn").click();
     await page.evaluate(() => window.advanceTime(4000));
     const waiting = (await state()).guests.find((guest) => guest.state === "awaiting_order");
@@ -42,7 +42,7 @@ async function serveOneCustomer(expectedCustomerId) {
     for (const drop of drops) await clickCanvas(drop.x, drop.y);
     if (Number((await state()).progression.ingredients[ingredientId] || 0) > before) return;
   }
-  throw new Error(`Customer ${expectedCustomerId} did not drop ingredient within 12 visits`);
+  throw new Error(`Customer ${expectedCustomerId} did not drop ingredient within 60 visits`);
 }
 
 try {
@@ -151,12 +151,15 @@ try {
   const autoEntry = current.progression.craftedRecipes.includes(7);
   if (!autoEntry || current.progression.ingredients[30002] !== 0 || current.progression.ingredients[30004] !== 0) throw new Error("Automatic pizza ingredient combination failed");
   if (!current.progression.unlockedRegions.includes(1)) throw new Error("Three recipes did not unlock the new region");
+  if (!current.cafeArea.expansionAvailable || current.cafeArea.unlocked) {
+    throw new Error(`The third recipe must enable, but not automatically open, Cafe expansion: ${JSON.stringify(current.cafeArea)}`);
+  }
 
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
   await page.locator('[data-tab="regions"]').click();
   await page.waitForTimeout(250);
-  await page.locator(".game-frame").screenshot({ path: path.join(out, "04-auto-crafted-regions.png") });
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "04-auto-crafted-regions-drop30.png") });
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);

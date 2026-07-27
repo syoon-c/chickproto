@@ -30,7 +30,7 @@ async function install(name) {
 }
 
 async function serveAndCollect(expectedCustomerId = 3) {
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  for (let attempt = 0; attempt < 60; attempt += 1) {
     for (let i = 0; i < 5; i += 1) await page.locator("#promotion-btn").click();
     await page.evaluate(() => window.advanceTime(4000));
     const waiting = (await state()).guests.find((guest) => guest.state === "awaiting_order");
@@ -49,7 +49,7 @@ async function serveAndCollect(expectedCustomerId = 3) {
     await clickCanvas(drop.x, drop.y);
     return;
   }
-  throw new Error("Base chick did not drop lettuce within 12 visits");
+  throw new Error("Base chick did not drop lettuce within 60 visits");
 }
 
 try {
@@ -68,14 +68,14 @@ try {
   current = await state();
   if (current.resources.acorns !== 100) throw new Error(`Core installation should leave 100 acorns, got ${current.resources.acorns}`);
   if (current.recipes.prices[1] !== 40) throw new Error(`Salad price should be 40, got ${current.recipes.prices[1]}`);
-  if (Object.values(current.progression.ingredientDropChances).some((chance) => chance !== 1)) {
-    throw new Error(`Guest gifts should be guaranteed: ${JSON.stringify(current.progression.ingredientDropChances)}`);
+  if (Object.values(current.progression.ingredientDropChances).some((chance) => chance !== 0.3)) {
+    throw new Error(`Guest ingredient drop chance should be 30%: ${JSON.stringify(current.progression.ingredientDropChances)}`);
   }
 
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
-    saved.rng = 2;
+    saved.rng = 1;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
@@ -93,7 +93,7 @@ try {
     || current.ingredientDrops[0].totalCount !== 1 || current.ingredientDrops[0].items[0].count !== 1) {
     throw new Error(`First-visit lettuce gift is incorrect: ${JSON.stringify(current.ingredientDrops)}`);
   }
-  if (current.metrics.ingredientDropAttempts !== 1 || current.metrics.ingredientDropMisses !== 0) throw new Error("Guaranteed gift counters are incorrect");
+  if (current.metrics.ingredientDropAttempts !== 1 || current.metrics.ingredientDropMisses !== 0) throw new Error("Thirty-percent drop counters are incorrect for the seeded hit");
   await page.screenshot({ path: path.join(out, "01-lettuce-field-drop.png"), fullPage: true });
   await clickCanvas(current.ingredientDrops[0].x, current.ingredientDrops[0].y);
 
@@ -115,10 +115,14 @@ try {
   await serveAndCollect();
   await serveAndCollect();
   await serveAndCollect();
+  const lettuceBeforeSecondUpgrade = Number((await state()).progression.ingredients[30001] || 0);
+  if (lettuceBeforeSecondUpgrade < 4) throw new Error(`Second salad upgrade lacks lettuce: ${lettuceBeforeSecondUpgrade}`);
   await page.locator('[data-screen="recipe"]').click();
   await page.locator('[data-action="craft-recipe"][data-id="1"]').click();
   current = await state();
-  if (current.recipes.levels[1] !== 3 || current.recipes.prices[1] !== 44 || current.progression.ingredients[30001] !== 0 || current.recipes.craftCosts[1] !== 5) {
+  if (current.recipes.levels[1] !== 3 || current.recipes.prices[1] !== 44
+    || current.progression.ingredients[30001] !== lettuceBeforeSecondUpgrade - 4
+    || current.recipes.craftCosts[1] !== 5) {
     throw new Error(`Duplicate craft did not level salad by 5%: ${JSON.stringify(current.recipes)}`);
   }
   await page.locator(".game-frame").screenshot({ path: path.join(out, "03-salad-level-3.png") });

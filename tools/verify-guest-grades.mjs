@@ -9,13 +9,12 @@ vm.runInThisContext(fs.readFileSync(path.join(root, "src", "game-config.js"), "u
   filename: "src/game-config.js",
 });
 
-const { CORE_PROGRESSION, GAME_INGREDIENTS, GUEST_GRADES } = globalThis.CHICK_CONFIG;
+const { CORE_PROGRESSION, GAME_INGREDIENTS, GUEST_GRADES, GUEST_INGREDIENT_DROP_CHANCE } = globalThis.CHICK_CONFIG;
 const expectedGrades = [
   [1, "첫 방문", 1, 1, 0, 0],
-  [2, "낯익은 손님", 20, 2, 0, 0],
-  [3, "단골", 80, 2, 1, 0],
-  [4, "VIP", 250, 3, 1, 0],
-  [5, "최고의 단골", 700, 3, 1, 1],
+  [2, "단골", 80, 2, 0, 0],
+  [3, "VIP", 250, 2, 1, 0],
+  [4, "최고의 단골", 700, 2, 2, 1],
 ];
 
 if (JSON.stringify(GUEST_GRADES.map((grade) => [
@@ -32,6 +31,9 @@ if (JSON.stringify(GUEST_GRADES.map((grade) => [
 if (CORE_PROGRESSION.length !== 45) {
   throw new Error(`Expected 45 chick routes, got ${CORE_PROGRESSION.length}`);
 }
+if (GUEST_INGREDIENT_DROP_CHANCE !== 0.3) {
+  throw new Error(`Guest ingredient drop chance must be 30%, got ${GUEST_INGREDIENT_DROP_CHANCE}`);
+}
 
 const validIngredientIds = new Set(Object.values(GAME_INGREDIENTS).map((ingredient) => ingredient.id));
 for (const route of CORE_PROGRESSION) {
@@ -44,8 +46,8 @@ for (const route of CORE_PROGRESSION) {
   if (route.rewardIngredients.some((ingredient) => !validIngredientIds.has(ingredient.id))) {
     throw new Error(`Customer ${route.customerId} references an unknown ingredient`);
   }
-  if (route.dropChance !== 1) {
-    throw new Error(`Customer ${route.customerId} gift is not guaranteed`);
+  if (route.dropChance !== GUEST_INGREDIENT_DROP_CHANCE) {
+    throw new Error(`Customer ${route.customerId} drop chance mismatch: ${route.dropChance}`);
   }
 }
 
@@ -55,4 +57,4 @@ if (assignedIngredientIds.size !== validIngredientIds.size) {
   throw new Error(`Expected all ${validIngredientIds.size} shared ingredients to be assigned, got ${assignedIngredientIds.size}; missing=${missing.join(",")}`);
 }
 
-console.log(`GUEST_GRADES_OK routes=${CORE_PROGRESSION.length} sharedIngredients=${assignedIngredientIds.size} thresholds=${GUEST_GRADES.map((grade) => grade.minVisits).join("/")}`);
+console.log(`GUEST_GRADES_OK routes=${CORE_PROGRESSION.length} sharedIngredients=${assignedIngredientIds.size} dropChance=${GUEST_INGREDIENT_DROP_CHANCE} thresholds=${GUEST_GRADES.map((grade) => grade.minVisits).join("/")}`);

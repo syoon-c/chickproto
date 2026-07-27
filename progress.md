@@ -552,3 +552,196 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 홍보 버튼의 5회 누적 게이지를 제거했다.
 - 홍보 버튼을 한 번 누를 때마다 병아리 한 마리를 즉시 방문 대기열에 추가한다.
 - 이전 저장 데이터의 남은 홍보 진행도는 다음 홍보 시 0으로 정리한다.
+
+## 2026-07-27 레시피 신규 지역과 카페 확장 연결
+
+- 현재 변경된 카페 프로토타입을 기준으로 레시피 지역 해금과 실제 카페 공간을 연결했다.
+- 기존 `신규 지역`을 `카페 지역`으로 명시하고 해금 조건은 레시피 3개를 유지했다.
+- 레시피 3개 전:
+  - 카페 상단 배지에 현재 진행도(예: `2/3`)가 표시된다.
+  - 카페 확장 버튼은 비활성화되고 잠긴 숲 화면에 필요한 레시피 수가 표시된다.
+  - 잠긴 상태에서는 카페 설비 설치 후보를 상태 출력에도 노출하지 않는다.
+- 레시피 3개 달성:
+  - 3번째 레시피 제작 토스트로 `카페 지역 해금`을 알린다.
+  - 레시피의 `지역 해금` 탭에 `3/3 · 카페 확장 가능`이 표시된다.
+  - 카페 배지는 `확장 가능`으로 바뀌고 Unity `AreaExpansion 2` 기준 무료 확장 버튼이 활성화된다.
+- 확장 버튼을 누르면 기존 통나무 카페 화면과 13개 설비 설치 흐름으로 이어지며 저장 후에도 열린 상태가 유지된다.
+- 과거 버전에서 이미 카페를 확장한 저장 데이터는 다시 잠그지 않고 그대로 보존한다.
+- 검증 결과:
+  - `node tools/verify-cafe-region-unlock.mjs` → `CAFE_REGION_UNLOCK_OK recipes=3 region=1`
+  - `node tools/verify-progression-loop.mjs` → `PROGRESSION_LOOP_OK` (실제 3번째 레시피 제작으로 확장 권한 활성화 확인)
+  - `node tools/verify-cafe-theme-rewards.mjs` → `CAFE_THEME_REWARDS_OK themes=2 installs=13 rewards=6 base=3 thresholds=0.3/0.7/1`
+  - `node tools/verify-drag-scroll.mjs` → `DRAG_SCROLL_OK horizontal=0->357 vertical=0->488`
+  - `node tools/verify-file-open.mjs` → `FILE_OPEN_CORE_LOOP_OK`
+  - 공식 develop-web-game 클라이언트: 초기 카페 `1/3`, 확장 불가, 설치 후보 0, 콘솔 오류 없음.
+  - 화면: `output/cafe-region-unlock/01-two-recipes-locked.png`, `02-three-recipes-ready.png`, `03-recipe-region-open.png`, `04-cafe-opened.png`.
+
+## 2026-07-27 테마 해금형 수제 케이크 제작
+
+- 카페의 케이크 진열대(시설 종류 18)를 누르면 수제 케이크 제작 화면이 열린다.
+- 테마 파츠 보유율 30%/70%/100% 보상으로 획득한 시트·크림·토핑과 기본 재료를 실제 제작 선택지로 연결했다.
+- 제작 순서는 `시트 맛 선택 → 크림 맛 선택 → 대표 토핑 선택 → 토핑 자유 배치 → 완성`이다.
+- 레시피 판정에는 시트·크림·대표 토핑만 사용한다. 토핑 위치·개수·회전은 외형에만 반영되며 최대 12개까지 배치할 수 있다.
+- 등록 조합 5종을 추가했다.
+  - 기본 딸기 생크림, 통나무 테마 조합, 모던 테마 조합.
+  - 서로 다른 테마 재료를 섞는 `호두 모카 케이크`, `메이플 딸기 케이크`.
+- 등록되지 않은 조합도 `나만의 커스텀 케이크`로 완성되며 등록 조합보다 가격과 판매 수량이 낮다.
+- 첫 제작은 하루 1회 무료, 이후에는 아이디어 5 또는 보석 1을 선택해 제작한다.
+- 완성한 케이크는 3~5조각 한정 판매로 진열된다. 레스토랑 손님은 식사를 마칠 때 남은 한정 케이크를 우선 구매하고 음식값에 케이크 가격이 합산된다.
+- 제작 결과, 발견한 레시피, 현재 진열 수량과 가격을 제작 화면과 `render_game_to_text`에 함께 표시한다.
+- 카페 설치 지점 오버레이가 설치된 설비의 캔버스 클릭을 가로막던 문제를 수정했다.
+- 저장 버전을 8로 올리고 이전 버전 저장 데이터에 케이크 제작 상태를 안전하게 보강한다.
+- 검증 결과:
+  - `node tools/verify-cake-workshop.mjs` → `CAKE_WORKSHOP_OK recipes=5 saleRemaining=4`
+  - `node tools/verify-cafe-theme-rewards.mjs` → `CAFE_THEME_REWARDS_OK themes=2 installs=13 rewards=6 base=3 thresholds=0.3/0.7/1`
+  - `node tools/verify-cafe-region-unlock.mjs` → `CAFE_REGION_UNLOCK_OK recipes=3 region=1`
+  - `node tools/verify-progression-loop.mjs` → `PROGRESSION_LOOP_OK`
+  - `node tools/verify-recipe-combinations.mjs` → `RECIPE_COMBINATIONS_OK single=1 middle=2 late=3`
+  - `node tools/verify-file-open.mjs` → `FILE_OPEN_CORE_LOOP_OK`
+  - 공식 develop-web-game 클라이언트 상태·화면 캡처 완료, 신규 콘솔 오류 없음.
+  - 화면: `output/cake-workshop/01-workshop-open.png`, `02-cross-theme-decoration.png`, `03-recipe-discovered.png`.
+- 다음 검토 후보:
+  - 케이크 조합 5종의 이름·가격·한정 수량 최종 밸런스.
+  - 실제 기획에서 카페 손님 루프가 확정되면 레스토랑 식후 구매를 카페 손님 구매로 이동.
+
+## 2026-07-27 카페 조기 개방 저장 호환 오류 수정
+
+- 원인: 이전 저장을 불러올 때 `카페 파츠가 하나라도 있음`을 `카페 확장 완료`로 간주해 해금 조건을 우회했다.
+- 카페 파츠 보유와 카페 확장 완료를 별도 상태로 분리했다.
+- 이전 버전 저장은 파츠와 케이크 재료를 보존하지만 카페 공간은 다시 잠근다.
+- 이제 저장 데이터와 무관하게 `레시피 3개 해금 → 카페 확장 버튼 직접 누르기`를 완료해야 카페가 열린다.
+- 명시적으로 확장한 뒤에는 새 `expansionConfirmed` 값으로 개방 상태가 정상 유지된다.
+- 검증:
+  - 이전 버전에서 카페 파츠와 `unlocked=true`가 저장된 상태도 처음 불러오면 잠김.
+  - 레시피 2개에서는 확장 불가, 3개에서는 확장 가능, 버튼 클릭 후에만 개방.
+  - `CAFE_REGION_UNLOCK_OK recipes=3 region=1`
+  - `CAKE_WORKSHOP_OK recipes=5 saleRemaining=4`
+  - 공식 클라이언트 상태 `unlocked=false`, `expansionConfirmed=false`, `1/3`; 잠긴 카페 화면 확인.
+
+## 2026-07-27 레스토랑 레시피 3개 전 카페 진입 차단
+
+- 요구사항을 다시 명확히 반영했다: 지역 조건은 `레스토랑 레시피 발견 3개`이며 케이크 조합 발견 수는 포함하지 않는다.
+- 레스토랑 레시피가 1~2개인 동안 카페 이동 버튼 자체를 비활성화해 카페 예정지 화면에도 들어갈 수 없게 했다.
+- 3번째 레스토랑 레시피를 발견하면 카페 버튼이 `확장 가능`으로 활성화된다.
+- 활성화된 카페 버튼을 누르면 확장 예정지와 무료 확장 버튼이 표시되고, 그 버튼을 직접 눌러야 실제 카페가 열린다.
+- 상태 출력에 `discoveredRestaurantRecipeCount`를 추가해 카페 조건의 계산 근거를 분명히 했다.
+- 검증:
+  - 2개: 레스토랑 화면 유지, 카페 버튼 비활성, 배지 `2/3`.
+  - 3개: 카페 버튼 활성, 배지 `확장 가능`, 확장 버튼 노출.
+  - 케이크 제작 후에도 레스토랑 레시피 발견 수는 변하지 않음.
+  - `CAFE_REGION_UNLOCK_OK recipes=3 region=1`
+  - `CAKE_WORKSHOP_OK recipes=5 saleRemaining=4`
+  - `PROGRESSION_LOOP_OK`
+  - 공식 클라이언트 초기 상태: `mode=restaurant`, `discoveredRestaurantRecipeCount=1`, `expansionAvailable=false`.
+
+## 2026-07-27 테마 병아리 정보와 도감 분리
+
+- 테마 화면의 병아리 실물 아이콘, 이름, 선물 재료, 연결 레시피 미리보기를 제거했다.
+- 테마 화면에는 30%/70%/100% 구간과 `새로운 병아리 등장` 사실만 표시한다.
+- 달성한 구간도 실제 병아리 정보 대신 범용 병아리 표시와 `상세 정보는 도감에서 확인` 안내만 보여준다.
+- 돌 테마 전체 설치 안내에서도 병아리 이름과 샌드위치 이름을 제거했다.
+- 도감의 손님 카드를 2열 상세형으로 변경했다.
+- 테마 등장 조건을 달성한 병아리는 아직 첫 방문 전이어도 도감에서 외형과 이름을 확인할 수 있다.
+- 도감에 테마 출처·해금 구간·주/보조/희귀 선물 재료 이름·연결 레시피를 모아 표시한다.
+- 아직 등장 조건을 달성하지 않은 병아리는 기존처럼 실루엣과 `???`만 표시한다.
+- 검증:
+  - `THEME_CODEX_SEPARATION_OK chicks=3`
+  - `THEME_CHICK_MILESTONES_OK total=11 thresholds=4/8/11`
+  - `DRAG_SCROLL_OK horizontal=0->357 vertical=0->506`
+  - 테마 화면에 캠핑 병아리 이름·재료·레시피가 노출되지 않음.
+  - 도감에 캠핑 병아리 3마리의 외형·이름·재료·레시피가 표시됨.
+  - 공식 클라이언트 `currentScreen=theme`, 신규 콘솔 오류 없음.
+
+## 2026-07-27 구역별 레시피·테마 메뉴 분리와 케이크 진입 개선
+
+- 하단 레시피와 테마 메뉴를 현재 공간에 따라 완전히 분리했다.
+- 레스토랑 화면:
+  - `레시피`는 레스토랑 음식 제작·지역 해금만 표시한다.
+  - `테마`는 돌~우주 점성술 레스토랑 테마만 표시한다.
+- 카페 화면:
+  - 하단 `레시피` 라벨이 `케이크`로 바뀌고 수제 케이크 조합·제작 화면을 연다.
+  - 하단 `테마` 라벨이 `카페 테마`로 바뀌고 통나무·모던 카페 테마만 표시한다.
+- 기존 레스토랑/카페 테마 전환 스위치는 제거했다. 다른 구역의 테마가 같은 화면에 섞이지 않는다.
+- 케이크 진열대가 없을 때 카페의 `케이크` 메뉴에 제작 위치와 설치 방법을 안내한다.
+- 안내의 `카페 테마에서 진열대 찾기` 버튼으로 카페 테마 화면에 바로 이동한다.
+- 케이크 진열대를 설치하면 카페 필드 오른쪽에 `케이크 만들기` 버튼이 상시 표시된다.
+- 진열대 직접 터치, 필드의 제작 버튼, 하단 `케이크` 메뉴가 모두 같은 제작 화면으로 연결된다.
+- 설비 없이 저장 데이터를 조작해 제작하는 경로는 차단했다.
+- 상태 출력에 `menuContext`, `visibleRecipeType`, `visibleThemeType`을 추가했다.
+- 검증:
+  - `AREA_CONTEXT_MENUS_OK restaurant=restaurant cafe=cake`
+  - `CAKE_WORKSHOP_OK recipes=5 saleRemaining=4`
+  - `CAFE_REGION_UNLOCK_OK recipes=3 region=1`
+  - `THEME_CODEX_SEPARATION_OK chicks=3`
+  - `DRAG_SCROLL_OK horizontal=0->357 vertical=0->506`
+  - 공식 클라이언트: `mode=restaurant`, `menuContext=restaurant`, `visibleRecipeType=restaurant`, 신규 콘솔 오류 없음.
+
+## 2026-07-27 방문 횟수별 재료 해금과 30% 단일 드랍
+
+- 손님 병아리가 식사를 마칠 때 재료 드랍을 한 번만 판정하며, 전체 성공 확률을 30%로 변경했다.
+- 드랍 성공 시 현재 해금된 재료 후보 중 하나만 골라 필드에 1개 떨어뜨린다. 여러 재료를 한꺼번에 주는 묶음 드랍은 제거했다.
+- 기존 손님 등급 기준을 유지해 첫 방문부터 주 재료, 80회부터 보조 재료, 700회부터 희귀 재료가 드랍 후보에 추가된다.
+- 20회와 250회 등급은 현재 손님 등급만 상승하며 새 재료 후보를 추가하지 않는다.
+- 도감의 선물 재료에 해금 방문 횟수를 함께 표시한다.
+- 상태 출력에 전체 확률, 성공 시 수량, 방문별 후보 슬롯을 `ingredientDropRule`로 추가했다.
+- 검증:
+  - 표본 120회씩: 첫 방문 구간 `31/120`, 80회 구간 `28/120`, 700회 구간 `40/120`.
+  - 모든 성공 드랍이 필드 재료 1개이며 각 구간에서 잠기지 않은 재료가 나오지 않음을 확인.
+  - `ALL_INGREDIENT_DROPS_OK`
+  - `PROGRESSION_LOOP_OK`
+  - `THEME_CODEX_SEPARATION_OK chicks=3`
+  - `BALANCE_ITEMS_OK`
+  - 공식 클라이언트 상태: `overallChance=0.3`, `itemCountOnSuccess=1`, 신규 콘솔 오류 없음.
+
+## 2026-07-27 손님 재료 드랍 4회 성장과 수량 증가
+
+- 최초 상태 뒤 네 번 성장하는 기존 손님 등급 `1 → 20 → 80 → 250 → 700회`를 재료 드랍에 다시 연결했다.
+- 식사 완료 시 30% 확률 판정과 성공 시 재료 한 종류만 선택하는 규칙은 유지했다.
+- 선택된 한 종류의 실제 드랍 수량을 등급별로 증가시켰다.
+  - 1회: 주 재료 ×1
+  - 20회: 주 재료 ×2
+  - 80회: 주 재료 ×2 또는 보조 재료 ×1
+  - 250회: 주 재료 ×3 또는 보조 재료 ×1
+  - 700회: 주 재료 ×3 또는 보조 재료 ×1 또는 희귀 재료 ×1
+- 필드 아이콘의 수량 배지와 획득 토스트에 `×2`, `×3`을 표시한다.
+- 도감에는 주·보조·희귀 재료별 방문 횟수와 수량 변화가 표시된다.
+- 상태 출력은 `ingredientTypesOnSuccess: 1`과 전체 등급별 수량표를 제공한다.
+- 검증:
+  - 등급별 120회 표본: `31/120`, `35/120`, `28/120`, `39/120`, `40/120`.
+  - 모든 당첨 건이 재료 한 종류이며 각 등급의 정확한 수량만 드랍됨.
+  - `INGREDIENT_DROP_30_PERCENT_QUANTITY_OK`
+  - `BALANCE_ITEMS_OK`
+  - `PROGRESSION_LOOP_OK`
+  - `THEME_CODEX_SEPARATION_OK chicks=3`
+  - `ALL_INGREDIENT_DROPS_OK`
+  - 공식 클라이언트 상태와 도감 화면 확인, 신규 콘솔 오류 없음.
+
+## 2026-07-27 주·보조 재료 최대 수량 조정
+
+- 주 재료는 20회부터 최대 ×2이며 이후 단계에서도 ×2를 유지하도록 조정했다.
+- 보조 재료는 80회부터 ×1, 마지막 700회 단계에서 ×2가 되도록 조정했다.
+- 최종 수량표는 250회 `주×2/보조×1`, 700회 `주×2/보조×2/희귀×1`이다.
+- 30% 당첨 확률과 당첨 시 재료 한 종류만 드랍하는 규칙은 그대로 유지했다.
+- 검증:
+  - `GUEST_GRADES_OK routes=45 sharedIngredients=38 dropChance=0.3 thresholds=1/20/80/250/700`
+  - `INGREDIENT_DROP_30_PERCENT_QUANTITY_OK`
+  - `THEME_CODEX_SEPARATION_OK chicks=3`
+  - 필드에서 보조 재료 `×2` 배지 확인.
+  - 공식 클라이언트 상태에서 700회 `primaryCount=2`, `secondaryCount=2`, `rareCount=1` 확인, 신규 콘솔 오류 없음.
+
+## 2026-07-27 손님 재료 드랍 네 단계로 축소
+
+- 중복되던 20회 단계를 제거하고 방문 조건을 `1 → 80 → 250 → 700회` 네 단계로 축소했다.
+- 최종 조건:
+  - 1회: 주 재료 ×1
+  - 80회: 주 재료 ×2
+  - 250회: 주 재료 ×2 또는 보조 재료 ×1
+  - 700회: 주 재료 ×2 또는 보조 재료 ×2 또는 희귀 재료 ×1
+- 도감의 수량 안내도 `주 1회×1→80회×2`, `보조 250회×1→700회×2`, `희귀 700회×1`로 정리했다.
+- 30% 당첨 확률과 당첨 시 한 종류만 드랍하는 규칙은 유지했다.
+- 검증:
+  - `GUEST_GRADES_OK routes=45 sharedIngredients=38 dropChance=0.3 thresholds=1/80/250/700`
+  - `INGREDIENT_DROP_30_PERCENT_QUANTITY_OK`
+  - `BALANCE_ITEMS_OK`
+  - `THEME_CODEX_SEPARATION_OK chicks=3`
+  - 공식 클라이언트 상태에 네 단계만 출력되며 신규 콘솔 오류 없음.

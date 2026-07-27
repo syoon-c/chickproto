@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리 — 기획 검증 프로토타입</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-    <link rel="stylesheet" href="styles.css?v=20260723-cafe7" />
+    <link rel="stylesheet" href="styles.css?v=20260727-drop30" />
   </head>
   <body>
     <main class="app-shell">
@@ -22,10 +22,14 @@
           <button id="cafe-expand-btn" class="cafe-expand-button" type="button" hidden>
             <span>🌳</span>
             <strong>카페 구역 확장</strong>
-            <small>무료 · Unity AreaExpansion 2 기준</small>
+            <small id="cafe-expand-status">레시피 3개 해금 필요</small>
           </button>
 
           <div id="cafe-install-targets" class="cafe-install-targets" aria-label="카페 설치 지점" hidden></div>
+
+          <button id="cake-workshop-btn" class="cake-workshop-access" type="button" hidden>
+            <span>🎂</span><strong>케이크 만들기</strong><small>카페 레시피</small>
+          </button>
 
         <header class="hud-top" aria-label="보유 재화">
           <div class="currency-pill primary">
@@ -80,17 +84,17 @@
         </div>
 
         <nav class="bottom-nav" aria-label="주요 메뉴">
-          <button class="nav-button" type="button" data-screen="recipe"><span><img src="assets/ui/common/icon_mainmenu_recipe.png" alt="" /></span><strong>레시피</strong><i id="recipe-dot" hidden></i></button>
+          <button class="nav-button" type="button" data-screen="recipe"><span><img src="assets/ui/common/icon_mainmenu_recipe.png" alt="" /></span><strong id="recipe-nav-label">레시피</strong><i id="recipe-dot" hidden></i></button>
           <button class="nav-button" type="button" data-screen="missions"><span><img src="assets/ui/common/icon_mainmenu_todo.png" alt="" /></span><strong>할 일</strong><i id="mission-dot" hidden></i></button>
           <button class="nav-button" type="button" data-screen="staff"><span><img src="assets/ui/common/icon_mainmenu_staff.png" alt="" /></span><strong>직원</strong></button>
-          <button class="nav-button" type="button" data-screen="theme"><span><img src="assets/ui/common/icon_mainmenu_theme.png" alt="" /></span><strong>테마</strong></button>
+          <button class="nav-button" type="button" data-screen="theme"><span><img src="assets/ui/common/icon_mainmenu_theme.png" alt="" /></span><strong id="theme-nav-label">테마</strong></button>
         </nav>
       </section>
     </main>
 
-    <script src="data/runtime-tables.js?v=20260723-cafe7"></script>
-    <script src="src/game-config.js?v=20260723-cafe7"></script>
-    <script src="src/data-loader.js?v=20260723-cafe7"></script>
-    <script src="game.js?v=20260723-cafe7"></script>
+    <script src="data/runtime-tables.js?v=20260727-drop30"></script>
+    <script src="src/game-config.js?v=20260727-drop-quantity-v3"></script>
+    <script src="src/data-loader.js?v=20260727-drop30"></script>
+    <script src="game.js?v=20260727-drop-quantity-v3"></script>
   </body>
 </html>

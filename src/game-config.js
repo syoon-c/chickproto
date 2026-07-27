@@ -51,11 +51,11 @@ const THEME_CHICK_THRESHOLDS = [0.3, 0.7, 1];
 
 const GUEST_GRADES = [
   { id: 1, name: "첫 방문", minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
-  { id: 2, name: "낯익은 손님", minVisits: 20, primaryCount: 2, secondaryCount: 0, rareCount: 0 },
-  { id: 3, name: "단골", minVisits: 80, primaryCount: 2, secondaryCount: 1, rareCount: 0 },
-  { id: 4, name: "VIP", minVisits: 250, primaryCount: 3, secondaryCount: 1, rareCount: 0 },
-  { id: 5, name: "최고의 단골", minVisits: 700, primaryCount: 3, secondaryCount: 1, rareCount: 1 },
+  { id: 2, name: "단골", minVisits: 80, primaryCount: 2, secondaryCount: 0, rareCount: 0 },
+  { id: 3, name: "VIP", minVisits: 250, primaryCount: 2, secondaryCount: 1, rareCount: 0 },
+  { id: 4, name: "최고의 단골", minVisits: 700, primaryCount: 2, secondaryCount: 2, rareCount: 1 },
 ];
+const GUEST_INGREDIENT_DROP_CHANCE = 0.3;
 
 const CAFE_CAKE_MILESTONES = [0.3, 0.7, 1];
 const CAFE_THEME_PRICE_RATE = 0.25;
@@ -161,6 +161,57 @@ const CAFE_THEME_CAKE_REWARDS = {
   ],
 };
 
+const CAKE_BASE_PRICE = 80;
+const CAKE_SECOND_CRAFT_IDEA_COST = 5;
+const CAKE_SECOND_CRAFT_GEM_COST = 1;
+const CAKE_RECIPES = [
+  {
+    id: "cake_recipe_strawberry_fresh",
+    name: "딸기 생크림 케이크",
+    sheetId: "cake_sheet_basic",
+    creamId: "cake_cream_fresh",
+    toppingId: "cake_topping_strawberry",
+    priceMultiplier: 2,
+    saleCount: 5,
+  },
+  {
+    id: "cake_recipe_forest_acorn",
+    name: "숲속 도토리 케이크",
+    sheetId: "cake_sheet_walnut",
+    creamId: "cake_cream_maple",
+    toppingId: "cake_topping_acorn",
+    priceMultiplier: 2.6,
+    saleCount: 5,
+  },
+  {
+    id: "cake_recipe_mocha_chocolate",
+    name: "모카 초콜릿 케이크",
+    sheetId: "cake_sheet_vanilla",
+    creamId: "cake_cream_espresso",
+    toppingId: "cake_topping_chocolate",
+    priceMultiplier: 2.8,
+    saleCount: 5,
+  },
+  {
+    id: "cake_recipe_walnut_mocha",
+    name: "호두 모카 케이크",
+    sheetId: "cake_sheet_walnut",
+    creamId: "cake_cream_espresso",
+    toppingId: "cake_topping_chocolate",
+    priceMultiplier: 3.1,
+    saleCount: 5,
+  },
+  {
+    id: "cake_recipe_maple_strawberry",
+    name: "메이플 딸기 케이크",
+    sheetId: "cake_sheet_vanilla",
+    creamId: "cake_cream_maple",
+    toppingId: "cake_topping_strawberry",
+    priceMultiplier: 2.7,
+    saleCount: 5,
+  },
+];
+
 const GAME_INGREDIENTS = {
   lettuce: { id: 30001, name: "양상추", emoji: "🥬" }, tomato: { id: 30002, name: "토마토", emoji: "🍅" },
   bread: { id: 30003, name: "빵", emoji: "🍞" }, cheese: { id: 30004, name: "치즈", emoji: "🧀" },
@@ -244,7 +295,7 @@ const CORE_PROGRESSION = Object.keys(THEME_NAMES).flatMap((themeIdText) => {
       baseRecipeId: override?.baseRecipeId || baseRecipeId,
       recipeName: override?.recipeName || `${shortThemeName(themeId)} ${RECIPE_NAMES[baseRecipeId - 1]}`,
       ingredientCount: 2,
-      dropChance: 1,
+      dropChance: GUEST_INGREDIENT_DROP_CHANCE,
     };
   });
 });
@@ -258,7 +309,7 @@ function allThemeChickMilestones() {
 }
 
 const REGION_UNLOCKS = [
-  { id: 1, name: "신규 지역", recipeCount: 3 },
+  { id: 1, name: "카페 지역", recipeCount: 3, area: "cafe" },
 ];
 
 function recipeName(id) { return RECIPE_NAMES[id - 1] || `메뉴 ${id}`; }
@@ -361,12 +412,17 @@ window.CHICK_CONFIG = {
   GAME_INGREDIENTS,
   THEME_CHICK_THRESHOLDS,
   GUEST_GRADES,
+  GUEST_INGREDIENT_DROP_CHANCE,
   CAFE_CAKE_MILESTONES,
   CAFE_THEME_PRICE_RATE,
   CAFE_THEME_MIN_PRICE,
   BASE_CAKE_INGREDIENTS,
   CAFE_THEME_NAMES,
   CAFE_THEME_CAKE_REWARDS,
+  CAKE_BASE_PRICE,
+  CAKE_SECOND_CRAFT_IDEA_COST,
+  CAKE_SECOND_CRAFT_GEM_COST,
+  CAKE_RECIPES,
   themeChickMilestones,
   allThemeChickMilestones,
   REGION_UNLOCKS,
