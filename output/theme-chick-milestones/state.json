@@ -1,6 +1,22 @@
 {
   "coordinateSystem": "canvas 480x900; origin top-left; x right; y down",
   "mode": "restaurant",
+  "worldNavigation": {
+    "areas": [
+      "restaurant",
+      "cafe"
+    ],
+    "current": "restaurant",
+    "previous": null,
+    "next": "cafe",
+    "methods": [
+      "edge-arrow"
+    ],
+    "cafeAccessible": false
+  },
+  "menuContext": "restaurant",
+  "visibleRecipeType": "restaurant",
+  "visibleThemeType": "restaurant",
   "objective": "손님의 주문 말풍선 누르기",
   "resources": {
     "acorns": 100000,
@@ -49,8 +65,14 @@
     "activeThemeId": 101,
     "activeThemeName": "통나무 카페",
     "installedPartIds": [],
-    "bakingFacilityInstalled": false
+    "bakingFacilityInstalled": false,
+    "serviceReady": false,
+    "continuedVisitChance": 0.8,
+    "queuedVisitors": 0,
+    "totalVisitors": 0
   },
+  "cafeGuests": [],
+  "cafePayments": [],
   "cakeWorkshop": {
     "freeCraftAvailable": true,
     "totalCrafted": 0,
@@ -64,6 +86,7 @@
     "discoveredRecipeIds": [],
     "limitedSale": null
   },
+  "mealDurationSeconds": 7,
   "promotion": {
     "progress": 0,
     "queued": 0,
@@ -83,6 +106,9 @@
       "recipeId": 1,
       "recipeName": "샐러드",
       "wait": 1.4,
+      "mealDuration": 7,
+      "mealElapsed": null,
+      "mealRemaining": null,
       "mood": "normal",
       "dropIngredient": 30003,
       "guestGrade": "첫 방문",
@@ -116,6 +142,9 @@
       "recipeId": 1,
       "recipeName": "샐러드",
       "wait": 1.4,
+      "mealDuration": 7,
+      "mealElapsed": null,
+      "mealRemaining": null,
       "mood": "normal",
       "dropIngredient": 30017,
       "guestGrade": "첫 방문",
@@ -149,6 +178,9 @@
       "recipeId": 1,
       "recipeName": "샐러드",
       "wait": 1.8,
+      "mealDuration": 7,
+      "mealElapsed": null,
+      "mealRemaining": null,
       "mood": "normal",
       "dropIngredient": 30016,
       "guestGrade": "첫 방문",
@@ -182,6 +214,9 @@
       "recipeId": 1,
       "recipeName": "샐러드",
       "wait": 2,
+      "mealDuration": 7,
+      "mealElapsed": null,
+      "mealRemaining": null,
       "mood": "normal",
       "dropIngredient": 30001,
       "guestGrade": "첫 방문",
@@ -215,6 +250,9 @@
       "recipeId": 1,
       "recipeName": "샐러드",
       "wait": 2,
+      "mealDuration": 7,
+      "mealElapsed": null,
+      "mealRemaining": null,
       "mood": "normal",
       "dropIngredient": 30007,
       "guestGrade": "첫 방문",
@@ -249,6 +287,10 @@
     "served": 0,
     "collected": 0,
     "angryLeaves": 0,
+    "cafeVisitors": 0,
+    "cafeContinuedVisitors": 0,
+    "cafeServed": 0,
+    "cafeCollected": 0,
     "ingredientDropAttempts": 0,
     "ingredientDropMisses": 0,
     "ingredientsFound": 0,
@@ -361,6 +403,7 @@
         "themeId": 1,
         "slot": 0,
         "customerId": 3,
+        "customerName": "기본 병아리",
         "ingredientId": 30001,
         "ingredientName": "양상추",
         "rewardItems": [
@@ -393,6 +436,7 @@
         "themeId": 1,
         "slot": 2,
         "customerId": 10013,
+        "customerName": "알껍질 병아리",
         "ingredientId": 30003,
         "ingredientName": "빵",
         "rewardItems": [
@@ -425,6 +469,7 @@
         "themeId": 6,
         "slot": 0,
         "customerId": 4,
+        "customerName": "카우보이 병아리",
         "ingredientId": 30007,
         "ingredientName": "감자",
         "rewardItems": [
@@ -461,6 +506,7 @@
         "themeId": 6,
         "slot": 1,
         "customerId": 10062,
+        "customerName": "캠핑 테마 병아리 2",
         "ingredientId": 30016,
         "ingredientName": "카레가루",
         "rewardItems": [
@@ -497,6 +543,7 @@
         "themeId": 6,
         "slot": 2,
         "customerId": 10063,
+        "customerName": "캠핑 테마 병아리 3",
         "ingredientId": 30017,
         "ingredientName": "생선",
         "rewardItems": [
@@ -535,6 +582,68 @@
       0.7,
       1
     ],
+    "themePartPrices": {
+      "1": {
+        "min": 0,
+        "max": 0
+      },
+      "2": {
+        "min": 1300,
+        "max": 2250
+      },
+      "3": {
+        "min": 13000,
+        "max": 22500
+      },
+      "4": {
+        "min": 130000,
+        "max": 225000
+      },
+      "5": {
+        "min": 1300000,
+        "max": 2250000
+      },
+      "6": {
+        "min": 13000000,
+        "max": 22500000
+      },
+      "7": {
+        "min": 130000000,
+        "max": 225000000
+      },
+      "8": {
+        "min": 1300000000,
+        "max": 2250000000
+      },
+      "9": {
+        "min": 13000000000,
+        "max": 22500000000
+      },
+      "10": {
+        "min": 130000000000,
+        "max": 225000000000
+      },
+      "11": {
+        "min": 1300000000000,
+        "max": 2250000000000
+      },
+      "12": {
+        "min": 13000000000000,
+        "max": 22500000000000
+      },
+      "13": {
+        "min": 130000000000000,
+        "max": 225000000000000
+      },
+      "14": {
+        "min": 1300000000000000,
+        "max": 2250000000000000
+      },
+      "15": {
+        "min": 13000000000000000,
+        "max": 22500000000000000
+      }
+    },
     "guestGrades": [
       {
         "id": 1,
@@ -546,34 +655,26 @@
       },
       {
         "id": 2,
-        "name": "낯익은 손님",
-        "minVisits": 20,
+        "name": "단골",
+        "minVisits": 80,
         "primaryCount": 2,
         "secondaryCount": 0,
         "rareCount": 0
       },
       {
         "id": 3,
-        "name": "단골",
-        "minVisits": 80,
+        "name": "VIP",
+        "minVisits": 250,
         "primaryCount": 2,
         "secondaryCount": 1,
         "rareCount": 0
       },
       {
         "id": 4,
-        "name": "VIP",
-        "minVisits": 250,
-        "primaryCount": 3,
-        "secondaryCount": 1,
-        "rareCount": 0
-      },
-      {
-        "id": 5,
         "name": "최고의 단골",
         "minVisits": 700,
-        "primaryCount": 3,
-        "secondaryCount": 1,
+        "primaryCount": 2,
+        "secondaryCount": 2,
         "rareCount": 1
       }
     ],
@@ -587,6 +688,7 @@
         "opened": 0,
         "total": 13,
         "ratio": 0,
+        "partPrice": 10000,
         "rewards": [
           {
             "id": "cake_sheet_walnut",
@@ -618,6 +720,7 @@
         "opened": 0,
         "total": 13,
         "ratio": 0,
+        "partPrice": 30000,
         "rewards": [
           {
             "id": "cake_sheet_vanilla",
@@ -766,43 +869,73 @@
       }
     },
     "ingredientDropChances": {
-      "30001": 1,
-      "30002": 1,
-      "30003": 1,
-      "30004": 1,
-      "30005": 1,
-      "30006": 1,
-      "30007": 1,
-      "30008": 1,
-      "30009": 1,
-      "30010": 1,
-      "30011": 1,
-      "30012": 1,
-      "30013": 1,
-      "30014": 1,
-      "30016": 1,
-      "30017": 1,
-      "30018": 1,
-      "30019": 1,
-      "30020": 1,
-      "30021": 1,
-      "30022": 1,
-      "30023": 1,
-      "30024": 1,
-      "30025": 1,
-      "30026": 1,
-      "30027": 1,
-      "30028": 1,
-      "30029": 1,
-      "30030": 1,
-      "30031": 1,
-      "30032": 1,
-      "30033": 1,
-      "30034": 1,
-      "30035": 1,
-      "30036": 1,
-      "30037": 1,
-      "30038": 1
+      "30001": 0.3,
+      "30002": 0.3,
+      "30003": 0.3,
+      "30004": 0.3,
+      "30005": 0.3,
+      "30006": 0.3,
+      "30007": 0.3,
+      "30008": 0.3,
+      "30009": 0.3,
+      "30010": 0.3,
+      "30011": 0.3,
+      "30012": 0.3,
+      "30013": 0.3,
+      "30014": 0.3,
+      "30016": 0.3,
+      "30017": 0.3,
+      "30018": 0.3,
+      "30019": 0.3,
+      "30020": 0.3,
+      "30021": 0.3,
+      "30022": 0.3,
+      "30023": 0.3,
+      "30024": 0.3,
+      "30025": 0.3,
+      "30026": 0.3,
+      "30027": 0.3,
+      "30028": 0.3,
+      "30029": 0.3,
+      "30030": 0.3,
+      "30031": 0.3,
+      "30032": 0.3,
+      "30033": 0.3,
+      "30034": 0.3,
+      "30035": 0.3,
+      "30036": 0.3,
+      "30037": 0.3,
+      "30038": 0.3
+    },
+    "ingredientDropRule": {
+      "overallChance": 0.3,
+      "ingredientTypesOnSuccess": 1,
+      "grades": [
+        {
+          "minVisits": 1,
+          "primaryCount": 1,
+          "secondaryCount": 0,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 80,
+          "primaryCount": 2,
+          "secondaryCount": 0,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 250,
+          "primaryCount": 2,
+          "secondaryCount": 1,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 700,
+          "primaryCount": 2,
+          "secondaryCount": 2,
+          "rareCount": 1
+        }
+      ]
     },
     "ingredients": {
       "30001": 3
@@ -825,31 +958,31 @@
         "visits": 5,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 20
+        "nextAt": 80
       },
       "4": {
         "visits": 10,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 20
+        "nextAt": 80
       },
       "10013": {
         "visits": 6,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 20
+        "nextAt": 80
       },
       "10062": {
         "visits": 11,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 20
+        "nextAt": 80
       },
       "10063": {
         "visits": 8,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 20
+        "nextAt": 80
       }
     }
   },

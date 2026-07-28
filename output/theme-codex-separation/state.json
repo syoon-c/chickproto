@@ -1,6 +1,19 @@
 {
   "coordinateSystem": "canvas 480x900; origin top-left; x right; y down",
   "mode": "restaurant",
+  "worldNavigation": {
+    "areas": [
+      "restaurant",
+      "cafe"
+    ],
+    "current": "restaurant",
+    "previous": null,
+    "next": "cafe",
+    "methods": [
+      "edge-arrow"
+    ],
+    "cafeAccessible": false
+  },
   "menuContext": "restaurant",
   "visibleRecipeType": "restaurant",
   "visibleThemeType": "restaurant",
@@ -42,8 +55,14 @@
     "activeThemeId": 101,
     "activeThemeName": "통나무 카페",
     "installedPartIds": [],
-    "bakingFacilityInstalled": false
+    "bakingFacilityInstalled": false,
+    "serviceReady": false,
+    "continuedVisitChance": 0.8,
+    "queuedVisitors": 0,
+    "totalVisitors": 0
   },
+  "cafeGuests": [],
+  "cafePayments": [],
   "cakeWorkshop": {
     "freeCraftAvailable": true,
     "totalCrafted": 0,
@@ -57,6 +76,7 @@
     "discoveredRecipeIds": [],
     "limitedSale": null
   },
+  "mealDurationSeconds": 7,
   "promotion": {
     "progress": 0,
     "queued": 0,
@@ -76,6 +96,10 @@
     "served": 0,
     "collected": 0,
     "angryLeaves": 0,
+    "cafeVisitors": 0,
+    "cafeContinuedVisitors": 0,
+    "cafeServed": 0,
+    "cafeCollected": 0,
     "ingredientDropAttempts": 0,
     "ingredientDropMisses": 0,
     "ingredientsFound": 0,
@@ -323,6 +347,23 @@
       0.7,
       1
     ],
+    "themePartPrices": {
+      "1": 0,
+      "2": 10,
+      "3": 100,
+      "4": 1000,
+      "5": 10000,
+      "6": 100000,
+      "7": 1000000,
+      "8": 10000000,
+      "9": 100000000,
+      "10": 1000000000,
+      "11": 10000000000,
+      "12": 100000000000,
+      "13": 1000000000000,
+      "14": 10000000000000,
+      "15": 100000000000000
+    },
     "guestGrades": [
       {
         "id": 1,
@@ -367,6 +408,7 @@
         "opened": 0,
         "total": 13,
         "ratio": 0,
+        "partPrice": 10,
         "rewards": [
           {
             "id": "cake_sheet_walnut",
@@ -398,6 +440,7 @@
         "opened": 0,
         "total": 13,
         "ratio": 0,
+        "partPrice": 30,
         "rewards": [
           {
             "id": "cake_sheet_vanilla",

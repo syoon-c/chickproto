@@ -16,8 +16,7 @@ const {
   BASE_CAKE_INGREDIENTS,
   CAFE_CAKE_MILESTONES,
   CAFE_THEME_CAKE_REWARDS,
-  CAFE_THEME_MIN_PRICE,
-  CAFE_THEME_PRICE_RATE,
+  CAFE_THEME_PART_PRICES,
   CAFE_THEME_NAMES,
 } = globalThis.CHICK_CONFIG;
 
@@ -27,8 +26,8 @@ if (JSON.stringify(CAFE_CAKE_MILESTONES) !== JSON.stringify([0.3, 0.7, 1])) {
 if (BASE_CAKE_INGREDIENTS.length !== 3) {
   throw new Error(`Expected three base cake ingredients, got ${BASE_CAKE_INGREDIENTS.length}`);
 }
-if (CAFE_THEME_MIN_PRICE !== 25 || CAFE_THEME_PRICE_RATE !== 0.25) {
-  throw new Error(`Cafe theme price rule mismatch: min=${CAFE_THEME_MIN_PRICE} rate=${CAFE_THEME_PRICE_RATE}`);
+if (CAFE_THEME_PART_PRICES[101] !== 10000 || CAFE_THEME_PART_PRICES[102] !== 30000) {
+  throw new Error(`Cafe theme price rule mismatch: ${JSON.stringify(CAFE_THEME_PART_PRICES)}`);
 }
 
 const themeIds = Object.keys(CAFE_THEME_NAMES).map(Number);

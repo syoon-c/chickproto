@@ -1,0 +1,1115 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/sqnta3",
+    "id": "sqnta3",
+    "slide": 5,
+    "layoutId": "516f81b8-86f5-4b45-a90e-e3428e5c3b3d",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "1d7fb567-fe4b-4d7a-a1ac-bc15c06780ce",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFDF7",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Malgun Gothic"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "516f81b8-86f5-4b45-a90e-e3428e5c3b3d",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "1d7fb567-fe4b-4d7a-a1ac-bc15c06780ce",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "1d7fb567-fe4b-4d7a-a1ac-bc15c06780ce",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ojah8n6p",
+      "id": "1",
+      "name": "yellow-accent",
+      "bbox": [
+        42,
+        40,
+        76,
+        8
+      ],
+      "geometry": "rect",
+      "fillColor": "#F4C542",
+      "lineColor": "#F4C542",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ni1gzip4",
+      "id": "2",
+      "name": "slide-5-title",
+      "bbox": [
+        42,
+        66,
+        1150,
+        72
+      ],
+      "geometry": "rect",
+      "text": "내일 회의에서는 네 가지를 먼저 합의합니다",
+      "textPreview": "내일 회의에서는 네 가지를 먼저 합의합니다",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 46,
+        "typeface": "Malgun Gothic",
+        "color": "#201D16",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "내일 회의에서는 네 가지를 먼저 합의합니다"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "내일 회의에서는 네 가지를 먼저 합의합니다",
+          "resolvedTextStyle": {
+            "fontSize": 46,
+            "typeface": "Malgun Gothic",
+            "color": "#201D16",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "내일 회의에서는 네 가지를 먼저 합의합니다",
+              "fontSize": 46,
+              "typeface": "Malgun Gothic",
+              "color": "#201D16",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2hsz6doz",
+      "id": "3",
+      "name": "page-5",
+      "bbox": [
+        1170,
+        664,
+        68,
+        24
+      ],
+      "geometry": "rect",
+      "text": "05",
+      "textPreview": "05",
+      "resolvedFontSize": 12,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.86,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "05"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "05",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "05",
+              "fontSize": 14,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x83y5s7m",
+      "id": "4",
+      "name": "priority-01",
+      "bbox": [
+        42,
+        205,
+        74,
+        46
+      ],
+      "geometry": "rect",
+      "text": "01",
+      "textPreview": "01",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Malgun Gothic",
+        "color": "#F4C542",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "01"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "01",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Malgun Gothic",
+            "color": "#F4C542",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "01",
+              "fontSize": 28,
+              "typeface": "Malgun Gothic",
+              "color": "#F4C542",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/c7uhcn61",
+      "id": "5",
+      "name": "priority-01-title",
+      "bbox": [
+        124,
+        202,
+        470,
+        54
+      ],
+      "geometry": "rect",
+      "text": "레시피 획득",
+      "textPreview": "레시피 획득",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Malgun Gothic",
+        "color": "#201D16",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "레시피 획득"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "레시피 획득",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Malgun Gothic",
+            "color": "#201D16",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "레시피 획득",
+              "fontSize": 30,
+              "typeface": "Malgun Gothic",
+              "color": "#201D16",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/b6lg3ipg",
+      "id": "6",
+      "name": "priority-01-body",
+      "bbox": [
+        124,
+        265,
+        470,
+        60
+      ],
+      "geometry": "rect",
+      "text": "발견 방식 · 연출 · 히든 조건",
+      "textPreview": "발견 방식 · 연출 · 히든 조건",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 22,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "발견 방식 · 연출 · 히든 조건"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "발견 방식 · 연출 · 히든 조건",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "발견 방식 · 연출 · 히든 조건",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/a5czaxov",
+      "id": "7",
+      "name": "priority-02",
+      "bbox": [
+        657,
+        205,
+        74,
+        46
+      ],
+      "geometry": "rect",
+      "text": "02",
+      "textPreview": "02",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Malgun Gothic",
+        "color": "#F4C542",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "02"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "02",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Malgun Gothic",
+            "color": "#F4C542",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "02",
+              "fontSize": 28,
+              "typeface": "Malgun Gothic",
+              "color": "#F4C542",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lcni9c7i",
+      "id": "8",
+      "name": "priority-02-title",
+      "bbox": [
+        739,
+        202,
+        470,
+        54
+      ],
+      "geometry": "rect",
+      "text": "카페 정체성",
+      "textPreview": "카페 정체성",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Malgun Gothic",
+        "color": "#201D16",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "카페 정체성"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "카페 정체성",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Malgun Gothic",
+            "color": "#201D16",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "카페 정체성",
+              "fontSize": 30,
+              "typeface": "Malgun Gothic",
+              "color": "#201D16",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kbuhg76x",
+      "id": "9",
+      "name": "priority-02-body",
+      "bbox": [
+        739,
+        265,
+        470,
+        60
+      ],
+      "geometry": "rect",
+      "text": "꾸미기 vs 케이크 연구",
+      "textPreview": "꾸미기 vs 케이크 연구",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 22,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "꾸미기 vs 케이크 연구"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "꾸미기 vs 케이크 연구",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "꾸미기 vs 케이크 연구",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/apg761gb",
+      "id": "10",
+      "name": "priority-03",
+      "bbox": [
+        42,
+        420,
+        74,
+        46
+      ],
+      "geometry": "rect",
+      "text": "03",
+      "textPreview": "03",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Malgun Gothic",
+        "color": "#F4C542",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "03"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "03",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Malgun Gothic",
+            "color": "#F4C542",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "03",
+              "fontSize": 28,
+              "typeface": "Malgun Gothic",
+              "color": "#F4C542",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bqpof6hw",
+      "id": "11",
+      "name": "priority-03-title",
+      "bbox": [
+        124,
+        417,
+        470,
+        54
+      ],
+      "geometry": "rect",
+      "text": "구조 정리",
+      "textPreview": "구조 정리",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Malgun Gothic",
+        "color": "#201D16",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "구조 정리"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "구조 정리",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Malgun Gothic",
+            "color": "#201D16",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "구조 정리",
+              "fontSize": 30,
+              "typeface": "Malgun Gothic",
+              "color": "#201D16",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cryp8by1",
+      "id": "12",
+      "name": "priority-03-body",
+      "bbox": [
+        124,
+        480,
+        470,
+        60
+      ],
+      "geometry": "rect",
+      "text": "직원 · 설비 · 가구 축소 범위",
+      "textPreview": "직원 · 설비 · 가구 축소 범위",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 22,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "직원 · 설비 · 가구 축소 범위"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "직원 · 설비 · 가구 축소 범위",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "직원 · 설비 · 가구 축소 범위",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xs76hgzm",
+      "id": "13",
+      "name": "priority-04",
+      "bbox": [
+        657,
+        420,
+        74,
+        46
+      ],
+      "geometry": "rect",
+      "text": "04",
+      "textPreview": "04",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Malgun Gothic",
+        "color": "#F4C542",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "04"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "04",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Malgun Gothic",
+            "color": "#F4C542",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "04",
+              "fontSize": 28,
+              "typeface": "Malgun Gothic",
+              "color": "#F4C542",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ytg7a1g7",
+      "id": "14",
+      "name": "priority-04-title",
+      "bbox": [
+        739,
+        417,
+        470,
+        54
+      ],
+      "geometry": "rect",
+      "text": "성장 목표",
+      "textPreview": "성장 목표",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Malgun Gothic",
+        "color": "#201D16",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "성장 목표"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "성장 목표",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Malgun Gothic",
+            "color": "#201D16",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "성장 목표",
+              "fontSize": 30,
+              "typeface": "Malgun Gothic",
+              "color": "#201D16",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/zupoj6hs",
+      "id": "15",
+      "name": "priority-04-body",
+      "bbox": [
+        739,
+        480,
+        470,
+        60
+      ],
+      "geometry": "rect",
+      "text": "승급 · 구역 · 시각적 보상",
+      "textPreview": "승급 · 구역 · 시각적 보상",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 22,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "승급 · 구역 · 시각적 보상"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "승급 · 구역 · 시각적 보상",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "승급 · 구역 · 시각적 보상",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kvypcbyd",
+      "id": "16",
+      "name": "meeting-note",
+      "bbox": [
+        42,
+        622,
+        1100,
+        38
+      ],
+      "geometry": "rect",
+      "text": "바로 확정하기보다 각 항목의 선택지를 확인하고, 후속 정리 기준을 만드는 회의",
+      "textPreview": "바로 확정하기보다 각 항목의 선택지를 확인하고, 후속 정리 기준을 만드는 회의",
+      "resolvedFontSize": 20,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 20,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "바로 확정하기보다 각 항목의 선택지를 확인하고, 후속 정리 기준을 만드는 회의"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "바로 확정하기보다 각 항목의 선택지를 확인하고, 후속 정리 기준을 만드는 회의",
+          "resolvedTextStyle": {
+            "fontSize": 20,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "바로 확정하기보다 각 항목의 선택지를 확인하고, 후속 정리 기준을 만드는 회의",
+              "fontSize": 20,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

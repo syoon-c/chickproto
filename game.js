@@ -18,8 +18,8 @@ const {
   GUEST_GRADES,
   GUEST_INGREDIENT_DROP_CHANCE,
   CAFE_CAKE_MILESTONES,
-  CAFE_THEME_PRICE_RATE,
-  CAFE_THEME_MIN_PRICE,
+  CAFE_THEME_PART_PRICES,
+  cafeThemeUnitPrice,
   BASE_CAKE_INGREDIENTS,
   CAFE_THEME_NAMES,
   CAFE_THEME_CAKE_REWARDS,
@@ -66,7 +66,6 @@ const dom = {
   worldAreaName: document.querySelector("#world-area-name"),
   cafeLockBadge: document.querySelector("#cafe-lock-badge"),
   cafeExpandButton: document.querySelector("#cafe-expand-btn"),
-  cafeInstallTargets: document.querySelector("#cafe-install-targets"),
   cakeWorkshopButton: document.querySelector("#cake-workshop-btn"),
   recipeNavLabel: document.querySelector("#recipe-nav-label"),
   themeNavLabel: document.querySelector("#theme-nav-label"),
@@ -83,7 +82,6 @@ const CAFE_ORDER_DURATION_SECONDS = 1.2;
 const CAFE_CONTINUE_VISIT_CHANCE = .8;
 let dragScrollGesture = null;
 let suppressedDragClick = null;
-let cafeInstallTargetSignature = "";
 
 function scrollableAncestors(target) {
   const result = { x: null, y: null };
@@ -170,8 +168,7 @@ function initialAcorns() {
     const row = tables.installs.find((item) => item.facilityType === type);
     return sum + Number(row?.facilityPrice || 0);
   }, 0);
-  const firstThemePart = tables.restaurantThemes.find((row) => row.facilityTheme === 6 && row.facilityType === 1);
-  return Math.max(Number(tables.general.AccountFirstAcorn ?? 100), coreInstallCost + Number(firstThemePart?.facilityPrice || 0));
+  return Math.max(150, Number(tables.general.AccountFirstAcorn ?? 100), coreInstallCost);
 }
 
 function initialCakeWorkshop() {
@@ -478,7 +475,7 @@ function cafeThemeRows(themeId) {
 }
 
 function cafeThemePartPrice(row) {
-  return Math.max(CAFE_THEME_MIN_PRICE, Math.ceil(Number(row?.facilityPrice || 0) * CAFE_THEME_PRICE_RATE));
+  return cafeThemeUnitPrice(row?.facilityTheme);
 }
 
 function cafeThemeProgress(themeId, openedIds = state?.cafeThemes?.opened || []) {
@@ -887,7 +884,7 @@ function checkAndGrantCafeAllCollect(themeId) {
   return cafeThemeProgress(themeId).ratio >= 1;
 }
 
-function buyCafeTheme(partId) {
+function buyCafeTheme(partId, { installation = false } = {}) {
   const row = Object.keys(CAFE_THEME_NAMES).flatMap((themeId) => cafeThemeRows(Number(themeId)))
     .find((item) => item.id === Number(partId));
   if (!row || state.cafeThemes.opened.includes(partId) || row.purchaseType === 2) return;
@@ -909,11 +906,14 @@ function buyCafeTheme(partId) {
   dispatchAchievement(11, 1, 0, partId);
   const progress = cafeThemeProgress(row.facilityTheme);
   const serviceStarted = !serviceReadyBefore && cafeServiceReady();
-  showToast(serviceStarted
-    ? "카페 영업 시작!"
-    : newlyUnlocked.length
-      ? `${CAFE_THEME_NAMES[row.facilityTheme]} 수집! ${newlyUnlocked.map((ingredient) => `${ingredient.emoji} ${ingredient.name}`).join(", ")} 획득.`
-      : `${CAFE_THEME_NAMES[row.facilityTheme]} 파츠 · ${progress.opened}/${progress.total}`, 3);
+  const meta = FACILITY_META[row.facilityType] || FACILITY_META[15];
+  showToast(installation
+    ? `${meta.name} 설치 완료!`
+    : serviceStarted
+      ? "카페 영업 시작!"
+      : newlyUnlocked.length
+        ? `${CAFE_THEME_NAMES[row.facilityTheme]} 수집! ${newlyUnlocked.map((ingredient) => `${ingredient.emoji} ${ingredient.name}`).join(", ")} 획득.`
+        : `${CAFE_THEME_NAMES[row.facilityTheme]} 파츠 · ${progress.opened}/${progress.total}`, 3);
   saveState();
   updateHud();
   if (!dom.menuScreen.hidden) renderMenu();
@@ -1060,7 +1060,6 @@ function showToast(message, seconds = 2.4) {
 function closeInstallPanel() {
   state.ui.selectedInstallId = null;
   dom.installPanel.hidden = true;
-  updateCafeInstallTargets();
   render();
 }
 
@@ -1075,7 +1074,6 @@ function openInstallPanel(row) {
   dom.installCost.textContent = formatNumber(price);
   dom.installConfirm.disabled = state.resources.acorns < price;
   dom.installPanel.hidden = false;
-  updateCafeInstallTargets();
 }
 
 function confirmInstall() {
@@ -1088,7 +1086,7 @@ function confirmInstall() {
       showToast("도토리가 부족해요.");
       return;
     }
-    buyCafeTheme(row.id);
+    buyCafeTheme(row.id, { installation: true });
     closeInstallPanel();
     return;
   }
@@ -1323,13 +1321,20 @@ function trySpawnCafeQueuedGuests() {
 function addCafePayment(guest, amount) {
   const table = cafeInstalledRows().find((row) => row.id === guest.tableId);
   const seat = table ? cafeSeatPositions(table).find((item) => item.id === guest.seatId) : null;
-  state.cafePayments.push({
-    id: `cafe-pay-${guest.id}`,
-    guestId: guest.id,
-    x: seat?.payX ?? guest.x,
-    y: seat?.payY ?? guest.y + 48,
-    amount,
-  });
+  const existing = state.cafePayments.find((payment) => payment.seatId === guest.seatId);
+  if (existing) {
+    existing.amount += amount;
+    existing.models = Math.min(20, Number(existing.models || 1) + 1);
+  } else {
+    state.cafePayments.push({
+      id: `cafe-pay-${guest.id}`,
+      seatId: guest.seatId,
+      x: seat?.payX ?? guest.x,
+      y: seat?.payY ?? guest.y + 48,
+      amount,
+      models: 1,
+    });
+  }
 }
 
 function collectCafePayment(payment) {
@@ -1893,6 +1898,7 @@ function drawFacility(row) {
 
 function drawInstallZone(row) {
   const p = row.placementOverride || (Number(row.areaType) === 2 ? cafeFacilityPlacement(row) : facilityPlacement(row));
+  const price = Number(row.areaType) === 2 ? cafeThemePartPrice(row) : Number(row.facilityPrice);
   const pulse = .72 + Math.sin(state.clock * 3 + row.id) * .18;
   ctx.save();
   ctx.fillStyle = `rgba(255,247,214,${.88 + pulse * .08})`;
@@ -1914,7 +1920,7 @@ function drawInstallZone(row) {
   ctx.fillStyle = "#fff8df";
   ctx.font = "900 12px sans-serif";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText(formatNumber(row.facilityPrice), p.x + 10, p.y + 43);
+  ctx.fillText(formatNumber(price), p.x + 10, p.y + 43);
   ctx.restore();
 }
 
@@ -2048,34 +2054,27 @@ function drawSpecialCustomers() {
   }
 }
 
-function drawPayments() {
-  for (const payment of state.payments) {
-    const visible = Math.min(4, payment.models);
-    for (let i = 0; i < visible; i += 1) {
-      const angle = (i / Math.max(1, visible)) * Math.PI * 2;
-      drawImage("assets/ui/currency/icon_currency_001.png", payment.x + Math.cos(angle) * 11, payment.y + Math.sin(angle) * 5, 29, 29);
-    }
-    ctx.fillStyle = "rgba(57,39,20,.88)";
-    roundRect(payment.x - 31, payment.y + 17, 62, 22, 11);
-    ctx.fill();
-    ctx.fillStyle = "white";
-    ctx.font = "900 12px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(formatNumber(payment.amount), payment.x, payment.y + 32);
+function drawPaymentPile(payment) {
+  const visible = Math.min(4, Number(payment.models || 1));
+  for (let i = 0; i < visible; i += 1) {
+    const angle = (i / Math.max(1, visible)) * Math.PI * 2;
+    drawImage("assets/ui/currency/icon_currency_001.png", payment.x + Math.cos(angle) * 11, payment.y + Math.sin(angle) * 5, 29, 29);
   }
+  ctx.fillStyle = "rgba(57,39,20,.88)";
+  roundRect(payment.x - 31, payment.y + 17, 62, 22, 11);
+  ctx.fill();
+  ctx.fillStyle = "white";
+  ctx.font = "900 12px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(formatNumber(payment.amount), payment.x, payment.y + 32);
+}
+
+function drawPayments() {
+  for (const payment of state.payments) drawPaymentPile(payment);
 }
 
 function drawCafePayments() {
-  for (const payment of state.cafePayments) {
-    drawImage("assets/ui/currency/icon_currency_001.png", payment.x, payment.y, 38, 38);
-    ctx.fillStyle = "rgba(57,39,20,.88)";
-    roundRect(payment.x - 31, payment.y + 17, 62, 22, 11);
-    ctx.fill();
-    ctx.fillStyle = "white";
-    ctx.font = "900 12px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(formatNumber(payment.amount), payment.x, payment.y + 32);
-  }
+  for (const payment of state.cafePayments) drawPaymentPile(payment);
 }
 
 function drawIngredientDrops() {
@@ -2130,6 +2129,7 @@ function drawWorldArea(area) {
     }
     drawCafeProgress();
     cafeInstalledRows().sort((a, b) => cafeFacilityPlacement(a).y - cafeFacilityPlacement(b).y).forEach(drawCafeFacility);
+    if (!state.ui.selectedInstallId) cafeInstallCandidates().forEach(drawInstallZone);
     [...state.cafeGuests].sort((a, b) => a.y - b.y).forEach(drawCafeGuest);
     drawCafePayments();
     return;
@@ -2211,26 +2211,6 @@ function updateHud() {
   dom.cafeExpandButton.hidden = !cafeWorld || state.cafeArea.unlocked;
   dom.cafeExpandButton.disabled = !expansionAvailable;
   dom.cakeWorkshopButton.hidden = !cafeWorld || !state.cafeArea.unlocked || !cafeBakingFacilityInstalled();
-  updateCafeInstallTargets();
-}
-
-function updateCafeInstallTargets() {
-  if (state.ui.worldArea !== "cafe" || !state.cafeArea.unlocked || state.ui.selectedInstallId) {
-    if (cafeInstallTargetSignature) dom.cafeInstallTargets.innerHTML = "";
-    cafeInstallTargetSignature = "";
-    dom.cafeInstallTargets.hidden = true;
-    return;
-  }
-  const rows = cafeInstallCandidates();
-  const nextSignature = `${activeCafeThemeId()}:${rows.map((row) => row.id).join(",")}`;
-  if (cafeInstallTargetSignature === nextSignature && !dom.cafeInstallTargets.hidden) return;
-  cafeInstallTargetSignature = nextSignature;
-  dom.cafeInstallTargets.hidden = false;
-  dom.cafeInstallTargets.innerHTML = rows.map((row) => {
-    const p = cafeFacilityPlacement(row);
-    const meta = FACILITY_META[row.facilityType] || FACILITY_META[15];
-    return `<button type="button" data-cafe-install="${row.id}" aria-label="${meta.name}${row.facilityGroup > 1 ? ` ${row.facilityGroup}` : ""} 설치 · 도토리 ${cafeThemePartPrice(row)}" style="left:${(p.x / GAME_W) * 100}%;top:${(p.y / GAME_H) * 100}%"><span>+</span><small>🌰 ${cafeThemePartPrice(row)}</small></button>`;
-  }).join("");
 }
 
 function pointerPosition(event) {
@@ -2468,18 +2448,16 @@ function renderRecipeMenu() {
   if (state.ui.tab === "craft") {
     const visibleRoutes = CORE_PROGRESSION.filter(isProgressionRouteUnlocked);
     const visibleIngredients = [...new Map(visibleRoutes.flatMap((route) => route.ingredientRequirements).map((ingredient) => [ingredient.id, ingredient])).values()];
-    dom.menuContent.innerHTML = `<section class="research-box"><h3>병아리 아이템으로 레시피 만들기</h3>
-      <p>초반 음식은 재료 1종, 중반은 2종, 후반은 3종을 조합합니다. 같은 레시피를 다시 만들면 레벨과 판매 가격이 5%씩 오르고, 다음 제작의 총 재료 수도 1개씩 늘어납니다.</p>
+    dom.menuContent.innerHTML = `<section class="research-box"><h3>추천 조합</h3>
       <div class="ingredient-strip">${visibleIngredients.map((ingredient) => `<span>${ingredient.emoji}<b>${ingredient.name}</b> ${ingredientAmount(ingredient.id)}</span>`).join("")}</div>
-      <button class="research-button" data-action="auto-craft">남은 재료로 자동 선택 제작</button></section>
+      <button class="research-button" data-action="auto-craft">추천 제작</button></section>
       ${visibleRoutes.map(craftingRouteCard).join("")}`;
   } else if (state.ui.tab === "owned") {
     const owned = Object.keys(state.ownedRecipes).map((id) => getRecipe(Number(id))).filter(Boolean);
-    dom.menuContent.innerHTML = `<p class="section-note">해금 레시피 ${owned.length}개 · 레시피 1개가 늘 때마다 전체 음식 수익이 5% 증가합니다.</p>${owned.map(recipeCard).join("")}`;
+    dom.menuContent.innerHTML = `<p class="section-note">레시피 ${owned.length} · 전체 수익 +${Math.max(0, owned.length - 1) * 5}%</p>${owned.map(recipeCard).join("")}`;
   } else {
     const count = unlockedRecipeCount();
-    dom.menuContent.innerHTML = `<p class="section-note">레시피를 3개 해금하면 카페 지역 확장 권한이 열립니다. 달성 후 상단의 카페 화면에서 무료로 확장할 수 있습니다.</p>
-      ${REGION_UNLOCKS.map((region) => { const opened = count >= region.recipeCount; return `<article class="feature-card ${opened ? "" : "is-locked"}"><div class="feature-icon region-icon"><img class="region-frame" src="assets/ui/common/bg_frame_expansion_01.png" alt="" /><img class="region-status" src="assets/ui/common/${opened ? "icon_check" : "icon_lock"}.png" alt="" /></div><div class="feature-copy"><strong>${region.name}</strong><small>필요 레시피 ${region.recipeCount}개</small><div class="progress-track"><span style="width:${Math.min(100, count / region.recipeCount * 100)}%"></span></div><small>${count}/${region.recipeCount}${opened ? " · 카페 확장 가능" : ""}</small></div></article>`; }).join("")}`;
+    dom.menuContent.innerHTML = `${REGION_UNLOCKS.map((region) => { const opened = count >= region.recipeCount; return `<article class="feature-card ${opened ? "" : "is-locked"}"><div class="feature-icon region-icon"><img class="region-frame" src="assets/ui/common/bg_frame_expansion_01.png" alt="" /><img class="region-status" src="assets/ui/common/${opened ? "icon_check" : "icon_lock"}.png" alt="" /></div><div class="feature-copy"><strong>${region.name}</strong><small>필요 레시피 ${region.recipeCount}개</small><div class="progress-track"><span style="width:${Math.min(100, count / region.recipeCount * 100)}%"></span></div><small>${count}/${region.recipeCount}${opened ? " · 확장 가능" : ""}</small></div></article>`; }).join("")}`;
   }
 }
 
@@ -2563,7 +2541,7 @@ function renderCollectionMenu() {
   }));
   if (category === "specialCustomers") rows = tables.specialCustomers.map((item) => ({ id: item.id, name: item.specialCustomerType === 1 ? "도둑" : "투자자", icon: "assets/ui/chick/icon_chick_007.png" }));
   if (category === "performers") rows = tables.performances.map((item) => ({ id: item.id, name: `공연팀 ${item.id}`, icon: "assets/ui/chick/icon_chick_006.png" }));
-  dom.menuContent.innerHTML = `<p class="section-note">${category === "customers" ? "테마에서 등장 조건을 달성한 병아리의 외형·선물 재료·연결 레시피를 확인합니다." : "처음 만난 대상은 NEW로 기록되며, 방문·공연 횟수가 누적됩니다."}</p><div class="collection-grid ${category === "customers" ? "customer-detail-grid" : ""}">${rows.map((item) => {
+  dom.menuContent.innerHTML = `<div class="collection-grid ${category === "customers" ? "customer-detail-grid" : ""}">${rows.map((item) => {
     const entry = dict[item.id];
     const known = category === "customers" ? item.available || Boolean(entry) : Boolean(entry);
     const grade = entry && category === "customers" ? guestGradeForVisits(entry.count) : null;
@@ -2612,14 +2590,14 @@ function renderStaffManagement() {
     return `<article class="feature-card"><img class="feature-icon" src="assets/ui/staff/icon_staff_${String(table.id).padStart(3, "0")}.png" alt="" />
       <div class="feature-copy"><strong>${table.staffName}${owned ? ` · Lv.${owned.level}` : ""}</strong><small>${staffDescription(table, level)}</small><small>휴식 ${level.breakTime}초${owned ? ` · 현재 ${owned.mode === "active" ? "근무 중" : "휴식 중"}` : ""}</small>${extra}</div>${action}</article>`;
   }).join("");
-  dom.menuContent.innerHTML = `<p class="section-note">보유 스티커 ${state.resources.stickers} · 매일 보유량이 ${Number(tables.general.StaffStickerDaily || 5)}개가 되도록 충전됩니다.</p>${cards}`;
+  dom.menuContent.innerHTML = `<p class="section-note">스티커 ${state.resources.stickers}/${Number(tables.general.StaffStickerDaily || 5)}</p>${cards}`;
 }
 
 function renderPerformanceManagement() {
   const current = activePerformance();
   const stageReady = installedRows(5).length > 0;
   dom.menuContent.innerHTML = `<section class="research-box"><h3>${current ? `공연팀 ${current.id} 공연 중` : "공연 무대"}</h3>
-    <p>${!stageReady ? "무대 시설을 먼저 설치해 주세요." : current ? `식당 가격 +${Math.round(current.abilityValue * 100)}% · ${Math.ceil(state.performance.remaining)}초 남음` : `다음 공연까지 ${Math.ceil(state.performance.cooldown)}초`}<br>공연 시작 시 할 일과 공연팀 도감이 함께 갱신됩니다.</p>
+    <p>${!stageReady ? "무대 시설을 먼저 설치해 주세요." : current ? `식당 가격 +${Math.round(current.abilityValue * 100)}% · ${Math.ceil(state.performance.remaining)}초 남음` : `다음 공연까지 ${Math.ceil(state.performance.cooldown)}초`}</p>
     <button class="research-button" data-action="start-performance" ${stageReady && !current && state.performance.cooldown <= 0 ? "" : "disabled"}>공연 시작</button></section>
     ${tables.performances.map((row) => `<article class="feature-card ${state.collections.performers[row.id] ? "" : "is-locked"}"><img class="feature-icon" src="assets/ui/performance/icon_performance_${String(row.id).padStart(3, "0")}.png" alt="" /><div class="feature-copy"><strong>${state.collections.performers[row.id] ? `공연팀 ${row.id}` : "???"}</strong><small>가격 +${Math.round(row.abilityValue * 100)}% · ${row.performanceTime}초</small><small>${row.price ? `공연료 도토리 ${row.price}` : "무료 공연"}</small></div></article>`).join("")}`;
 }
@@ -2629,6 +2607,15 @@ function themeAreaSwitchHtml() {
   return `<div class="theme-area-switch" aria-label="테마 구역 선택">
     <button type="button" data-action="theme-area" data-area="restaurant" class="${area === "restaurant" ? "is-active" : ""}">레스토랑 테마</button>
     <button type="button" data-action="theme-area" data-area="cafe" class="${area === "cafe" ? "is-active" : ""}">카페 테마</button>
+  </div>`;
+}
+
+function themeProgressGauge(ratio, milestones) {
+  const percent = Math.max(0, Math.min(100, Number(ratio || 0) * 100));
+  return `<div class="theme-progress-gauge" aria-label="구매 진척도 ${Math.round(percent)}%">
+    <div class="progress-track"><span style="width:${percent}%"></span></div>
+    <div class="theme-progress-markers">${milestones.map((milestone) =>
+      `<span style="left:${Math.max(0, Math.min(100, milestone.threshold * 100))}%;transform:${milestone.threshold <= 0 ? "translateX(0)" : milestone.threshold >= 1 ? "translateX(-100%)" : "translateX(-50%)"}">${milestone.label}</span>`).join("")}</div>
   </div>`;
 }
 
@@ -2649,23 +2636,23 @@ function renderCafeThemeManagement() {
     const unlocked = ingredientIds.has(reward.id);
     const requiredCount = Math.ceil(progress.total * CAFE_CAKE_MILESTONES[index]);
     return `<div class="cake-reward-chip ${unlocked ? "is-unlocked" : "is-locked"}">
-      <span>${reward.emoji}</span><div><b>${Math.round(CAFE_CAKE_MILESTONES[index] * 100)}% · ${typeNames[reward.type]}</b>
-      <small>${unlocked ? reward.name : `${requiredCount}개 보유 시 해금`}</small></div>
+      <span>${reward.emoji}</span><div><b>${reward.name}</b>
+      <small>${Math.round(CAFE_CAKE_MILESTONES[index] * 100)}% · ${unlocked ? "해금" : `${progress.opened}/${requiredCount}`}</small></div>
     </div>`;
   }).join("");
-  const inventory = ownedIngredients.map((ingredient) =>
-    `<span class="cake-ingredient-chip"><i>${ingredient.emoji}</i><b>${ingredient.name}</b><small>${typeNames[ingredient.type]}</small></span>`).join("");
+  const gauge = themeProgressGauge(progress.ratio, CAFE_CAKE_MILESTONES.map((threshold, index) => ({
+    threshold,
+    label: `${Math.round(threshold * 100)}% ${typeNames[rewards[index]?.type] || ""}`,
+  })));
 
   dom.menuContent.innerHTML = `<div class="theme-tabs" aria-label="카페 테마 선택">${themeIds.map((themeId) => {
     const representative = cafeThemeRows(themeId).find((row) => row.facilityType === 15) || cafeThemeRows(themeId)[0];
     return `<button type="button" data-action="theme-select" data-id="${themeId}" class="${themeId === selectedTheme ? "is-active" : ""}"><img src="${cafeThemeFacilityIcon(representative)}" alt=""/><span>${CAFE_THEME_NAMES[themeId]}</span></button>`;
   }).join("")}</div>
     <section class="theme-summary"><div><strong>${CAFE_THEME_NAMES[selectedTheme]}</strong>
-      <span>파츠 보유 ${progress.opened}/${progress.total} · 케이크 재료 ${ownedIngredients.length}종</span>
-      <small>30% 시트 · 70% 크림 · 100% 시그니처 토핑을 영구 획득합니다.</small></div></section>
+      <span>진척도 ${progress.opened}/${progress.total} · 재료 ${ownedIngredients.length}종</span>
+      ${gauge}</div></section>
     <div class="cake-reward-milestones">${rewardCards}</div>
-    <section class="cake-inventory"><h3>보유 케이크 재료</h3><div>${inventory}</div></section>
-    <p class="section-note">해금한 재료는 다른 테마와 자유롭게 조합할 수 있습니다. 카페에 케이크 진열대를 설치한 뒤 설비를 누르면 제작을 시작합니다.</p>
     ${rows.map((row) => {
     const opened = state.cafeThemes.opened.includes(row.id);
     const price = cafeThemePartPrice(row);
@@ -2675,7 +2662,7 @@ function renderCafeThemeManagement() {
     if (opened) label = "보유 중";
     return `<article class="feature-card ${state.cafeArea.unlocked ? "" : "is-locked"}"><img class="feature-icon" src="${cafeThemeFacilityIcon(row)}" alt=""/>
       <div class="feature-copy"><strong>${FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`}</strong>
-      <small>${CAFE_THEME_NAMES[selectedTheme]} 파츠${row.facilityGroup > 1 ? ` ${row.facilityGroup}` : ""}</small><small>${opened ? "보유 중" : `테스트 가격 · 도토리 ${formatNumber(price)}`}</small></div>
+      <small>${CAFE_THEME_NAMES[selectedTheme]}${row.facilityGroup > 1 ? ` ${row.facilityGroup}` : ""}</small></div>
       <button class="card-action" data-action="buy-cafe-theme" data-id="${row.id}" ${canBuy ? "" : "disabled"}>${label}</button></article>`;
   }).join("")}`;
   requestAnimationFrame(() => {
@@ -2695,10 +2682,6 @@ function renderThemeManagement() {
   const applicableCount = rows.filter((row) => state.themes.opened.includes(row.id)
     && isThemeFacilityAvailable(row.facilityType)
     && state.themes.activeByFacility[row.facilityType] !== row.id).length;
-  const totalBonus = state.themes.opened.reduce((sum, id) => {
-    const row = tables.restaurantThemes.find((item) => item.id === Number(id));
-    return sum + Number(row?.abilityValue || 0);
-  }, 0);
   const milestones = themeChickMilestones(selectedTheme);
   const unlockedChicks = unlockedThemeChicks(selectedTheme);
   const progress = themeChickProgress(selectedTheme);
@@ -2706,18 +2689,20 @@ function renderThemeManagement() {
     const requiredCount = Math.ceil(progress.total * chick.threshold);
     const unlocked = unlockedChicks.some((item) => item.customerId === chick.customerId);
     const milestoneLabel = selectedTheme === 1 && chick.slot === 0 ? "기본" : `${Math.round(chick.threshold * 100)}%`;
-    const lockedLabel = selectedTheme === 1 ? `${requiredCount}개 설비 설치 시 등장` : `${requiredCount}개 보유 시 등장`;
-    return `<div class="theme-chick-chip ${unlocked ? "is-unlocked" : "is-locked"}"><span class="theme-chick-mystery" aria-hidden="true">${unlocked ? "🐣" : "?"}</span><div><b>${milestoneLabel}</b><small>${unlocked ? "새로운 병아리 등장 완료" : "새로운 병아리 등장"}</small><em>${unlocked ? "상세 정보는 도감에서 확인" : lockedLabel}</em></div></div>`;
+    return `<div class="theme-chick-chip ${unlocked ? "is-unlocked" : "is-locked"}"><span class="theme-chick-mystery" aria-hidden="true">🐣</span><div><b>${chick.customerName}</b><small>${milestoneLabel} · ${unlocked ? "등장" : "잠김"}</small><em>${unlocked ? "등장 완료" : `${progress.opened}/${requiredCount}`}</em></div></div>`;
   }).join("");
+  const gaugeMilestones = selectedTheme === 1
+    ? [{ threshold: 0, label: "기본" }, { threshold: 1, label: "100%" }]
+    : milestones.map((chick) => ({ threshold: chick.threshold, label: `${Math.round(chick.threshold * 100)}%` }));
+  const gauge = themeProgressGauge(progress.ratio, gaugeMilestones);
 
   dom.menuContent.innerHTML = `<div class="theme-tabs" aria-label="테마 선택">${themeIds.map((themeId) => {
     const representative = tables.restaurantThemes.find((row) => row.facilityTheme === themeId && row.facilityType === 1)
       || tables.restaurantThemes.find((row) => row.facilityTheme === themeId);
     return `<button type="button" data-action="theme-select" data-id="${themeId}" class="${themeId === selectedTheme ? "is-active" : ""}"><img src="${themeFacilityIcon(representative)}" alt=""/><span>${THEME_NAMES[themeId] || `테마 ${themeId}`}</span></button>`;
   }).join("")}</div>
-    <section class="theme-summary"><div><strong>${THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`}</strong><span>${selectedTheme === 1 ? `설비 설치 ${progress.opened}/${progress.total}` : `보유 ${openedCount}/${rows.length}`} · 누적 식당 수익 +${Math.round(totalBonus * 100)}%</span><small>${selectedTheme === 1 ? "설비를 모두 설치하면 새로운 병아리가 등장합니다." : "파츠 보유율 30% · 70% · 100%에서 새로운 병아리가 등장합니다."}</small></div><button class="card-action" data-action="apply-theme-all" data-id="${selectedTheme}" ${applicableCount ? "" : "disabled"}>보유 파츠 전체 적용</button></section>
+    <section class="theme-summary"><div><strong>${THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`}</strong><span>진척도 ${progress.opened}/${progress.total}</span>${gauge}</div><button class="card-action" data-action="apply-theme-all" data-id="${selectedTheme}" ${applicableCount ? "" : "disabled"}>전체 적용</button></section>
     <div class="theme-chick-milestones">${milestoneCards}</div>
-    <p class="section-note">유니티와 동일하게 선택한 테마의 설비 파츠를 종류별로 구매하고 적용합니다. 아직 설치하지 않은 설비 파츠는 잠겨 있습니다.</p>
     ${rows.map((row) => {
     const opened = state.themes.opened.includes(row.id);
     const active = state.themes.activeByFacility[row.facilityType] === row.id;
@@ -2730,7 +2715,7 @@ function renderThemeManagement() {
     if (!available) label = "설비 필요";
     else if (collectible && !opened) label = "전체 수집 보상";
     if (opened) { action = "apply-theme"; label = active ? "적용 중" : "적용"; disabled = active; }
-    return `<article class="feature-card ${available ? "" : "is-locked"}"><img class="feature-icon" src="${themeFacilityIcon(row)}" alt=""/><div class="feature-copy"><strong>${FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`}</strong><small>${THEME_NAMES[selectedTheme]} 파츠</small><small>식당 수익 +${Math.round(row.abilityValue * 100)}% · ${opened ? "보유 중" : available ? RESOURCE_NAMES[row.itemId] || "재화" : "미설치"}</small></div><button class="card-action" data-action="${action}" data-id="${row.id}" ${disabled ? "disabled" : ""}>${label}</button></article>`;
+    return `<article class="feature-card ${available ? "" : "is-locked"}"><img class="feature-icon" src="${themeFacilityIcon(row)}" alt=""/><div class="feature-copy"><strong>${FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`}</strong><small>${THEME_NAMES[selectedTheme]} · 수익 +${Math.round(row.abilityValue * 100)}%</small></div><button class="card-action" data-action="${action}" data-id="${row.id}" ${disabled ? "disabled" : ""}>${label}</button></article>`;
   }).join("")}`;
   requestAnimationFrame(() => {
     const tabs = dom.menuContent.querySelector(".theme-tabs");
@@ -2776,7 +2761,6 @@ function renderCakeWorkshop() {
   }).join("");
   if (!cafeBakingFacilityInstalled()) {
     dom.menuContent.innerHTML = `<section class="cake-workshop-lock"><span>🎂</span><strong>케이크 진열대를 먼저 설치해 주세요</strong>
-      <p>케이크는 카페의 <b>케이크 진열대</b>에서 만듭니다.<br>카페 테마에서 진열대 파츠를 구매하면 이 화면에 제작대가 열립니다.</p>
       <button type="button" data-action="go-cafe-theme">카페 테마에서 진열대 찾기</button></section>
       <section class="cake-codex"><div class="cake-part-heading"><strong>카페 케이크 레시피</strong><small>${workshop.discoveredRecipeIds.length}/${CAKE_RECIPES.length}</small></div>${codex}</section>`;
     return;
@@ -2797,7 +2781,7 @@ function renderCakeWorkshop() {
     </section>`
     : "";
   const sale = workshop.limitedSale
-    ? `<section class="cake-sale-status"><span>진열 중</span><div><strong>${workshop.limitedSale.name}</strong><small>남은 수량 ${workshop.limitedSale.remaining}조각 · 손님이 식사 후 우선 구매</small></div><b>🌰 ${formatNumber(workshop.limitedSale.unitPrice)}</b></section>`
+    ? `<section class="cake-sale-status"><span>진열 중</span><div><strong>${workshop.limitedSale.name}</strong><small>남은 ${workshop.limitedSale.remaining}조각</small></div><b>🌰 ${formatNumber(workshop.limitedSale.unitPrice)}</b></section>`
     : "";
   const craftButtons = workshop.freeCraftsUsed < 1
     ? `<button class="cake-finish-button" data-action="finish-cake" data-currency="free">오늘의 무료 제작으로 완성하기</button>`
@@ -2805,8 +2789,7 @@ function renderCakeWorkshop() {
       <button class="cake-finish-button" data-action="finish-cake" data-currency="ideas" ${state.resources.ideas >= CAKE_SECOND_CRAFT_IDEA_COST ? "" : "disabled"}>💡 ${CAKE_SECOND_CRAFT_IDEA_COST}로 완성</button>
       <button class="cake-finish-button secondary" data-action="finish-cake" data-currency="gems" ${state.resources.gems >= CAKE_SECOND_CRAFT_GEM_COST ? "" : "disabled"}>💎 ${CAKE_SECOND_CRAFT_GEM_COST}로 완성</button>
     </div>`;
-  dom.menuContent.innerHTML = `<p class="section-note cake-intro">테마 파츠 보유율로 해금한 재료를 고르고 케이크를 꾸며 주세요. 맛 조합은 시트·크림·대표 토핑으로 판정하며, 배치와 개수는 자유입니다.</p>
-    ${sale}${result}
+  dom.menuContent.innerHTML = `${sale}${result}
     ${cakeIngredientSelector("sheet", "1. 시트 맛", workshop.selectedSheet)}
     ${cakeIngredientSelector("cream", "2. 크림 맛", workshop.selectedCream)}
     ${cakeIngredientSelector("topping", "3. 대표 토핑", workshop.selectedTopping)}
@@ -2930,9 +2913,11 @@ function renderGameToText() {
     })),
     cafePayments: state.cafePayments.map((payment) => ({
       id: payment.id,
+      seatId: payment.seatId,
       x: Math.round(payment.x),
       y: Math.round(payment.y),
       amount: payment.amount,
+      models: Number(payment.models || 1),
     })),
     cakeWorkshop: {
       freeCraftAvailable: state.cakeWorkshop.freeCraftsUsed < 1,
@@ -3033,12 +3018,19 @@ function renderGameToText() {
         recipeIngredients: chick.ingredientRequirements.map((ingredient) => ({ ingredientId: ingredient.id, name: ingredient.name })),
       })),
       themeChickThresholds: THEME_CHICK_THRESHOLDS,
+      themePartPrices: Object.fromEntries(Object.keys(THEME_NAMES).map((themeId) => {
+        const prices = tables.restaurantThemes
+          .filter((row) => Number(row.facilityTheme) === Number(themeId) && Number(row.purchaseType) !== 2)
+          .map((row) => Number(row.facilityPrice || 0));
+        return [themeId, { min: Math.min(...prices), max: Math.max(...prices) }];
+      })),
       guestGrades: GUEST_GRADES,
       cafeCakeMilestones: CAFE_CAKE_MILESTONES,
       cafeThemes: Object.fromEntries(Object.keys(CAFE_THEME_NAMES).map((themeId) => {
         const progress = cafeThemeProgress(Number(themeId));
         return [themeId, {
           ...progress,
+          partPrice: CAFE_THEME_PART_PRICES[themeId],
           rewards: (CAFE_THEME_CAKE_REWARDS[themeId] || []).map((reward, index) => ({
             ...reward,
             threshold: CAFE_CAKE_MILESTONES[index],
@@ -3115,12 +3107,6 @@ dom.worldAreaButtons.forEach((button) =>
   button.addEventListener("click", () => setWorldArea(button.dataset.worldArea)));
 dom.cafeExpandButton.addEventListener("click", expandCafeArea);
 dom.cakeWorkshopButton.addEventListener("click", () => openMenu("cake"));
-dom.cafeInstallTargets.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-cafe-install]");
-  if (!button) return;
-  const row = cafeThemeRows(activeCafeThemeId()).find((item) => item.id === Number(button.dataset.cafeInstall));
-  if (row) openInstallPanel(row);
-});
 dom.menuTabs.addEventListener("click", (event) => {
   const button = event.target.closest("[data-tab]");
   if (!button) return;

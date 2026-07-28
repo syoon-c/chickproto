@@ -797,3 +797,64 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
   - `DRAG_SCROLL_OK horizontal=0->357 vertical=0->506`
   - `FILE_OPEN_CORE_LOOP_OK`
   - 레스토랑/카페 화면 캡처에서 동일 배경, 한 줄 기능 제목, 화살표·버튼·설비 비겹침을 확인했다.
+
+## 2026-07-28 카페 설치·매출 회수 규칙 통일
+
+- 카페 전용 HTML 설치 버튼을 제거하고 레스토랑과 같은 캔버스 설치 지점 연출을 사용하도록 변경했다.
+- 두 구역 모두 맥동하는 `+`와 도토리 가격을 누른 뒤 동일한 설치 패널에서 확인한다.
+- 카페 설비도 설치 완료 후 실제 설비가 나타나며 `설비명 설치 완료!` 토스트를 사용한다.
+- 카페 매출을 손님마다 별도 도토리로 생성하지 않고 레스토랑처럼 좌석별로 합산한다.
+- 같은 좌석에서 매출이 반복되면 도토리 모델 수와 총액이 한 더미에 누적되며 한 번의 클릭으로 모두 회수한다.
+- 레스토랑과 카페가 동일한 도토리 더미 렌더링 함수를 공유하도록 정리했다.
+- 검증:
+  - `CAFE_REGION_UNLOCK_OK recipes=3 region=1 installFlow=shared`
+  - `CAFE_GUESTS_OK restaurantContinuation=80% revenuePile=2 payment=singleCollect independentVisitors=0`
+  - `AREA_CONTEXT_MENUS_OK restaurant=restaurant cafe=cake`
+  - `PROGRESSION_LOOP_OK`
+  - 공식 게임 클라이언트 상태 출력 정상, 콘솔 오류 없음.
+  - 카페 설치 패널, 설치 완료 화면, 도토리 2개·250 합산 더미를 직접 확인했다.
+
+## 2026-07-28 테마 병아리 미리보기·구매 진척도 UI
+
+- 레스토랑 테마 화면에서 아직 등장하지 않은 병아리도 이름을 미리 확인할 수 있게 변경했다.
+- 병아리의 선물 재료와 연결 레시피는 테마 화면에 노출하지 않고 도감에만 유지했다.
+- 테마 파츠 구매 진척도를 한눈에 볼 수 있는 게이지를 추가했다.
+  - 일반 테마: 병아리 등장 구간 `30% / 70% / 100%`
+  - 돌 테마: `기본 / 100%`
+  - 카페 테마: 케이크 재료 해금 구간 `30% 시트 / 70% 크림 / 100% 토핑`
+- 잠긴 보상 카드도 이름을 읽을 수 있도록 대비를 높였다.
+- 레시피 제작 규칙, 지역 해금 안내, 도감 사용법, 공연 기록 안내, 케이크 제작 기획 설명처럼 카드 내용과 중복되는 장문을 제거했다.
+- 브라우저 제목의 `기획 검증 프로토타입` 표기도 제거했다.
+- 검증:
+  - `THEME_CODEX_SEPARATION_OK chicks=3`
+  - 구매 전 이름 3개, 잠금 상태, `30% / 70% / 100%` 표시 확인
+  - 구매 완료 후 등장 상태와 게이지 100% 표시 확인
+  - `PROGRESSION_LOOP_OK`
+  - `CAFE_THEME_REWARDS_OK themes=2 installs=13 rewards=6 base=3 thresholds=0.3/0.7/1`
+  - `AREA_CONTEXT_MENUS_OK restaurant=restaurant cafe=cake`
+  - `CAKE_WORKSHOP_OK recipes=5 saleRemaining=5`
+  - 공식 게임 클라이언트 상태 출력 정상, 콘솔 오류 없음.
+
+## 2026-07-28 임시 테마 가격 곡선 (a 단위 해석 정정)
+
+- 유니티 원본 테이블은 수정하지 않고 프로토타입의 `src/game-config.js`와 로더에서 임시 가격표를 적용했다.
+- 레스토랑 테마 파츠 가격:
+  - 돌 테마: 무료
+  - 나무 테마: 기존 반값 `1,300~2,250` 유지
+  - 100으로 임시 입력돼 있던 3번 이후 테마는 같은 설비의 나무 가격을 기준으로 테마마다 10배
+  - 3번 테마 `13,000~22,500`, 4번 `130,000~225,000`, 이후 같은 비율로 증가
+  - 구매형이 아닌 전체 수집 보상 파츠는 0a 유지
+- 카페 테마 파츠 가격:
+  - 통나무 카페: 파츠당 `10a = 10,000`
+  - 모던 카페: 파츠당 `30a = 30,000`
+- 초기 도토리는 기존 플레이 흐름과 동일하게 150을 유지했다.
+- `render_game_to_text`에 테마별 최소·최대 가격 범위와 카페별 `partPrice`를 추가했다.
+- 검증:
+  - `THEME_CHICK_MILESTONES_OK total=11 thresholds=4/8/11`
+  - `CAFE_THEME_REWARDS_OK themes=2 installs=13 rewards=6 base=3 thresholds=0.3/0.7/1`
+  - `PROGRESSION_LOOP_OK`
+  - `CAFE_REGION_UNLOCK_OK recipes=3 region=1 installFlow=shared`
+  - `AREA_CONTEXT_MENUS_OK restaurant=restaurant cafe=cake`
+  - 기본 카페 설치 패널의 10a 표시·차감 확인
+  - 모던 카페 구매 버튼의 30a 표시·차감 확인
+  - 공식 게임 클라이언트 상태에서 초기 도토리 150a와 전체 가격 곡선 확인, 콘솔 오류 없음.

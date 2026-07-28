@@ -17,6 +17,11 @@ page.on("console", (message) => { if (message.type() === "error") errors.push(me
 page.on("pageerror", (error) => errors.push(String(error)));
 const state = () => page.evaluate(() => JSON.parse(window.render_game_to_text()));
 
+async function clickCanvas(x, y) {
+  const box = await page.locator("#game-canvas").boundingBox();
+  await page.mouse.click(box.x + x / 480 * box.width, box.y + y / 900 * box.height);
+}
+
 async function setOwnedRecipes(ids) {
   await page.evaluate((recipeIds) => {
     const key = "chick-bistro-planning-prototype-v2";
@@ -93,7 +98,7 @@ try {
   await page.locator('[data-screen="recipe"]').click();
   await page.locator('[data-tab="regions"]').click();
   const regionText = await page.locator("#menu-content").innerText();
-  if (!regionText.includes("카페 지역") || !regionText.includes("카페 확장 가능")) {
+  if (!regionText.includes("카페 지역") || !regionText.includes("확장 가능")) {
     throw new Error(`Recipe region card is not linked to Cafe: ${regionText}`);
   }
   await page.screenshot({ path: path.join(out, "03-recipe-region-open.png"), fullPage: true });
@@ -110,17 +115,40 @@ try {
   }
   await page.screenshot({ path: path.join(out, "04-cafe-opened.png"), fullPage: true });
 
+  await page.evaluate(() => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    saved.resources.acorns = 10000;
+    localStorage.setItem(key, JSON.stringify(saved));
+  });
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-world-area="cafe"]').click();
   current = await state();
   if (!current.cafeArea.unlocked || current.mode !== "cafe" || current.installCandidates.length === 0) {
     throw new Error(`Cafe expansion did not persist after reload: ${JSON.stringify(current.cafeArea)}`);
   }
+  const firstCafeCandidate = current.installCandidates[0];
+  const acornsBeforeCafeInstall = current.resources.acorns;
+  await clickCanvas(firstCafeCandidate.x, firstCafeCandidate.y);
+  if (!await page.locator("#install-panel").isVisible()
+    || await page.locator("#install-name").innerText() !== firstCafeCandidate.name
+    || (await page.locator("#install-cost").innerText()).trim() !== "10a") {
+    throw new Error("Cafe facility did not use the shared Restaurant install panel");
+  }
+  await page.screenshot({ path: path.join(out, "05-cafe-shared-install-panel.png"), fullPage: true });
+  await page.locator("#install-confirm-btn").click();
+  current = await state();
+  if (!current.cafeArea.installedPartIds.includes(firstCafeCandidate.id)
+    || current.installCandidates.some((candidate) => candidate.id === firstCafeCandidate.id)
+    || current.resources.acorns !== acornsBeforeCafeInstall - 10000) {
+    throw new Error(`Cafe facility installation did not complete through the shared flow: ${JSON.stringify(current.cafeArea)}`);
+  }
+  await page.screenshot({ path: path.join(out, "06-cafe-shared-install-complete.png"), fullPage: true });
 
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log("CAFE_REGION_UNLOCK_OK recipes=3 region=1");
+  console.log("CAFE_REGION_UNLOCK_OK recipes=3 region=1 installFlow=shared");
 } finally {
   await browser.close();
 }

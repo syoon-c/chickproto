@@ -51,13 +51,20 @@ try {
   if (current.progression.unlockedChickRoutes.some((route) => route.customerId === 10013)) {
     throw new Error("The Stone completion chick must remain locked before all facilities are installed");
   }
-  const woodPrices = await page.evaluate(async () => {
-    const source = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === 2);
+  const themePrices = await page.evaluate(async () => {
     const loaded = (await window.ChickData.loadTables()).restaurantThemes;
-    return source.map((row) => ({ raw: row.facilityPrice, expected: Math.max(1, Math.ceil(row.facilityPrice / 2)), loaded: loaded.find((item) => item.id === row.id)?.facilityPrice }));
+    const woodByType = new Map(loaded
+      .filter((row) => Number(row.facilityTheme) === 2 && Number(row.purchaseType) !== 2)
+      .map((row) => [Number(row.facilityType), Number(row.facilityPrice)]));
+    return loaded.filter((row) => Number(row.purchaseType) !== 2).map((row) => ({
+      themeId: Number(row.facilityTheme),
+      facilityType: Number(row.facilityType),
+      expected: window.CHICK_CONFIG.restaurantThemePartPrice(row.facilityTheme, woodByType.get(Number(row.facilityType))),
+      actual: Number(row.facilityPrice),
+    }));
   });
-  if (woodPrices.some((row) => row.loaded !== row.expected)) {
-    throw new Error(`Wood theme prices were not halved: ${JSON.stringify(woodPrices)}`);
+  if (themePrices.some((row) => row.actual !== row.expected)) {
+    throw new Error(`Restaurant theme prices do not follow the 10x curve: ${JSON.stringify(themePrices)}`);
   }
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
@@ -99,7 +106,7 @@ try {
   await page.locator('[data-action="theme-select"][data-id="2"]').click();
   await page.waitForTimeout(150);
   await page.locator("#menu-content").evaluate((element) => { element.scrollTop = 0; });
-  await page.locator(".game-frame").screenshot({ path: path.join(out, "00d-wood-half-prices.png") });
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "00d-theme-price-curve.png") });
   await page.locator('[data-action="theme-select"][data-id="1"]').click();
   await page.waitForFunction(() => [...document.images].every((image) => image.complete));
   await page.waitForTimeout(500);

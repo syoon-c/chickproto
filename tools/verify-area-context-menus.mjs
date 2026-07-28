@@ -50,6 +50,7 @@ try {
     };
     saved.cafeArea = { unlocked: true, expansionConfirmed: true };
     saved.cafeThemes.opened = [];
+    saved.resources.acorns = 50000;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
@@ -76,7 +77,24 @@ try {
     || menuText.includes("돌 테마") || await page.locator(".theme-area-switch").count()) {
     throw new Error(`Cafe theme menu mixed in Restaurant themes: ${menuText}`);
   }
+  if ((await page.locator(".feature-card .card-action").allTextContents()).some((label) => !label.includes("10a 구매"))) {
+    throw new Error("Log cafe parts must cost 10a");
+  }
+  await page.screenshot({ path: path.join(out, "03a-cafe-base-price.png"), fullPage: true });
+  await page.locator('[data-action="theme-select"][data-id="102"]').click();
+  if ((await page.locator(".feature-card .card-action").allTextContents()).some((label) => !label.includes("30a 구매"))) {
+    throw new Error("Modern cafe parts must cost 30a");
+  }
   await page.screenshot({ path: path.join(out, "03-cafe-theme-only.png"), fullPage: true });
+  const beforeModernPurchase = await state();
+  const modernBuyButton = page.locator('[data-action="buy-cafe-theme"]').first();
+  const modernPartId = Number(await modernBuyButton.getAttribute("data-id"));
+  await modernBuyButton.click();
+  current = await state();
+  if (!current.cafeArea.installedPartIds.includes(modernPartId)
+    || current.resources.acorns !== beforeModernPurchase.resources.acorns - 30000) {
+    throw new Error("Modern cafe part did not deduct 30a");
+  }
 
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";

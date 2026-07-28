@@ -12,6 +12,9 @@
       if (!rewardGroups.has(row.rewardId)) rewardGroups.set(row.rewardId, []);
       rewardGroups.get(row.rewardId).push(row);
     });
+    const woodThemePrices = new Map(raw.ThemeFacility
+      .filter((row) => row.areaType === 1 && Number(row.facilityTheme) === 2 && Number(row.purchaseType) !== 2)
+      .map((row) => [Number(row.facilityType), Math.max(1, Math.ceil(Number(row.facilityPrice) / 2))]));
 
     const availableMissionActions = new Set([1, 2, 3, 4, 6, 7, 10, 11, 12, 13, 14]);
     const recipes = raw.Recipe.map((row) => ({
@@ -42,9 +45,15 @@
       specialCustomers: raw.SpecialCustomer.filter((row) => row.areaType === 1),
       restaurantThemes: raw.ThemeFacility
         .filter((row) => row.areaType === 1 && Number(row.facilityTheme) <= 15)
-        .map((row) => Number(row.facilityTheme) === 2
-          ? { ...row, facilityPrice: Math.max(1, Math.ceil(Number(row.facilityPrice) / 2)) }
-          : row),
+        .map((row) => ({
+          ...row,
+          facilityPrice: Number(row.purchaseType) === 2
+            ? 0
+            : window.CHICK_CONFIG.restaurantThemePartPrice(
+              row.facilityTheme,
+              woodThemePrices.get(Number(row.facilityType)),
+            ),
+        })),
       cafeThemes: raw.ThemeFacility.filter((row) => row.areaType === 2),
       installs: raw.InstallFacility
         .filter((row) => row.areaType === 1)
@@ -52,7 +61,7 @@
         .sort((a, b) => a.sequence - b.sequence || a.id - b.id),
       cafeInstalls: raw.InstallFacility
         .filter((row) => row.areaType === 2)
-        .map((row) => ({ ...row, facilityPrice: Math.max(25, Math.ceil(Number(row.facilityPrice) * 0.25)) }))
+        .map((row) => ({ ...row, facilityPrice: window.CHICK_CONFIG.cafeThemeUnitPrice(101) }))
         .sort((a, b) => a.sequence - b.sequence || a.id - b.id),
     });
   }

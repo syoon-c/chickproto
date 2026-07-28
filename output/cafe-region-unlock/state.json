@@ -19,7 +19,7 @@
   "visibleThemeType": "cafe",
   "objective": "조명 설치하기",
   "resources": {
-    "acorns": 150,
+    "acorns": 0,
     "gems": 0,
     "ideas": 0,
     "stickers": 5
@@ -27,18 +27,9 @@
   "installedFacilityIds": [],
   "installCandidates": [
     {
-      "id": 101020,
-      "name": "카페 테이블",
-      "cost": 25,
-      "x": 155,
-      "y": 470,
-      "w": 104,
-      "h": 88
-    },
-    {
       "id": 101021,
       "name": "카페 테이블",
-      "cost": 25,
+      "cost": 10000,
       "x": 325,
       "y": 470,
       "w": 104,
@@ -47,11 +38,20 @@
     {
       "id": 101022,
       "name": "카페 테이블",
-      "cost": 25,
+      "cost": 10000,
       "x": 240,
       "y": 620,
       "w": 104,
       "h": 88
+    },
+    {
+      "id": 101023,
+      "name": "그네",
+      "cost": 10000,
+      "x": 80,
+      "y": 650,
+      "w": 82,
+      "h": 82
     }
   ],
   "cafeArea": {
@@ -63,7 +63,9 @@
     "discoveredRestaurantRecipeCount": 3,
     "activeThemeId": 101,
     "activeThemeName": "통나무 카페",
-    "installedPartIds": [],
+    "installedPartIds": [
+      101020
+    ],
     "bakingFacilityInstalled": false,
     "serviceReady": false,
     "continuedVisitChance": 0.8,
@@ -206,6 +208,68 @@
       0.7,
       1
     ],
+    "themePartPrices": {
+      "1": {
+        "min": 0,
+        "max": 0
+      },
+      "2": {
+        "min": 1300,
+        "max": 2250
+      },
+      "3": {
+        "min": 13000,
+        "max": 22500
+      },
+      "4": {
+        "min": 130000,
+        "max": 225000
+      },
+      "5": {
+        "min": 1300000,
+        "max": 2250000
+      },
+      "6": {
+        "min": 13000000,
+        "max": 22500000
+      },
+      "7": {
+        "min": 130000000,
+        "max": 225000000
+      },
+      "8": {
+        "min": 1300000000,
+        "max": 2250000000
+      },
+      "9": {
+        "min": 13000000000,
+        "max": 22500000000
+      },
+      "10": {
+        "min": 130000000000,
+        "max": 225000000000
+      },
+      "11": {
+        "min": 1300000000000,
+        "max": 2250000000000
+      },
+      "12": {
+        "min": 13000000000000,
+        "max": 22500000000000
+      },
+      "13": {
+        "min": 130000000000000,
+        "max": 225000000000000
+      },
+      "14": {
+        "min": 1300000000000000,
+        "max": 2250000000000000
+      },
+      "15": {
+        "min": 13000000000000000,
+        "max": 22500000000000000
+      }
+    },
     "guestGrades": [
       {
         "id": 1,
@@ -247,9 +311,10 @@
     ],
     "cafeThemes": {
       "101": {
-        "opened": 0,
+        "opened": 1,
         "total": 13,
-        "ratio": 0,
+        "ratio": 0.07692307692307693,
+        "partPrice": 10000,
         "rewards": [
           {
             "id": "cake_sheet_walnut",
@@ -281,6 +346,7 @@
         "opened": 0,
         "total": 13,
         "ratio": 0,
+        "partPrice": 30000,
         "rewards": [
           {
             "id": "cake_sheet_vanilla",

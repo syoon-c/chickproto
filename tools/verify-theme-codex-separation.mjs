@@ -24,6 +24,19 @@ try {
   page.once("dialog", (dialog) => dialog.accept());
   await page.locator("#reset-btn").click();
 
+  await page.locator('[data-screen="theme"]').click();
+  await page.locator('[data-action="theme-select"][data-id="6"]').click();
+  await page.waitForTimeout(200);
+  const lockedThemeText = await page.locator("#menu-content").innerText();
+  const previewNames = await page.locator(".theme-chick-chip b").allTextContents();
+  if (previewNames.length !== 3 || previewNames.some((name) => !name || name.includes("?"))) {
+    throw new Error(`Locked theme must preview three chick names: ${JSON.stringify(previewNames)}`);
+  }
+  if (!lockedThemeText.includes("잠김") || !lockedThemeText.includes("30%") || !lockedThemeText.includes("70%") || !lockedThemeText.includes("100%")) {
+    throw new Error(`Locked theme is missing progress milestones: ${lockedThemeText}`);
+  }
+  await page.screenshot({ path: path.join(out, "00-theme-locked-preview.png"), fullPage: true });
+
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
@@ -42,20 +55,22 @@ try {
   await page.locator('[data-action="theme-select"][data-id="6"]').click();
   await page.waitForTimeout(200);
   const themeText = await page.locator("#menu-content").innerText();
-  if (!themeText.includes("새로운 병아리 등장 완료") || !themeText.includes("상세 정보는 도감에서 확인")) {
-    throw new Error(`Theme page is missing the generic chick notice: ${themeText}`);
+  if (!themeText.includes("진척도") || !themeText.includes("30%") || !themeText.includes("70%") || !themeText.includes("100%")) {
+    throw new Error(`Theme page is missing purchase progress: ${themeText}`);
   }
   for (const route of campingRoutes) {
-    const privateThemeDetails = [
-      route.customerName,
+    if (!themeText.includes(route.customerName)) {
+      throw new Error(`Theme page is missing chick preview name for ${route.customerName}: ${themeText}`);
+    }
+    const codexOnlyDetails = [
       route.recipeName,
       ...route.rewardItems.map((item) => item.name),
     ].filter(Boolean);
-    if (privateThemeDetails.some((detail) => themeText.includes(detail))) {
-      throw new Error(`Theme page leaked chick detail for ${route.customerName}: ${themeText}`);
+    if (codexOnlyDetails.some((detail) => themeText.includes(detail))) {
+      throw new Error(`Theme page leaked codex-only detail for ${route.customerName}: ${themeText}`);
     }
   }
-  await page.screenshot({ path: path.join(out, "01-theme-generic-chicks.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "01-theme-chick-preview.png"), fullPage: true });
 
   await page.locator("#collection-btn").click();
   await page.waitForTimeout(200);

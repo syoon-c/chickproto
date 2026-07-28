@@ -59,8 +59,18 @@ const GUEST_GRADES = [
 const GUEST_INGREDIENT_DROP_CHANCE = 0.3;
 
 const CAFE_CAKE_MILESTONES = [0.3, 0.7, 1];
-const CAFE_THEME_PRICE_RATE = 0.25;
-const CAFE_THEME_MIN_PRICE = 25;
+const RESTAURANT_THEME_PRICE_MULTIPLIER = 10;
+const CAFE_THEME_PART_PRICES = { 101: 10000, 102: 30000 };
+
+function restaurantThemePartPrice(themeId, woodPartPrice) {
+  if (Number(themeId) <= 1) return 0;
+  return Math.round(Number(woodPartPrice || 0) * RESTAURANT_THEME_PRICE_MULTIPLIER ** (Number(themeId) - 2));
+}
+
+function cafeThemeUnitPrice(themeId) {
+  return CAFE_THEME_PART_PRICES[Number(themeId)] ?? CAFE_THEME_PART_PRICES[101];
+}
+
 const BASE_CAKE_INGREDIENTS = [
   { id: "cake_sheet_basic", type: "sheet", name: "기본 스펀지 시트", emoji: "🍰" },
   { id: "cake_cream_fresh", type: "cream", name: "생크림", emoji: "🧁" },
@@ -416,8 +426,10 @@ window.CHICK_CONFIG = {
   GUEST_GRADES,
   GUEST_INGREDIENT_DROP_CHANCE,
   CAFE_CAKE_MILESTONES,
-  CAFE_THEME_PRICE_RATE,
-  CAFE_THEME_MIN_PRICE,
+  RESTAURANT_THEME_PRICE_MULTIPLIER,
+  CAFE_THEME_PART_PRICES,
+  restaurantThemePartPrice,
+  cafeThemeUnitPrice,
   BASE_CAKE_INGREDIENTS,
   CAFE_THEME_NAMES,
   CAFE_THEME_CAKE_REWARDS,

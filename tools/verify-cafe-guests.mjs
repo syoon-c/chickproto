@@ -127,6 +127,49 @@ try {
       sale: current.cakeWorkshop.limitedSale,
     })}`);
   }
+  if (current.cafePayments[0].models !== 1) {
+    throw new Error(`First Cafe payment pile is malformed: ${JSON.stringify(current.cafePayments[0])}`);
+  }
+  await page.evaluate(() => window.advanceTime(12000));
+  await page.evaluate(() => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    saved.rng = 1;
+    saved.guests = [{
+      id: 88002,
+      customerId: 3,
+      commonId: 1001,
+      customerName: "기본 병아리",
+      state: "eating",
+      seatId: "restaurant-to-cafe-test-2",
+      tableId: 0,
+      x: 240,
+      y: 450,
+      targetX: 240,
+      targetY: 900,
+      recipeId: 1,
+      visitNumber: 2,
+      wait: 0,
+      stateTime: 7.1,
+      mood: "satisfied",
+      bob: 0,
+    }];
+    localStorage.setItem(key, JSON.stringify(saved));
+  });
+  await page.reload({ waitUntil: "load" });
+  await page.evaluate(() => window.advanceTime(4000));
+  await page.locator('[data-world-area="cafe"]').click();
+  await page.evaluate(() => window.advanceTime(14500));
+  current = await state();
+  if (current.metrics.cafeVisitors !== 2 || current.cafePayments.length !== 1
+    || current.cafePayments[0].models !== 2 || current.cafePayments[0].amount !== 250) {
+    throw new Error(`Cafe revenue did not merge into one Restaurant-style seat pile: ${JSON.stringify({
+      payments: current.cafePayments,
+      metrics: current.metrics,
+    })}`);
+  }
+  await page.screenshot({ path: path.join(out, "03-cafe-revenue-pile.png"), fullPage: true });
+
   const payment = current.cafePayments[0];
   const beforeAcorns = current.resources.acorns;
   await clickCanvas(payment.x, payment.y);
@@ -135,10 +178,10 @@ try {
     || current.metrics.cafeCollected !== payment.amount) {
     throw new Error(`Cafe payment collection failed: ${JSON.stringify(current.metrics)}`);
   }
-  await page.screenshot({ path: path.join(out, "03-cafe-sale-collected.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "04-cafe-sale-collected.png"), fullPage: true });
   await page.evaluate(() => window.advanceTime(30000));
   current = await state();
-  if (current.metrics.cafeVisitors !== 1 || current.cafeArea.queuedVisitors !== 0) {
+  if (current.metrics.cafeVisitors !== 2 || current.cafeArea.queuedVisitors !== 0) {
     throw new Error(`Cafe created an independent visitor: ${JSON.stringify({
       cafeArea: current.cafeArea,
       cafeGuests: current.cafeGuests,
@@ -149,7 +192,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log("CAFE_GUESTS_OK restaurantContinuation=80% cakeSale=1 independentVisitors=0");
+  console.log("CAFE_GUESTS_OK restaurantContinuation=80% revenuePile=2 payment=singleCollect independentVisitors=0");
 } finally {
   await browser.close();
 }

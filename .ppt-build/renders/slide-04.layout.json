@@ -1,0 +1,784 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/v3jejc",
+    "id": "v3jejc",
+    "slide": 4,
+    "layoutId": "516f81b8-86f5-4b45-a90e-e3428e5c3b3d",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "1d7fb567-fe4b-4d7a-a1ac-bc15c06780ce",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFDF7",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Malgun Gothic"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "516f81b8-86f5-4b45-a90e-e3428e5c3b3d",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "1d7fb567-fe4b-4d7a-a1ac-bc15c06780ce",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "1d7fb567-fe4b-4d7a-a1ac-bc15c06780ce",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5cn6tkzq",
+      "id": "1",
+      "name": "yellow-accent",
+      "bbox": [
+        42,
+        40,
+        76,
+        8
+      ],
+      "geometry": "rect",
+      "fillColor": "#F4C542",
+      "lineColor": "#F4C542",
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/i9cnyp0z",
+      "id": "2",
+      "name": "slide-4-title",
+      "bbox": [
+        42,
+        66,
+        1150,
+        72
+      ],
+      "geometry": "rect",
+      "text": "반복 루프에는 변화와 개연성이 필요합니다",
+      "textPreview": "반복 루프에는 변화와 개연성이 필요합니다",
+      "resolvedFontSize": 46,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 46,
+        "typeface": "Malgun Gothic",
+        "color": "#201D16",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "반복 루프에는 변화와 개연성이 필요합니다"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "반복 루프에는 변화와 개연성이 필요합니다",
+          "resolvedTextStyle": {
+            "fontSize": 46,
+            "typeface": "Malgun Gothic",
+            "color": "#201D16",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "반복 루프에는 변화와 개연성이 필요합니다",
+              "fontSize": 46,
+              "typeface": "Malgun Gothic",
+              "color": "#201D16",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ja5ora1k",
+      "id": "3",
+      "name": "page-4",
+      "bbox": [
+        1170,
+        664,
+        68,
+        24
+      ],
+      "geometry": "rect",
+      "text": "04",
+      "textPreview": "04",
+      "resolvedFontSize": 12,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 14,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "right",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 0.86,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "04"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "04",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "04",
+              "fontSize": 14,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wnu5wfit",
+      "id": "4",
+      "name": "problem-5-number",
+      "bbox": [
+        42,
+        190,
+        70,
+        44
+      ],
+      "geometry": "rect",
+      "text": "05",
+      "textPreview": "05",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Malgun Gothic",
+        "color": "#F4C542",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "05"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "05",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Malgun Gothic",
+            "color": "#F4C542",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "05",
+              "fontSize": 28,
+              "typeface": "Malgun Gothic",
+              "color": "#F4C542",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x836pkje",
+      "id": "5",
+      "name": "problem-5-title",
+      "bbox": [
+        116,
+        188,
+        481,
+        58
+      ],
+      "geometry": "rect",
+      "text": "반복 플레이가 지루해질 수 있음",
+      "textPreview": "반복 플레이가 지루해질 수 있음",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Malgun Gothic",
+        "color": "#201D16",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "반복 플레이가 지루해질 수 있음"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "반복 플레이가 지루해질 수 있음",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Malgun Gothic",
+            "color": "#201D16",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "반복 플레이가 지루해질 수 있음",
+              "fontSize": 30,
+              "typeface": "Malgun Gothic",
+              "color": "#201D16",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/alcnu503",
+      "id": "6",
+      "name": "problem-5-bullets",
+      "bbox": [
+        116,
+        262,
+        477,
+        338
+      ],
+      "geometry": "rect",
+      "text": "• 성장 루프는 명확하지만 동일 패턴이 계속 반복됨\n\n• 확장·돌발 이벤트로 루프 안팎의 변수 추가\n\n• 대기 시간 개입은 선택형으로 설계해 터치 피로 방지",
+      "textPreview": "• 성장 루프는 명확하지만 동일 패턴이 계속 반복됨 |  | • 확장·돌발 이벤트로 루프 안팎의 변수 추가 |  | • 대기 시간 개입은 선택형으로 설계해 터치 피로 방지",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 22,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 7,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• 성장 루프는 명확하지만 동일 패턴이 계속"
+          },
+          {
+            "index": 2,
+            "text": "반복됨"
+          },
+          {
+            "index": 3,
+            "text": ""
+          },
+          {
+            "index": 4,
+            "text": "• 확장·돌발 이벤트로 루프 안팎의 변수 추가"
+          },
+          {
+            "index": 5,
+            "text": ""
+          },
+          {
+            "index": 6,
+            "text": "• 대기 시간 개입은 선택형으로 설계해 터치"
+          },
+          {
+            "index": 7,
+            "text": "피로 방지"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "• 성장 루프는 명확하지만 동일 패턴이 계속 반복됨",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 성장 루프는 명확하지만 동일 패턴이 계속 반복됨",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "• 확장·돌발 이벤트로 루프 안팎의 변수 추가",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 확장·돌발 이벤트로 루프 안팎의 변수 추가",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 5,
+          "text": "• 대기 시간 개입은 선택형으로 설계해 터치 피로 방지",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 대기 시간 개입은 선택형으로 설계해 터치 피로 방지",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vmlona1o",
+      "id": "7",
+      "name": "center-rule-4",
+      "bbox": [
+        630,
+        188,
+        2,
+        414
+      ],
+      "geometry": "rect",
+      "fillColor": "#F5F0E3",
+      "lineColor": "#F5F0E3",
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/oju5svix",
+      "id": "8",
+      "name": "problem-6-number",
+      "bbox": [
+        670,
+        190,
+        70,
+        44
+      ],
+      "geometry": "rect",
+      "text": "06",
+      "textPreview": "06",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 28,
+        "typeface": "Malgun Gothic",
+        "color": "#F4C542",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "06"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "06",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "typeface": "Malgun Gothic",
+            "color": "#F4C542",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "06",
+              "fontSize": 28,
+              "typeface": "Malgun Gothic",
+              "color": "#F4C542",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9k36l0ji",
+      "id": "9",
+      "name": "problem-6-title",
+      "bbox": [
+        744,
+        188,
+        494,
+        58
+      ],
+      "geometry": "rect",
+      "text": "재료 획득 설정의 근거가 약함",
+      "textPreview": "재료 획득 설정의 근거가 약함",
+      "resolvedFontSize": 30,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 30,
+        "typeface": "Malgun Gothic",
+        "color": "#201D16",
+        "bold": true,
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "재료 획득 설정의 근거가 약함"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "재료 획득 설정의 근거가 약함",
+          "resolvedTextStyle": {
+            "fontSize": 30,
+            "typeface": "Malgun Gothic",
+            "color": "#201D16",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "재료 획득 설정의 근거가 약함",
+              "fontSize": 30,
+              "typeface": "Malgun Gothic",
+              "color": "#201D16",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lknm9kju",
+      "id": "10",
+      "name": "problem-6-bullets",
+      "bbox": [
+        744,
+        262,
+        490,
+        338
+      ],
+      "geometry": "rect",
+      "text": "• 손님 병아리가 재료를 두고 가는 이유가 불분명함\n\n• 캐릭터 외형·설정과 고유 재료를 연결\n\n• 드롭 빈도를 낮춰 화면 혼잡과 희소성을 함께 개선",
+      "textPreview": "• 손님 병아리가 재료를 두고 가는 이유가 불분명함 |  | • 캐릭터 외형·설정과 고유 재료를 연결 |  | • 드롭 빈도를 낮춰 화면 혼잡과 희소성을 함께 개선",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 22,
+        "typeface": "Malgun Gothic",
+        "color": "#6B6558",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "autoFit": "shrinkText",
+        "autoFitScale": 1,
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 7,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• 손님 병아리가 재료를 두고 가는 이유가"
+          },
+          {
+            "index": 2,
+            "text": "불분명함"
+          },
+          {
+            "index": 3,
+            "text": ""
+          },
+          {
+            "index": 4,
+            "text": "• 캐릭터 외형·설정과 고유 재료를 연결"
+          },
+          {
+            "index": 5,
+            "text": ""
+          },
+          {
+            "index": 6,
+            "text": "• 드롭 빈도를 낮춰 화면 혼잡과 희소성을 함께"
+          },
+          {
+            "index": 7,
+            "text": "개선"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "• 손님 병아리가 재료를 두고 가는 이유가 불분명함",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 손님 병아리가 재료를 두고 가는 이유가 불분명함",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "• 캐릭터 외형·설정과 고유 재료를 연결",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 캐릭터 외형·설정과 고유 재료를 연결",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 5,
+          "text": "• 드롭 빈도를 낮춰 화면 혼잡과 희소성을 함께 개선",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Malgun Gothic",
+            "color": "#6B6558",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• 드롭 빈도를 낮춰 화면 혼잡과 희소성을 함께 개선",
+              "fontSize": 22,
+              "typeface": "Malgun Gothic",
+              "color": "#6B6558",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

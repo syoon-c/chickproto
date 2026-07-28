@@ -56,11 +56,14 @@ try {
   }
   const afterInstall = await state();
   if (afterInstall.resources.acorns !== 100) throw new Error(`Core installation should leave 100 acorns, got ${afterInstall.resources.acorns}`);
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const loaded = await window.ChickData.loadTables();
+    const campingTable = loaded.restaurantThemes.find((row) => row.id === 6001);
     saved.ownedRecipes = { 1: { level: 1, stack: 0, codexClaimed: true } };
     saved.crafting = { autoEnabled: false, ingredients: {}, history: [] };
+    saved.resources.acorns = campingTable.facilityPrice;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
@@ -75,18 +78,22 @@ try {
   if (current.progression.activeThemeParts[1] !== 6001 || current.progression.activeThemeParts[2] !== 1002) {
     throw new Error("Buying the table theme part changed more than the table facility type");
   }
-  if (current.resources.acorns !== 0) throw new Error("First theme part was not affordable immediately after core installation");
+  if (current.resources.acorns !== 0) throw new Error("Camping theme part did not deduct its temporary price");
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(out, "01-theme-unlocks-chick.png"), fullPage: true });
   await page.locator("#menu-close-btn").click();
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(out, "01b-single-part-world.png"), fullPage: true });
 
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const loaded = await window.ChickData.loadTables();
+    const campingTotal = loaded.restaurantThemes
+      .filter((row) => row.facilityTheme === 6 && Number(row.purchaseType) !== 2)
+      .reduce((sum, row) => sum + Number(row.facilityPrice), 0);
     saved.installed = window.CHICK_TABLE_SOURCE.InstallFacility.filter((row) => row.areaType === 1).map((row) => row.id);
-    saved.resources.acorns = 2000;
+    saved.resources.acorns = campingTotal;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
@@ -103,14 +110,17 @@ try {
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(out, "01c-complete-theme-unlocks-chick.png"), fullPage: true });
   await page.locator("#menu-close-btn").click();
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const loaded = await window.ChickData.loadTables();
+    const italyTable = loaded.restaurantThemes.find((row) => row.id === 8001);
     const stoneIds = new Set(window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === 1).map((row) => row.id));
     saved.themes.opened = saved.themes.opened.filter((id) => !stoneIds.has(id));
     saved.installed = saved.installed.filter((id) => ![11, 19].includes(id));
     saved.crafting.ingredients[30007] = 1;
     saved.crafting.ingredients[30010] = 1;
+    saved.resources.acorns = italyTable.facilityPrice;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });

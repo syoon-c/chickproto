@@ -19,7 +19,7 @@
   "visibleThemeType": "cafe",
   "objective": "조명 설치하기",
   "resources": {
-    "acorns": 275,
+    "acorns": 400,
     "gems": 0,
     "ideas": 0,
     "stickers": 5
@@ -76,7 +76,7 @@
     "serviceReady": true,
     "continuedVisitChance": 0.8,
     "queuedVisitors": 0,
-    "totalVisitors": 1
+    "totalVisitors": 2
   },
   "cafeGuests": [],
   "cafePayments": [],
@@ -91,18 +91,7 @@
     "toppingCount": 0,
     "matchedRecipe": "cake_recipe_strawberry_fresh",
     "discoveredRecipeIds": [],
-    "limitedSale": {
-      "recipeId": "cafe-guest-test",
-      "name": "테스트 딸기 케이크",
-      "comboBonus": true,
-      "unitPrice": 100,
-      "remaining": 1,
-      "selection": {
-        "sheetId": "cake_sheet_basic",
-        "creamId": "cake_cream_fresh",
-        "toppingId": "cake_topping_strawberry"
-      }
-    }
+    "limitedSale": null
   },
   "mealDurationSeconds": 7,
   "promotion": {
@@ -116,6 +105,11 @@
   "ordersQueued": 0,
   "cooking": [],
   "payments": [
+    {
+      "x": 240,
+      "y": 500,
+      "amount": 66
+    },
     {
       "x": 240,
       "y": 500,
@@ -138,24 +132,40 @@
       ],
       "x": 258,
       "y": 392
+    },
+    {
+      "id": "ingredient-2",
+      "ingredientId": 30001,
+      "emoji": "🥬",
+      "grade": "첫 방문",
+      "totalCount": 1,
+      "items": [
+        {
+          "ingredientId": 30001,
+          "name": "양상추",
+          "count": 1
+        }
+      ],
+      "x": 258,
+      "y": 392
     }
   ],
   "tipbox": 0,
   "metrics": {
     "visitors": 0,
     "orders": 0,
-    "served": 1,
-    "collected": 125,
+    "served": 2,
+    "collected": 250,
     "angryLeaves": 0,
-    "cafeVisitors": 1,
-    "cafeContinuedVisitors": 1,
-    "cafeServed": 1,
-    "cafeCollected": 125,
-    "ingredientDropAttempts": 1,
+    "cafeVisitors": 2,
+    "cafeContinuedVisitors": 2,
+    "cafeServed": 2,
+    "cafeCollected": 250,
+    "ingredientDropAttempts": 2,
     "ingredientDropMisses": 0,
     "ingredientsFound": 0,
-    "giftBundles": 1,
-    "giftItems": 1,
+    "giftBundles": 2,
+    "giftItems": 2,
     "recipesCrafted": 0
   },
   "currentScreen": "restaurant",
