@@ -46,70 +46,101 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 
 .world-area { position: relative; width: 100%; aspect-ratio: 8 / 15; flex: 0 0 auto; overflow: hidden; background: #8ca662; }
 #game-canvas { display: block; width: 100%; height: 100%; }
-.world-area-switch {
+.world-area-navigation {
   position: absolute;
   z-index: 11;
+  inset: 0;
+  pointer-events: none;
+}
+.world-area-indicator {
+  position: absolute;
   top: 68px;
   left: 50%;
+  min-width: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transform: translateX(-50%);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3px;
-  width: 210px;
-  padding: 3px;
-  border: 2px solid rgba(91,58,28,.72);
+  padding: 6px 10px;
+  border: 2px solid rgba(91,58,28,.68);
   border-radius: 16px;
   background: rgba(255,249,225,.92);
   box-shadow: 0 4px 0 rgba(91,58,28,.18);
 }
-.world-area-switch button {
-  min-width: 0;
-  padding: 7px 9px;
-  border: 0;
-  border-radius: 11px;
-  background: transparent;
-  color: #76583d;
-  font-size: 11px;
-  font-weight: 900;
+.world-area-indicator strong { font-size: 11px; font-weight: 900; }
+.area-arrow {
+  position: absolute;
+  top: 45%;
+  width: 36px;
+  height: 36px;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  gap: 0;
+  transform: translateY(-50%);
+  padding: 0;
+  border: 2px solid rgba(91,58,28,.76);
+  border-radius: 50%;
+  background: rgba(255,249,225,.94);
+  box-shadow: 0 4px 0 rgba(91,58,28,.22);
+  color: #754a27;
+  pointer-events: auto;
   cursor: pointer;
 }
-.world-area-switch button.is-active { background: #f7c84e; color: #663a17; }
-.world-area-switch button:disabled { cursor: default; opacity: .52; filter: grayscale(.75); }
-.world-area-switch small { color: #a45b2c; font-size: 8px; }
+.area-arrow-left { left: 6px; }
+.area-arrow-right { right: 6px; }
+.area-arrow[hidden] { display: none; }
+.area-arrow:disabled { cursor: default; opacity: .58; filter: grayscale(.7); }
+.area-arrow span { font: 900 28px/24px sans-serif; }
+.area-arrow small {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  min-width: 34px;
+  transform: translateX(-50%);
+  padding: 2px 4px;
+  border-radius: 7px;
+  background: rgba(255,249,225,.94);
+  color: #95572c;
+  font-size: 7px;
+  font-weight: 900;
+  line-height: 1;
+}
+.area-arrow:active:not(:disabled) { transform: translateY(calc(-50% + 3px)); box-shadow: 0 1px 0 rgba(91,58,28,.22); }
+#game-canvas { touch-action: manipulation; }
 .cafe-expand-button {
   position: absolute;
   z-index: 12;
   left: 50%;
   top: 48%;
   transform: translate(-50%, -50%);
-  width: 230px;
+  width: 132px;
   display: grid;
-  grid-template-columns: 46px 1fr;
-  column-gap: 9px;
+  grid-template-columns: 28px 1fr;
+  column-gap: 5px;
   align-items: center;
-  padding: 13px 16px;
-  border: 3px solid #6d4527;
-  border-radius: 20px;
+  padding: 9px 10px;
+  border: 2px solid #6d4527;
+  border-radius: 15px;
   background: linear-gradient(180deg,#fff4b8,#f2c257);
   box-shadow: 0 7px 0 #9a632e, 0 14px 30px rgba(50,35,21,.32);
   cursor: pointer;
 }
 .cafe-expand-button[hidden] { display: none; }
 .cafe-expand-button:disabled { cursor: default; filter: grayscale(.72); opacity: .72; box-shadow: 0 3px 0 #84664f; }
-.cafe-expand-button > span { grid-row: 1 / 3; font-size: 36px; }
-.cafe-expand-button strong { text-align: left; font-size: 17px; }
-.cafe-expand-button small { text-align: left; color: #855a35; font-size: 10px; font-weight: 800; }
+.cafe-expand-button > span { font-size: 23px; }
+.cafe-expand-button strong { text-align: left; font-size: 13px; }
 .cafe-install-targets { position: absolute; z-index: 9; inset: 0; pointer-events: none; }
 .cafe-install-targets[hidden] { display: none; }
 .cafe-install-targets button {
   position: absolute;
-  width: 68px;
-  height: 76px;
+  width: 48px;
+  height: 54px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
   transform: translate(-50%, -50%);
   border: 0;
   border-radius: 18px;
@@ -119,8 +150,8 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
   pointer-events: auto;
 }
 .cafe-install-targets button > span {
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   border: 2px solid #7d5733;
@@ -128,16 +159,16 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
   background: #fff8d9;
   box-shadow: 0 3px 0 rgba(91,58,28,.23);
   color: #996229;
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 900;
 }
 .cafe-install-targets button > small {
-  min-width: 55px;
-  padding: 3px 7px;
+  min-width: 42px;
+  padding: 2px 4px;
   border-radius: 10px;
   background: rgba(61,43,29,.86);
   color: #fff7dc;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 900;
 }
 .cafe-install-targets button:hover > span { background: #ffe885; }
@@ -148,27 +179,25 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .cake-workshop-access {
   position: absolute;
   z-index: 12;
-  top: 224px;
-  right: 12px;
-  width: 138px;
-  min-height: 57px;
+  top: 116px;
+  right: 10px;
+  width: 92px;
+  min-height: 42px;
   display: grid;
-  grid-template-columns: 34px 1fr;
-  grid-template-rows: auto auto;
+  grid-template-columns: 24px 1fr;
   align-items: center;
   column-gap: 6px;
-  padding: 7px 9px;
+  padding: 6px 7px;
   border: 2px solid #72431e;
-  border-radius: 18px;
+  border-radius: 14px;
   background: linear-gradient(#ffe6a3,#f4a95e);
   box-shadow: 0 5px 0 #9d5a2c, 0 9px 18px rgba(74,44,18,.2);
   color: #61391f;
   cursor: pointer;
 }
 .cake-workshop-access[hidden] { display: none; }
-.cake-workshop-access > span { grid-row: 1 / 3; font-size: 30px; }
-.cake-workshop-access strong { align-self: end; font-size: 13px; line-height: 1.1; text-align: left; }
-.cake-workshop-access small { align-self: start; color: #8a5733; font-size: 9px; font-weight: 800; text-align: left; }
+.cake-workshop-access > span { font-size: 21px; }
+.cake-workshop-access strong { font-size: 11px; line-height: 1.1; text-align: left; }
 .cake-workshop-access:active { transform: translateY(3px); box-shadow: 0 2px 0 #9d5a2c; }
 
 .hud-top {
@@ -244,15 +273,15 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
   z-index: 12;
   right: 12px;
   bottom: 166px;
-  width: 142px;
-  min-height: 60px;
+  width: 92px;
+  min-height: 42px;
   display: grid;
-  grid-template-columns: 34px 1fr;
+  grid-template-columns: 24px 1fr;
   align-items: center;
   column-gap: 5px;
-  padding: 7px 10px 14px 7px;
+  padding: 6px 7px;
   border: 2px solid #72431e;
-  border-radius: 19px;
+  border-radius: 14px;
   background: linear-gradient(#ffe571, #f5a932);
   box-shadow: 0 5px 0 #9d541e, 0 9px 18px rgba(74, 44, 18, .2);
   cursor: pointer;
@@ -468,10 +497,9 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .promotion-button:not(:disabled):hover { filter: brightness(1.04); }
 .promotion-button:not(:disabled):active { transform: translateY(4px); box-shadow: 0 3px 0 #9d541e; }
 .promotion-button:disabled { cursor: default; filter: grayscale(.45); opacity: .72; }
-.promotion-icon { width: 34px; height: 34px; object-fit: contain; transform: rotate(-9deg); }
+.promotion-icon { width: 24px; height: 24px; object-fit: contain; transform: rotate(-9deg); }
 .promotion-copy { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
-.promotion-copy strong { font-size: 16px; line-height: 1.05; }
-.promotion-copy span { margin-top: 2px; font-size: 9px; font-weight: 800; color: #7d4c28; }
+.promotion-copy strong { font-size: 12px; line-height: 1.05; }
 .install-panel {
   position: absolute;
   z-index: 20;

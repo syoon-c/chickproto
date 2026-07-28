@@ -1,0 +1,563 @@
+{
+  "coordinateSystem": "canvas 480x900; origin top-left; x right; y down",
+  "mode": "cafe",
+  "worldNavigation": {
+    "areas": [
+      "restaurant",
+      "cafe"
+    ],
+    "current": "cafe",
+    "previous": "restaurant",
+    "next": null,
+    "methods": [
+      "edge-arrow"
+    ],
+    "cafeAccessible": true
+  },
+  "menuContext": "cafe",
+  "visibleRecipeType": "cake",
+  "visibleThemeType": "cafe",
+  "objective": "조명 설치하기",
+  "resources": {
+    "acorns": 275,
+    "gems": 0,
+    "ideas": 0,
+    "stickers": 5
+  },
+  "installedFacilityIds": [],
+  "installCandidates": [
+    {
+      "id": 101023,
+      "name": "그네",
+      "cost": 25,
+      "x": 80,
+      "y": 650,
+      "w": 82,
+      "h": 82
+    },
+    {
+      "id": 101027,
+      "name": "울타리",
+      "cost": 25,
+      "x": 66,
+      "y": 792,
+      "w": 100,
+      "h": 42
+    },
+    {
+      "id": 101028,
+      "name": "울타리",
+      "cost": 25,
+      "x": 414,
+      "y": 792,
+      "w": 100,
+      "h": 42
+    }
+  ],
+  "cafeArea": {
+    "unlocked": true,
+    "expansionConfirmed": true,
+    "expansionAvailable": true,
+    "requiredRecipeCount": 3,
+    "unlockedRecipeCount": 3,
+    "discoveredRestaurantRecipeCount": 3,
+    "activeThemeId": 101,
+    "activeThemeName": "통나무 카페",
+    "installedPartIds": [
+      101020,
+      101021,
+      101022,
+      101024,
+      101025,
+      101026,
+      101029
+    ],
+    "bakingFacilityInstalled": true,
+    "serviceReady": true,
+    "continuedVisitChance": 0.8,
+    "queuedVisitors": 0,
+    "totalVisitors": 1
+  },
+  "cafeGuests": [],
+  "cafePayments": [],
+  "cakeWorkshop": {
+    "freeCraftAvailable": true,
+    "totalCrafted": 0,
+    "selections": {
+      "sheetId": "cake_sheet_basic",
+      "creamId": "cake_cream_fresh",
+      "toppingId": "cake_topping_strawberry"
+    },
+    "toppingCount": 0,
+    "matchedRecipe": "cake_recipe_strawberry_fresh",
+    "discoveredRecipeIds": [],
+    "limitedSale": {
+      "recipeId": "cafe-guest-test",
+      "name": "테스트 딸기 케이크",
+      "comboBonus": true,
+      "unitPrice": 100,
+      "remaining": 1,
+      "selection": {
+        "sheetId": "cake_sheet_basic",
+        "creamId": "cake_cream_fresh",
+        "toppingId": "cake_topping_strawberry"
+      }
+    }
+  },
+  "mealDurationSeconds": 7,
+  "promotion": {
+    "progress": 0,
+    "queued": 0,
+    "totalClicks": 0,
+    "threshold": 1,
+    "enabled": false
+  },
+  "guests": [],
+  "ordersQueued": 0,
+  "cooking": [],
+  "payments": [
+    {
+      "x": 240,
+      "y": 500,
+      "amount": 66
+    }
+  ],
+  "ingredientDrops": [
+    {
+      "id": "ingredient-1",
+      "ingredientId": 30001,
+      "emoji": "🥬",
+      "grade": "첫 방문",
+      "totalCount": 1,
+      "items": [
+        {
+          "ingredientId": 30001,
+          "name": "양상추",
+          "count": 1
+        }
+      ],
+      "x": 258,
+      "y": 392
+    }
+  ],
+  "tipbox": 0,
+  "metrics": {
+    "visitors": 0,
+    "orders": 0,
+    "served": 1,
+    "collected": 125,
+    "angryLeaves": 0,
+    "cafeVisitors": 1,
+    "cafeContinuedVisitors": 1,
+    "cafeServed": 1,
+    "cafeCollected": 125,
+    "ingredientDropAttempts": 1,
+    "ingredientDropMisses": 0,
+    "ingredientsFound": 0,
+    "giftBundles": 1,
+    "giftItems": 1,
+    "recipesCrafted": 0
+  },
+  "currentScreen": "restaurant",
+  "recipes": {
+    "owned": 3,
+    "globalRevenueBonus": 0.1,
+    "craftable": [],
+    "craftCosts": {
+      "1": 3
+    },
+    "craftRequirements": {
+      "1": [
+        {
+          "ingredientId": 30001,
+          "name": "양상추",
+          "count": 3
+        }
+      ]
+    },
+    "levels": {
+      "1": 1,
+      "7": 1,
+      "10": 1
+    },
+    "prices": {
+      "1": 40,
+      "7": 90,
+      "10": 62
+    }
+  },
+  "progression": {
+    "unlockedThemes": [
+      1
+    ],
+    "activeThemeParts": {
+      "1": 1001,
+      "2": 1002,
+      "3": 1005,
+      "4": 1003,
+      "5": 1004,
+      "6": 1006,
+      "7": 1007,
+      "8": 1008,
+      "9": 1009,
+      "10": 1010,
+      "11": 1011,
+      "12": 1012,
+      "13": 1013
+    },
+    "unlockedCustomers": [
+      3
+    ],
+    "unlockedChickRoutes": [
+      {
+        "themeId": 1,
+        "slot": 0,
+        "customerId": 3,
+        "customerName": "기본 병아리",
+        "ingredientId": 30001,
+        "ingredientName": "양상추",
+        "rewardItems": [
+          {
+            "slot": "primary",
+            "ingredientId": 30001,
+            "name": "양상추"
+          },
+          {
+            "slot": "secondary",
+            "ingredientId": 30002,
+            "name": "토마토"
+          },
+          {
+            "slot": "rare",
+            "ingredientId": 30023,
+            "name": "모둠 채소"
+          }
+        ],
+        "recipeId": 1,
+        "recipeName": "샐러드",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30001,
+            "name": "양상추"
+          }
+        ]
+      }
+    ],
+    "themeChickThresholds": [
+      0.3,
+      0.7,
+      1
+    ],
+    "guestGrades": [
+      {
+        "id": 1,
+        "name": "첫 방문",
+        "minVisits": 1,
+        "primaryCount": 1,
+        "secondaryCount": 0,
+        "rareCount": 0
+      },
+      {
+        "id": 2,
+        "name": "단골",
+        "minVisits": 80,
+        "primaryCount": 2,
+        "secondaryCount": 0,
+        "rareCount": 0
+      },
+      {
+        "id": 3,
+        "name": "VIP",
+        "minVisits": 250,
+        "primaryCount": 2,
+        "secondaryCount": 1,
+        "rareCount": 0
+      },
+      {
+        "id": 4,
+        "name": "최고의 단골",
+        "minVisits": 700,
+        "primaryCount": 2,
+        "secondaryCount": 2,
+        "rareCount": 1
+      }
+    ],
+    "cafeCakeMilestones": [
+      0.3,
+      0.7,
+      1
+    ],
+    "cafeThemes": {
+      "101": {
+        "opened": 7,
+        "total": 13,
+        "ratio": 0.5384615384615384,
+        "rewards": [
+          {
+            "id": "cake_sheet_walnut",
+            "type": "sheet",
+            "name": "호두 시트",
+            "emoji": "🌰",
+            "threshold": 0.3,
+            "unlocked": true
+          },
+          {
+            "id": "cake_cream_maple",
+            "type": "cream",
+            "name": "메이플 크림",
+            "emoji": "🍯",
+            "threshold": 0.7,
+            "unlocked": false
+          },
+          {
+            "id": "cake_topping_acorn",
+            "type": "topping",
+            "name": "도토리 토핑",
+            "emoji": "🌰",
+            "threshold": 1,
+            "unlocked": false
+          }
+        ]
+      },
+      "102": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "rewards": [
+          {
+            "id": "cake_sheet_vanilla",
+            "type": "sheet",
+            "name": "바닐라 시트",
+            "emoji": "🍰",
+            "threshold": 0.3,
+            "unlocked": false
+          },
+          {
+            "id": "cake_cream_espresso",
+            "type": "cream",
+            "name": "에스프레소 크림",
+            "emoji": "☕",
+            "threshold": 0.7,
+            "unlocked": false
+          },
+          {
+            "id": "cake_topping_chocolate",
+            "type": "topping",
+            "name": "초콜릿 토핑",
+            "emoji": "🍫",
+            "threshold": 1,
+            "unlocked": false
+          }
+        ]
+      }
+    },
+    "cakeIngredients": [
+      {
+        "id": "cake_sheet_basic",
+        "type": "sheet",
+        "name": "기본 스펀지 시트",
+        "emoji": "🍰"
+      },
+      {
+        "id": "cake_cream_fresh",
+        "type": "cream",
+        "name": "생크림",
+        "emoji": "🧁"
+      },
+      {
+        "id": "cake_topping_strawberry",
+        "type": "topping",
+        "name": "딸기 토핑",
+        "emoji": "🍓"
+      },
+      {
+        "id": "cake_sheet_walnut",
+        "type": "sheet",
+        "name": "호두 시트",
+        "emoji": "🌰"
+      }
+    ],
+    "themeChickProgress": {
+      "1": {
+        "opened": 0,
+        "total": 18,
+        "ratio": 0,
+        "unlocked": [
+          3
+        ]
+      },
+      "2": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "3": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "4": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "5": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "6": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "7": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "8": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "9": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "10": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "11": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "12": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "13": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "14": {
+        "opened": 0,
+        "total": 11,
+        "ratio": 0,
+        "unlocked": []
+      },
+      "15": {
+        "opened": 0,
+        "total": 13,
+        "ratio": 0,
+        "unlocked": []
+      }
+    },
+    "ingredientDropChances": {
+      "30001": 0.3,
+      "30002": 0.3,
+      "30003": 0.3,
+      "30004": 0.3,
+      "30005": 0.3,
+      "30006": 0.3,
+      "30007": 0.3,
+      "30008": 0.3,
+      "30009": 0.3,
+      "30010": 0.3,
+      "30011": 0.3,
+      "30012": 0.3,
+      "30013": 0.3,
+      "30014": 0.3,
+      "30016": 0.3,
+      "30017": 0.3,
+      "30018": 0.3,
+      "30019": 0.3,
+      "30020": 0.3,
+      "30021": 0.3,
+      "30022": 0.3,
+      "30023": 0.3,
+      "30024": 0.3,
+      "30025": 0.3,
+      "30026": 0.3,
+      "30027": 0.3,
+      "30028": 0.3,
+      "30029": 0.3,
+      "30030": 0.3,
+      "30031": 0.3,
+      "30032": 0.3,
+      "30033": 0.3,
+      "30034": 0.3,
+      "30035": 0.3,
+      "30036": 0.3,
+      "30037": 0.3,
+      "30038": 0.3
+    },
+    "ingredientDropRule": {
+      "overallChance": 0.3,
+      "ingredientTypesOnSuccess": 1,
+      "grades": [
+        {
+          "minVisits": 1,
+          "primaryCount": 1,
+          "secondaryCount": 0,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 80,
+          "primaryCount": 2,
+          "secondaryCount": 0,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 250,
+          "primaryCount": 2,
+          "secondaryCount": 1,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 700,
+          "primaryCount": 2,
+          "secondaryCount": 2,
+          "rareCount": 1
+        }
+      ]
+    },
+    "ingredients": {},
+    "autoCraft": "click-to-craft-one",
+    "craftedRecipes": [],
+    "unlockedRegions": [
+      1
+    ]
+  },
+  "missions": {
+    "mainGroup": 1,
+    "rewardReady": true,
+    "dailyClaimed": 0
+  },
+  "collection": {
+    "customers": 0,
+    "specialCustomers": 0,
+    "performers": 0,
+    "customerGrades": {}
+  },
+  "specialCustomers": [],
+  "selectedInstallId": null
+}

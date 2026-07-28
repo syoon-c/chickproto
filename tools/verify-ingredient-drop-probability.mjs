@@ -37,7 +37,7 @@ async function runVisitGroup(visits, expectedCountsByIngredientId) {
       recipeId: 1,
       visitNumber: visitCount,
       wait: 0,
-      stateTime: 3.3,
+      stateTime: 7.1,
       mood: "satisfied",
       bob: 0,
     }));

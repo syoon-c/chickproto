@@ -5,6 +5,7 @@ const GAME_W = 480;
 const GAME_H = 900;
 const FIXED_DT = 1 / 60;
 const SAVE_KEY = "chick-bistro-planning-prototype-v2";
+const GUEST_MEAL_DURATION_SECONDS = 7;
 
 const RECIPE_NAMES = [
   "샐러드", "샌드위치", "핫도그", "수프", "꼬치구이", "김밥", "피자", "볶음밥", "햄버거", "웨지감자",
@@ -401,6 +402,7 @@ window.CHICK_CONFIG = {
   GAME_H,
   FIXED_DT,
   SAVE_KEY,
+  GUEST_MEAL_DURATION_SECONDS,
   FACILITY_META,
   facilityPlacement,
   cafeFacilityPlacement,

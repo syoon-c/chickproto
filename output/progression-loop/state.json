@@ -1,6 +1,19 @@
 {
   "coordinateSystem": "canvas 480x900; origin top-left; x right; y down",
   "mode": "restaurant",
+  "worldNavigation": {
+    "areas": [
+      "restaurant",
+      "cafe"
+    ],
+    "current": "restaurant",
+    "previous": null,
+    "next": "cafe",
+    "methods": [
+      "edge-arrow"
+    ],
+    "cafeAccessible": true
+  },
   "menuContext": "restaurant",
   "visibleRecipeType": "restaurant",
   "visibleThemeType": "restaurant",
@@ -60,8 +73,14 @@
     "activeThemeId": 101,
     "activeThemeName": "통나무 카페",
     "installedPartIds": [],
-    "bakingFacilityInstalled": false
+    "bakingFacilityInstalled": false,
+    "serviceReady": false,
+    "continuedVisitChance": 0.8,
+    "queuedVisitors": 0,
+    "totalVisitors": 0
   },
+  "cafeGuests": [],
+  "cafePayments": [],
   "cakeWorkshop": {
     "freeCraftAvailable": true,
     "totalCrafted": 0,
@@ -75,6 +94,7 @@
     "discoveredRecipeIds": [],
     "limitedSale": null
   },
+  "mealDurationSeconds": 7,
   "promotion": {
     "progress": 0,
     "queued": 0,
@@ -94,6 +114,10 @@
     "served": 0,
     "collected": 0,
     "angryLeaves": 0,
+    "cafeVisitors": 0,
+    "cafeContinuedVisitors": 0,
+    "cafeServed": 0,
+    "cafeCollected": 0,
     "ingredientDropAttempts": 0,
     "ingredientDropMisses": 0,
     "ingredientsFound": 0,
@@ -355,34 +379,26 @@
       },
       {
         "id": 2,
-        "name": "낯익은 손님",
-        "minVisits": 20,
+        "name": "단골",
+        "minVisits": 80,
         "primaryCount": 2,
         "secondaryCount": 0,
         "rareCount": 0
       },
       {
         "id": 3,
-        "name": "단골",
-        "minVisits": 80,
+        "name": "VIP",
+        "minVisits": 250,
         "primaryCount": 2,
         "secondaryCount": 1,
         "rareCount": 0
       },
       {
         "id": 4,
-        "name": "VIP",
-        "minVisits": 250,
-        "primaryCount": 3,
-        "secondaryCount": 1,
-        "rareCount": 0
-      },
-      {
-        "id": 5,
         "name": "최고의 단골",
         "minVisits": 700,
-        "primaryCount": 3,
-        "secondaryCount": 1,
+        "primaryCount": 2,
+        "secondaryCount": 2,
         "rareCount": 1
       }
     ],
@@ -623,27 +639,21 @@
           "rareCount": 0
         },
         {
-          "minVisits": 20,
+          "minVisits": 80,
           "primaryCount": 2,
           "secondaryCount": 0,
           "rareCount": 0
         },
         {
-          "minVisits": 80,
+          "minVisits": 250,
           "primaryCount": 2,
           "secondaryCount": 1,
           "rareCount": 0
         },
         {
-          "minVisits": 250,
-          "primaryCount": 3,
-          "secondaryCount": 1,
-          "rareCount": 0
-        },
-        {
           "minVisits": 700,
-          "primaryCount": 3,
-          "secondaryCount": 1,
+          "primaryCount": 2,
+          "secondaryCount": 2,
           "rareCount": 1
         }
       ]

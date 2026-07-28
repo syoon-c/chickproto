@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리 — 기획 검증 프로토타입</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-    <link rel="stylesheet" href="styles.css?v=20260727-drop30" />
+    <link rel="stylesheet" href="styles.css?v=20260728-arrow-only" />
   </head>
   <body>
     <main class="app-shell">
@@ -14,21 +14,27 @@
         <div class="world-area">
           <canvas id="game-canvas" width="480" height="900" aria-label="레스토랑"></canvas>
 
-          <div id="world-area-switch" class="world-area-switch" aria-label="공간 이동">
-            <button type="button" data-world-area="restaurant" class="is-active">레스토랑</button>
-            <button type="button" data-world-area="cafe">카페 <small id="cafe-lock-badge">잠김</small></button>
+          <div id="world-area-switch" class="world-area-navigation" aria-label="이어진 구역 이동">
+            <button type="button" data-world-area="restaurant" class="area-arrow area-arrow-left" aria-label="왼쪽 레스토랑 구역으로 이동" hidden>
+              <span>‹</span>
+            </button>
+            <div class="world-area-indicator" aria-live="polite">
+              <strong id="world-area-name">레스토랑</strong>
+            </div>
+            <button type="button" data-world-area="cafe" class="area-arrow area-arrow-right" aria-label="오른쪽 카페 구역으로 이동">
+              <span>›</span><small id="cafe-lock-badge">잠김</small>
+            </button>
           </div>
 
           <button id="cafe-expand-btn" class="cafe-expand-button" type="button" hidden>
             <span>🌳</span>
-            <strong>카페 구역 확장</strong>
-            <small id="cafe-expand-status">레시피 3개 해금 필요</small>
+            <strong>카페 확장</strong>
           </button>
 
           <div id="cafe-install-targets" class="cafe-install-targets" aria-label="카페 설치 지점" hidden></div>
 
           <button id="cake-workshop-btn" class="cake-workshop-access" type="button" hidden>
-            <span>🎂</span><strong>케이크 만들기</strong><small>카페 레시피</small>
+            <span>🎂</span><strong>케이크</strong>
           </button>
 
         <header class="hud-top" aria-label="보유 재화">
@@ -52,7 +58,6 @@
           <img class="promotion-icon" src="assets/ui/common/icon_promotion.png" alt="" />
           <span class="promotion-copy">
             <strong>홍보하기</strong>
-            <span id="promotion-status">시설을 먼저 설치해 주세요</span>
           </span>
         </button>
 
@@ -93,8 +98,8 @@
     </main>
 
     <script src="data/runtime-tables.js?v=20260727-drop30"></script>
-    <script src="src/game-config.js?v=20260727-drop-quantity-v3"></script>
+    <script src="src/game-config.js?v=20260728-arrow-only"></script>
     <script src="src/data-loader.js?v=20260727-drop30"></script>
-    <script src="game.js?v=20260727-drop-quantity-v3"></script>
+    <script src="game.js?v=20260728-arrow-only"></script>
   </body>
 </html>

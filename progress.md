@@ -745,3 +745,55 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
   - `BALANCE_ITEMS_OK`
   - `THEME_CODEX_SEPARATION_OK chicks=3`
   - 공식 클라이언트 상태에 네 단계만 출력되며 신규 콘솔 오류 없음.
+
+## 2026-07-28 식사 7초·연결 구역 이동·카페 손님 이용
+
+- 레스토랑과 카페 병아리의 실제 취식 시간을 3.2초에서 7초로 늘렸다.
+- 상단 레스토랑/카페 탭을 제거하고 현재 구역명과 2개 구역 위치 점으로 교체했다.
+- 레스토랑 오른쪽과 카페 왼쪽에 구역 이동 화살표를 추가했다.
+- 필드를 왼쪽으로 드래그하면 카페, 카페에서 오른쪽으로 드래그하면 레스토랑으로 이동한다.
+- 드래그 중에는 현재 구역과 다음 구역을 한 캔버스에 나란히 그려 실제로 이어진 공간처럼 보이게 했다.
+- 레시피 3개 전에는 카페 화살표가 `🔒 n/3`으로 잠기며 기존 카페 해금 조건은 유지된다.
+- 카페에 카페 테이블과 카운터를 설치하면 자동 영업이 시작된다.
+- 카페 병아리 흐름:
+  - 출구 쪽에서 입장
+  - 카운터에서 음료/케이크 주문
+  - 빈 카페 테이블에 착석
+  - 7초 동안 이용
+  - 퇴식구를 거쳐 출구로 퇴장
+  - 테이블에 카페 매출을 남기며 직접 눌러 회수
+- 케이크가 진열 중이면 카페 손님이 우선 구매하고 한정 판매 수량과 매출에 반영된다.
+- 상태 출력에 `worldNavigation`, `mealDurationSeconds`, `cafeGuests`, `cafePayments`, 카페 영업 준비/다음 방문 정보를 추가했다.
+- 검증:
+  - `AREA_SWIPE_AND_MEAL_TIME_OK duration=7 arrows=ok swipe=restaurant<->cafe`
+  - `CAFE_GUESTS_OK autoVisit=1 cakeSale=1 payment=collected`
+  - `CAKE_WORKSHOP_OK recipes=5 saleRemaining=4`
+  - `CAFE_REGION_UNLOCK_OK recipes=3 region=1`
+  - `AREA_CONTEXT_MENUS_OK restaurant=restaurant cafe=cake`
+  - `PROGRESSION_LOOP_OK`
+  - `FILE_OPEN_CORE_LOOP_OK`
+  - `INGREDIENT_DROP_30_PERCENT_QUANTITY_OK`
+  - 드래그 중 연결 화면, 카페 입장, 케이크 이용, 퇴식·매출 회수 화면을 직접 확인.
+  - 공식 클라이언트 상태 `mealDurationSeconds=7`, 이동 방식 `edge-arrow/horizontal-drag`, 신규 콘솔 오류 없음.
+
+## 2026-07-28 화살표 전용 구역 이동·레스토랑 손님의 카페 연계
+
+- 카페 배경을 레스토랑과 같은 필드 배경으로 통일했다.
+- 캔버스 가로 드래그 구역 이동을 제거하고 좌우 가장자리의 작은 화살표로만 이동하도록 변경했다.
+- 홍보, 카페 확장, 케이크 버튼과 카페 설치 지점을 축소하고 긴 보조 설명을 제거했다.
+- 카페 화면의 상태 카드는 테마 이름만 표시하며, 케이크 버튼은 설비와 겹치지 않는 상단 여백으로 이동했다.
+- 카페의 10초 간격 독립 손님 생성을 제거했다.
+- 카페 테이블과 카운터가 준비된 경우, 레스토랑 식사를 마친 손님에게 80% 확률로 카페 계속 이용 여부를 결정한다.
+- 선택된 손님은 레스토랑 출구까지 이동한 후 동일한 손님 ID·외형 정보로 카페에 입장한다. 빈자리가 없으면 카페 대기열에서 기다린다.
+- 레스토랑에서는 한정 케이크를 구매하지 않으며, 케이크 판매와 카페 매출은 실제 카페 이용 중에만 발생한다.
+- 상태 출력의 구역 이동 방식은 `edge-arrow`만 제공하고, 카페 계속 이용 확률 `0.8`과 대기 인원을 추가했다.
+- 검증:
+  - `AREA_ARROW_AND_MEAL_TIME_OK duration=7 arrows=ok drag=disabled`
+  - `CAFE_GUESTS_OK restaurantContinuation=80% cakeSale=1 independentVisitors=0`
+  - `CAKE_WORKSHOP_OK recipes=5 saleRemaining=5`
+  - `CAFE_REGION_UNLOCK_OK recipes=3 region=1`
+  - `AREA_CONTEXT_MENUS_OK restaurant=restaurant cafe=cake`
+  - `PROGRESSION_LOOP_OK`
+  - `DRAG_SCROLL_OK horizontal=0->357 vertical=0->506`
+  - `FILE_OPEN_CORE_LOOP_OK`
+  - 레스토랑/카페 화면 캡처에서 동일 배경, 한 줄 기능 제목, 화살표·버튼·설비 비겹침을 확인했다.

@@ -65,7 +65,7 @@ try {
   if (!await page.locator('[data-world-area="cafe"]').isDisabled()) {
     throw new Error("Cafe area button must remain disabled before three restaurant recipes");
   }
-  if ((await page.locator("#cafe-lock-badge").innerText()).trim() !== "2/3") {
+  if (!(await page.locator("#cafe-lock-badge").innerText()).includes("2/3")) {
     throw new Error(`Cafe lock badge did not show recipe progress: ${await page.locator("#cafe-lock-badge").innerText()}`);
   }
   await page.screenshot({ path: path.join(out, "01-two-recipes-locked.png"), fullPage: true });
@@ -84,7 +84,7 @@ try {
   if (await page.locator("#cafe-expand-btn").isDisabled()) {
     throw new Error("Cafe expansion button did not activate at three recipes");
   }
-  if (!(await page.locator("#cafe-lock-badge").innerText()).includes("확장 가능")) {
+  if (!(await page.locator("#cafe-lock-badge").innerText()).includes("확장")) {
     throw new Error("Cafe lock badge did not change to expansion available");
   }
   await page.screenshot({ path: path.join(out, "02-three-recipes-ready.png"), fullPage: true });

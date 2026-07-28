@@ -8,7 +8,7 @@ const codexHome = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
 const playwrightUrl = pathToFileURL(path.join(codexHome, "node_modules", "playwright", "index.mjs")).href;
 const { chromium } = await import(playwrightUrl);
 
-const outputDir = path.join(root, "output", "file-open-verified");
+const outputDir = path.join(root, "output", "file-open-verified-v7");
 fs.mkdirSync(outputDir, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -64,7 +64,7 @@ try {
   const guest = awaiting.guests.find((item) => item.state === "awaiting_order");
   if (!guest) throw new Error("Awaiting-order guest not found");
   await clickCanvas(guest.x, guest.y - 40);
-  await page.evaluate(() => window.advanceTime(7500));
+  await page.evaluate(() => window.advanceTime(12000));
   const paymentState = await readState();
   const payment = paymentState.payments[0];
   if (!payment) throw new Error("Payment not found after meal");

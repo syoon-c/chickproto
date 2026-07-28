@@ -131,7 +131,7 @@ try {
       targetY: 900,
       recipeId: 1,
       wait: 0,
-      stateTime: 3.3,
+      stateTime: 7.1,
       mood: "satisfied",
       bob: 0,
     }];
@@ -140,11 +140,11 @@ try {
   await page.reload({ waitUntil: "load" });
   await page.evaluate(() => window.advanceTime(34));
   state = await gameState();
-  if (state.cakeWorkshop.limitedSale?.remaining !== 4
-    || state.guests[0]?.cakePurchase !== "호두 모카 케이크"
+  if (state.cakeWorkshop.limitedSale?.remaining !== 5
+    || state.guests[0]?.cakePurchase
     || !state.payments.length
-    || state.payments[0].amount < 248) {
-    throw new Error(`Customer did not prioritize the limited cake: ${JSON.stringify({
+    || state.payments[0].amount >= 248) {
+    throw new Error(`Restaurant meal incorrectly consumed the Cafe-only cake sale: ${JSON.stringify({
       sale: state.cakeWorkshop.limitedSale,
       guest: state.guests[0],
       payment: state.payments[0],
