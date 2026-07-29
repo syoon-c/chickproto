@@ -56,172 +56,14 @@ const GUEST_GRADES = [
   { id: 3, name: "VIP", minVisits: 250, primaryCount: 2, secondaryCount: 1, rareCount: 0 },
   { id: 4, name: "최고의 단골", minVisits: 700, primaryCount: 2, secondaryCount: 2, rareCount: 1 },
 ];
-const GUEST_INGREDIENT_DROP_CHANCE = 0.3;
+const GUEST_INGREDIENT_DROP_CHANCE = 0.08;
 
-const CAFE_CAKE_MILESTONES = [0.3, 0.7, 1];
 const RESTAURANT_THEME_PRICE_MULTIPLIER = 10;
-const CAFE_THEME_PART_PRICES = { 101: 10000, 102: 30000 };
 
 function restaurantThemePartPrice(themeId, woodPartPrice) {
   if (Number(themeId) <= 1) return 0;
   return Math.round(Number(woodPartPrice || 0) * RESTAURANT_THEME_PRICE_MULTIPLIER ** (Number(themeId) - 2));
 }
-
-function cafeThemeUnitPrice(themeId) {
-  return CAFE_THEME_PART_PRICES[Number(themeId)] ?? CAFE_THEME_PART_PRICES[101];
-}
-
-const BASE_CAKE_INGREDIENTS = [
-  { id: "cake_sheet_basic", type: "sheet", name: "기본 스펀지 시트", emoji: "🍰" },
-  { id: "cake_cream_fresh", type: "cream", name: "생크림", emoji: "🧁" },
-  { id: "cake_topping_strawberry", type: "topping", name: "딸기 토핑", emoji: "🍓" },
-];
-const LEGACY_CAFE_THEME_CAKE_REWARDS = {
-  1: [
-    { id: "cake_sheet_plain", type: "sheet", name: "담백한 시트", emoji: "🍰" },
-    { id: "cake_cream_milk", type: "cream", name: "우유 크림", emoji: "🥛" },
-    { id: "cake_topping_eggshell", type: "topping", name: "알껍질 토핑", emoji: "🥚" },
-  ],
-  2: [
-    { id: "cake_sheet_walnut", type: "sheet", name: "호두 시트", emoji: "🌰" },
-    { id: "cake_cream_maple", type: "cream", name: "메이플 크림", emoji: "🍯" },
-    { id: "cake_topping_acorn", type: "topping", name: "도토리 토핑", emoji: "🌰" },
-  ],
-  3: [
-    { id: "cake_sheet_matcha", type: "sheet", name: "말차 시트", emoji: "🍵" },
-    { id: "cake_cream_herb", type: "cream", name: "허브 크림", emoji: "🌿" },
-    { id: "cake_topping_leaf", type: "topping", name: "나뭇잎 토핑", emoji: "🍃" },
-  ],
-  4: [
-    { id: "cake_sheet_yogurt", type: "sheet", name: "요거트 시트", emoji: "🥛" },
-    { id: "cake_cream_blueberry", type: "cream", name: "블루베리 크림", emoji: "🫐" },
-    { id: "cake_topping_cloud", type: "topping", name: "구름 토핑", emoji: "☁️" },
-  ],
-  5: [
-    { id: "cake_sheet_pistachio", type: "sheet", name: "피스타치오 시트", emoji: "🌰" },
-    { id: "cake_cream_strawberry", type: "cream", name: "딸기 크림", emoji: "🍓" },
-    { id: "cake_topping_flower", type: "topping", name: "꽃 토핑", emoji: "🌸" },
-  ],
-  6: [
-    { id: "cake_sheet_sweetpotato", type: "sheet", name: "고구마 시트", emoji: "🍠" },
-    { id: "cake_cream_roasted", type: "cream", name: "구운 크림", emoji: "🔥" },
-    { id: "cake_topping_marshmallow", type: "topping", name: "마시멜로 토핑", emoji: "☁️" },
-  ],
-  7: [
-    { id: "cake_sheet_cookie", type: "sheet", name: "쿠키 시트", emoji: "🍪" },
-    { id: "cake_cream_soda", type: "cream", name: "소다 크림", emoji: "🥤" },
-    { id: "cake_topping_polkadot", type: "topping", name: "땡땡이 캔디", emoji: "🍬" },
-  ],
-  8: [
-    { id: "cake_sheet_coffee", type: "sheet", name: "커피 시트", emoji: "☕" },
-    { id: "cake_cream_mascarpone", type: "cream", name: "마스카포네 크림", emoji: "🧀" },
-    { id: "cake_topping_cocoa", type: "topping", name: "코코아 토핑", emoji: "🍫" },
-  ],
-  9: [
-    { id: "cake_sheet_cherry", type: "sheet", name: "체리 시트", emoji: "🍒" },
-    { id: "cake_cream_cherryblossom", type: "cream", name: "벚꽃 크림", emoji: "🌸" },
-    { id: "cake_topping_petals", type: "topping", name: "꽃잎 토핑", emoji: "🌸" },
-  ],
-  10: [
-    { id: "cake_sheet_brioche", type: "sheet", name: "브리오슈 시트", emoji: "🍞" },
-    { id: "cake_cream_butter", type: "cream", name: "버터 크림", emoji: "🧈" },
-    { id: "cake_topping_toast", type: "topping", name: "토스트 토핑", emoji: "🍞" },
-  ],
-  11: [
-    { id: "cake_sheet_egg", type: "sheet", name: "달걀 시트", emoji: "🥚" },
-    { id: "cake_cream_custard", type: "cream", name: "커스터드 크림", emoji: "🍮" },
-    { id: "cake_topping_chick", type: "topping", name: "병아리 토핑", emoji: "🐥" },
-  ],
-  12: [
-    { id: "cake_sheet_mocha", type: "sheet", name: "모카 시트", emoji: "☕" },
-    { id: "cake_cream_condensedmilk", type: "cream", name: "연유 크림", emoji: "🥛" },
-    { id: "cake_topping_document", type: "topping", name: "서류 토핑", emoji: "📄" },
-  ],
-  13: [
-    { id: "cake_sheet_blackcocoa", type: "sheet", name: "블랙코코아 시트", emoji: "🍫" },
-    { id: "cake_cream_purple", type: "cream", name: "보라빛 크림", emoji: "🫐" },
-    { id: "cake_topping_potion", type: "topping", name: "포션 토핑", emoji: "🧪" },
-  ],
-  14: [
-    { id: "cake_sheet_banana", type: "sheet", name: "바나나 시트", emoji: "🍌" },
-    { id: "cake_cream_bathmilk", type: "cream", name: "목욕 우유 크림", emoji: "🥛" },
-    { id: "cake_topping_bathbasket", type: "topping", name: "목욕 바구니 토핑", emoji: "🧺" },
-  ],
-  15: [
-    { id: "cake_sheet_chocolate", type: "sheet", name: "초콜릿 시트", emoji: "🍫" },
-    { id: "cake_cream_galaxy", type: "cream", name: "은하수 크림", emoji: "🌌" },
-    { id: "cake_topping_star", type: "topping", name: "별 토핑", emoji: "⭐" },
-  ],
-};
-
-const CAFE_THEME_NAMES = {
-  101: "통나무 카페",
-  102: "모던 카페",
-};
-
-const CAFE_THEME_CAKE_REWARDS = {
-  101: [
-    { id: "cake_sheet_walnut", type: "sheet", name: "호두 시트", emoji: "🌰" },
-    { id: "cake_cream_maple", type: "cream", name: "메이플 크림", emoji: "🍯" },
-    { id: "cake_topping_acorn", type: "topping", name: "도토리 토핑", emoji: "🌰" },
-  ],
-  102: [
-    { id: "cake_sheet_vanilla", type: "sheet", name: "바닐라 시트", emoji: "🍰" },
-    { id: "cake_cream_espresso", type: "cream", name: "에스프레소 크림", emoji: "☕" },
-    { id: "cake_topping_chocolate", type: "topping", name: "초콜릿 토핑", emoji: "🍫" },
-  ],
-};
-
-const CAKE_BASE_PRICE = 80;
-const CAKE_SECOND_CRAFT_IDEA_COST = 5;
-const CAKE_SECOND_CRAFT_GEM_COST = 1;
-const CAKE_RECIPES = [
-  {
-    id: "cake_recipe_strawberry_fresh",
-    name: "딸기 생크림 케이크",
-    sheetId: "cake_sheet_basic",
-    creamId: "cake_cream_fresh",
-    toppingId: "cake_topping_strawberry",
-    priceMultiplier: 2,
-    saleCount: 5,
-  },
-  {
-    id: "cake_recipe_forest_acorn",
-    name: "숲속 도토리 케이크",
-    sheetId: "cake_sheet_walnut",
-    creamId: "cake_cream_maple",
-    toppingId: "cake_topping_acorn",
-    priceMultiplier: 2.6,
-    saleCount: 5,
-  },
-  {
-    id: "cake_recipe_mocha_chocolate",
-    name: "모카 초콜릿 케이크",
-    sheetId: "cake_sheet_vanilla",
-    creamId: "cake_cream_espresso",
-    toppingId: "cake_topping_chocolate",
-    priceMultiplier: 2.8,
-    saleCount: 5,
-  },
-  {
-    id: "cake_recipe_walnut_mocha",
-    name: "호두 모카 케이크",
-    sheetId: "cake_sheet_walnut",
-    creamId: "cake_cream_espresso",
-    toppingId: "cake_topping_chocolate",
-    priceMultiplier: 3.1,
-    saleCount: 5,
-  },
-  {
-    id: "cake_recipe_maple_strawberry",
-    name: "메이플 딸기 케이크",
-    sheetId: "cake_sheet_vanilla",
-    creamId: "cake_cream_maple",
-    toppingId: "cake_topping_strawberry",
-    priceMultiplier: 2.7,
-    saleCount: 5,
-  },
-];
 
 const GAME_INGREDIENTS = {
   lettuce: { id: 30001, name: "양상추", emoji: "🥬" }, tomato: { id: 30002, name: "토마토", emoji: "🍅" },
@@ -319,10 +161,6 @@ function allThemeChickMilestones() {
   return Object.keys(THEME_NAMES).flatMap((themeId) => themeChickMilestones(Number(themeId)));
 }
 
-const REGION_UNLOCKS = [
-  { id: 1, name: "카페 지역", recipeCount: 3, area: "cafe" },
-];
-
 function recipeName(id) { return RECIPE_NAMES[id - 1] || `메뉴 ${id}`; }
 function recipeIcon(id) {
   const slug = RECIPE_ICON_SLUGS[id - 1] || "salad";
@@ -344,25 +182,12 @@ const FACILITY_META = {
   12: { key: "tree", name: "나무", description: "식당 외곽을 꾸미는 테마 장식이에요.", icon: "assets/ui/facility/icon_facility_1_tree_stone.png" },
   13: { key: "base", name: "바닥", description: "식당 전체의 바닥 테마예요.", icon: "assets/ui/facility/icon_facility_1_base_stone.png" },
   14: { key: "mailbox", name: "우체통", description: "확인하지 않은 우편을 알려 주는 설비예요.", icon: "assets/ui/facility/icon_facility_1_mailbox_none.png" },
-  15: { key: "cafetable", name: "카페 테이블", description: "손님 두 마리가 음료를 마실 수 있는 카페 좌석이에요.", icon: "assets/ui/facility2/icon_facility_2_cafetable_log.png" },
-  16: { key: "swing", name: "그네", description: "주문을 기다리는 손님이 잠시 이용하는 카페 놀이 시설이에요.", icon: "assets/ui/facility2/icon_facility_2_swing_log.png" },
-  17: { key: "cafecounter", name: "카페 카운터", description: "손님의 음료 주문을 받고 준비하는 핵심 설비예요.", icon: "assets/ui/facility2/icon_facility_2_cafecounter_log.png" },
-  18: { key: "cakeshelf", name: "케이크 진열대", description: "카페의 케이크와 디저트를 진열하는 설비예요.", icon: "assets/ui/facility2/icon_facility_2_cakeshelf_log.png" },
-  19: { key: "trayreturn", name: "반납대", description: "손님이 사용한 컵과 트레이를 반납하는 설비예요.", icon: "assets/ui/facility2/icon_facility_2_trayreturn_log.png" },
-  20: { key: "cafedeco", name: "카페 장식", description: "카페 공간의 분위기를 채우는 전용 장식이에요.", icon: "assets/ui/facility2/icon_facility_2_cafedeco_log.png" },
-  21: { key: "exit", name: "카페 출구", description: "음료를 받은 손님이 카페를 나가는 출구예요.", icon: "assets/ui/facility2/icon_facility_2_exit_log.png" },
 };
 
 function themeFacilityIcon(row) {
   const key = FACILITY_META[row.facilityType]?.key || "table";
   const slug = THEME_SLUGS[row.facilityTheme] || "stone";
   return `assets/ui/facility/icon_facility_1_${key}_${slug}.png`;
-}
-
-function cafeThemeFacilityIcon(row) {
-  const key = FACILITY_META[row.facilityType]?.key || "cafetable";
-  const slug = Number(row.facilityTheme) === 102 ? "modern" : "log";
-  return `assets/ui/facility2/icon_facility_2_${key}_${slug}.png`;
 }
 
 const TABLE_POSITIONS = [{ x: 240, y: 430 }, { x: 135, y: 550 }, { x: 345, y: 550 }, { x: 240, y: 670 }];
@@ -384,21 +209,6 @@ function facilityPlacement(row) {
   return { x: 240, y: 450, w: 80, h: 80 };
 }
 
-const CAFE_TABLE_POSITIONS = [{ x: 155, y: 470 }, { x: 325, y: 470 }, { x: 240, y: 620 }];
-
-function cafeFacilityPlacement(row) {
-  if (row.facilityType === 15) return { ...CAFE_TABLE_POSITIONS[row.facilityGroup - 1], w: 104, h: 88 };
-  if (row.facilityType === 16) return { x: 80, y: 650, w: 82, h: 82 };
-  if (row.facilityType === 17) return { x: 240, y: 245, w: 118, h: 92 };
-  if (row.facilityType === 18) return { x: 355, y: 285, w: 82, h: 82 };
-  if (row.facilityType === 19) return { x: 105, y: 300, w: 82, h: 82 };
-  if (row.facilityType === 20) return { x: 395, y: 675, w: 76, h: 76 };
-  if (row.facilityType === 21) return { x: 240, y: 820, w: 96, h: 88 };
-  if (row.facilityType === 11) return { x: row.facilityGroup === 2 ? 414 : 66, y: 792, w: 100, h: 42 };
-  if (row.facilityType === 10) return { x: row.facilityGroup === 2 ? 404 : 76, y: 145, w: 62, h: 76 };
-  return { x: 240, y: 450, w: 80, h: 80 };
-}
-
 function seatPositions(tableRow) {
   const p = facilityPlacement(tableRow);
   return [
@@ -415,7 +225,6 @@ window.CHICK_CONFIG = {
   GUEST_MEAL_DURATION_SECONDS,
   FACILITY_META,
   facilityPlacement,
-  cafeFacilityPlacement,
   seatPositions,
   recipeName,
   recipeIcon,
@@ -425,22 +234,10 @@ window.CHICK_CONFIG = {
   THEME_CHICK_THRESHOLDS,
   GUEST_GRADES,
   GUEST_INGREDIENT_DROP_CHANCE,
-  CAFE_CAKE_MILESTONES,
   RESTAURANT_THEME_PRICE_MULTIPLIER,
-  CAFE_THEME_PART_PRICES,
   restaurantThemePartPrice,
-  cafeThemeUnitPrice,
-  BASE_CAKE_INGREDIENTS,
-  CAFE_THEME_NAMES,
-  CAFE_THEME_CAKE_REWARDS,
-  CAKE_BASE_PRICE,
-  CAKE_SECOND_CRAFT_IDEA_COST,
-  CAKE_SECOND_CRAFT_GEM_COST,
-  CAKE_RECIPES,
   themeChickMilestones,
   allThemeChickMilestones,
-  REGION_UNLOCKS,
   themeFacilityIcon,
-  cafeThemeFacilityIcon,
 };
 })();

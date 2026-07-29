@@ -30,7 +30,7 @@ async function install(name) {
 }
 
 async function serveAndCollect(expectedCustomerId = 3) {
-  for (let attempt = 0; attempt < 60; attempt += 1) {
+  for (let attempt = 0; attempt < 150; attempt += 1) {
     for (let i = 0; i < 5; i += 1) await page.locator("#promotion-btn").click();
     await page.evaluate(() => window.advanceTime(4000));
     const waiting = (await state()).guests.find((guest) => guest.state === "awaiting_order");
@@ -49,7 +49,7 @@ async function serveAndCollect(expectedCustomerId = 3) {
     await clickCanvas(drop.x, drop.y);
     return;
   }
-  throw new Error("Base chick did not drop lettuce within 60 visits");
+  throw new Error("Base chick did not drop lettuce within 150 visits");
 }
 
 try {
@@ -68,8 +68,8 @@ try {
   current = await state();
   if (current.resources.acorns !== 100) throw new Error(`Core installation should leave 100 acorns, got ${current.resources.acorns}`);
   if (current.recipes.prices[1] !== 40) throw new Error(`Salad price should be 40, got ${current.recipes.prices[1]}`);
-  if (Object.values(current.progression.ingredientDropChances).some((chance) => chance !== 0.3)) {
-    throw new Error(`Guest ingredient drop chance should be 30%: ${JSON.stringify(current.progression.ingredientDropChances)}`);
+  if (Object.values(current.progression.ingredientDropChances).some((chance) => chance !== 0.08)) {
+    throw new Error(`Guest ingredient drop chance should be 8%: ${JSON.stringify(current.progression.ingredientDropChances)}`);
   }
 
   await page.evaluate(() => {
@@ -89,16 +89,24 @@ try {
   await page.evaluate(() => window.advanceTime(12000));
   current = await state();
   if (current.progression.ingredients[30001]) throw new Error("Lettuce entered inventory before field collection");
-  if (current.ingredientDrops.length !== 1 || current.ingredientDrops[0].emoji !== "🥬"
-    || current.ingredientDrops[0].totalCount !== 1 || current.ingredientDrops[0].items[0].count !== 1) {
-    throw new Error(`First-visit lettuce gift is incorrect: ${JSON.stringify(current.ingredientDrops)}`);
+  if (current.ingredientDrops.length) {
+    if (current.ingredientDrops.length !== 1 || current.ingredientDrops[0].emoji !== "🥬"
+      || current.ingredientDrops[0].totalCount !== 1 || current.ingredientDrops[0].items[0].count !== 1) {
+      throw new Error(`First-visit lettuce gift is incorrect: ${JSON.stringify(current.ingredientDrops)}`);
+    }
+    await page.screenshot({ path: path.join(out, "01-lettuce-field-drop.png"), fullPage: true });
+    await clickCanvas(current.ingredientDrops[0].x, current.ingredientDrops[0].y);
   }
-  if (current.metrics.ingredientDropAttempts !== 1 || current.metrics.ingredientDropMisses !== 0) throw new Error("Thirty-percent drop counters are incorrect for the seeded hit");
-  await page.screenshot({ path: path.join(out, "01-lettuce-field-drop.png"), fullPage: true });
-  await clickCanvas(current.ingredientDrops[0].x, current.ingredientDrops[0].y);
+  if (current.metrics.ingredientDropAttempts !== 1
+    || current.metrics.ingredientDropMisses + current.ingredientDrops.length !== 1) {
+    throw new Error("Eight-percent drop counters are incorrect for the first visit");
+  }
 
-  await serveAndCollect();
-  await serveAndCollect();
+  current = await state();
+  while (Number(current.progression.ingredients[30001] || 0) < 3) {
+    await serveAndCollect();
+    current = await state();
+  }
   current = await state();
   if (current.progression.ingredients[30001] !== 3) throw new Error(`Collected lettuce should be 3, got ${current.progression.ingredients[30001]}`);
 

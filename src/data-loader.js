@@ -2,10 +2,16 @@
   "use strict";
 
   function loadTables() {
-    const raw = window.CHICK_TABLE_SOURCE;
-    if (!raw) {
+    const source = window.CHICK_TABLE_SOURCE;
+    if (!source) {
       throw new Error("브라우저용 테이블 데이터가 없습니다. runtime-tables.js를 다시 생성해 주세요.");
     }
+    const raw = Object.fromEntries(Object.entries(source).map(([tableName, rows]) => [
+      tableName,
+      Array.isArray(rows)
+        ? rows.filter((row) => row?.areaType == null || Number(row.areaType) === 1)
+        : rows,
+    ]));
 
     const rewardGroups = new Map();
     raw.RewardGroup.forEach((row) => {
@@ -54,14 +60,9 @@
               woodThemePrices.get(Number(row.facilityType)),
             ),
         })),
-      cafeThemes: raw.ThemeFacility.filter((row) => row.areaType === 2),
       installs: raw.InstallFacility
         .filter((row) => row.areaType === 1)
         .map((row) => ({ ...row, facilityPrice: Math.max(1, Math.ceil(Number(row.facilityPrice) / 2)) }))
-        .sort((a, b) => a.sequence - b.sequence || a.id - b.id),
-      cafeInstalls: raw.InstallFacility
-        .filter((row) => row.areaType === 2)
-        .map((row) => ({ ...row, facilityPrice: window.CHICK_CONFIG.cafeThemeUnitPrice(101) }))
         .sort((a, b) => a.sequence - b.sequence || a.id - b.id),
     });
   }

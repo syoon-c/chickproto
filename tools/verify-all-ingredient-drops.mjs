@@ -36,7 +36,7 @@ try {
   await page.locator("#reset-btn").click();
 
   for (const route of routes) {
-    await page.evaluate(({ themeId }) => {
+    await page.evaluate(({ themeId, customerId }) => {
       const key = "chick-bistro-planning-prototype-v2";
       const saved = JSON.parse(localStorage.getItem(key));
       saved.rng = 1;
@@ -49,7 +49,25 @@ try {
         ? themeRows.map((row) => row.id)
         : themeRows.slice(0, Math.ceil(themeRows.length * .3)).map((row) => row.id);
       saved.themes.unlockedThemeIds = [themeId];
-      saved.guests = [];
+      saved.guests = Array.from({ length: 150 }, (_, index) => ({
+        id: 70000 + index,
+        customerId,
+        commonId: 1001,
+        customerName: "재료 드랍 검증 병아리",
+        state: "eating",
+        seatId: `all-drop-${themeId}-${index}`,
+        tableId: 0,
+        x: 45 + (index % 8) * 55,
+        y: 170 + Math.floor(index / 8) * 28,
+        targetX: 240,
+        targetY: 900,
+        recipeId: 1,
+        visitNumber: 1,
+        wait: 0,
+        stateTime: 7.1,
+        mood: "satisfied",
+        bob: 0,
+      }));
       saved.orders = [];
       saved.cooking = [];
       saved.payments = [];
@@ -61,22 +79,8 @@ try {
       localStorage.setItem(key, JSON.stringify(saved));
     }, route);
     await page.reload({ waitUntil: "load" });
-
-    let drop = null;
-    for (let attempt = 0; attempt < 150 && !drop; attempt += 1) {
-      for (let i = 0; i < 5; i += 1) await page.locator("#promotion-btn").click();
-      await page.evaluate(() => window.advanceTime(4000));
-      const waiting = (await state()).guests.find((guest) => guest.state === "awaiting_order");
-      if (!waiting) continue;
-      const targetCustomer = waiting.customerId === route.customerId;
-      await clickCanvas(waiting.x, waiting.y - 40);
-      await page.evaluate(() => window.advanceTime(12000));
-      const drops = (await state()).ingredientDrops;
-      drop = targetCustomer ? drops.find((item) => item.ingredientId === route.ingredientId) || null : null;
-      if (!drop) {
-        for (const item of drops) await clickCanvas(item.x, item.y);
-      }
-    }
+    await page.evaluate(() => window.advanceTime(34));
+    const drop = (await state()).ingredientDrops.find((item) => item.ingredientId === route.ingredientId) || null;
     if (!drop || drop.ingredientId !== route.ingredientId || drop.emoji !== route.emoji) {
       throw new Error(`Wrong ${route.name} field drop: ${JSON.stringify(drop)}`);
     }

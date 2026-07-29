@@ -1,34 +1,34 @@
 {
-  "configuredChance": 0.3,
+  "configuredChance": 0.08,
   "first": {
-    "hits": 31,
-    "misses": 89,
-    "rate": 0.25833333333333336,
+    "hits": 54,
+    "misses": 546,
+    "rate": 0.09,
     "counts": {
       "30001": 1
     }
   },
   "regular": {
-    "hits": 27,
-    "misses": 93,
-    "rate": 0.225,
+    "hits": 49,
+    "misses": 551,
+    "rate": 0.08166666666666667,
     "counts": {
       "30001": 2
     }
   },
   "vip": {
-    "hits": 39,
-    "misses": 81,
-    "rate": 0.325,
+    "hits": 52,
+    "misses": 548,
+    "rate": 0.08666666666666667,
     "counts": {
       "30001": 2,
       "30002": 1
     }
   },
   "best": {
-    "hits": 40,
-    "misses": 80,
-    "rate": 0.3333333333333333,
+    "hits": 63,
+    "misses": 537,
+    "rate": 0.105,
     "counts": {
       "30001": 2,
       "30002": 2,

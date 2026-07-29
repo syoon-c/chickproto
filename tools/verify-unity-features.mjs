@@ -73,7 +73,6 @@ try {
   await page.locator('[data-action="craft-recipe"][data-id="1"]').click();
   const crafted = await state();
   if (crafted.recipes.owned !== 1 || crafted.recipes.levels[1] !== 2 || crafted.progression.ingredients[30001] !== 0) throw new Error("Base salad upgrade failed");
-  if (crafted.progression.unlockedRegions.length !== 0) throw new Error("Region unlocked before three recipes were owned");
   await page.screenshot({ path: path.join(out, "03-research-upgrade.png"), fullPage: true });
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")));
   if (saved.ownedRecipes[1]?.level !== 2 || saved.metrics.recipesCrafted !== 1) throw new Error("Crafted recipe state mismatch");
@@ -81,7 +80,7 @@ try {
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const current = JSON.parse(localStorage.getItem(key));
-    current.resources.acorns = 10000;
+    current.resources.acorns = 100000000;
     current.resources.stickers = 5;
     current.installed = [...new Set([...current.installed, 10])];
     current.performance.cooldown = 0;

@@ -14,27 +14,6 @@
         <div class="world-area">
           <canvas id="game-canvas" width="480" height="900" aria-label="레스토랑"></canvas>
 
-          <div id="world-area-switch" class="world-area-navigation" aria-label="이어진 구역 이동">
-            <button type="button" data-world-area="restaurant" class="area-arrow area-arrow-left" aria-label="왼쪽 레스토랑 구역으로 이동" hidden>
-              <span>‹</span>
-            </button>
-            <div class="world-area-indicator" aria-live="polite">
-              <strong id="world-area-name">레스토랑</strong>
-            </div>
-            <button type="button" data-world-area="cafe" class="area-arrow area-arrow-right" aria-label="오른쪽 카페 구역으로 이동">
-              <span>›</span><small id="cafe-lock-badge">잠김</small>
-            </button>
-          </div>
-
-          <button id="cafe-expand-btn" class="cafe-expand-button" type="button" hidden>
-            <span>🌳</span>
-            <strong>카페 확장</strong>
-          </button>
-
-          <button id="cake-workshop-btn" class="cake-workshop-access" type="button" hidden>
-            <span>🎂</span><strong>케이크</strong>
-          </button>
-
         <header class="hud-top" aria-label="보유 재화">
           <div class="currency-pill primary">
             <img src="assets/ui/currency/icon_currency_001.png" alt="도토리" />
@@ -95,9 +74,9 @@
       </section>
     </main>
 
-    <script src="data/runtime-tables.js?v=20260727-drop30"></script>
-    <script src="src/game-config.js?v=20260728-theme-prices-corrected"></script>
-    <script src="src/data-loader.js?v=20260728-theme-prices-corrected"></script>
-    <script src="game.js?v=20260728-theme-prices-corrected"></script>
+    <script src="data/runtime-tables.js?v=20260729-restaurant-only"></script>
+    <script src="src/game-config.js?v=20260729-restaurant-only"></script>
+    <script src="src/data-loader.js?v=20260729-restaurant-only"></script>
+    <script src="game.js?v=20260729-restaurant-only"></script>
   </body>
 </html>

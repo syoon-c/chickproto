@@ -1,6 +1,9 @@
 {
   "coordinateSystem": "canvas 480x900; origin top-left; x right; y down",
   "mode": "restaurant",
+  "menuContext": "restaurant",
+  "visibleRecipeType": "restaurant",
+  "visibleThemeType": "restaurant",
   "objective": "손님의 주문 말풍선 누르기",
   "resources": {
     "acorns": 100000,
@@ -46,11 +49,12 @@
       "h": 42
     }
   ],
+  "mealDurationSeconds": 7,
   "promotion": {
     "progress": 0,
-    "queued": 0,
+    "queued": 3,
     "totalClicks": 5,
-    "threshold": 5,
+    "threshold": 1,
     "enabled": true
   },
   "guests": [
@@ -64,9 +68,63 @@
       "y": 432,
       "recipeId": 1,
       "recipeName": "샐러드",
-      "wait": 0.7,
+      "wait": 0.8,
+      "mealDuration": 7,
+      "mealElapsed": null,
+      "mealRemaining": null,
       "mood": "normal",
       "dropIngredient": 30001,
+      "guestGrade": "첫 방문",
+      "visits": 1,
+      "rewardItems": [
+        {
+          "ingredientId": 30001,
+          "name": "양상추"
+        },
+        {
+          "ingredientId": 30002,
+          "name": "토마토"
+        },
+        {
+          "ingredientId": 30023,
+          "name": "모둠 채소"
+        }
+      ],
+      "themeId": 1,
+      "chickSlot": 0
+    },
+    {
+      "id": 2,
+      "customerId": 3,
+      "customerName": "기본 병아리",
+      "icon": "assets/ui/chick/icon_chick_001.png",
+      "state": "awaiting_order",
+      "x": 292,
+      "y": 432,
+      "recipeId": 1,
+      "recipeName": "샐러드",
+      "wait": 0.8,
+      "mealDuration": 7,
+      "mealElapsed": null,
+      "mealRemaining": null,
+      "mood": "normal",
+      "dropIngredient": 30001,
+      "guestGrade": "첫 방문",
+      "visits": 2,
+      "rewardItems": [
+        {
+          "ingredientId": 30001,
+          "name": "양상추"
+        },
+        {
+          "ingredientId": 30002,
+          "name": "토마토"
+        },
+        {
+          "ingredientId": 30023,
+          "name": "모둠 채소"
+        }
+      ],
       "themeId": 1,
       "chickSlot": 0
     }
@@ -77,7 +135,7 @@
   "ingredientDrops": [],
   "tipbox": 100,
   "metrics": {
-    "visitors": 1,
+    "visitors": 2,
     "orders": 0,
     "served": 0,
     "collected": 0,
@@ -85,6 +143,8 @@
     "ingredientDropAttempts": 0,
     "ingredientDropMisses": 0,
     "ingredientsFound": 0,
+    "giftBundles": 0,
+    "giftItems": 0,
     "recipesCrafted": 1
   },
   "currentScreen": "restaurant",
@@ -138,8 +198,26 @@
         "themeId": 1,
         "slot": 0,
         "customerId": 3,
+        "customerName": "기본 병아리",
         "ingredientId": 30001,
         "ingredientName": "양상추",
+        "rewardItems": [
+          {
+            "slot": "primary",
+            "ingredientId": 30001,
+            "name": "양상추"
+          },
+          {
+            "slot": "secondary",
+            "ingredientId": 30002,
+            "name": "토마토"
+          },
+          {
+            "slot": "rare",
+            "ingredientId": 30023,
+            "name": "모둠 채소"
+          }
+        ],
         "recipeId": 1,
         "recipeName": "샐러드",
         "recipeIngredients": [
@@ -154,6 +232,102 @@
       0.3,
       0.7,
       1
+    ],
+    "themePartPrices": {
+      "1": {
+        "min": 0,
+        "max": 0
+      },
+      "2": {
+        "min": 1300,
+        "max": 2250
+      },
+      "3": {
+        "min": 13000,
+        "max": 22500
+      },
+      "4": {
+        "min": 130000,
+        "max": 225000
+      },
+      "5": {
+        "min": 1300000,
+        "max": 2250000
+      },
+      "6": {
+        "min": 13000000,
+        "max": 22500000
+      },
+      "7": {
+        "min": 130000000,
+        "max": 225000000
+      },
+      "8": {
+        "min": 1300000000,
+        "max": 2250000000
+      },
+      "9": {
+        "min": 13000000000,
+        "max": 22500000000
+      },
+      "10": {
+        "min": 130000000000,
+        "max": 225000000000
+      },
+      "11": {
+        "min": 1300000000000,
+        "max": 2250000000000
+      },
+      "12": {
+        "min": 13000000000000,
+        "max": 22500000000000
+      },
+      "13": {
+        "min": 130000000000000,
+        "max": 225000000000000
+      },
+      "14": {
+        "min": 1300000000000000,
+        "max": 2250000000000000
+      },
+      "15": {
+        "min": 13000000000000000,
+        "max": 22500000000000000
+      }
+    },
+    "guestGrades": [
+      {
+        "id": 1,
+        "name": "첫 방문",
+        "minVisits": 1,
+        "primaryCount": 1,
+        "secondaryCount": 0,
+        "rareCount": 0
+      },
+      {
+        "id": 2,
+        "name": "단골",
+        "minVisits": 80,
+        "primaryCount": 2,
+        "secondaryCount": 0,
+        "rareCount": 0
+      },
+      {
+        "id": 3,
+        "name": "VIP",
+        "minVisits": 250,
+        "primaryCount": 2,
+        "secondaryCount": 1,
+        "rareCount": 0
+      },
+      {
+        "id": 4,
+        "name": "최고의 단골",
+        "minVisits": 700,
+        "primaryCount": 2,
+        "secondaryCount": 2,
+        "rareCount": 1
+      }
     ],
     "themeChickProgress": {
       "1": {
@@ -250,43 +424,73 @@
       }
     },
     "ingredientDropChances": {
-      "30001": 0.5,
-      "30002": 0.5,
-      "30003": 0.5,
-      "30004": 0.5,
-      "30005": 0.5,
-      "30006": 0.5,
-      "30007": 0.5,
-      "30008": 0.5,
-      "30009": 0.5,
-      "30010": 0.5,
-      "30011": 0.5,
-      "30012": 0.5,
-      "30013": 0.5,
-      "30014": 0.5,
-      "30016": 0.5,
-      "30017": 0.5,
-      "30018": 0.5,
-      "30019": 0.5,
-      "30020": 0.5,
-      "30021": 0.5,
-      "30022": 0.5,
-      "30023": 0.5,
-      "30024": 0.5,
-      "30025": 0.5,
-      "30026": 0.5,
-      "30027": 0.5,
-      "30028": 0.5,
-      "30029": 0.5,
-      "30030": 0.5,
-      "30031": 0.5,
-      "30032": 0.5,
-      "30033": 0.5,
-      "30034": 0.5,
-      "30035": 0.5,
-      "30036": 0.5,
-      "30037": 0.5,
-      "30038": 0.5
+      "30001": 0.08,
+      "30002": 0.08,
+      "30003": 0.08,
+      "30004": 0.08,
+      "30005": 0.08,
+      "30006": 0.08,
+      "30007": 0.08,
+      "30008": 0.08,
+      "30009": 0.08,
+      "30010": 0.08,
+      "30011": 0.08,
+      "30012": 0.08,
+      "30013": 0.08,
+      "30014": 0.08,
+      "30016": 0.08,
+      "30017": 0.08,
+      "30018": 0.08,
+      "30019": 0.08,
+      "30020": 0.08,
+      "30021": 0.08,
+      "30022": 0.08,
+      "30023": 0.08,
+      "30024": 0.08,
+      "30025": 0.08,
+      "30026": 0.08,
+      "30027": 0.08,
+      "30028": 0.08,
+      "30029": 0.08,
+      "30030": 0.08,
+      "30031": 0.08,
+      "30032": 0.08,
+      "30033": 0.08,
+      "30034": 0.08,
+      "30035": 0.08,
+      "30036": 0.08,
+      "30037": 0.08,
+      "30038": 0.08
+    },
+    "ingredientDropRule": {
+      "overallChance": 0.08,
+      "ingredientTypesOnSuccess": 1,
+      "grades": [
+        {
+          "minVisits": 1,
+          "primaryCount": 1,
+          "secondaryCount": 0,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 80,
+          "primaryCount": 2,
+          "secondaryCount": 0,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 250,
+          "primaryCount": 2,
+          "secondaryCount": 1,
+          "rareCount": 0
+        },
+        {
+          "minVisits": 700,
+          "primaryCount": 2,
+          "secondaryCount": 2,
+          "rareCount": 1
+        }
+      ]
     },
     "ingredients": {
       "30001": 0
@@ -294,8 +498,7 @@
     "autoCraft": "click-to-craft-one",
     "craftedRecipes": [
       1
-    ],
-    "unlockedRegions": []
+    ]
   },
   "missions": {
     "mainGroup": 1,
@@ -305,7 +508,15 @@
   "collection": {
     "customers": 1,
     "specialCustomers": 0,
-    "performers": 1
+    "performers": 1,
+    "customerGrades": {
+      "3": {
+        "visits": 2,
+        "gradeId": 1,
+        "gradeName": "첫 방문",
+        "nextAt": 80
+      }
+    }
   },
   "specialCustomers": [],
   "selectedInstallId": null

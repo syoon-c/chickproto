@@ -50,19 +50,19 @@ async function runVisitGroup(visits, expectedCountsByIngredientId) {
     saved.metrics.giftBundles = 0;
     saved.metrics.giftItems = 0;
     localStorage.setItem(key, JSON.stringify(saved));
-  }, { visitCount: visits, guestCount: 120 });
+  }, { visitCount: visits, guestCount: 600 });
   await page.reload({ waitUntil: "load" });
   await page.evaluate(() => window.advanceTime(34));
   const current = await state();
   const attempts = current.metrics.ingredientDropAttempts;
   const misses = current.metrics.ingredientDropMisses;
   const hits = current.ingredientDrops.length;
-  if (attempts !== 120 || hits + misses !== attempts) {
+  if (attempts !== 600 || hits + misses !== attempts) {
     throw new Error(`Drop counters do not add up at ${visits} visits: attempts=${attempts} hits=${hits} misses=${misses}`);
   }
   const rate = hits / attempts;
-  if (rate < 0.2 || rate > 0.4) {
-    throw new Error(`Seeded drop rate is inconsistent with 30% at ${visits} visits: ${rate}`);
+  if (rate < 0.05 || rate > 0.11) {
+    throw new Error(`Seeded drop rate is inconsistent with 8% at ${visits} visits: ${rate}`);
   }
   if (current.ingredientDrops.some((drop) => {
     const expectedCount = expectedCountsByIngredientId[drop.ingredientId];
@@ -92,7 +92,7 @@ try {
   await page.locator("#reset-btn").click();
 
   let current = await state();
-  if (current.progression.ingredientDropRule.overallChance !== 0.3
+  if (current.progression.ingredientDropRule.overallChance !== 0.08
     || current.progression.ingredientDropRule.ingredientTypesOnSuccess !== 1
     || JSON.stringify(current.progression.ingredientDropRule.grades) !== JSON.stringify([
       { minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
@@ -132,7 +132,7 @@ try {
   fs.writeFileSync(path.join(out, "result.json"), JSON.stringify(result, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`INGREDIENT_DROP_30_PERCENT_QUANTITY_OK first=${first.hits}/120 regular=${regular.hits}/120 vip=${vip.hits}/120 best=${best.hits}/120`);
+  console.log(`INGREDIENT_DROP_8_PERCENT_QUANTITY_OK first=${first.hits}/600 regular=${regular.hits}/600 vip=${vip.hits}/600 best=${best.hits}/600`);
 } finally {
   await browser.close();
 }

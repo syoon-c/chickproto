@@ -7,7 +7,6 @@ const {
   GUEST_MEAL_DURATION_SECONDS,
   FACILITY_META,
   facilityPlacement,
-  cafeFacilityPlacement,
   seatPositions,
   recipeIcon,
   recipeName,
@@ -17,21 +16,9 @@ const {
   THEME_CHICK_THRESHOLDS,
   GUEST_GRADES,
   GUEST_INGREDIENT_DROP_CHANCE,
-  CAFE_CAKE_MILESTONES,
-  CAFE_THEME_PART_PRICES,
-  cafeThemeUnitPrice,
-  BASE_CAKE_INGREDIENTS,
-  CAFE_THEME_NAMES,
-  CAFE_THEME_CAKE_REWARDS,
-  CAKE_BASE_PRICE,
-  CAKE_SECOND_CRAFT_IDEA_COST,
-  CAKE_SECOND_CRAFT_GEM_COST,
-  CAKE_RECIPES,
   themeChickMilestones,
   allThemeChickMilestones,
-  REGION_UNLOCKS,
   themeFacilityIcon,
-  cafeThemeFacilityIcon,
 } = window.CHICK_CONFIG;
 
 const canvas = document.querySelector("#game-canvas");
@@ -61,12 +48,6 @@ const dom = {
   missionDot: document.querySelector("#mission-dot"),
   collectionDot: document.querySelector("#collection-dot"),
   toast: document.querySelector("#toast"),
-  worldAreaSwitch: document.querySelector("#world-area-switch"),
-  worldAreaButtons: [...document.querySelectorAll("[data-world-area]")],
-  worldAreaName: document.querySelector("#world-area-name"),
-  cafeLockBadge: document.querySelector("#cafe-lock-badge"),
-  cafeExpandButton: document.querySelector("#cafe-expand-btn"),
-  cakeWorkshopButton: document.querySelector("#cake-workshop-btn"),
   recipeNavLabel: document.querySelector("#recipe-nav-label"),
   themeNavLabel: document.querySelector("#theme-nav-label"),
 };
@@ -78,8 +59,6 @@ let deterministicStepping = false;
 let toastTimer = 0;
 const imageCache = new Map();
 const DRAG_SCROLL_THRESHOLD = 6;
-const CAFE_ORDER_DURATION_SECONDS = 1.2;
-const CAFE_CONTINUE_VISIT_CHANCE = .8;
 let dragScrollGesture = null;
 let suppressedDragClick = null;
 
@@ -171,21 +150,6 @@ function initialAcorns() {
   return Math.max(150, Number(tables.general.AccountFirstAcorn ?? 100), coreInstallCost);
 }
 
-function initialCakeWorkshop() {
-  return {
-    dayKey: new Date().toISOString().slice(0, 10),
-    freeCraftsUsed: 0,
-    totalCrafted: 0,
-    discoveredRecipeIds: [],
-    selectedSheet: "cake_sheet_basic",
-    selectedCream: "cake_cream_fresh",
-    selectedTopping: "cake_topping_strawberry",
-    toppingPlacements: [],
-    limitedSale: null,
-    lastResult: null,
-  };
-}
-
 function createInitialState() {
   return {
     version: 9,
@@ -209,13 +173,6 @@ function createInitialState() {
       activeByFacility: Object.fromEntries(tables.restaurantThemes.filter((row) => row.facilityTheme === 1).map((row) => [row.facilityType, row.id])),
       unlockedThemeIds: [1],
     },
-    cafeThemes: {
-      opened: [],
-      activeThemeId: 101,
-      cakeIngredients: BASE_CAKE_INGREDIENTS.map((ingredient) => ingredient.id),
-    },
-    cafeArea: { unlocked: false, expansionConfirmed: false },
-    cakeWorkshop: initialCakeWorkshop(),
     crafting: { autoEnabled: false, ingredients: {}, history: [] },
     specialActors: [],
     specialLastSpawn: {},
@@ -231,26 +188,18 @@ function createInitialState() {
     promotion: { progress: 0, queued: 0, totalClicks: 0 },
     guests: [],
     guestSequence: 1,
-    cafeGuests: [],
-    cafeGuestSequence: 1,
-    cafeQueue: [],
-    cafePayments: [],
-    cafeVisit: { timer: 0, total: 0 },
     orders: [],
     cooking: [],
     payments: [],
     ingredientDrops: [],
     dropSequence: 1,
     tipbox: 0,
-    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, cafeVisitors: 0, cafeContinuedVisitors: 0, cafeServed: 0, cafeCollected: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, giftBundles: 0, giftItems: 0, recipesCrafted: 0 },
+    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, giftBundles: 0, giftItems: 0, recipesCrafted: 0 },
     ui: {
       selectedInstallId: null,
       screen: "restaurant",
       tab: "craft",
       themeId: 1,
-      cafeThemeId: 101,
-      themeArea: "restaurant",
-      worldArea: "restaurant",
       lastResearch: null,
     },
   };
@@ -277,59 +226,35 @@ function loadState() {
       tables.restaurantThemes.find((row) => row.id === Number(id))?.facilityTheme).filter(Boolean))])
       .map(Number)
       .filter((themeId) => Object.hasOwn(THEME_NAMES, themeId));
-    const availableCakeIngredientIds = new Set([
-      ...BASE_CAKE_INGREDIENTS,
-      ...Object.values(CAFE_THEME_CAKE_REWARDS).flat(),
-    ].map((ingredient) => ingredient.id));
-    const availableCafeThemePartIds = new Set(Object.keys(CAFE_THEME_NAMES).flatMap((themeId) =>
-      tables.cafeInstalls.map((row) => Number(themeId) * 1000 + Number(row.id))));
-    const openedCafeThemes = (parsed.cafeThemes?.opened || [])
-      .map(Number)
-      .filter((id) => availableCafeThemePartIds.has(id));
-    const cakeIngredients = [...new Set([
-      ...BASE_CAKE_INGREDIENTS.map((ingredient) => ingredient.id),
-      ...(parsed.cafeThemes?.cakeIngredients || []),
-      ...earnedCafeCakeIngredients(openedCafeThemes).map((ingredient) => ingredient.id),
-    ])].filter((id) => availableCakeIngredientIds.has(id));
-    const parsedCakeWorkshop = { ...initialCakeWorkshop(), ...parsed.cakeWorkshop };
-    const availableIngredient = (id, type, fallback) => {
-      const ingredient = cakeIngredientData(id);
-      return ingredient?.type === type && cakeIngredients.includes(id) ? id : fallback;
-    };
-    const cakeWorkshop = {
-      ...parsedCakeWorkshop,
-      dayKey: typeof parsedCakeWorkshop.dayKey === "string" ? parsedCakeWorkshop.dayKey : new Date().toISOString().slice(0, 10),
-      freeCraftsUsed: Math.max(0, Number(parsedCakeWorkshop.freeCraftsUsed) || 0),
-      totalCrafted: Math.max(0, Number(parsedCakeWorkshop.totalCrafted) || 0),
-      discoveredRecipeIds: [...new Set(parsedCakeWorkshop.discoveredRecipeIds || [])]
-        .filter((id) => CAKE_RECIPES.some((recipe) => recipe.id === id)),
-      selectedSheet: availableIngredient(parsedCakeWorkshop.selectedSheet, "sheet", "cake_sheet_basic"),
-      selectedCream: availableIngredient(parsedCakeWorkshop.selectedCream, "cream", "cake_cream_fresh"),
-      selectedTopping: availableIngredient(parsedCakeWorkshop.selectedTopping, "topping", "cake_topping_strawberry"),
-      toppingPlacements: (parsedCakeWorkshop.toppingPlacements || []).slice(0, 12).map((placement) => ({
-        x: Math.min(.9, Math.max(.1, Number(placement.x) || .5)),
-        y: Math.min(.82, Math.max(.12, Number(placement.y) || .45)),
-        rotation: Number(placement.rotation) || 0,
-      })),
-      limitedSale: parsedCakeWorkshop.limitedSale && Number(parsedCakeWorkshop.limitedSale.remaining) > 0
-        ? {
-          ...parsedCakeWorkshop.limitedSale,
-          remaining: Math.max(0, Number(parsedCakeWorkshop.limitedSale.remaining) || 0),
-          unitPrice: Math.max(1, Number(parsedCakeWorkshop.limitedSale.unitPrice) || CAKE_BASE_PRICE),
-        }
-        : null,
-      lastResult: parsedCakeWorkshop.lastResult || null,
-    };
+    const {
+      cafeThemes: _cafeThemes,
+      cafeArea: _cafeArea,
+      cakeWorkshop: _cakeWorkshop,
+      cafeGuests: _cafeGuests,
+      cafeGuestSequence: _cafeGuestSequence,
+      cafeQueue: _cafeQueue,
+      cafePayments: _cafePayments,
+      cafeVisit: _cafeVisit,
+      ...restaurantSave
+    } = parsed;
+    const {
+      cafeThemeId: _cafeThemeId,
+      worldArea: _worldArea,
+      themeArea: _themeArea,
+      ...savedUi
+    } = parsed.ui || {};
+    const metrics = Object.fromEntries(Object.keys(defaults.metrics)
+      .map((key) => [key, Number(parsed.metrics?.[key] ?? defaults.metrics[key])]));
     return {
       ...defaults,
-      ...parsed,
+      ...restaurantSave,
       version: 9,
       resources: { ...defaults.resources, ...parsed.resources },
       ownedRecipes,
       collections: { ...defaults.collections, ...parsed.collections },
       missions: { ...defaults.missions, ...parsed.missions },
-      metrics: { ...defaults.metrics, ...parsed.metrics },
-      ui: { ...defaults.ui, ...parsed.ui, screen: "restaurant", tab: "craft", worldArea: "restaurant" },
+      metrics,
+      ui: { ...defaults.ui, ...savedUi, screen: "restaurant", tab: "craft" },
       staff: parsed.staff || {},
       performance: { ...defaults.performance, ...parsed.performance },
       themes: {
@@ -339,22 +264,6 @@ function loadState() {
         unlockedThemeIds,
         activeByFacility,
       },
-      cafeThemes: {
-        ...defaults.cafeThemes,
-        ...parsed.cafeThemes,
-        opened: openedCafeThemes,
-        activeThemeId: Object.hasOwn(CAFE_THEME_NAMES, Number(parsed.cafeThemes?.activeThemeId))
-          ? Number(parsed.cafeThemes.activeThemeId)
-          : defaults.cafeThemes.activeThemeId,
-        cakeIngredients,
-      },
-      cafeArea: {
-        ...defaults.cafeArea,
-        ...parsed.cafeArea,
-        unlocked: Number(parsed.version) >= 9 && Boolean(parsed.cafeArea?.expansionConfirmed),
-        expansionConfirmed: Number(parsed.version) >= 9 && Boolean(parsed.cafeArea?.expansionConfirmed),
-      },
-      cakeWorkshop,
       crafting: {
         ...defaults.crafting,
         ...parsed.crafting,
@@ -363,11 +272,6 @@ function loadState() {
       },
       specialActors: parsed.specialActors || [],
       specialLastSpawn: parsed.specialLastSpawn || {},
-      cafeGuests: parsed.cafeGuests || [],
-      cafeGuestSequence: Number(parsed.cafeGuestSequence || 1),
-      cafeQueue: parsed.cafeQueue || [],
-      cafePayments: parsed.cafePayments || [],
-      cafeVisit: { ...defaults.cafeVisit, ...parsed.cafeVisit },
       ingredientDrops: parsed.ingredientDrops || [],
       dropSequence: Number(parsed.dropSequence || 1),
     };
@@ -461,147 +365,6 @@ function allUnlockedThemeChicks() {
   return Object.keys(THEME_NAMES).flatMap((themeId) => unlockedThemeChicks(Number(themeId)));
 }
 
-function cafeThemeRows(themeId) {
-  const cafeThemeId = Number(themeId);
-  if (!Object.hasOwn(CAFE_THEME_NAMES, cafeThemeId)) return [];
-  return tables.cafeInstalls.map((row) => ({
-    ...row,
-    id: cafeThemeId * 1000 + Number(row.id),
-    installId: Number(row.id),
-    facilityTheme: cafeThemeId,
-    purchaseType: 1,
-    itemId: 101,
-  }));
-}
-
-function cafeThemePartPrice(row) {
-  return cafeThemeUnitPrice(row?.facilityTheme);
-}
-
-function cafeThemeProgress(themeId, openedIds = state?.cafeThemes?.opened || []) {
-  const rows = cafeThemeRows(themeId);
-  const opened = rows.filter((row) => openedIds.includes(row.id)).length;
-  return {
-    opened,
-    total: rows.length,
-    ratio: rows.length ? opened / rows.length : 0,
-  };
-}
-
-function earnedCafeCakeIngredients(openedIds) {
-  return Object.keys(CAFE_THEME_NAMES).flatMap((themeIdText) => {
-    const themeId = Number(themeIdText);
-    const progress = cafeThemeProgress(themeId, openedIds);
-    const rewards = CAFE_THEME_CAKE_REWARDS[themeId] || [];
-    return rewards.filter((reward, index) => progress.ratio + Number.EPSILON >= CAFE_CAKE_MILESTONES[index]);
-  });
-}
-
-function cakeIngredientData(id) {
-  return [...BASE_CAKE_INGREDIENTS, ...Object.values(CAFE_THEME_CAKE_REWARDS).flat()]
-    .find((ingredient) => ingredient.id === id) || null;
-}
-
-function ensureCakeDailyReset() {
-  const dayKey = new Date().toISOString().slice(0, 10);
-  if (state.cakeWorkshop.dayKey === dayKey) return;
-  state.cakeWorkshop.dayKey = dayKey;
-  state.cakeWorkshop.freeCraftsUsed = 0;
-}
-
-function unlockedCakeIngredients(type) {
-  return state.cafeThemes.cakeIngredients.map(cakeIngredientData)
-    .filter((ingredient) => ingredient?.type === type);
-}
-
-function selectedCakeRecipe() {
-  return CAKE_RECIPES.find((recipe) =>
-    recipe.sheetId === state.cakeWorkshop.selectedSheet
-    && recipe.creamId === state.cakeWorkshop.selectedCream
-    && recipe.toppingId === state.cakeWorkshop.selectedTopping) || null;
-}
-
-function cakeUnitPrice(recipe = selectedCakeRecipe()) {
-  return Math.max(1, Math.round(CAKE_BASE_PRICE * Number(recipe?.priceMultiplier || 1.5)));
-}
-
-function selectCakePart(kind, id) {
-  const property = { sheet: "selectedSheet", cream: "selectedCream", topping: "selectedTopping" }[kind];
-  const ingredient = cakeIngredientData(id);
-  if (!property || ingredient?.type !== kind || !state.cafeThemes.cakeIngredients.includes(id)) return;
-  state.cakeWorkshop[property] = id;
-  if (kind === "topping") state.cakeWorkshop.toppingPlacements = [];
-  state.cakeWorkshop.lastResult = null;
-  saveState();
-  renderMenu();
-}
-
-function finishCake(currency) {
-  if (!state.cafeArea.unlocked || !cafeBakingFacilityInstalled()) {
-    return showToast("카페에 케이크 진열대를 먼저 설치해 주세요.");
-  }
-  ensureCakeDailyReset();
-  if (!state.cakeWorkshop.toppingPlacements.length) {
-    return showToast("케이크 위를 눌러 토핑을 하나 이상 올려 주세요.");
-  }
-  const free = state.cakeWorkshop.freeCraftsUsed < 1;
-  if (!free) {
-    if (currency === "gems") {
-      if (state.resources.gems < CAKE_SECOND_CRAFT_GEM_COST) return showToast("보석이 부족해요.");
-      state.resources.gems -= CAKE_SECOND_CRAFT_GEM_COST;
-    } else {
-      if (state.resources.ideas < CAKE_SECOND_CRAFT_IDEA_COST) return showToast("아이디어가 부족해요.");
-      state.resources.ideas -= CAKE_SECOND_CRAFT_IDEA_COST;
-    }
-  } else {
-    state.cakeWorkshop.freeCraftsUsed += 1;
-  }
-
-  const recipe = selectedCakeRecipe();
-  const newlyDiscovered = Boolean(recipe && !state.cakeWorkshop.discoveredRecipeIds.includes(recipe.id));
-  if (newlyDiscovered) state.cakeWorkshop.discoveredRecipeIds.push(recipe.id);
-  const name = recipe?.name || "나만의 커스텀 케이크";
-  const saleCount = Number(recipe?.saleCount || 3);
-  const unitPrice = cakeUnitPrice(recipe);
-  state.cakeWorkshop.totalCrafted += 1;
-  state.cakeWorkshop.lastResult = {
-    recipeId: recipe?.id || null,
-    name,
-    newlyDiscovered,
-    comboBonus: Boolean(recipe),
-    unitPrice,
-    saleCount,
-  };
-  state.cakeWorkshop.limitedSale = {
-    recipeId: recipe?.id || null,
-    name,
-    comboBonus: Boolean(recipe),
-    unitPrice,
-    remaining: saleCount,
-    selection: {
-      sheetId: state.cakeWorkshop.selectedSheet,
-      creamId: state.cakeWorkshop.selectedCream,
-      toppingId: state.cakeWorkshop.selectedTopping,
-    },
-  };
-  saveState();
-  updateHud();
-  renderMenu();
-  dom.menuContent.scrollTop = 0;
-  render();
-  showToast(newlyDiscovered ? `신규 레시피 발견 · ${name}` : `${name} ${saleCount}조각을 진열했어요.`, 3);
-}
-
-function sellLimitedCake(guest) {
-  const sale = state.cakeWorkshop.limitedSale;
-  if (!sale || sale.remaining <= 0) return 0;
-  sale.remaining -= 1;
-  guest.cakePurchase = sale.name;
-  const amount = Math.max(1, Number(sale.unitPrice) || CAKE_BASE_PRICE);
-  if (sale.remaining <= 0) state.cakeWorkshop.limitedSale = null;
-  return amount;
-}
-
 function isProgressionRouteUnlocked(route) {
   return Boolean(route && unlockedThemeChicks(route.themeId).some((chick) => chick.customerId === route.customerId));
 }
@@ -643,22 +406,7 @@ function guestRewardItems(route, visits) {
 }
 
 function unlockedRecipeCount() {
-  // Cake combinations live in cakeWorkshop and never count toward restaurant region unlocks.
   return Object.keys(state.ownedRecipes).filter((id) => recipeData(id)).length;
-}
-
-function unlockedRegions() {
-  const count = unlockedRecipeCount();
-  return REGION_UNLOCKS.filter((region) => count >= region.recipeCount);
-}
-
-function cafeRegion() {
-  return REGION_UNLOCKS.find((region) => region.area === "cafe") || REGION_UNLOCKS[0];
-}
-
-function cafeExpansionAvailable() {
-  const region = cafeRegion();
-  return Boolean(region && unlockedRegions().some((unlocked) => unlocked.id === region.id));
 }
 
 function rewardRows(rewardId) { return tables.rewards.get(Number(rewardId)) || []; }
@@ -880,46 +628,6 @@ function checkAndGrantAllCollect(themeId) {
   }
 }
 
-function checkAndGrantCafeAllCollect(themeId) {
-  return cafeThemeProgress(themeId).ratio >= 1;
-}
-
-function buyCafeTheme(partId, { installation = false } = {}) {
-  const row = Object.keys(CAFE_THEME_NAMES).flatMap((themeId) => cafeThemeRows(Number(themeId)))
-    .find((item) => item.id === Number(partId));
-  if (!row || state.cafeThemes.opened.includes(partId) || row.purchaseType === 2) return;
-  const serviceReadyBefore = cafeServiceReady();
-  const key = RESOURCE_BY_ITEM[row.itemId];
-  const price = cafeThemePartPrice(row);
-  if (!key || state.resources[key] < price) return;
-  const ownedBefore = new Set(state.cafeThemes.cakeIngredients);
-  state.resources[key] -= price;
-  state.cafeThemes.opened.push(row.id);
-  state.cafeThemes.activeThemeId = row.facilityTheme;
-  checkAndGrantCafeAllCollect(row.facilityTheme);
-  const earned = earnedCafeCakeIngredients(state.cafeThemes.opened);
-  const newlyUnlocked = earned.filter((ingredient) => !ownedBefore.has(ingredient.id));
-  state.cafeThemes.cakeIngredients = [...new Set([
-    ...state.cafeThemes.cakeIngredients,
-    ...earned.map((ingredient) => ingredient.id),
-  ])];
-  dispatchAchievement(11, 1, 0, partId);
-  const progress = cafeThemeProgress(row.facilityTheme);
-  const serviceStarted = !serviceReadyBefore && cafeServiceReady();
-  const meta = FACILITY_META[row.facilityType] || FACILITY_META[15];
-  showToast(installation
-    ? `${meta.name} 설치 완료!`
-    : serviceStarted
-      ? "카페 영업 시작!"
-      : newlyUnlocked.length
-        ? `${CAFE_THEME_NAMES[row.facilityTheme]} 수집! ${newlyUnlocked.map((ingredient) => `${ingredient.emoji} ${ingredient.name}`).join(", ")} 획득.`
-        : `${CAFE_THEME_NAMES[row.facilityTheme]} 파츠 · ${progress.opened}/${progress.total}`, 3);
-  saveState();
-  updateHud();
-  if (!dom.menuScreen.hidden) renderMenu();
-  render();
-}
-
 function buyTheme(themeId) {
   const row = tables.restaurantThemes.find((item) => item.id === themeId);
   if (!row || state.themes.opened.includes(themeId)) return;
@@ -981,48 +689,6 @@ function installCandidates() {
   return tables.installs.filter((row) => !isInstalled(row.id)).slice(0, 2);
 }
 
-function activeCafeThemeId() {
-  const selected = Number(state.cafeThemes.activeThemeId || state.ui.cafeThemeId || 101);
-  return Object.hasOwn(CAFE_THEME_NAMES, selected) ? selected : 101;
-}
-
-function cafeInstalledRows(themeId = activeCafeThemeId()) {
-  return cafeThemeRows(themeId).filter((row) => state.cafeThemes.opened.includes(row.id));
-}
-
-function cafeBakingFacilityInstalled() {
-  return cafeInstalledRows().some((row) => row.facilityType === 18);
-}
-
-function cafeInstallCandidates(themeId = activeCafeThemeId()) {
-  return cafeThemeRows(themeId).filter((row) => !state.cafeThemes.opened.includes(row.id)).slice(0, 3);
-}
-
-function cafeServiceReady() {
-  const installed = cafeInstalledRows();
-  return state.cafeArea.unlocked
-    && installed.some((row) => row.facilityType === 15)
-    && installed.some((row) => row.facilityType === 17);
-}
-
-function cafeSeatPositions(tableRow) {
-  const p = cafeFacilityPlacement(tableRow);
-  return [
-    { id: `cafe-${tableRow.id}-left`, tableId: tableRow.id, x: p.x - 42, y: p.y + 2, payX: p.x - 40, payY: p.y + 53 },
-    { id: `cafe-${tableRow.id}-right`, tableId: tableRow.id, x: p.x + 42, y: p.y + 2, payX: p.x + 40, payY: p.y + 53 },
-  ];
-}
-
-function availableCafeSeats() {
-  const occupied = new Set(state.cafeGuests
-    .filter((guest) => guest.seatId && guest.state !== "leaving")
-    .map((guest) => guest.seatId));
-  return cafeInstalledRows()
-    .filter((row) => row.facilityType === 15)
-    .flatMap(cafeSeatPositions)
-    .filter((seat) => !occupied.has(seat.id));
-}
-
 function coreReady() {
   return installedRows(1).length > 0 && installedRows(2).length > 0;
 }
@@ -1065,31 +731,17 @@ function closeInstallPanel() {
 
 function openInstallPanel(row) {
   const meta = FACILITY_META[row.facilityType] || FACILITY_META[1];
-  const cafePart = Number(row.areaType) === 2;
-  const price = cafePart ? cafeThemePartPrice(row) : Number(row.facilityPrice);
   state.ui.selectedInstallId = row.id;
-  dom.installIcon.src = cafePart ? cafeThemeFacilityIcon(row) : meta.icon;
+  dom.installIcon.src = meta.icon;
   dom.installName.textContent = row.facilityGroup > 1 ? `${meta.name} ${row.facilityGroup}` : meta.name;
   dom.installDescription.textContent = meta.description;
-  dom.installCost.textContent = formatNumber(price);
-  dom.installConfirm.disabled = state.resources.acorns < price;
+  dom.installCost.textContent = formatNumber(row.facilityPrice);
+  dom.installConfirm.disabled = state.resources.acorns < row.facilityPrice;
   dom.installPanel.hidden = false;
 }
 
 function confirmInstall() {
-  const row = tables.installs.find((item) => item.id === state.ui.selectedInstallId)
-    || Object.keys(CAFE_THEME_NAMES).flatMap((themeId) => cafeThemeRows(Number(themeId)))
-      .find((item) => item.id === state.ui.selectedInstallId);
-  if (Number(row?.areaType) === 2) {
-    if (state.cafeThemes.opened.includes(row.id)) return closeInstallPanel();
-    if (state.resources.acorns < cafeThemePartPrice(row)) {
-      showToast("도토리가 부족해요.");
-      return;
-    }
-    buyCafeTheme(row.id, { installation: true });
-    closeInstallPanel();
-    return;
-  }
+  const row = tables.installs.find((item) => item.id === state.ui.selectedInstallId);
   if (!row || isInstalled(row.id)) return closeInstallPanel();
   if (state.resources.acorns < row.facilityPrice) {
     showToast("도토리가 부족해요.");
@@ -1256,163 +908,6 @@ function moveTowards(entity, x, y, speed, dt) {
   return false;
 }
 
-function markRestaurantGuestForCafe(guest) {
-  if (!cafeServiceReady() || random() >= CAFE_CONTINUE_VISIT_CHANCE) return false;
-  guest.continueToCafe = true;
-  return true;
-}
-
-function queueRestaurantGuestForCafe(guest) {
-  state.cafeQueue.push({
-    sourceRestaurantGuestId: guest.id,
-    customerId: guest.customerId,
-    commonId: guest.commonId,
-    customerName: guest.customerName,
-  });
-  state.metrics.cafeContinuedVisitors += 1;
-  trySpawnCafeQueuedGuests();
-}
-
-function spawnCafeGuest(queuedGuest) {
-  if (!cafeServiceReady() || !queuedGuest) return false;
-  const seat = availableCafeSeats()[0];
-  if (!seat) return false;
-  const counter = cafeInstalledRows().find((row) => row.facilityType === 17);
-  const counterPosition = counter ? cafeFacilityPlacement(counter) : { x: 240, y: 245 };
-  const exit = cafeInstalledRows().find((row) => row.facilityType === 21);
-  const exitPosition = exit ? cafeFacilityPlacement(exit) : { x: 240, y: 860 };
-  state.cafeGuests.push({
-    id: state.cafeGuestSequence++,
-    sourceRestaurantGuestId: queuedGuest.sourceRestaurantGuestId,
-    customerId: queuedGuest.customerId,
-    commonId: queuedGuest.commonId,
-    customerName: queuedGuest.customerName,
-    state: "arriving_counter",
-    seatId: seat.id,
-    tableId: seat.tableId,
-    x: exitPosition.x,
-    y: 890,
-    targetX: counterPosition.x,
-    targetY: counterPosition.y + 55,
-    stateTime: 0,
-    bob: random() * 10,
-    orderKind: state.cakeWorkshop.limitedSale ? "cake" : "drink",
-    cakePurchase: null,
-  });
-  state.cafeVisit.total += 1;
-  state.metrics.cafeVisitors += 1;
-  if (state.ui.worldArea === "cafe") showToast(`${queuedGuest.customerName || "병아리 손님"}이 카페에 들어왔어요!`);
-  return true;
-}
-
-function trySpawnCafeQueuedGuests() {
-  let changed = false;
-  while (state.cafeQueue.length && availableCafeSeats().length) {
-    const queuedGuest = state.cafeQueue.shift();
-    if (!spawnCafeGuest(queuedGuest)) {
-      state.cafeQueue.unshift(queuedGuest);
-      break;
-    }
-    changed = true;
-  }
-  if (changed) saveState();
-}
-
-function addCafePayment(guest, amount) {
-  const table = cafeInstalledRows().find((row) => row.id === guest.tableId);
-  const seat = table ? cafeSeatPositions(table).find((item) => item.id === guest.seatId) : null;
-  const existing = state.cafePayments.find((payment) => payment.seatId === guest.seatId);
-  if (existing) {
-    existing.amount += amount;
-    existing.models = Math.min(20, Number(existing.models || 1) + 1);
-  } else {
-    state.cafePayments.push({
-      id: `cafe-pay-${guest.id}`,
-      seatId: guest.seatId,
-      x: seat?.payX ?? guest.x,
-      y: seat?.payY ?? guest.y + 48,
-      amount,
-      models: 1,
-    });
-  }
-}
-
-function collectCafePayment(payment) {
-  state.resources.acorns += Number(payment.amount || 0);
-  state.metrics.cafeCollected += Number(payment.amount || 0);
-  state.metrics.collected += Number(payment.amount || 0);
-  state.cafePayments = state.cafePayments.filter((item) => item.id !== payment.id);
-  showToast(`카페 매출 도토리 ${formatNumber(payment.amount)} 획득!`);
-  saveState();
-  updateHud();
-  render();
-}
-
-function updateCafeGuests(dt) {
-  trySpawnCafeQueuedGuests();
-
-  for (const guest of state.cafeGuests) {
-    guest.bob += dt;
-    guest.stateTime += dt;
-    if (guest.state === "arriving_counter") {
-      if (moveTowards(guest, guest.targetX, guest.targetY, 165, dt)) {
-        guest.state = "ordering";
-        guest.stateTime = 0;
-      }
-    } else if (guest.state === "ordering" && guest.stateTime >= CAFE_ORDER_DURATION_SECONDS) {
-      const table = cafeInstalledRows().find((row) => row.id === guest.tableId);
-      const seat = table ? cafeSeatPositions(table).find((item) => item.id === guest.seatId) : null;
-      if (!seat) {
-        guest.state = "leaving";
-        guest.targetX = 240;
-        guest.targetY = 900;
-      } else {
-        guest.state = "seating";
-        guest.targetX = seat.x;
-        guest.targetY = seat.y;
-        guest.stateTime = 0;
-      }
-    } else if (guest.state === "seating") {
-      if (moveTowards(guest, guest.targetX, guest.targetY, 145, dt)) {
-        guest.state = "enjoying";
-        guest.stateTime = 0;
-        guest.orderKind = state.cakeWorkshop.limitedSale ? "cake" : "drink";
-      }
-    } else if (guest.state === "enjoying" && guest.stateTime >= GUEST_MEAL_DURATION_SECONDS) {
-      const cakeAmount = sellLimitedCake(guest);
-      const amount = 25 + cakeAmount;
-      addCafePayment(guest, amount);
-      state.metrics.cafeServed += 1;
-      guest.state = "returning_tray";
-      guest.stateTime = 0;
-      guest.mood = "satisfied";
-      const tray = cafeInstalledRows().find((row) => row.facilityType === 19);
-      const trayPosition = tray ? cafeFacilityPlacement(tray) : { x: 240, y: 780 };
-      guest.targetX = trayPosition.x;
-      guest.targetY = trayPosition.y + 35;
-      saveState();
-    } else if (guest.state === "returning_tray") {
-      if (moveTowards(guest, guest.targetX, guest.targetY, 145, dt)) {
-        const exit = cafeInstalledRows().find((row) => row.facilityType === 21);
-        const exitPosition = exit ? cafeFacilityPlacement(exit) : { x: 240, y: 850 };
-        guest.state = "leaving";
-        guest.seatId = null;
-        guest.targetX = exitPosition.x;
-        guest.targetY = 905;
-      }
-    } else if (guest.state === "leaving") {
-      moveTowards(guest, guest.targetX, guest.targetY, 165, dt);
-    }
-  }
-
-  const before = state.cafeGuests.length;
-  state.cafeGuests = state.cafeGuests.filter((guest) => !(guest.state === "leaving" && guest.y >= 900));
-  if (state.cafeGuests.length !== before) {
-    trySpawnCafeQueuedGuests();
-    saveState();
-  }
-}
-
 function takeOrder(guest) {
   if (!guest || guest.state !== "awaiting_order") return;
   guest.state = "waiting_food";
@@ -1492,7 +987,6 @@ function craftIngredientCost(route) {
 function craftRecipe(recipeId, automatic = false) {
   const route = progressionForRecipe(recipeId);
   if (!route || !canCraftRecipe(recipeId)) return false;
-  const regionsBefore = unlockedRegions().length;
   const existing = recipeData(route.recipeId);
   const ingredientRequirements = craftIngredientRequirements(route);
   for (const requirement of ingredientRequirements) {
@@ -1505,12 +999,9 @@ function craftRecipe(recipeId, automatic = false) {
   state.crafting.history = state.crafting.history.slice(0, 12);
   state.metrics.recipesCrafted += 1;
   if (existing) dispatchAchievement(9, 1, 103, route.recipeId);
-  const newlyUnlockedRegion = unlockedRegions()[regionsBefore];
-  showToast(newlyUnlockedRegion
-    ? `${routeRecipeName(route.recipeId)} 제작! ${newlyUnlockedRegion.name} 해금!`
-    : existing
-      ? `${routeRecipeName(route.recipeId)} Lv.${level}! 판매 가격 +5%`
-      : `${automatic ? "자동 선택 제작" : "수동 제작"} · ${routeRecipeName(route.recipeId)} 완성!`, 3);
+  showToast(existing
+    ? `${routeRecipeName(route.recipeId)} Lv.${level}! 판매 가격 +5%`
+    : `${automatic ? "자동 선택 제작" : "수동 제작"} · ${routeRecipeName(route.recipeId)} 완성!`, 3);
   saveState();
   updateHud();
   if (!dom.menuScreen.hidden && state.ui.screen === "recipe") renderMenu();
@@ -1614,7 +1105,6 @@ function resolveMeal(guest, forcedSatisfied = false) {
   const mealPrice = Math.max(1, Math.round(upgradedPrice * multiplier));
   addPayment(guest, mealPrice);
   grantGuestIngredient(guest);
-  markRestaurantGuestForCafe(guest);
 
   const hasTipbox = installedRows(3).length > 0;
   if (hasTipbox && (mood === "satisfied" || random() < Number(common.tipProbability || 0))) {
@@ -1701,7 +1191,6 @@ function updateGuests(dt) {
       const recipe = getRecipe(guest.recipeId);
       addPayment(guest, Math.max(1, Math.round(Number(recipe?.foodPrice || 1))));
       grantGuestIngredient(guest);
-      markRestaurantGuestForCafe(guest);
       guest.state = "leaving";
       guest.targetX = 240;
       guest.targetY = 900;
@@ -1711,9 +1200,6 @@ function updateGuests(dt) {
     }
   }
 
-  state.guests
-    .filter((guest) => guest.state === "leaving" && guest.y >= 896 && guest.continueToCafe)
-    .forEach(queueRestaurantGuestForCafe);
   const before = state.guests.length;
   state.guests = state.guests.filter((guest) => !(guest.state === "leaving" && guest.y >= 896));
   if (state.guests.length !== before) {
@@ -1741,7 +1227,6 @@ function update(dt) {
     if (toastTimer <= 0) dom.toast.hidden = true;
   }
   updateGuests(dt);
-  updateCafeGuests(dt);
   updateSpecialCustomers(dt);
   updateCooking(dt);
   updateStaff(dt);
@@ -1788,93 +1273,6 @@ function drawBackground() {
   }
 }
 
-function drawCafeBackground() {
-  const gradient = ctx.createLinearGradient(0, 0, 0, GAME_H);
-  gradient.addColorStop(0, "#dce9b5");
-  gradient.addColorStop(1, "#8db673");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, GAME_W, GAME_H);
-
-  ctx.fillStyle = "rgba(87,122,65,.42)";
-  for (const [x, y, r] of [[28, 180, 68], [458, 210, 82], [25, 730, 85], [458, 710, 92]]) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  ctx.fillStyle = "#ecd7a3";
-  ctx.strokeStyle = "#8f6c44";
-  ctx.lineWidth = 4;
-  roundRect(35, 135, 410, 700, 34);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.strokeStyle = "rgba(135,94,53,.16)";
-  ctx.lineWidth = 2;
-  for (let y = 178; y < 820; y += 44) {
-    ctx.beginPath();
-    ctx.moveTo(40, y);
-    ctx.lineTo(440, y);
-    ctx.stroke();
-  }
-}
-
-function drawCafeLockedScene() {
-  const region = cafeRegion();
-  const recipeCount = unlockedRecipeCount();
-  const expansionAvailable = cafeExpansionAvailable();
-  ctx.save();
-  ctx.font = "58px 'Segoe UI Emoji', sans-serif";
-  ctx.textAlign = "center";
-  for (const [x, y] of [[95, 260], [180, 225], [285, 245], [385, 275], [125, 390], [245, 360], [365, 410], [95, 560], [225, 520], [370, 570], [155, 690], [320, 685]]) {
-    ctx.fillText("🌲", x, y);
-  }
-  ctx.fillStyle = "rgba(62,44,27,.82)";
-  roundRect(115, 320, 250, 94, 20);
-  ctx.fill();
-  ctx.fillStyle = "#fff7d4";
-  ctx.font = "900 23px sans-serif";
-  ctx.fillText("카페 확장 예정지", 240, 357);
-  ctx.font = "800 12px sans-serif";
-  ctx.fillText(expansionAvailable
-    ? "신규 지역 해금 완료 · 나무를 걷어내세요"
-    : `레시피 ${recipeCount}/${region?.recipeCount || 3} · 신규 지역을 먼저 해금하세요`, 240, 383);
-  ctx.restore();
-}
-
-function drawCafeFacility(row) {
-  const p = cafeFacilityPlacement(row);
-  if (row.facilityType !== 10 && row.facilityType !== 11) drawShadow(p.x, p.y + p.h * .38, p.w * .34, 7);
-  if (!drawImage(cafeThemeFacilityIcon(row), p.x, p.y, p.w, p.h)) {
-    ctx.fillStyle = "#ae8d65";
-    roundRect(p.x - p.w / 2, p.y - p.h / 2, p.w, p.h, 13);
-    ctx.fill();
-  }
-  if (row.facilityType === 18) {
-    ctx.fillStyle = "rgba(91,55,25,.9)";
-    roundRect(p.x - 43, p.y - p.h / 2 - 25, 86, 24, 12);
-    ctx.fill();
-    ctx.fillStyle = "#fff8dc";
-    ctx.textAlign = "center";
-    ctx.font = "900 11px sans-serif";
-    ctx.fillText("🎂 만들기", p.x, p.y - p.h / 2 - 9);
-  }
-}
-
-function drawCafeProgress() {
-  const themeId = activeCafeThemeId();
-  ctx.fillStyle = "rgba(255,249,225,.94)";
-  ctx.strokeStyle = "rgba(100,67,34,.62)";
-  ctx.lineWidth = 2;
-  roundRect(174, 150, 132, 34, 16);
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = "#61401f";
-  ctx.textAlign = "center";
-  ctx.font = "900 13px sans-serif";
-  ctx.fillText(CAFE_THEME_NAMES[themeId], 240, 172);
-}
-
 function drawShadow(x, y, rx, ry) {
   ctx.fillStyle = "rgba(44,35,19,.24)";
   ctx.beginPath();
@@ -1897,8 +1295,8 @@ function drawFacility(row) {
 }
 
 function drawInstallZone(row) {
-  const p = row.placementOverride || (Number(row.areaType) === 2 ? cafeFacilityPlacement(row) : facilityPlacement(row));
-  const price = Number(row.areaType) === 2 ? cafeThemePartPrice(row) : Number(row.facilityPrice);
+  const p = row.placementOverride || facilityPlacement(row);
+  const price = Number(row.facilityPrice);
   const pulse = .72 + Math.sin(state.clock * 3 + row.id) * .18;
   ctx.save();
   ctx.fillStyle = `rgba(255,247,214,${.88 + pulse * .08})`;
@@ -2015,31 +1413,6 @@ function drawGuest(guest) {
   }
 }
 
-function drawCafeGuest(guest) {
-  const bob = Math.sin(guest.bob * 4) * 2;
-  drawShadow(guest.x, guest.y + 25, 18, 5);
-  drawImage(guestIcon(guest), guest.x, guest.y + bob, 61, 61);
-  if (guest.state === "ordering") {
-    drawSpeechBubble(guest.x, guest.y - 55, 52, 46);
-    ctx.font = "25px 'Segoe UI Emoji', sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(guest.orderKind === "cake" ? "🍰" : "☕", guest.x, guest.y - 48);
-  } else if (guest.state === "enjoying") {
-    ctx.font = "27px 'Segoe UI Emoji', sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(guest.orderKind === "cake" ? "🍰" : "☕", guest.x, guest.y - 39);
-  } else if (guest.state === "returning_tray") {
-    ctx.font = "22px 'Segoe UI Emoji', sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("☕", guest.x, guest.y - 37);
-  } else if (guest.mood === "satisfied") {
-    ctx.fillStyle = "#d94b4b";
-    ctx.font = "900 18px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("♥", guest.x, guest.y - 38);
-  }
-}
-
 function drawSpecialCustomers() {
   for (const actor of state.specialActors) {
     drawShadow(actor.x, actor.y + 26, 20, 6);
@@ -2071,10 +1444,6 @@ function drawPaymentPile(payment) {
 
 function drawPayments() {
   for (const payment of state.payments) drawPaymentPile(payment);
-}
-
-function drawCafePayments() {
-  for (const payment of state.cafePayments) drawPaymentPile(payment);
 }
 
 function drawIngredientDrops() {
@@ -2121,19 +1490,6 @@ function drawTipboxValue() {
 }
 
 function drawWorldArea(area) {
-  if (area === "cafe") {
-    drawBackground();
-    if (!state.cafeArea.unlocked) {
-      drawCafeLockedScene();
-      return;
-    }
-    drawCafeProgress();
-    cafeInstalledRows().sort((a, b) => cafeFacilityPlacement(a).y - cafeFacilityPlacement(b).y).forEach(drawCafeFacility);
-    if (!state.ui.selectedInstallId) cafeInstallCandidates().forEach(drawInstallZone);
-    [...state.cafeGuests].sort((a, b) => a.y - b.y).forEach(drawCafeGuest);
-    drawCafePayments();
-    return;
-  }
   drawBackground();
 
   const installed = installedRows().sort((a, b) => facilityPlacement(a).y - facilityPlacement(b).y);
@@ -2151,16 +1507,10 @@ function drawWorldArea(area) {
 function render() {
   if (!tables || !state) return;
   ctx.clearRect(0, 0, GAME_W, GAME_H);
-  drawWorldArea(state.ui.worldArea);
+  drawWorldArea("restaurant");
 }
 
 function currentObjective() {
-  if (state.ui.worldArea === "cafe" && !state.cafeArea.unlocked) {
-    const region = cafeRegion();
-    return cafeExpansionAvailable()
-      ? "카페 구역 확장하기"
-      : `레시피 ${unlockedRecipeCount()}/${region?.recipeCount || 3}개 해금하기`;
-  }
   const required = [10, 1, 2].map((type) => tables.installs.find((row) => row.facilityType === type));
   const missing = required.find((row) => row && !isInstalled(row.id));
   if (missing) return `${FACILITY_META[missing.facilityType].name} 설치하기`;
@@ -2179,38 +1529,17 @@ function currentObjective() {
 function updateHud() {
   if (!state) return;
   ensureDailyReset();
-  const cafeWorld = state.ui.worldArea === "cafe";
   dom.acorns.textContent = formatNumber(state.resources.acorns);
   dom.ideas.textContent = formatNumber(state.resources.ideas);
   dom.gems.textContent = formatNumber(state.resources.gems);
-  dom.promoButton.hidden = cafeWorld;
-  dom.promoButton.disabled = cafeWorld || !coreReady();
+  dom.promoButton.hidden = false;
+  dom.promoButton.disabled = !coreReady();
   dom.missionDot.hidden = !hasMissionReward();
-  dom.recipeDot.hidden = cafeWorld || (!CORE_PROGRESSION.some((route) => canCraftRecipe(route.recipeId))
-    && !Object.values(state.ownedRecipes).some((owned) => !owned.codexClaimed || owned.stack > 0));
+  dom.recipeDot.hidden = !CORE_PROGRESSION.some((route) => canCraftRecipe(route.recipeId))
+    && !Object.values(state.ownedRecipes).some((owned) => !owned.codexClaimed || owned.stack > 0);
   dom.collectionDot.hidden = !Object.values(state.collections).some((dict) => Object.values(dict).some((entry) => entry.isNew));
-  dom.recipeNavLabel.textContent = cafeWorld ? "케이크" : "레시피";
-  dom.themeNavLabel.textContent = cafeWorld ? "카페 테마" : "테마";
-  const region = cafeRegion();
-  const recipeCount = unlockedRecipeCount();
-  const expansionAvailable = cafeExpansionAvailable();
-  dom.worldAreaButtons.forEach((button) => {
-    const targetArea = button.dataset.worldArea;
-    button.hidden = targetArea === state.ui.worldArea;
-    if (button.dataset.worldArea === "cafe") {
-      button.disabled = !state.cafeArea.unlocked && !expansionAvailable;
-      button.title = button.disabled
-        ? `레스토랑 레시피 ${recipeCount}/${region?.recipeCount || 3} 발견`
-        : "";
-    }
-  });
-  dom.worldAreaName.textContent = cafeWorld ? "카페" : "레스토랑";
-  dom.cafeLockBadge.textContent = state.cafeArea.unlocked
-    ? ""
-    : expansionAvailable ? "확장" : `${recipeCount}/${region?.recipeCount || 3}`;
-  dom.cafeExpandButton.hidden = !cafeWorld || state.cafeArea.unlocked;
-  dom.cafeExpandButton.disabled = !expansionAvailable;
-  dom.cakeWorkshopButton.hidden = !cafeWorld || !state.cafeArea.unlocked || !cafeBakingFacilityInstalled();
+  dom.recipeNavLabel.textContent = "레시피";
+  dom.themeNavLabel.textContent = "테마";
 }
 
 function pointerPosition(event) {
@@ -2229,19 +1558,6 @@ function insideBox(point, box, padding = 0) {
 function handleCanvasTap(event) {
   if (!dom.installPanel.hidden) return;
   const point = pointerPosition(event);
-
-  if (state.ui.worldArea === "cafe") {
-    if (!state.cafeArea.unlocked) return;
-    const payment = state.cafePayments.find((item) => Math.hypot(point.x - item.x, point.y - item.y) <= 42);
-    if (payment) return collectCafePayment(payment);
-    const bakingFacility = cafeInstalledRows().find((row) =>
-      row.facilityType === 18 && insideBox(point, cafeFacilityPlacement(row), 14));
-    if (bakingFacility) return openMenu("cake");
-    const candidate = cafeInstallCandidates().find((row) => insideBox(point, cafeFacilityPlacement(row), 10));
-    if (candidate) openInstallPanel(candidate);
-    render();
-    return;
-  }
 
   const special = state.specialActors.find((actor) => Math.hypot(point.x - actor.x, point.y - actor.y) <= 48);
   if (special) return catchSpecial(special);
@@ -2280,54 +1596,11 @@ function closeMenu() {
   saveState();
 }
 
-function setWorldArea(area) {
-  if (!["restaurant", "cafe"].includes(area)) return;
-  if (area === "cafe" && !state.cafeArea.unlocked && !cafeExpansionAvailable()) {
-    const region = cafeRegion();
-    const remaining = Math.max(0, Number(region?.recipeCount || 3) - unlockedRecipeCount());
-    showToast(`레스토랑 레시피를 ${remaining}개 더 발견하면 카페 확장이 열려요.`);
-    return;
-  }
-  state.ui.worldArea = area;
-  state.ui.themeArea = area;
-  state.ui.screen = "restaurant";
-  state.ui.selectedInstallId = null;
-  dom.menuScreen.hidden = true;
-  dom.installPanel.hidden = true;
-  setActiveNav("");
-  saveState();
-  updateHud();
-  render();
-}
-
-function expandCafeArea() {
-  if (state.cafeArea.unlocked) return;
-  const region = cafeRegion();
-  if (!cafeExpansionAvailable()) {
-    const remaining = Math.max(0, Number(region?.recipeCount || 3) - unlockedRecipeCount());
-    return showToast(`레스토랑 레시피를 ${remaining}개 더 발견하면 카페 지역을 확장할 수 있어요.`);
-  }
-  const expansion = tables.areaExpansions.find((row) => Number(row.id) === 2);
-  const price = Number(expansion?.areaPrice || 0);
-  if (state.resources.acorns < price) return showToast("카페 확장에 필요한 도토리가 부족해요.");
-  state.resources.acorns -= price;
-  state.cafeArea.unlocked = true;
-  state.cafeArea.expansionConfirmed = true;
-  state.cafeThemes.activeThemeId = 101;
-  state.ui.cafeThemeId = 101;
-  showToast("신규 지역 해금 보상으로 카페 구역이 열렸습니다!");
-  saveState();
-  updateHud();
-  render();
-}
-
 function openMenu(screen) {
-  const resolvedScreen = screen === "recipe" && state.ui.worldArea === "cafe" ? "cake" : screen;
-  if (screen === "theme") state.ui.themeArea = state.ui.worldArea;
-  state.ui.screen = resolvedScreen;
-  state.ui.tab = resolvedScreen === "recipe" ? "craft" : resolvedScreen === "missions" ? "main" : resolvedScreen === "collection" ? "customers" : resolvedScreen;
+  state.ui.screen = screen;
+  state.ui.tab = screen === "recipe" ? "craft" : screen === "missions" ? "main" : screen === "collection" ? "customers" : screen;
   dom.menuScreen.hidden = false;
-  setActiveNav(resolvedScreen === "cake" ? "recipe" : screen);
+  setActiveNav(screen);
   renderMenu();
 }
 
@@ -2444,7 +1717,7 @@ function craftingRouteCard(route) {
 function renderRecipeMenu() {
   dom.menuKicker.textContent = "아이템 주방";
   dom.menuTitle.textContent = "레시피";
-  renderTabs([["craft", "아이템 제작"], ["owned", `보유 ${unlockedRecipeCount()}`], ["regions", "지역 해금"]]);
+  renderTabs([["craft", "아이템 제작"], ["owned", `보유 ${unlockedRecipeCount()}`]]);
   if (state.ui.tab === "craft") {
     const visibleRoutes = CORE_PROGRESSION.filter(isProgressionRouteUnlocked);
     const visibleIngredients = [...new Map(visibleRoutes.flatMap((route) => route.ingredientRequirements).map((ingredient) => [ingredient.id, ingredient])).values()];
@@ -2452,12 +1725,9 @@ function renderRecipeMenu() {
       <div class="ingredient-strip">${visibleIngredients.map((ingredient) => `<span>${ingredient.emoji}<b>${ingredient.name}</b> ${ingredientAmount(ingredient.id)}</span>`).join("")}</div>
       <button class="research-button" data-action="auto-craft">추천 제작</button></section>
       ${visibleRoutes.map(craftingRouteCard).join("")}`;
-  } else if (state.ui.tab === "owned") {
+  } else {
     const owned = Object.keys(state.ownedRecipes).map((id) => getRecipe(Number(id))).filter(Boolean);
     dom.menuContent.innerHTML = `<p class="section-note">레시피 ${owned.length} · 전체 수익 +${Math.max(0, owned.length - 1) * 5}%</p>${owned.map(recipeCard).join("")}`;
-  } else {
-    const count = unlockedRecipeCount();
-    dom.menuContent.innerHTML = `${REGION_UNLOCKS.map((region) => { const opened = count >= region.recipeCount; return `<article class="feature-card ${opened ? "" : "is-locked"}"><div class="feature-icon region-icon"><img class="region-frame" src="assets/ui/common/bg_frame_expansion_01.png" alt="" /><img class="region-status" src="assets/ui/common/${opened ? "icon_check" : "icon_lock"}.png" alt="" /></div><div class="feature-copy"><strong>${region.name}</strong><small>필요 레시피 ${region.recipeCount}개</small><div class="progress-track"><span style="width:${Math.min(100, count / region.recipeCount * 100)}%"></span></div><small>${count}/${region.recipeCount}${opened ? " · 확장 가능" : ""}</small></div></article>`; }).join("")}`;
   }
 }
 
@@ -2602,14 +1872,6 @@ function renderPerformanceManagement() {
     ${tables.performances.map((row) => `<article class="feature-card ${state.collections.performers[row.id] ? "" : "is-locked"}"><img class="feature-icon" src="assets/ui/performance/icon_performance_${String(row.id).padStart(3, "0")}.png" alt="" /><div class="feature-copy"><strong>${state.collections.performers[row.id] ? `공연팀 ${row.id}` : "???"}</strong><small>가격 +${Math.round(row.abilityValue * 100)}% · ${row.performanceTime}초</small><small>${row.price ? `공연료 도토리 ${row.price}` : "무료 공연"}</small></div></article>`).join("")}`;
 }
 
-function themeAreaSwitchHtml() {
-  const area = state.ui.themeArea === "cafe" ? "cafe" : "restaurant";
-  return `<div class="theme-area-switch" aria-label="테마 구역 선택">
-    <button type="button" data-action="theme-area" data-area="restaurant" class="${area === "restaurant" ? "is-active" : ""}">레스토랑 테마</button>
-    <button type="button" data-action="theme-area" data-area="cafe" class="${area === "cafe" ? "is-active" : ""}">카페 테마</button>
-  </div>`;
-}
-
 function themeProgressGauge(ratio, milestones) {
   const percent = Math.max(0, Math.min(100, Number(ratio || 0) * 100));
   return `<div class="theme-progress-gauge" aria-label="구매 진척도 ${Math.round(percent)}%">
@@ -2619,61 +1881,7 @@ function themeProgressGauge(ratio, milestones) {
   </div>`;
 }
 
-function renderCafeThemeManagement() {
-  const themeIds = Object.keys(CAFE_THEME_NAMES).map(Number);
-  const selectedTheme = themeIds.includes(Number(state.ui.cafeThemeId))
-    ? Number(state.ui.cafeThemeId)
-    : themeIds[0];
-  state.ui.cafeThemeId = selectedTheme;
-  state.cafeThemes.activeThemeId = selectedTheme;
-  const rows = cafeThemeRows(selectedTheme);
-  const progress = cafeThemeProgress(selectedTheme);
-  const rewards = CAFE_THEME_CAKE_REWARDS[selectedTheme] || [];
-  const ingredientIds = new Set(state.cafeThemes.cakeIngredients);
-  const ownedIngredients = state.cafeThemes.cakeIngredients.map(cakeIngredientData).filter(Boolean);
-  const typeNames = { sheet: "시트", cream: "크림", topping: "토핑" };
-  const rewardCards = rewards.map((reward, index) => {
-    const unlocked = ingredientIds.has(reward.id);
-    const requiredCount = Math.ceil(progress.total * CAFE_CAKE_MILESTONES[index]);
-    return `<div class="cake-reward-chip ${unlocked ? "is-unlocked" : "is-locked"}">
-      <span>${reward.emoji}</span><div><b>${reward.name}</b>
-      <small>${Math.round(CAFE_CAKE_MILESTONES[index] * 100)}% · ${unlocked ? "해금" : `${progress.opened}/${requiredCount}`}</small></div>
-    </div>`;
-  }).join("");
-  const gauge = themeProgressGauge(progress.ratio, CAFE_CAKE_MILESTONES.map((threshold, index) => ({
-    threshold,
-    label: `${Math.round(threshold * 100)}% ${typeNames[rewards[index]?.type] || ""}`,
-  })));
-
-  dom.menuContent.innerHTML = `<div class="theme-tabs" aria-label="카페 테마 선택">${themeIds.map((themeId) => {
-    const representative = cafeThemeRows(themeId).find((row) => row.facilityType === 15) || cafeThemeRows(themeId)[0];
-    return `<button type="button" data-action="theme-select" data-id="${themeId}" class="${themeId === selectedTheme ? "is-active" : ""}"><img src="${cafeThemeFacilityIcon(representative)}" alt=""/><span>${CAFE_THEME_NAMES[themeId]}</span></button>`;
-  }).join("")}</div>
-    <section class="theme-summary"><div><strong>${CAFE_THEME_NAMES[selectedTheme]}</strong>
-      <span>진척도 ${progress.opened}/${progress.total} · 재료 ${ownedIngredients.length}종</span>
-      ${gauge}</div></section>
-    <div class="cake-reward-milestones">${rewardCards}</div>
-    ${rows.map((row) => {
-    const opened = state.cafeThemes.opened.includes(row.id);
-    const price = cafeThemePartPrice(row);
-    const canBuy = state.cafeArea.unlocked && !opened && state.resources.acorns >= price;
-    let label = `${formatNumber(price)} 구매`;
-    if (!state.cafeArea.unlocked) label = "카페 확장 필요";
-    if (opened) label = "보유 중";
-    return `<article class="feature-card ${state.cafeArea.unlocked ? "" : "is-locked"}"><img class="feature-icon" src="${cafeThemeFacilityIcon(row)}" alt=""/>
-      <div class="feature-copy"><strong>${FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`}</strong>
-      <small>${CAFE_THEME_NAMES[selectedTheme]}${row.facilityGroup > 1 ? ` ${row.facilityGroup}` : ""}</small></div>
-      <button class="card-action" data-action="buy-cafe-theme" data-id="${row.id}" ${canBuy ? "" : "disabled"}>${label}</button></article>`;
-  }).join("")}`;
-  requestAnimationFrame(() => {
-    const tabs = dom.menuContent.querySelector(".theme-tabs");
-    const selected = tabs?.querySelector(`[data-id="${selectedTheme}"]`);
-    if (tabs && selected) tabs.scrollLeft = Math.max(0, selected.offsetLeft - (tabs.clientWidth - selected.clientWidth) / 2);
-  });
-}
-
 function renderThemeManagement() {
-  if (state.ui.worldArea === "cafe") return renderCafeThemeManagement();
   const themeIds = [...new Set(tables.restaurantThemes.map((row) => row.facilityTheme))].sort((a, b) => a - b);
   const selectedTheme = themeIds.includes(Number(state.ui.themeId)) ? Number(state.ui.themeId) : themeIds[0];
   state.ui.themeId = selectedTheme;
@@ -2724,89 +1932,6 @@ function renderThemeManagement() {
   });
 }
 
-function cakeIngredientSelector(type, title, selectedId) {
-  return `<section class="cake-part-group"><div class="cake-part-heading"><strong>${title}</strong><small>${unlockedCakeIngredients(type).length}종 해금</small></div>
-    <div class="cake-part-options">${unlockedCakeIngredients(type).map((ingredient) =>
-    `<button type="button" data-action="select-cake-part" data-kind="${type}" data-part-id="${ingredient.id}" class="${ingredient.id === selectedId ? "is-active" : ""}">
-      <i>${ingredient.emoji}</i><span>${ingredient.name}</span></button>`).join("")}</div></section>`;
-}
-
-function cakePreviewColors() {
-  const sheet = {
-    cake_sheet_basic: "#efbd6d",
-    cake_sheet_walnut: "#a96840",
-    cake_sheet_vanilla: "#f3d490",
-  }[state.cakeWorkshop.selectedSheet] || "#d39b63";
-  const cream = {
-    cake_cream_fresh: "#fff7e8",
-    cake_cream_maple: "#eeb95e",
-    cake_cream_espresso: "#77513b",
-  }[state.cakeWorkshop.selectedCream] || "#f4d6af";
-  return { sheet, cream };
-}
-
-function renderCakeWorkshop() {
-  ensureCakeDailyReset();
-  dom.menuKicker.textContent = "카페 레시피";
-  dom.menuTitle.textContent = "수제 케이크";
-  dom.menuTabs.innerHTML = "";
-  const workshop = state.cakeWorkshop;
-  const codex = CAKE_RECIPES.map((item) => {
-    const discovered = workshop.discoveredRecipeIds.includes(item.id);
-    const combination = discovered
-      ? [item.sheetId, item.creamId, item.toppingId].map(cakeIngredientData).filter(Boolean)
-        .map((ingredient) => `<span>${ingredient.emoji} ${ingredient.name}</span>`).join("")
-      : `<span>시트 ???</span><span>크림 ???</span><span>토핑 ???</span>`;
-    return `<article class="cake-codex-card ${discovered ? "" : "is-locked"}"><b>${discovered ? "🎂" : "?"}</b><div><strong>${discovered ? item.name : "아직 모르는 조합"}</strong><small>${combination}</small></div></article>`;
-  }).join("");
-  if (!cafeBakingFacilityInstalled()) {
-    dom.menuContent.innerHTML = `<section class="cake-workshop-lock"><span>🎂</span><strong>케이크 진열대를 먼저 설치해 주세요</strong>
-      <button type="button" data-action="go-cafe-theme">카페 테마에서 진열대 찾기</button></section>
-      <section class="cake-codex"><div class="cake-part-heading"><strong>카페 케이크 레시피</strong><small>${workshop.discoveredRecipeIds.length}/${CAKE_RECIPES.length}</small></div>${codex}</section>`;
-    return;
-  }
-  const sheet = cakeIngredientData(workshop.selectedSheet);
-  const cream = cakeIngredientData(workshop.selectedCream);
-  const topping = cakeIngredientData(workshop.selectedTopping);
-  const recipe = selectedCakeRecipe();
-  const recipeKnown = recipe && workshop.discoveredRecipeIds.includes(recipe.id);
-  const colors = cakePreviewColors();
-  const toppingHtml = workshop.toppingPlacements.map((placement, index) =>
-    `<span class="placed-cake-topping" style="left:${placement.x * 100}%;top:${placement.y * 100}%;transform:translate(-50%,-50%) rotate(${placement.rotation}deg)" aria-hidden="true">${topping?.emoji || "🍓"}<small>${index + 1}</small></span>`).join("");
-  const result = workshop.lastResult
-    ? `<section class="cake-result ${workshop.lastResult.comboBonus ? "is-combo" : ""}">
-      <span>${workshop.lastResult.newlyDiscovered ? "✨ 신규 레시피 발견" : workshop.lastResult.comboBonus ? "레시피 조합 완성" : "커스텀 케이크 완성"}</span>
-      <strong>${workshop.lastResult.name}</strong>
-      <small>조각당 🌰 ${formatNumber(workshop.lastResult.unitPrice)} · ${workshop.lastResult.saleCount}조각 한정 판매</small>
-    </section>`
-    : "";
-  const sale = workshop.limitedSale
-    ? `<section class="cake-sale-status"><span>진열 중</span><div><strong>${workshop.limitedSale.name}</strong><small>남은 ${workshop.limitedSale.remaining}조각</small></div><b>🌰 ${formatNumber(workshop.limitedSale.unitPrice)}</b></section>`
-    : "";
-  const craftButtons = workshop.freeCraftsUsed < 1
-    ? `<button class="cake-finish-button" data-action="finish-cake" data-currency="free">오늘의 무료 제작으로 완성하기</button>`
-    : `<div class="cake-paid-actions">
-      <button class="cake-finish-button" data-action="finish-cake" data-currency="ideas" ${state.resources.ideas >= CAKE_SECOND_CRAFT_IDEA_COST ? "" : "disabled"}>💡 ${CAKE_SECOND_CRAFT_IDEA_COST}로 완성</button>
-      <button class="cake-finish-button secondary" data-action="finish-cake" data-currency="gems" ${state.resources.gems >= CAKE_SECOND_CRAFT_GEM_COST ? "" : "disabled"}>💎 ${CAKE_SECOND_CRAFT_GEM_COST}로 완성</button>
-    </div>`;
-  dom.menuContent.innerHTML = `${sale}${result}
-    ${cakeIngredientSelector("sheet", "1. 시트 맛", workshop.selectedSheet)}
-    ${cakeIngredientSelector("cream", "2. 크림 맛", workshop.selectedCream)}
-    ${cakeIngredientSelector("topping", "3. 대표 토핑", workshop.selectedTopping)}
-    <section class="cake-decoration">
-      <div class="cake-decoration-heading"><div><strong>4. 토핑 꾸미기</strong><small>케이크 위를 눌러 ${topping?.name || "토핑"}을 놓으세요.</small></div>
-        <div><button type="button" data-action="undo-cake-topping" ${workshop.toppingPlacements.length ? "" : "disabled"}>하나 취소</button><button type="button" data-action="clear-cake-toppings" ${workshop.toppingPlacements.length ? "" : "disabled"}>초기화</button></div></div>
-      <button type="button" class="cake-preview" data-action="place-cake-topping" aria-label="토핑 놓기" style="--cake-sheet:${colors.sheet};--cake-cream:${colors.cream}">
-        <span class="cake-layer cake-layer-bottom"></span><span class="cake-layer cake-layer-middle"></span><span class="cake-layer cake-layer-top"></span>
-        ${toppingHtml}
-      </button>
-      <div class="cake-combination"><span>${sheet?.emoji} ${sheet?.name}</span><b>+</b><span>${cream?.emoji} ${cream?.name}</span><b>+</b><span>${topping?.emoji} ${topping?.name}</span></div>
-      <p>${recipeKnown ? `등록 조합 · <strong>${recipe.name}</strong> · 수익 보너스 적용` : recipe ? "아직 발견하지 않은 조합입니다." : "등록되지 않은 조합도 커스텀 케이크로 완성할 수 있습니다."}</p>
-      ${craftButtons}
-    </section>
-    <section class="cake-codex"><div class="cake-part-heading"><strong>발견한 케이크 레시피</strong><small>${workshop.discoveredRecipeIds.length}/${CAKE_RECIPES.length}</small></div>${codex}</section>`;
-}
-
 function renderMenu() {
   if (state.ui.screen === "recipe") renderRecipeMenu();
   else if (state.ui.screen === "missions") renderMissionMenu();
@@ -2826,8 +1951,6 @@ function renderMenu() {
     dom.menuTitle.textContent = "공연";
     dom.menuTabs.innerHTML = "";
     renderPerformanceManagement();
-  } else if (state.ui.screen === "cake") {
-    renderCakeWorkshop();
   }
 }
 
@@ -2852,86 +1975,22 @@ function frame(now) {
 }
 
 function renderGameToText() {
-  const cafeMode = state.ui.worldArea === "cafe";
-  const candidateRows = cafeMode
-    ? state.cafeArea.unlocked ? cafeInstallCandidates() : []
-    : installCandidates();
-  const candidates = candidateRows.map((row) => ({
+  const candidates = installCandidates().map((row) => ({
     id: row.id,
     name: FACILITY_META[row.facilityType]?.name,
-    cost: cafeMode ? cafeThemePartPrice(row) : row.facilityPrice,
-    ...(cafeMode ? cafeFacilityPlacement(row) : facilityPlacement(row)),
+    cost: row.facilityPrice,
+    ...facilityPlacement(row),
   }));
   return JSON.stringify({
     coordinateSystem: "canvas 480x900; origin top-left; x right; y down",
-    mode: cafeMode ? "cafe" : "restaurant",
-    worldNavigation: {
-      areas: ["restaurant", "cafe"],
-      current: cafeMode ? "cafe" : "restaurant",
-      previous: cafeMode ? "restaurant" : null,
-      next: cafeMode ? null : "cafe",
-      methods: ["edge-arrow"],
-      cafeAccessible: state.cafeArea.unlocked || cafeExpansionAvailable(),
-    },
-    menuContext: cafeMode ? "cafe" : "restaurant",
-    visibleRecipeType: cafeMode ? "cake" : "restaurant",
-    visibleThemeType: cafeMode ? "cafe" : "restaurant",
+    mode: "restaurant",
+    menuContext: "restaurant",
+    visibleRecipeType: "restaurant",
+    visibleThemeType: "restaurant",
     objective: currentObjective(),
     resources: state.resources,
     installedFacilityIds: state.installed,
     installCandidates: candidates,
-    cafeArea: {
-      unlocked: state.cafeArea.unlocked,
-      expansionConfirmed: state.cafeArea.expansionConfirmed,
-      expansionAvailable: cafeExpansionAvailable(),
-      requiredRecipeCount: cafeRegion()?.recipeCount || 3,
-      unlockedRecipeCount: unlockedRecipeCount(),
-      discoveredRestaurantRecipeCount: unlockedRecipeCount(),
-      activeThemeId: activeCafeThemeId(),
-      activeThemeName: CAFE_THEME_NAMES[activeCafeThemeId()],
-      installedPartIds: cafeInstalledRows().map((row) => row.id),
-      bakingFacilityInstalled: cafeBakingFacilityInstalled(),
-      serviceReady: cafeServiceReady(),
-      continuedVisitChance: CAFE_CONTINUE_VISIT_CHANCE,
-      queuedVisitors: state.cafeQueue.length,
-      totalVisitors: state.cafeVisit.total,
-    },
-    cafeGuests: state.cafeGuests.map((guest) => ({
-      id: guest.id,
-      sourceRestaurantGuestId: guest.sourceRestaurantGuestId,
-      customerId: guest.customerId,
-      customerName: guest.customerName,
-      icon: guestIcon(guest),
-      state: guest.state,
-      x: Math.round(guest.x),
-      y: Math.round(guest.y),
-      orderKind: guest.orderKind,
-      cakePurchase: guest.cakePurchase,
-      enjoyRemaining: guest.state === "enjoying"
-        ? Number(Math.max(0, GUEST_MEAL_DURATION_SECONDS - guest.stateTime).toFixed(1))
-        : null,
-    })),
-    cafePayments: state.cafePayments.map((payment) => ({
-      id: payment.id,
-      seatId: payment.seatId,
-      x: Math.round(payment.x),
-      y: Math.round(payment.y),
-      amount: payment.amount,
-      models: Number(payment.models || 1),
-    })),
-    cakeWorkshop: {
-      freeCraftAvailable: state.cakeWorkshop.freeCraftsUsed < 1,
-      totalCrafted: state.cakeWorkshop.totalCrafted,
-      selections: {
-        sheetId: state.cakeWorkshop.selectedSheet,
-        creamId: state.cakeWorkshop.selectedCream,
-        toppingId: state.cakeWorkshop.selectedTopping,
-      },
-      toppingCount: state.cakeWorkshop.toppingPlacements.length,
-      matchedRecipe: selectedCakeRecipe()?.id || null,
-      discoveredRecipeIds: [...state.cakeWorkshop.discoveredRecipeIds],
-      limitedSale: state.cakeWorkshop.limitedSale ? { ...state.cakeWorkshop.limitedSale } : null,
-    },
     mealDurationSeconds: GUEST_MEAL_DURATION_SECONDS,
     promotion: { ...state.promotion, threshold: promotionThreshold(), enabled: coreReady() },
     guests: state.guests.map((guest) => ({
@@ -2957,7 +2016,6 @@ function renderGameToText() {
       rewardItems: (progressionForCustomer(guest.customerId)?.rewardIngredients || []).map((ingredient) => ({ ingredientId: ingredient.id, name: ingredient.name })),
       themeId: guest.themeId || chickMilestoneForCustomer(guest.customerId)?.themeId || null,
       chickSlot: Number.isInteger(guest.chickSlot) ? guest.chickSlot : chickMilestoneForCustomer(guest.customerId)?.slot ?? null,
-      cakePurchase: guest.cakePurchase || null,
     })),
     ordersQueued: state.orders.length,
     cooking: state.cooking.map((task) => ({
@@ -3025,20 +2083,6 @@ function renderGameToText() {
         return [themeId, { min: Math.min(...prices), max: Math.max(...prices) }];
       })),
       guestGrades: GUEST_GRADES,
-      cafeCakeMilestones: CAFE_CAKE_MILESTONES,
-      cafeThemes: Object.fromEntries(Object.keys(CAFE_THEME_NAMES).map((themeId) => {
-        const progress = cafeThemeProgress(Number(themeId));
-        return [themeId, {
-          ...progress,
-          partPrice: CAFE_THEME_PART_PRICES[themeId],
-          rewards: (CAFE_THEME_CAKE_REWARDS[themeId] || []).map((reward, index) => ({
-            ...reward,
-            threshold: CAFE_CAKE_MILESTONES[index],
-            unlocked: state.cafeThemes.cakeIngredients.includes(reward.id),
-          })),
-        }];
-      })),
-      cakeIngredients: state.cafeThemes.cakeIngredients.map(cakeIngredientData).filter(Boolean),
       themeChickProgress: Object.fromEntries(Object.keys(THEME_NAMES).map((themeId) => {
         const progress = themeChickProgress(Number(themeId));
         return [themeId, { ...progress, unlocked: unlockedThemeChicks(Number(themeId)).map((chick) => chick.customerId) }];
@@ -3057,7 +2101,6 @@ function renderGameToText() {
       ingredients: { ...state.crafting.ingredients },
       autoCraft: "click-to-craft-one",
       craftedRecipes: state.crafting.history.map((entry) => entry.recipeId),
-      unlockedRegions: unlockedRegions().map((region) => region.id),
     },
     missions: {
       mainGroup: state.missions.mainGroup,
@@ -3103,10 +2146,6 @@ dom.installClose.addEventListener("click", closeInstallPanel);
 dom.installConfirm.addEventListener("click", confirmInstall);
 dom.menuClose.addEventListener("click", closeMenu);
 dom.navButtons.forEach((button) => button.addEventListener("click", () => openMenu(button.dataset.screen)));
-dom.worldAreaButtons.forEach((button) =>
-  button.addEventListener("click", () => setWorldArea(button.dataset.worldArea)));
-dom.cafeExpandButton.addEventListener("click", expandCafeArea);
-dom.cakeWorkshopButton.addEventListener("click", () => openMenu("cake"));
 dom.menuTabs.addEventListener("click", (event) => {
   const button = event.target.closest("[data-tab]");
   if (!button) return;
@@ -3116,50 +2155,6 @@ dom.menuTabs.addEventListener("click", (event) => {
 dom.menuContent.addEventListener("click", (event) => {
   const button = event.target.closest("[data-action]");
   if (!button || button.disabled) return;
-  if (button.dataset.action === "go-cafe-theme") {
-    openMenu("theme");
-    return;
-  }
-  if (button.dataset.action === "select-cake-part") {
-    selectCakePart(button.dataset.kind, button.dataset.partId);
-    return;
-  }
-  if (button.dataset.action === "place-cake-topping") {
-    if (state.cakeWorkshop.toppingPlacements.length >= 12) {
-      showToast("토핑은 최대 12개까지 올릴 수 있어요.");
-      return;
-    }
-    const rect = button.getBoundingClientRect();
-    const x = Math.min(.88, Math.max(.12, (event.clientX - rect.left) / rect.width));
-    const y = Math.min(.78, Math.max(.14, (event.clientY - rect.top) / rect.height));
-    state.cakeWorkshop.toppingPlacements.push({
-      x,
-      y,
-      rotation: (state.cakeWorkshop.toppingPlacements.length * 37) % 50 - 25,
-    });
-    state.cakeWorkshop.lastResult = null;
-    saveState();
-    renderMenu();
-    return;
-  }
-  if (button.dataset.action === "undo-cake-topping") {
-    state.cakeWorkshop.toppingPlacements.pop();
-    state.cakeWorkshop.lastResult = null;
-    saveState();
-    renderMenu();
-    return;
-  }
-  if (button.dataset.action === "clear-cake-toppings") {
-    state.cakeWorkshop.toppingPlacements = [];
-    state.cakeWorkshop.lastResult = null;
-    saveState();
-    renderMenu();
-    return;
-  }
-  if (button.dataset.action === "finish-cake") {
-    finishCake(button.dataset.currency);
-    return;
-  }
   const id = Number(button.dataset.id);
   if (button.dataset.action === "research") doResearch();
   if (button.dataset.action === "craft-recipe") craftRecipe(id, false);
@@ -3175,18 +2170,10 @@ dom.menuContent.addEventListener("click", (event) => {
   if (button.dataset.action === "level-staff") levelUpStaff(id);
   if (button.dataset.action === "start-performance") startPerformance();
   if (button.dataset.action === "buy-theme") buyTheme(id);
-  if (button.dataset.action === "buy-cafe-theme") buyCafeTheme(id);
   if (button.dataset.action === "apply-theme") applyTheme(id);
   if (button.dataset.action === "apply-theme-all") applyThemeAll(id);
-  if (button.dataset.action === "theme-area") { state.ui.themeArea = button.dataset.area; renderMenu(); }
   if (button.dataset.action === "theme-select") {
-    if (state.ui.worldArea === "cafe") {
-      state.ui.cafeThemeId = id;
-      state.cafeThemes.activeThemeId = id;
-      saveState();
-      updateHud();
-      render();
-    } else state.ui.themeId = id;
+    state.ui.themeId = id;
     renderMenu();
   }
   if (button.dataset.action === "theme-filter") { state.ui.themeFacilityType = id; renderMenu(); }

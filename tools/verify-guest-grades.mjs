@@ -31,8 +31,8 @@ if (JSON.stringify(GUEST_GRADES.map((grade) => [
 if (CORE_PROGRESSION.length !== 45) {
   throw new Error(`Expected 45 chick routes, got ${CORE_PROGRESSION.length}`);
 }
-if (GUEST_INGREDIENT_DROP_CHANCE !== 0.3) {
-  throw new Error(`Guest ingredient drop chance must be 30%, got ${GUEST_INGREDIENT_DROP_CHANCE}`);
+if (GUEST_INGREDIENT_DROP_CHANCE !== 0.08) {
+  throw new Error(`Guest ingredient drop chance must be 8%, got ${GUEST_INGREDIENT_DROP_CHANCE}`);
 }
 
 const validIngredientIds = new Set(Object.values(GAME_INGREDIENTS).map((ingredient) => ingredient.id));

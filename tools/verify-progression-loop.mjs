@@ -135,7 +135,6 @@ try {
   if (current.progression.ingredients[30007] !== 0 || current.progression.ingredients[30010] !== 0 || !current.progression.craftedRecipes.includes(10)) {
     throw new Error("Manual recipe crafting failed");
   }
-  if (current.progression.unlockedRegions.length !== 0) throw new Error("Region unlocked before three recipes were owned");
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(out, "03-manual-crafted.png"), fullPage: true });
 
@@ -160,16 +159,10 @@ try {
   current = await state();
   const autoEntry = current.progression.craftedRecipes.includes(7);
   if (!autoEntry || current.progression.ingredients[30002] !== 0 || current.progression.ingredients[30004] !== 0) throw new Error("Automatic pizza ingredient combination failed");
-  if (!current.progression.unlockedRegions.includes(1)) throw new Error("Three recipes did not unlock the new region");
-  if (!current.cafeArea.expansionAvailable || current.cafeArea.unlocked) {
-    throw new Error(`The third recipe must enable, but not automatically open, Cafe expansion: ${JSON.stringify(current.cafeArea)}`);
-  }
-
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
-  await page.locator('[data-tab="regions"]').click();
   await page.waitForTimeout(250);
-  await page.locator(".game-frame").screenshot({ path: path.join(out, "04-auto-crafted-regions-drop30.png") });
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "04-auto-crafted-restaurant-only.png") });
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
