@@ -204,6 +204,13 @@ const GAME_RECIPE_CATALOG = [
 ];
 
 function themeRewardIngredientKeys(themeId, slot) {
+  if (Number(themeId) === 3) {
+    return [
+      ["leaf", "oil", "rice"],
+      ["potato", "leaf", "cheese"],
+      ["tomato", "leaf", "sausage"],
+    ][Number(slot)];
+  }
   const current = THEME_NEW_INGREDIENT_KEYS[themeId];
   if (themeId === 1) return current.slice(slot * 3, slot * 3 + 3);
   const repeated = THEME_REPEAT_INGREDIENT_KEYS[themeId];
