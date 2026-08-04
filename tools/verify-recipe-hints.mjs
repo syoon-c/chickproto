@@ -41,10 +41,10 @@ try {
   await page.locator('[data-screen="recipe"]').click();
 
   const allCards = page.locator(".recipe-catalog-card");
-  if (await allCards.count() !== 59
-    || await page.locator(".recipe-catalog-card.is-mystery").count() !== 58
+  if (await allCards.count() !== 64
+    || await page.locator(".recipe-catalog-card.is-mystery").count() !== 63
     || await page.locator(".recipe-catalog-card.is-discovered").count() !== 1) {
-    throw new Error("The recipe catalog does not show all 59 discovered and mystery cards");
+    throw new Error("The recipe catalog does not show all 64 discovered and mystery cards");
   }
   const mysteryNames = await page.locator(".recipe-catalog-card.is-mystery .recipe-catalog-copy > strong").allTextContents();
   if (mysteryNames.some((name) => name !== "???")) throw new Error("A locked recipe name was exposed");
@@ -100,7 +100,7 @@ try {
   await page.evaluate(() => window.advanceTime(2500));
   current = await gameState();
   if (current.recipes.levels[String(recipeInfo.sandwich.recipeId)] !== 1
-    || current.recipes.mysteryRecipeCount !== 57
+    || current.recipes.mysteryRecipeCount !== 62
     || !await page.locator("#recipe-reveal").isVisible()) {
     throw new Error("Completing the hinted combination did not discover the recipe");
   }
@@ -115,7 +115,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log("RECIPE_HINTS_OK catalog=59 oneMatch=bread name=sandwich clue=green-vegetable persisted=true discovered=sandwich");
+  console.log("RECIPE_HINTS_OK catalog=64 oneMatch=bread name=sandwich clue=green-vegetable persisted=true discovered=sandwich");
 } finally {
   await browser.close();
 }

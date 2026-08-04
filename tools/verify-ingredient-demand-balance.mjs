@@ -23,7 +23,7 @@ const activeRows = Object.values(ingredientRows).filter((row) => row.uses > 0);
 const supplyRatios = activeRows.map((row) => row.supplyWeight / row.uses);
 const minSupplyRatio = Math.min(...supplyRatios);
 const maxSupplyRatio = Math.max(...supplyRatios);
-if (RECIPE_PROGRESSION.length !== 59 || activeRows.length !== 51
+if (RECIPE_PROGRESSION.length !== 64 || activeRows.length !== 51
   || activeRows.filter((row) => row.uses === 1).length !== 12
   || maxSupplyRatio / minSupplyRatio > 3.01) {
   throw new Error(`Ingredient demand/supply balance mismatch: ${JSON.stringify({
@@ -96,7 +96,7 @@ try {
   }, info);
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
-  if (await page.locator(".recipe-catalog-card").count() !== 59) throw new Error("Recipe UI does not show 59 recipes");
+  if (await page.locator(".recipe-catalog-card").count() !== 64) throw new Error("Recipe UI does not show 64 recipes");
   for (const ingredient of [info.corn, info.cheese, info.butter]) {
     await page.locator(`[data-action="select-ingredient"][data-id="${ingredient.id}"]`).click();
   }
@@ -148,7 +148,7 @@ try {
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "03-surplus-auto-research.png") });
 
   if (errors.length) throw new Error(`Console errors: ${errors.join(" | ")}`);
-  console.log(`INGREDIENT_DEMAND_BALANCE_OK recipes=59 active=51 singleUse=12 supplySpread=${(maxSupplyRatio / minSupplyRatio).toFixed(1)}x auto=inventory-pressure`);
+  console.log(`INGREDIENT_DEMAND_BALANCE_OK recipes=64 active=51 singleUse=12 supplySpread=${(maxSupplyRatio / minSupplyRatio).toFixed(1)}x auto=inventory-pressure`);
 } finally {
   await browser.close();
 }

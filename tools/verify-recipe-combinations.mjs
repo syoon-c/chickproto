@@ -27,13 +27,13 @@ try {
   const routeInfo = await page.evaluate(() => {
     const early = window.CHICK_CONFIG.CORE_PROGRESSION.find((route) => route.themeId === 1 && route.slot === 0);
     const middle = window.CHICK_CONFIG.CORE_PROGRESSION.find((route) => route.recipeName === "볶음밥");
-    const late = window.CHICK_CONFIG.CORE_PROGRESSION.find((route) => route.themeId === 14 && route.slot === 2);
+    const late = window.CHICK_CONFIG.CORE_PROGRESSION.find((route) => route.recipeName === "스테이크");
     const sunflower = window.CHICK_CONFIG.CORE_PROGRESSION.find((route) => route.recipeName === "해바라기 씨앗 파이");
     return { early, middle, late, sunflower };
   });
   if (routeInfo.early.ingredientRequirements.length !== 1 || routeInfo.early.ingredientRequirements[0].id !== 30039
-    || routeInfo.middle.ingredientRequirements.length !== 3
-    || routeInfo.late.ingredientRequirements.length !== 3) {
+    || routeInfo.middle.ingredientRequirements.length !== 4
+    || routeInfo.late.ingredientRequirements.length !== 5) {
     throw new Error(`Ingredient tiers are incorrect: ${JSON.stringify(routeInfo)}`);
   }
   const sensibleExamples = await page.evaluate(() => {
@@ -43,14 +43,16 @@ try {
       sandwich: ingredients("샌드위치"),
       friedRice: ingredients("볶음밥"),
       porkCutlet: ingredients("돈까스"),
+      steak: ingredients("스테이크"),
       sunflowerPie: ingredients("해바라기 씨앗 파이"),
       originalRecipeCount: window.CHICK_CONFIG.RECIPE_NAMES.filter((name) => routes.some((route) => route.recipeName === name)).length,
       themedNames: routes.filter((route) => /^(돌|나무|목욕탕|우주 점성술) /.test(route.recipeName)).map((route) => route.recipeName),
     };
   });
   if (JSON.stringify(sensibleExamples.sandwich) !== JSON.stringify(["빵", "나뭇잎"])
-    || JSON.stringify(sensibleExamples.friedRice) !== JSON.stringify(["쌀", "식용유", "모둠 채소"])
-    || JSON.stringify(sensibleExamples.porkCutlet) !== JSON.stringify(["돼지고기", "빵가루", "식용유"])
+    || JSON.stringify(sensibleExamples.friedRice) !== JSON.stringify(["쌀", "식용유", "모둠 채소", "달걀"])
+    || JSON.stringify(sensibleExamples.porkCutlet) !== JSON.stringify(["돼지고기", "빵가루", "식용유", "양배추"])
+    || JSON.stringify(sensibleExamples.steak) !== JSON.stringify(["소고기", "로즈마리", "버터", "마늘", "후추"])
     || JSON.stringify(sensibleExamples.sunflowerPie) !== JSON.stringify(["해바라기씨", "밀가루", "버터"])
     || sensibleExamples.originalRecipeCount !== 40
     || sensibleExamples.themedNames.length) {
@@ -63,7 +65,12 @@ try {
     const stoneRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === 1);
     const targetRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === middle.themeId);
     saved.themes.opened = [...stoneRows.map((row) => row.id), ...targetRows.slice(0, Math.ceil(targetRows.length * .7)).map((row) => row.id)];
-    saved.ownedRecipes[2] = { level: 1, stack: 0, codexClaimed: true };
+    saved.ownedRecipes = {
+      1: { level: 1, stack: 0, codexClaimed: true },
+      2: { level: 1, stack: 0, codexClaimed: true },
+      10001: { level: 1, stack: 0, codexClaimed: true },
+      20001: { level: 1, stack: 0, codexClaimed: true },
+    };
     saved.crafting.ingredients = Object.fromEntries(middle.ingredientRequirements.map((ingredient) => [ingredient.id, 1]));
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));
@@ -72,8 +79,8 @@ try {
 
   let current = await state();
   const requirements = current.recipes.craftRequirements[routeInfo.middle.recipeId];
-  if (current.recipes.combinationCapacity !== 3 || requirements?.length !== 3 || !current.recipes.craftable.includes(routeInfo.middle.recipeId)) {
-    throw new Error(`Three-slot recipe is not craftable: ${JSON.stringify({ requirements, recipes: current.recipes })}`);
+  if (current.recipes.combinationCapacity !== 4 || requirements?.length !== 4 || !current.recipes.craftable.includes(routeInfo.middle.recipeId)) {
+    throw new Error(`Four-slot recipe is not craftable: ${JSON.stringify({ requirements, recipes: current.recipes })}`);
   }
   await page.locator('[data-screen="recipe"]').click();
   await page.waitForTimeout(200);
@@ -82,10 +89,10 @@ try {
   }
   if (!await page.locator(".mixing-board .mixing-bowl").isVisible()
     || await page.locator(".combination-slots").count()
-    || await page.locator(".bowl-ingredient").count() !== 3) {
+    || await page.locator(".bowl-ingredient").count() !== 4) {
     throw new Error("Recipe ingredients are not presented inside the cutting-board bowl");
   }
-  await page.locator("#menu-screen").screenshot({ path: path.join(out, "01-three-ingredient-ready.png") });
+  await page.locator("#menu-screen").screenshot({ path: path.join(out, "01-four-ingredient-ready.png") });
   await page.locator('[data-action="discover-combination"]').click();
   await page.evaluate(() => window.advanceTime(2500));
   current = await state();
@@ -99,7 +106,7 @@ try {
   }
   await page.waitForFunction(() => [...document.querySelectorAll("#recipe-reveal img")].every((image) => image.complete));
   await page.waitForTimeout(700);
-  await page.locator("#menu-screen").screenshot({ path: path.join(out, "02-three-ingredient-crafted.png") });
+  await page.locator("#menu-screen").screenshot({ path: path.join(out, "02-four-ingredient-crafted.png") });
 
   await page.evaluate((route) => {
     const key = "chick-bistro-planning-prototype-v2";
@@ -121,10 +128,34 @@ try {
     throw new Error("Sunflower seed pie was not discovered from seed, flour, and butter");
   }
 
+  await page.evaluate((route) => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    saved.crafting.ingredients = Object.fromEntries(route.ingredientRequirements.map((ingredient) => [ingredient.id, 1]));
+    saved.crafting.selected = [];
+    localStorage.setItem(key, JSON.stringify(saved));
+  }, routeInfo.late);
+  await page.reload({ waitUntil: "load" });
+  await page.locator('[data-screen="recipe"]').click();
+  current = await state();
+  if (current.recipes.combinationCapacity !== 5) throw new Error(`Five-slot bowl did not unlock: ${current.recipes.combinationCapacity}`);
+  for (const ingredient of routeInfo.late.ingredientRequirements) {
+    await page.locator(`[data-action="select-ingredient"][data-id="${ingredient.id}"]`).click();
+  }
+  if (await page.locator(".bowl-ingredient").count() !== 5) throw new Error("Five ingredients were not placed in the bowl");
+  await page.locator("#menu-screen").screenshot({ path: path.join(out, "04-five-ingredient-steak-ready.png") });
+  await page.locator('[data-action="discover-combination"]').click();
+  await page.evaluate(() => window.advanceTime(2500));
+  current = await state();
+  if (current.recipes.levels[routeInfo.late.recipeId] !== 1 || current.recipes.reveal?.recipeName !== "스테이크") {
+    throw new Error("Five-ingredient steak was not discovered");
+  }
+  await page.locator("#recipe-reveal").screenshot({ path: path.join(out, "05-five-ingredient-steak-discovered.png") });
+
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log("RECIPE_COMBINATIONS_OK originals=40 sunflowerPie=seed+flour+butter sandwich=bread+leaf friedRice=rice+oil+veg");
+  console.log("RECIPE_COMBINATIONS_OK recipes=64 costs=2/3/4/5 friedRice=4 steak=5 sunflowerPie=3");
 } finally {
   await browser.close();
 }

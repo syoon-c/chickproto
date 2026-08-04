@@ -473,7 +473,9 @@ function unlockedRecipeCount() {
 }
 
 function recipeCombinationCapacity() {
-  return 2 + Math.floor(unlockedRecipeCount() / 2);
+  const maximumRecipeSize = Math.max(2, ...RECIPE_PROGRESSION.map((route) => Number(route.ingredientCount
+    || route.ingredientRequirements?.length || 0)));
+  return Math.min(maximumRecipeSize, 2 + Math.floor(unlockedRecipeCount() / 2));
 }
 
 function rewardRows(rewardId) { return tables.rewards.get(Number(rewardId)) || []; }
@@ -1200,12 +1202,25 @@ function compareAutoResearchRoutes(a, b) {
   return recipeInventoryPressure(b) - recipeInventoryPressure(a) || a.recipeId - b.recipeId;
 }
 
+function randomAutoResearchIngredients() {
+  const pool = storedIngredientIds().flatMap((ingredientId) => Array.from({
+    length: ingredientAmount(ingredientId),
+  }, () => ingredientId));
+  for (let index = pool.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [pool[index], pool[randomIndex]] = [pool[randomIndex], pool[index]];
+  }
+  return pool.slice(0, Math.min(recipeCombinationCapacity(), pool.length));
+}
+
 function tryAutoCraft() {
   if (unlockedRecipeCount() < 5) return false;
   const route = RECIPE_PROGRESSION
     .filter((entry) => canCraftRecipe(entry.recipeId))
     .sort(compareAutoResearchRoutes)[0];
-  return route ? startRecipeResearch(route.recipeId, true, expandedCraftIngredientIds(route)) : false;
+  if (route) return startRecipeResearch(route.recipeId, true, expandedCraftIngredientIds(route));
+  const randomIngredients = randomAutoResearchIngredients();
+  return randomIngredients.length >= 2 && startRecipeResearch(null, true, randomIngredients);
 }
 
 function selectedIngredientCount(ingredientId) {
@@ -2596,6 +2611,7 @@ function renderGameToText() {
         .filter((route) => canCraftRecipe(route.recipeId))
         .sort(compareAutoResearchRoutes)[0]?.recipeId || null,
       autoResearchPriority: "new-first-lowest-level-then-highest-inventory-pressure",
+      autoResearchWhenNoRecipe: "random-ingredients-up-to-bowl-capacity-then-weird-dish",
       globalRevenueBonus: Math.max(0, unlockedRecipeCount() - 1) * .05,
       recipeLevelPriceBonus: RECIPE_LEVEL_PRICE_BONUS,
       craftable: RECIPE_PROGRESSION.filter((route) => canCraftRecipe(route.recipeId)).map((route) => route.recipeId),
@@ -2715,7 +2731,9 @@ dom.menuContent.addEventListener("click", (event) => {
   if (button.dataset.action === "clear-combination") { state.crafting.selected = []; mixingDropIndex = -1; saveState(); renderMenu(); }
   if (button.dataset.action === "discover-combination") discoverSelectedCombination();
   if (button.dataset.action === "auto-craft") {
-    if (!tryAutoCraft()) showToast(unlockedRecipeCount() < 5 ? "레시피 5개 발견 후 자동 연구가 열려요." : "현재 재료로 연구할 수 있는 조합이 없어요.");
+    if (!tryAutoCraft()) showToast(unlockedRecipeCount() < 5
+      ? "레시피 5개 발견 후 자동 연구가 열려요."
+      : "자동 연구에는 재료가 2개 이상 필요해요.");
     renderMenu();
   }
   if (button.dataset.action === "codex") claimCodexReward(id);

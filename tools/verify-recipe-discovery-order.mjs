@@ -39,16 +39,16 @@ try {
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
 
-  const expectedFirstNine = [1, 20014, 10001, 2, 20002, 20003, 20004, 20001, 20005];
+  const expectedFirstTwelve = [1, 20014, 10001, 2, 20015, 20016, 20002, 20003, 20004, 20001, 20005, 20017];
   let current = await gameState();
   let uiOrder = await visibleCatalogOrder();
   if (current.recipes.catalogSort !== "earliest-ingredient-discovery-stage"
-    || JSON.stringify(current.recipes.catalogOrder.slice(0, 9)) !== JSON.stringify(expectedFirstNine)
-    || JSON.stringify(uiOrder.slice(0, 9)) !== JSON.stringify(expectedFirstNine)) {
+    || JSON.stringify(current.recipes.catalogOrder.slice(0, 12)) !== JSON.stringify(expectedFirstTwelve)
+    || JSON.stringify(uiOrder.slice(0, 12)) !== JSON.stringify(expectedFirstTwelve)) {
     throw new Error(`Recipe catalog is not sorted by expected discovery stage: ${JSON.stringify(current.recipes.catalogOrder.slice(0, 12))}`);
   }
   const fifthCardText = await page.locator('.recipe-catalog-card[data-recipe-id="20002"]').innerText();
-  if (!fifthCardText.includes("NO.05")) throw new Error(`Tomato sandwich is not fifth in discovery order: ${fifthCardText}`);
+  if (!fifthCardText.includes("NO.07")) throw new Error(`Tomato sandwich is not seventh in discovery order: ${fifthCardText}`);
   await page.locator('.recipe-catalog-card[data-recipe-id="1"]').scrollIntoViewIfNeeded();
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "01-earliest-recipes-first.png") });
 
@@ -60,8 +60,8 @@ try {
   current = await gameState();
   uiOrder = await visibleCatalogOrder();
   if (current.recipes.levels["20002"] !== 1
-    || JSON.stringify(current.recipes.catalogOrder.slice(0, 9)) !== JSON.stringify(expectedFirstNine)
-    || JSON.stringify(uiOrder.slice(0, 9)) !== JSON.stringify(expectedFirstNine)) {
+    || JSON.stringify(current.recipes.catalogOrder.slice(0, 12)) !== JSON.stringify(expectedFirstTwelve)
+    || JSON.stringify(uiOrder.slice(0, 12)) !== JSON.stringify(expectedFirstTwelve)) {
     throw new Error("Discovery changed the fixed expected-discovery catalog order");
   }
   await page.locator('.recipe-catalog-card[data-recipe-id="20002"]').scrollIntoViewIfNeeded();

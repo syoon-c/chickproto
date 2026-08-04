@@ -28,6 +28,9 @@ try {
     bread: window.CHICK_CONFIG.GAME_INGREDIENTS.bread,
     rice: window.CHICK_CONFIG.GAME_INGREDIENTS.rice,
     leaf: window.CHICK_CONFIG.GAME_INGREDIENTS.leaf,
+    salt: window.CHICK_CONFIG.GAME_INGREDIENTS.salt,
+    pepper: window.CHICK_CONFIG.GAME_INGREDIENTS.pepper,
+    sugar: window.CHICK_CONFIG.GAME_INGREDIENTS.sugar,
     sandwich: window.CHICK_CONFIG.RECIPE_PROGRESSION.find((route) => route.recipeName === "샌드위치"),
   }));
   await page.evaluate(({ bread, rice }) => {
@@ -117,8 +120,43 @@ try {
   await page.waitForTimeout(150);
   await page.locator("#recipe-reveal").screenshot({ path: path.join(out, "03-auto-research-success.png") });
 
+  await page.locator('[data-action="dismiss-recipe-reveal"]').click();
+  await page.evaluate(({ salt, pepper, sugar }) => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    saved.crafting.ingredients = { [salt.id]: 2, [pepper.id]: 2, [sugar.id]: 2 };
+    saved.crafting.selected = [];
+    localStorage.setItem(key, JSON.stringify(saved));
+  }, info);
+  await page.reload({ waitUntil: "load" });
+  await page.locator('[data-screen="recipe"]').click();
+  await page.locator('[data-action="auto-craft"]').click();
+  current = await gameState();
+  const fallbackIngredientIds = new Set([info.salt.id, info.pepper.id, info.sugar.id]);
+  if (!current.recipes.research?.automatic || current.recipes.research.recipeId !== null
+    || current.recipes.autoResearchWhenNoRecipe !== "random-ingredients-up-to-bowl-capacity-then-weird-dish"
+    || current.recipes.research.ingredientIds.length !== current.recipes.combinationCapacity
+    || current.recipes.research.ingredientIds.some((ingredientId) => !fallbackIngredientIds.has(ingredientId))
+    || current.ingredientStorage.totalItems !== 1) {
+    throw new Error(`Automatic fallback did not consume random ingredients: ${JSON.stringify(current.recipes)}`);
+  }
+  await page.evaluate(() => window.advanceTime(1200));
+  await page.locator("#menu-screen").screenshot({ path: path.join(out, "04-auto-random-research-loading.png") });
+  await page.evaluate(() => window.advanceTime(1300));
+  current = await gameState();
+  if (current.recipes.research !== null || current.recipes.reveal?.result !== "failure"
+    || current.recipes.reveal?.recipeName !== "괴식" || current.metrics.failedRecipeResearches !== 2) {
+    throw new Error(`Automatic random fallback did not become a weird dish: ${JSON.stringify(current.recipes)}`);
+  }
+  await page.waitForFunction(() => {
+    const image = document.querySelector(".recipe-reveal-dish img");
+    return image?.complete && image.naturalWidth > 0;
+  });
+  await page.waitForTimeout(150);
+  await page.locator("#recipe-reveal").screenshot({ path: path.join(out, "05-auto-random-weird-dish.png") });
+
   if (errors.length) throw new Error(`Console errors: ${errors.join(" | ")}`);
-  console.log("RECIPE_RESEARCH_WEIRD_DISH_OK manualFailureConsumes=true autoUsesLoading=true duration=2.4s");
+  console.log("RECIPE_RESEARCH_WEIRD_DISH_OK manualFailureConsumes=true autoSuccessUsesLoading=true autoNoRecipe=randomThenWeirdDish duration=2.4s");
 } finally {
   await browser.close();
 }

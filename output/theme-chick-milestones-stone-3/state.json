@@ -318,7 +318,7 @@
       10030
     ],
     "reveal": null,
-    "hintRule": "same-size-and-all-but-one-correct",
+    "hintRule": "same-size-at-least-one-correct-reveals-name-and-missing-clues",
     "mysteryRecipeCount": 58,
     "hintedRecipes": {},
     "autoResearchUnlocked": false,
@@ -1600,56 +1600,56 @@
         "max": 2250
       },
       "3": {
-        "min": 2600,
-        "max": 4500
+        "min": 13000,
+        "max": 22500
       },
       "4": {
-        "min": 5200,
-        "max": 9000
+        "min": 26000,
+        "max": 45000
       },
       "5": {
-        "min": 10400,
-        "max": 18000
+        "min": 52000,
+        "max": 90000
       },
       "6": {
-        "min": 20800,
-        "max": 36000
+        "min": 104000,
+        "max": 180000
       },
       "7": {
-        "min": 41600,
-        "max": 72000
+        "min": 208000,
+        "max": 360000
       },
       "8": {
-        "min": 83200,
-        "max": 144000
+        "min": 416000,
+        "max": 720000
       },
       "9": {
-        "min": 166400,
-        "max": 288000
+        "min": 832000,
+        "max": 1440000
       },
       "10": {
-        "min": 332800,
-        "max": 576000
+        "min": 1664000,
+        "max": 2880000
       },
       "11": {
-        "min": 665600,
-        "max": 1152000
+        "min": 3328000,
+        "max": 5760000
       },
       "12": {
-        "min": 1331200,
-        "max": 2304000
+        "min": 6656000,
+        "max": 11520000
       },
       "13": {
-        "min": 2662400,
-        "max": 4608000
+        "min": 13312000,
+        "max": 23040000
       },
       "14": {
-        "min": 5324800,
-        "max": 9216000
+        "min": 26624000,
+        "max": 46080000
       },
       "15": {
-        "min": 10649600,
-        "max": 18432000
+        "min": 53248000,
+        "max": 92160000
       }
     },
     "guestGrades": [

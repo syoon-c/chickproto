@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const codexHome = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
 const playwrightUrl = pathToFileURL(path.join(codexHome, "node_modules", "playwright", "index.mjs")).href;
 const { chromium } = await import(playwrightUrl);
-const out = path.join(root, "output", "theme-price-2x");
+const out = path.join(root, "output", "theme-price-hybrid");
 fs.mkdirSync(out, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -28,18 +28,35 @@ try {
       .filter((row) => Number(row.purchaseType) !== 2);
     const woodByType = new Map(rows.filter((row) => Number(row.facilityTheme) === 2)
       .map((row) => [Number(row.facilityType), Number(row.facilityPrice)]));
-    const mismatches = rows.filter((row) => Number(row.facilityTheme) >= 2 && Number(row.facilityPrice)
-      !== Math.round(woodByType.get(Number(row.facilityType)) * 2 ** (Number(row.facilityTheme) - 2)));
+    const expectedPrice = (themeId, facilityType) => {
+      const woodPrice = woodByType.get(Number(facilityType));
+      if (Number(themeId) === 2) return woodPrice;
+      return Math.round(woodPrice * 10 * 2 ** (Number(themeId) - 3));
+    };
+    const mismatches = rows.filter((row) => Number(row.facilityTheme) >= 2
+      && Number(row.facilityPrice) !== expectedPrice(row.facilityTheme, row.facilityType));
+    const ratios = rows.filter((row) => Number(row.facilityTheme) >= 3).map((row) => {
+      const previous = rows.find((candidate) => Number(candidate.facilityTheme) === Number(row.facilityTheme) - 1
+        && Number(candidate.facilityType) === Number(row.facilityType));
+      return { themeId: Number(row.facilityTheme), ratio: Number(row.facilityPrice) / Number(previous?.facilityPrice || 1) };
+    });
     const ranges = Object.fromEntries(Array.from({ length: 14 }, (_, index) => index + 2).map((themeId) => {
       const prices = rows.filter((row) => Number(row.facilityTheme) === themeId).map((row) => Number(row.facilityPrice));
       return [themeId, { min: Math.min(...prices), max: Math.max(...prices) }];
     }));
-    return { multiplier: window.CHICK_CONFIG.RESTAURANT_THEME_PRICE_MULTIPLIER, mismatches, ranges };
+    return {
+      greenMultiplier: window.CHICK_CONFIG.GREEN_STRIPE_THEME_PRICE_MULTIPLIER,
+      laterMultiplier: window.CHICK_CONFIG.RESTAURANT_THEME_PRICE_MULTIPLIER,
+      mismatches,
+      ratios,
+      ranges,
+    };
   });
-  if (result.multiplier !== 2 || result.mismatches.length
+  if (result.greenMultiplier !== 10 || result.laterMultiplier !== 2 || result.mismatches.length
+    || result.ratios.some(({ themeId, ratio }) => ratio !== (themeId === 3 ? 10 : 2))
     || result.ranges[2].min !== 1300 || result.ranges[2].max !== 2250
-    || result.ranges[3].min !== 2600 || result.ranges[3].max !== 4500
-    || result.ranges[4].min !== 5200 || result.ranges[4].max !== 9000) {
+    || result.ranges[3].min !== 13000 || result.ranges[3].max !== 22500
+    || result.ranges[4].min !== 26000 || result.ranges[4].max !== 45000) {
     throw new Error(`Theme price curve mismatch: ${JSON.stringify(result)}`);
   }
 
@@ -55,12 +72,12 @@ try {
   await page.locator('[data-screen="theme"]').click();
   await page.locator('[data-action="theme-select"][data-id="3"]').click();
   const menuText = await page.locator("#menu-screen").innerText();
-  if (!menuText.includes("초록 줄무늬 테마") || !menuText.includes("2.6a 구매")) {
+  if (!menuText.includes("초록 줄무늬 테마") || !menuText.includes("13a 구매")) {
     throw new Error(`Green stripe prices are not visible in the theme UI: ${menuText}`);
   }
-  await page.locator("#menu-screen").screenshot({ path: path.join(out, "01-green-stripe-2x-prices.png") });
+  await page.locator("#menu-screen").screenshot({ path: path.join(out, "01-green-stripe-10x-prices.png") });
   if (errors.length) throw new Error(`Console errors: ${errors.join(" | ")}`);
-  console.log(`THEME_PRICE_2X_OK wood=${result.ranges[2].min}-${result.ranges[2].max} greenStripe=${result.ranges[3].min}-${result.ranges[3].max} blueWhite=${result.ranges[4].min}-${result.ranges[4].max}`);
+  console.log(`THEME_PRICE_HYBRID_OK wood=${result.ranges[2].min}-${result.ranges[2].max} greenStripe=${result.ranges[3].min}-${result.ranges[3].max} blueWhite=${result.ranges[4].min}-${result.ranges[4].max}`);
 } finally {
   await browser.close();
 }

@@ -62,11 +62,16 @@ const INGREDIENT_STORAGE_EXPANSION_AMOUNT = 5;
 const INGREDIENT_STORAGE_EXPANSION_GEM_COST = 10;
 const RECIPE_LEVEL_PRICE_BONUS = 0.10;
 
+const GREEN_STRIPE_THEME_PRICE_MULTIPLIER = 10;
 const RESTAURANT_THEME_PRICE_MULTIPLIER = 2;
 
 function restaurantThemePartPrice(themeId, woodPartPrice) {
-  if (Number(themeId) <= 1) return 0;
-  return Math.round(Number(woodPartPrice || 0) * RESTAURANT_THEME_PRICE_MULTIPLIER ** (Number(themeId) - 2));
+  const numericThemeId = Number(themeId);
+  const woodPrice = Number(woodPartPrice || 0);
+  if (numericThemeId <= 1) return 0;
+  if (numericThemeId === 2) return Math.round(woodPrice);
+  const greenStripePrice = woodPrice * GREEN_STRIPE_THEME_PRICE_MULTIPLIER;
+  return Math.round(greenStripePrice * RESTAURANT_THEME_PRICE_MULTIPLIER ** (numericThemeId - 3));
 }
 
 const GAME_INGREDIENTS = {
@@ -157,21 +162,21 @@ const GAME_RECIPE_CATALOG = [
   { name: RECIPE_NAMES[2], keys: ["bread", "sausage", "ketchup"], iconRecipeId: 3 },
   { name: RECIPE_NAMES[3], keys: ["broth", "mixedVeg"], iconRecipeId: 4 },
   { name: RECIPE_NAMES[4], keys: ["meat", "onion", "paprika"], iconRecipeId: 5 },
-  { name: RECIPE_NAMES[5], keys: ["rice", "seaweed", "mixedVeg"], iconRecipeId: 6 },
-  { name: RECIPE_NAMES[6], keys: ["flour", "tomato", "cheese"], iconRecipeId: 7 },
-  { name: RECIPE_NAMES[7], keys: ["rice", "oil", "mixedVeg"], iconRecipeId: 8 },
-  { name: RECIPE_NAMES[8], keys: ["bread", "beef", "cheese"], iconRecipeId: 9 },
+  { name: RECIPE_NAMES[5], keys: ["rice", "seaweed", "mixedVeg", "egg"], iconRecipeId: 6 },
+  { name: RECIPE_NAMES[6], keys: ["flour", "tomato", "cheese", "oil"], iconRecipeId: 7 },
+  { name: RECIPE_NAMES[7], keys: ["rice", "oil", "mixedVeg", "egg"], iconRecipeId: 8 },
+  { name: RECIPE_NAMES[8], keys: ["bread", "beef", "cheese", "tomato", "onion"], iconRecipeId: 9 },
   { name: RECIPE_NAMES[9], keys: ["potato", "oil"], iconRecipeId: 10 },
-  { name: RECIPE_NAMES[10], keys: ["rice", "mixedVeg", "egg"], iconRecipeId: 11 },
+  { name: RECIPE_NAMES[10], keys: ["rice", "mixedVeg", "egg", "beef", "soy"], iconRecipeId: 11 },
   { name: RECIPE_NAMES[11], keys: ["flour", "pork", "cabbage"], iconRecipeId: 12 },
-  { name: RECIPE_NAMES[12], keys: ["pasta", "tomato", "garlic"], iconRecipeId: 13 },
-  { name: RECIPE_NAMES[13], keys: ["tortilla", "beef", "tomato"], iconRecipeId: 14 },
-  { name: RECIPE_NAMES[14], keys: ["noodles", "broth", "egg"], iconRecipeId: 15 },
-  { name: RECIPE_NAMES[15], keys: ["pork", "breadcrumbs", "oil"], iconRecipeId: 16 },
-  { name: RECIPE_NAMES[16], keys: ["rice", "curry", "onion"], iconRecipeId: 17 },
-  { name: RECIPE_NAMES[17], keys: ["rice", "fish", "vinegar"], iconRecipeId: 18 },
-  { name: RECIPE_NAMES[18], keys: ["beef", "soy", "onion"], iconRecipeId: 19 },
-  { name: RECIPE_NAMES[19], keys: ["beef", "rosemary", "butter"], iconRecipeId: 20 },
+  { name: RECIPE_NAMES[12], keys: ["pasta", "tomato", "garlic", "oil"], iconRecipeId: 13 },
+  { name: RECIPE_NAMES[13], keys: ["tortilla", "beef", "tomato", "cheese", "chili"], iconRecipeId: 14 },
+  { name: RECIPE_NAMES[14], keys: ["noodles", "broth", "egg", "pork", "seaweed"], iconRecipeId: 15 },
+  { name: RECIPE_NAMES[15], keys: ["pork", "breadcrumbs", "oil", "cabbage"], iconRecipeId: 16 },
+  { name: RECIPE_NAMES[16], keys: ["rice", "curry", "onion", "meat"], iconRecipeId: 17 },
+  { name: RECIPE_NAMES[17], keys: ["rice", "fish", "vinegar", "avocado"], iconRecipeId: 18 },
+  { name: RECIPE_NAMES[18], keys: ["beef", "soy", "onion", "rice"], iconRecipeId: 19 },
+  { name: RECIPE_NAMES[19], keys: ["beef", "rosemary", "butter", "garlic", "pepper"], iconRecipeId: 20 },
   { name: RECIPE_NAMES[20], keys: ["egg", "oil"], iconRecipeId: 21 },
   { name: RECIPE_NAMES[21], keys: ["egg", "rice", "ketchup"], iconRecipeId: 22 },
   { name: RECIPE_NAMES[22], keys: ["meat", "pepper", "butter"], iconRecipeId: 23 },
@@ -184,18 +189,18 @@ const GAME_RECIPE_CATALOG = [
   { name: RECIPE_NAMES[29], keys: ["potato", "oil", "salt"], iconRecipeId: 30 },
   { name: RECIPE_NAMES[30], keys: ["rice", "tofu", "vinegar"], iconRecipeId: 31 },
   { name: RECIPE_NAMES[31], keys: ["acorn", "water"], iconRecipeId: 32 },
-  { name: RECIPE_NAMES[32], keys: ["bread", "beef", "truffle"], iconRecipeId: 33 },
-  { name: RECIPE_NAMES[33], keys: ["fruit", "strawberry", "apple"], iconRecipeId: 34 },
+  { name: RECIPE_NAMES[32], keys: ["bread", "beef", "truffle", "cheese", "onion"], iconRecipeId: 33 },
+  { name: RECIPE_NAMES[33], keys: ["fruit", "strawberry", "apple", "cream"], iconRecipeId: 34 },
   { name: RECIPE_NAMES[34], keys: ["egg", "rice", "water"], iconRecipeId: 35 },
-  { name: RECIPE_NAMES[35], keys: ["meat", "potato", "broth"], iconRecipeId: 36 },
+  { name: RECIPE_NAMES[35], keys: ["meat", "potato", "broth", "onion", "carrot"], iconRecipeId: 36 },
   { name: RECIPE_NAMES[36], keys: ["noodles", "egg", "chili"], iconRecipeId: 37 },
   { name: RECIPE_NAMES[37], keys: ["bread", "egg", "milk"], iconRecipeId: 38 },
   { name: RECIPE_NAMES[38], keys: ["broth", "tofu", "pepper"], iconRecipeId: 39 },
-  { name: RECIPE_NAMES[39], keys: ["flour", "egg", "milk"], iconRecipeId: 40 },
+  { name: RECIPE_NAMES[39], keys: ["flour", "egg", "milk", "cream"], iconRecipeId: 40 },
   { name: "콘수프", keys: ["corn", "milk", "butter"], iconRecipeId: 4 },
-  { name: "햄 샌드위치", keys: ["bread", "ham", "lettuce"], iconRecipeId: 2 },
-  { name: "트러플 크림 파스타", keys: ["pasta", "truffle", "cream"], iconRecipeId: 13 },
-  { name: "아보카도 샐러드", keys: ["avocado", "lettuce", "tomato"], iconRecipeId: 1 },
+  { name: "햄 샌드위치", keys: ["bread", "ham", "cheese"], iconRecipeId: 2 },
+  { name: "트러플 크림 파스타", keys: ["pasta", "truffle", "cream", "garlic", "butter"], iconRecipeId: 13 },
+  { name: "아보카도 샐러드", keys: ["avocado", "lettuce", "tomato", "oil"], iconRecipeId: 1 },
 ];
 
 function themeRewardIngredientKeys(themeId, slot) {
@@ -273,6 +278,11 @@ const EARLY_RECIPE_CATALOG = [
   { recipeId: 20012, recipeName: "과일 우유", keys: ["fruit", "milk"], baseRecipeId: 34, foodPrice: 52 },
   { recipeId: 20013, recipeName: "매콤 치즈 감자", keys: ["potato", "chili", "cheese"], baseRecipeId: 10, foodPrice: 60 },
   { recipeId: 20014, recipeName: "새싹 샐러드", keys: ["leaf", "lettuce"], baseRecipeId: 1, foodPrice: 32 },
+  { recipeId: 20015, recipeName: "양상추 샌드위치", keys: ["bread", "lettuce"], baseRecipeId: 2, foodPrice: 36 },
+  { recipeId: 20016, recipeName: "버섯 토스트", keys: ["bread", "mushroom"], baseRecipeId: 38, foodPrice: 38 },
+  { recipeId: 20017, recipeName: "달걀밥", keys: ["rice", "egg"], baseRecipeId: 22, foodPrice: 40 },
+  { recipeId: 20018, recipeName: "버터 라이스", keys: ["rice", "butter"], baseRecipeId: 8, foodPrice: 38 },
+  { recipeId: 20019, recipeName: "토마토 리조또", keys: ["rice", "tomato", "butter"], baseRecipeId: 8, foodPrice: 50 },
 ];
 
 const EARLY_RECIPE_PROGRESSION = EARLY_RECIPE_CATALOG.map((recipe) => ({
@@ -380,6 +390,7 @@ window.CHICK_CONFIG = {
   INGREDIENT_STORAGE_EXPANSION_AMOUNT,
   INGREDIENT_STORAGE_EXPANSION_GEM_COST,
   RECIPE_LEVEL_PRICE_BONUS,
+  GREEN_STRIPE_THEME_PRICE_MULTIPLIER,
   RESTAURANT_THEME_PRICE_MULTIPLIER,
   restaurantThemePartPrice,
   themeChickMilestones,
