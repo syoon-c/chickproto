@@ -98,14 +98,14 @@ try {
     || JSON.stringify(current.progression.ingredientDropRule.grades) !== JSON.stringify([
       { minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
       { minVisits: 40, primaryCount: 1, secondaryCount: 1, rareCount: 0 },
-      { minVisits: 300, primaryCount: 1, secondaryCount: 1, rareCount: 1 },
+      { minVisits: 150, primaryCount: 1, secondaryCount: 1, rareCount: 1 },
     ])) {
     throw new Error(`Drop rule mismatch: ${JSON.stringify(current.progression.ingredientDropRule)}`);
   }
 
   const first = await runVisitGroup(1, { 30039: 1 });
   const regular = await runVisitGroup(40, { 30039: 1, 30001: 1 });
-  const best = await runVisitGroup(300, { 30039: 1, 30001: 1, 30002: 1 });
+  const best = await runVisitGroup(150, { 30039: 1, 30001: 1, 30002: 1 });
   current = best.current;
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";

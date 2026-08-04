@@ -1355,3 +1355,13 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 만족 결제·불만 결제 및 레시피 레벨 가격 회귀 테스트를 통과했다.
 - 공식 `develop-web-game` 클라이언트에서 `tipRule: final-meal-price / 0.1`과 콘솔 오류 없음 확인.
 - 화면 확인: `output/restaurant-price-formula/01-multiplied-happy-payment.png`.
+
+## 2026-08-04 특별 재료 해금 150회 완화
+
+- 후반 병아리의 특별 재료 수급 부담을 낮추기 위해 최고의 단골 조건을 방문 300회에서 150회로 낮췄다.
+- 손님 단계는 `첫 방문 1회: 주재료 / 단골 40회: 보조재료 / 최고의 단골 150회: 특별 재료`가 된다.
+- 실제 드랍 후보 판정, 손님 도감 단계 게이지, 다음 단계 안내, `render_game_to_text`가 모두 공통 `GUEST_GRADES` 값을 사용한다.
+- 150회 손님이 주·보조·특별 재료 3종을 모두 드랍 후보로 갖고, 성공 시 기존대로 그중 한 종류만 50/30/20 비율로 선택되는 것을 확인했다.
+- 손님 등급, 15% 드랍 확률, 도감 UI 회귀 테스트를 통과했다.
+- 공식 `develop-web-game` 클라이언트에서 단계값 `1/40/150`과 콘솔 오류 없음 확인.
+- 화면 확인: `output/customer-codex-clean-ui/01-clean-customer-profile.png`.

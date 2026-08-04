@@ -13,7 +13,7 @@ const { CORE_PROGRESSION, GAME_INGREDIENTS, GUEST_GRADES, GUEST_INGREDIENT_DROP_
 const expectedGrades = [
   [1, "첫 방문", 1, 1, 0, 0],
   [2, "단골", 40, 1, 1, 0],
-  [3, "최고의 단골", 300, 1, 1, 1],
+  [3, "최고의 단골", 150, 1, 1, 1],
 ];
 
 if (JSON.stringify(GUEST_GRADES.map((grade) => [

@@ -9,7 +9,7 @@ globalThis.window = globalThis;
 vm.runInThisContext(fs.readFileSync(path.join(root, "src", "game-config.js"), "utf8"), { filename: "src/game-config.js" });
 const { GUEST_GRADES } = globalThis.CHICK_CONFIG;
 if (JSON.stringify(GUEST_GRADES.map((grade) => [grade.minVisits, grade.primaryCount, grade.secondaryCount, grade.rareCount]))
-  !== JSON.stringify([[1, 1, 0, 0], [40, 1, 1, 0], [300, 1, 1, 1]])) {
+  !== JSON.stringify([[1, 1, 0, 0], [40, 1, 1, 0], [150, 1, 1, 1]])) {
   throw new Error(`Three-stage guest grades mismatch: ${JSON.stringify(GUEST_GRADES)}`);
 }
 
@@ -41,7 +41,7 @@ try {
     saved.collections.customers = {
       [campingRoutes[0].customerId]: { count: 1, firstSeen: Date.now(), isNew: false },
       [campingRoutes[1].customerId]: { count: 40, firstSeen: Date.now(), isNew: false },
-      [campingRoutes[2].customerId]: { count: 300, firstSeen: Date.now(), isNew: false },
+      [campingRoutes[2].customerId]: { count: 150, firstSeen: Date.now(), isNew: false },
     };
     saved.ui.collectionCustomerId = campingRoutes[2].customerId;
     localStorage.setItem(key, JSON.stringify(saved));
@@ -53,12 +53,12 @@ try {
   if (await page.locator(".customer-roster-card").count() !== 45) throw new Error("Customer roster must contain 45 compact cards");
   if (await page.locator(".customer-profile").count() !== 1) throw new Error("Codex must show exactly one customer detail panel");
   if (await page.locator(".customer-grade-step").count() !== 3) throw new Error("Customer grade panel must have three steps");
-  if (await page.locator(".customer-grade-step.is-reached").count() !== 3) throw new Error("300 visits must reach all three steps");
+  if (await page.locator(".customer-grade-step.is-reached").count() !== 3) throw new Error("150 visits must reach all three steps");
   if (await page.locator(".customer-drop-row").count() !== 3 || await page.locator(".customer-drop-row.is-active").count() !== 3) {
-    throw new Error("300 visits must unlock all three material rows");
+    throw new Error("150 visits must unlock all three material rows");
   }
   let text = await page.locator("#menu-content").innerText();
-  if (!text.includes("300회") || !text.includes("최고의 단골") || text.includes("연결 레시피") || text.includes("현재 2개")) {
+  if (!text.includes("150회") || !text.includes("최고의 단골") || text.includes("연결 레시피") || text.includes("현재 2개")) {
     throw new Error(`Customer detail text is incorrect: ${text}`);
   }
   await page.screenshot({ path: path.join(out, "01-clean-customer-profile.png"), fullPage: true });
@@ -69,7 +69,7 @@ try {
     throw new Error("40 visits must unlock two grade/material steps");
   }
   text = await page.locator(".customer-profile").innerText();
-  if (!text.includes("단골") || !text.includes("다음 300회") || !text.includes("현재 1개")) {
+  if (!text.includes("단골") || !text.includes("다음 150회") || !text.includes("현재 1개")) {
     throw new Error(`40-visit profile is incorrect: ${text}`);
   }
 
@@ -81,7 +81,7 @@ try {
   const current = await state();
   if (current.progression.guestGrades.length !== 3
     || current.collection.customerGrades[routes[0].customerId].nextAt !== 40
-    || current.collection.customerGrades[routes[1].customerId].nextAt !== 300
+    || current.collection.customerGrades[routes[1].customerId].nextAt !== 150
     || current.collection.customerGrades[routes[2].customerId].nextAt !== null) {
     throw new Error(`Text state grade progression mismatch: ${JSON.stringify(current.collection.customerGrades)}`);
   }
@@ -89,7 +89,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log("CUSTOMER_CODEX_UI_OK roster=45 detail=1 grades=1/40/300 dropQuantity=1");
+  console.log("CUSTOMER_CODEX_UI_OK roster=45 detail=1 grades=1/40/150 dropQuantity=1");
 } finally {
   await browser.close();
 }

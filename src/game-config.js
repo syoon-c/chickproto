@@ -53,7 +53,7 @@ const THEME_CHICK_THRESHOLDS = [0.3, 0.7, 1];
 const GUEST_GRADES = [
   { id: 1, name: "첫 방문", minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
   { id: 2, name: "단골", minVisits: 40, primaryCount: 1, secondaryCount: 1, rareCount: 0 },
-  { id: 3, name: "최고의 단골", minVisits: 300, primaryCount: 1, secondaryCount: 1, rareCount: 1 },
+  { id: 3, name: "최고의 단골", minVisits: 150, primaryCount: 1, secondaryCount: 1, rareCount: 1 },
 ];
 const GUEST_INGREDIENT_DROP_CHANCE = 0.15;
 const INGREDIENT_SLOT_WEIGHTS = Object.freeze({ primary: 0.5, secondary: 0.3, special: 0.2 });
