@@ -142,9 +142,13 @@ try {
   }
   await page.evaluate(() => window.advanceTime(2500));
   current = await gameState();
-  if (current.recipes.levels["20002"] !== 2 || current.recipes.levels["20001"] !== 1) {
+  if (current.recipes.levels["20002"] !== 2 || current.recipes.levels["20001"] !== 1
+    || current.recipes.reveal?.result !== "upgrade" || current.recipes.reveal?.automatic !== true
+    || current.recipes.reveal?.previousPrice !== 40 || current.recipes.reveal?.newPrice !== 44
+    || current.recipes.reveal?.priceIncrease !== 4) {
     throw new Error("Automatic research upgraded the wrong same-level recipe");
   }
+  await page.waitForTimeout(450);
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "03-surplus-auto-research.png") });
 
   if (errors.length) throw new Error(`Console errors: ${errors.join(" | ")}`);

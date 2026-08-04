@@ -104,6 +104,9 @@ try {
   if (!await reveal.isVisible() || !(await reveal.innerText()).includes("새 레시피 발견!") || !(await reveal.innerText()).includes("볶음밥")) {
     throw new Error("New recipe celebration reveal did not appear");
   }
+  if (await page.locator(".recipe-reveal-rays").count() !== 1 || await page.locator(".recipe-upgrade-card").count()) {
+    throw new Error("New recipe discovery no longer uses the brighter celebration reveal");
+  }
   await page.waitForFunction(() => [...document.querySelectorAll("#recipe-reveal img")].every((image) => image.complete));
   await page.waitForTimeout(700);
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "02-four-ingredient-crafted.png") });

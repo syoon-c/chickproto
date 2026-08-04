@@ -139,7 +139,8 @@
     "reveal": {
       "recipeId": 10020,
       "recipeName": "스테이크",
-      "result": "success"
+      "result": "success",
+      "automatic": false
     },
     "hintRule": "same-size-at-least-one-correct-reveals-name-and-missing-clues",
     "mysteryRecipeCount": 57,
@@ -1427,18 +1428,18 @@
         "slot": 0,
         "customerId": 10031,
         "customerName": "아보카도 병아리",
-        "ingredientId": 30010,
-        "ingredientName": "식용유",
+        "ingredientId": 30039,
+        "ingredientName": "나뭇잎",
         "rewardItems": [
           {
             "slot": "primary",
-            "ingredientId": 30010,
-            "name": "식용유"
+            "ingredientId": 30039,
+            "name": "나뭇잎"
           },
           {
             "slot": "secondary",
-            "ingredientId": 30023,
-            "name": "모둠 채소"
+            "ingredientId": 30010,
+            "name": "식용유"
           },
           {
             "slot": "special",
@@ -1482,8 +1483,8 @@
           },
           {
             "slot": "secondary",
-            "ingredientId": 30005,
-            "name": "달걀"
+            "ingredientId": 30039,
+            "name": "나뭇잎"
           },
           {
             "slot": "special",

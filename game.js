@@ -798,10 +798,30 @@ function renderRecipeReveal() {
   if (!recipeReveal || state.ui.screen !== "recipe") {
     dom.recipeReveal.hidden = true;
     dom.recipeReveal.innerHTML = "";
+    dom.recipeReveal.classList.remove("is-upgrade");
     return;
   }
   const recipeId = recipeReveal.recipeId;
+  const isUpgrade = recipeReveal.result === "upgrade";
   const isWeird = recipeReveal.result === "failure";
+  dom.recipeReveal.classList.toggle("is-upgrade", isUpgrade);
+  if (isUpgrade) {
+    dom.recipeReveal.innerHTML = `<section class="recipe-upgrade-card" role="dialog" aria-modal="true" aria-label="레시피 레벨업">
+      <span class="recipe-upgrade-kicker">레시피 레벨업</span>
+      <div class="recipe-upgrade-icon"><img src="${routeRecipeIcon(recipeId)}" alt="" /><b aria-hidden="true">↑</b></div>
+      <h3>${routeRecipeName(recipeId)}</h3>
+      <div class="recipe-upgrade-level"><span>Lv.${recipeReveal.previousLevel}</span><i>→</i><strong>Lv.${recipeReveal.newLevel}</strong></div>
+      <section class="recipe-upgrade-price">
+        <small>판매 가격</small>
+        <div><del>${formatNumber(recipeReveal.previousPrice)}</del><i>→</i><strong>${formatNumber(recipeReveal.newPrice)}</strong></div>
+        <b>+${formatNumber(recipeReveal.priceIncrease)}원 상승</b>
+      </section>
+      <p>이제 한 접시마다 ${formatNumber(recipeReveal.priceIncrease)}원 더 받아요.</p>
+      <button type="button" data-action="dismiss-recipe-reveal">확인</button>
+    </section>`;
+    dom.recipeReveal.hidden = false;
+    return;
+  }
   dom.recipeReveal.innerHTML = `<div class="recipe-reveal-rays" aria-hidden="true"></div>
     <div class="recipe-reveal-sparkles" aria-hidden="true"><i>✦</i><i>✧</i><i>★</i><i>✦</i><i>✧</i><i>★</i></div>
     <section class="recipe-reveal-card ${isWeird ? "is-weird" : ""}" role="dialog" aria-modal="true" aria-label="${isWeird ? "요리 연구 실패" : "새 레시피 발견"}">
@@ -825,6 +845,21 @@ function startRecipeReveal(recipeId, automatic) {
   recipeReveal = { recipeId: Number(recipeId), automatic: Boolean(automatic), result: "success" };
   if (recipeRevealTimer) window.clearTimeout(recipeRevealTimer);
   recipeRevealTimer = window.setTimeout(dismissRecipeReveal, 3600);
+}
+
+function startRecipeUpgradeReveal(recipeId, automatic, previousLevel, newLevel, previousPrice, newPrice) {
+  recipeReveal = {
+    recipeId: Number(recipeId),
+    automatic: Boolean(automatic),
+    result: "upgrade",
+    previousLevel: Number(previousLevel),
+    newLevel: Number(newLevel),
+    previousPrice: Number(previousPrice),
+    newPrice: Number(newPrice),
+    priceIncrease: Math.max(0, Number(newPrice) - Number(previousPrice)),
+  };
+  if (recipeRevealTimer) window.clearTimeout(recipeRevealTimer);
+  recipeRevealTimer = window.setTimeout(dismissRecipeReveal, 3800);
 }
 
 function startWeirdDishReveal(automatic) {
@@ -1097,6 +1132,9 @@ function completeRecipeCraft(recipeId, automatic = false) {
   const route = progressionForRecipe(recipeId);
   if (!route) return false;
   const existing = recipeData(route.recipeId);
+  const recipe = getRecipe(route.recipeId);
+  const previousLevel = Number(existing?.level || 0);
+  const previousPrice = existing ? Math.round(recipeLevelPrice(recipe, existing)) : 0;
   if (existing) existing.level += 1;
   else state.ownedRecipes[route.recipeId] = { level: 1, stack: 0, codexClaimed: false };
   state.crafting.selected = [];
@@ -1104,11 +1142,14 @@ function completeRecipeCraft(recipeId, automatic = false) {
   state.crafting.history.unshift({ recipeId: route.recipeId, automatic, level, at: Math.round(state.clock) });
   state.crafting.history = state.crafting.history.slice(0, 12);
   state.metrics.recipesCrafted += 1;
-  if (existing) dispatchAchievement(9, 1, 103, route.recipeId);
-  else startRecipeReveal(route.recipeId, automatic);
-  showToast(existing
-    ? `${routeRecipeName(route.recipeId)} Lv.${level}! 판매 가격 +${Math.round(RECIPE_LEVEL_PRICE_BONUS * 100)}%`
-    : `${automatic ? "자동 요리 연구" : "새 조합 발견"} · ${routeRecipeName(route.recipeId)} 완성!`, 3);
+  if (existing) {
+    const newPrice = Math.round(recipeLevelPrice(recipe, existing));
+    dispatchAchievement(9, 1, 103, route.recipeId);
+    startRecipeUpgradeReveal(route.recipeId, automatic, previousLevel, level, previousPrice, newPrice);
+  } else {
+    startRecipeReveal(route.recipeId, automatic);
+    showToast(`${automatic ? "자동 요리 연구" : "새 조합 발견"} · ${routeRecipeName(route.recipeId)} 완성!`, 3);
+  }
   saveState();
   updateHud();
   if (!dom.menuScreen.hidden && state.ui.screen === "recipe") renderMenu();
@@ -2581,6 +2622,12 @@ function renderGameToText() {
         recipeId: recipeReveal.recipeId,
         recipeName: recipeReveal.result === "failure" ? "괴식" : routeRecipeName(recipeReveal.recipeId),
         result: recipeReveal.result,
+        automatic: recipeReveal.automatic,
+        previousLevel: recipeReveal.previousLevel,
+        newLevel: recipeReveal.newLevel,
+        previousPrice: recipeReveal.previousPrice,
+        newPrice: recipeReveal.newPrice,
+        priceIncrease: recipeReveal.priceIncrease,
       } : null,
       hintRule: "same-size-at-least-one-correct-reveals-name-and-missing-clues",
       mysteryRecipeCount: RECIPE_PROGRESSION.filter((route) => !recipeData(route.recipeId)).length,

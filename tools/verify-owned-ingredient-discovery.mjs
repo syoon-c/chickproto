@@ -63,17 +63,31 @@ try {
     || current.recipes.recipeLevelPriceBonus !== 0.10
     || current.recipes.craftCosts[1] !== 2
     || current.recipes.upgradeIngredientCostRule !== "fixed-per-recipe"
+    || current.recipes.reveal?.result !== "upgrade"
+    || current.recipes.reveal?.automatic !== false
+    || current.recipes.reveal?.previousLevel !== 1
+    || current.recipes.reveal?.newLevel !== 2
+    || current.recipes.reveal?.previousPrice !== 40
+    || current.recipes.reveal?.newPrice !== 44
+    || current.recipes.reveal?.priceIncrease !== 4
     || Number(current.progression.ingredients[30039] || 0) !== 1) {
     throw new Error(`Two leaves did not upgrade salad price by 10%: ${JSON.stringify(current.recipes)}`);
   }
-  const toastText = await page.locator("#toast").innerText();
-  if (!toastText.includes("판매 가격 +10%")) throw new Error(`Upgrade toast is stale: ${toastText}`);
+  const upgradeText = await page.locator(".recipe-upgrade-card").innerText();
+  if (!upgradeText.includes("레시피 레벨업") || !upgradeText.includes("Lv.1") || !upgradeText.includes("Lv.2")
+    || !upgradeText.includes("40") || !upgradeText.includes("44") || !upgradeText.includes("+4원 상승")
+    || await page.locator(".recipe-reveal-rays").count() || await page.locator(".recipe-reveal-sparkles").count()) {
+    throw new Error(`Upgrade reveal is stale: ${upgradeText}`);
+  }
+  await page.waitForTimeout(450);
+  await page.locator("#recipe-reveal").screenshot({ path: path.join(out, "02-salad-levelup-price-reveal.png") });
+  await page.locator('[data-action="dismiss-recipe-reveal"]').click();
   await page.locator('[data-tab="owned"]').click();
   const ownedRecipeText = await page.locator("#menu-content").innerText();
   if (!ownedRecipeText.includes("Lv.UP당 가격 +10%") || !ownedRecipeText.includes("현재 가격 44")) {
     throw new Error(`Owned recipe price copy is stale: ${ownedRecipeText}`);
   }
-  await page.screenshot({ path: path.join(out, "02-salad-level-2-price.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "03-salad-level-2-price.png"), fullPage: true });
 
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
@@ -92,7 +106,7 @@ try {
     || current.recipes.craftCosts[1] !== 2 || Number(current.progression.ingredients[30039] || 0) !== 0) {
     throw new Error(`Salad upgrade cost increased after level 2: ${JSON.stringify(current.recipes)}`);
   }
-  await page.screenshot({ path: path.join(out, "03-salad-level-3-fixed-cost.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "04-salad-level-3-fixed-cost.png"), fullPage: true });
 
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";

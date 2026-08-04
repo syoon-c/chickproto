@@ -551,6 +551,25 @@ button.combination-slot { cursor: pointer; }
 @keyframes recipe-hint-reveal { 0% { opacity: 0; transform: scale(.45) rotate(-9deg); } 70% { transform: scale(1.1) rotate(2deg); } 100% { opacity: 1; transform: none; } }
 .recipe-reveal { position: absolute; z-index: 48; inset: 0; display: grid; place-items: center; overflow: hidden; padding: 24px; background: radial-gradient(circle at center,rgba(255,246,174,.97),rgba(96,55,27,.78)); backdrop-filter: blur(3px); }
 .recipe-reveal[hidden] { display: none; }
+.recipe-reveal.is-upgrade { background: rgba(73,52,35,.48); backdrop-filter: blur(2px); }
+.recipe-upgrade-card { position: relative; z-index: 2; width: min(286px,90%); padding: 22px 22px 20px; border: 3px solid #9a7449; border-radius: 24px; background: linear-gradient(165deg,#fffdf1,#f5e3b6); box-shadow: 0 7px 0 #715039,0 18px 34px rgba(51,36,25,.28),inset 0 0 0 3px rgba(255,255,255,.58); text-align: center; animation: recipe-levelup-pop .38s ease-out both; }
+.recipe-upgrade-kicker { display: inline-block; padding: 5px 11px; border-radius: 99px; background: #e9d5a4; color: #765532; font-size: 11px; font-weight: 1000; }
+.recipe-upgrade-icon { position: relative; width: 86px; height: 82px; display: grid; place-items: center; margin: 9px auto 1px; border-radius: 22px; background: rgba(255,255,255,.52); }
+.recipe-upgrade-icon img { width: 70px; height: 70px; object-fit: contain; filter: drop-shadow(0 4px 2px rgba(86,57,31,.18)); }
+.recipe-upgrade-icon b { position: absolute; right: -5px; top: -5px; width: 30px; height: 30px; display: grid; place-items: center; border: 2px solid #897041; border-radius: 50%; background: #dce99a; color: #52652c; font-size: 18px; }
+.recipe-upgrade-card h3 { margin: 4px 0 5px; color: #5f442c; font-size: 21px; }
+.recipe-upgrade-level { display: flex; align-items: center; justify-content: center; gap: 9px; margin-bottom: 11px; color: #8d7459; font-size: 13px; font-weight: 900; }
+.recipe-upgrade-level i { color: #ad8b5b; font-style: normal; }
+.recipe-upgrade-level strong { color: #5b6e32; font-size: 17px; }
+.recipe-upgrade-price { padding: 12px 10px 11px; border: 2px solid #d89a3f; border-radius: 16px; background: #fff6d1; }
+.recipe-upgrade-price small { display: block; margin-bottom: 3px; color: #896844; font-size: 10px; font-weight: 900; }
+.recipe-upgrade-price div { display: flex; align-items: center; justify-content: center; gap: 9px; }
+.recipe-upgrade-price del { color: #a28c72; font-size: 16px; font-weight: 900; text-decoration-thickness: 2px; }
+.recipe-upgrade-price i { color: #b88745; font-style: normal; font-weight: 1000; }
+.recipe-upgrade-price strong { color: #d66e24; font-size: 25px; line-height: 1; }
+.recipe-upgrade-price > b { display: block; margin-top: 6px; color: #bd5c21; font-size: 14px; }
+.recipe-upgrade-card > p { margin: 9px 0 13px; color: #705b43; font-size: 10px; font-weight: 800; }
+.recipe-upgrade-card > button { min-width: 112px; padding: 9px 18px; border: 2px solid #745137; border-radius: 13px; background: #efd18a; box-shadow: 0 3px 0 #79573d; color: #5d422d; font-size: 13px; font-weight: 1000; cursor: pointer; }
 .recipe-reveal-rays { position: absolute; width: 520px; height: 520px; border-radius: 50%; opacity: .52; background: repeating-conic-gradient(from 0deg,rgba(255,255,255,.86) 0 7deg,transparent 7deg 18deg); animation: recipe-rays-spin 14s linear infinite; }
 .recipe-reveal-card { position: relative; z-index: 2; width: min(310px,92%); padding: 26px 22px 22px; border: 4px solid #8b4d25; border-radius: 30px; background: linear-gradient(165deg,#fffdf0,#ffe48b 72%,#f7b94c); box-shadow: 0 12px 0 #6d3d20,0 24px 48px rgba(62,35,20,.36),inset 0 0 0 4px rgba(255,255,255,.55); text-align: center; animation: recipe-reveal-pop .68s cubic-bezier(.18,.88,.25,1.2) both; }
 .recipe-reveal-kicker { display: inline-block; padding: 7px 14px; border: 2px solid #a65726; border-radius: 99px; background: #fff7d5; color: #d15a26; font-size: 14px; font-weight: 1000; letter-spacing: -.02em; }
@@ -581,6 +600,7 @@ button.combination-slot { cursor: pointer; }
 @keyframes recipe-rays-spin { to { transform: rotate(360deg); } }
 @keyframes recipe-glow-pulse { to { transform: scale(1.08); opacity: .82; } }
 @keyframes recipe-sparkle { from { opacity: .35; transform: scale(.65) rotate(-12deg); } to { opacity: 1; transform: scale(1.25) rotate(12deg); } }
+@keyframes recipe-levelup-pop { from { opacity: 0; transform: translateY(15px) scale(.95); } to { opacity: 1; transform: none; } }
 .mission-group-title { display: flex; align-items: center; justify-content: space-between; margin: 5px 2px 9px; }
 .mission-group-title h3 { margin: 0; font-size: 17px; }
 .collection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
