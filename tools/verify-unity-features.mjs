@@ -28,18 +28,11 @@ try {
   await page.reload({ waitUntil: "load" });
 
   const navLabels = await page.locator(".bottom-nav .nav-button strong").allTextContents();
-  if (navLabels.join(",") !== "레시피,할 일,직원,테마") throw new Error(`Unexpected bottom navigation: ${navLabels.join(",")}`);
+  if (navLabels.join(",") !== "테마,레시피,손님") throw new Error(`Unexpected bottom navigation: ${navLabels.join(",")}`);
   if (await page.locator("#objective-card").count()) throw new Error("Objective toast/card still exists");
-  if (!(await page.locator("#collection-btn").isVisible())) throw new Error("Top-right collection button is missing");
+  if (await page.locator("#collection-btn,[data-screen='missions'],[data-screen='staff']").count()) throw new Error("Removed navigation is still visible");
+  await page.screenshot({ path: path.join(out, "01-three-button-layout.png"), fullPage: true });
 
-  await page.locator('[data-screen="missions"]').click();
-  await page.locator('[data-tab="daily"]').click();
-  const loginClaim = page.locator('[data-action="claim-mission"][data-id="1001"]');
-  if (!(await loginClaim.isEnabled())) throw new Error("Daily login mission was not ready");
-  await loginClaim.click();
-  await page.screenshot({ path: path.join(out, "01-daily-claimed.png"), fullPage: true });
-
-  await page.locator("#menu-close-btn").click();
   for (const name of ["조명", "테이블", "조리기구"]) {
     const current = await state();
     const candidate = current.installCandidates.find((item) => item.name === name);
@@ -50,13 +43,15 @@ try {
   await page.evaluate(() => window.advanceTime(2500));
   const waiting = await state();
   if (waiting.collection.customers !== 1) throw new Error("Customer collection did not register");
-  await page.locator("#collection-btn").click();
+  await page.locator('[data-screen="collection"]').click();
   await page.screenshot({ path: path.join(out, "02-customer-collection.png"), fullPage: true });
 
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
-    saved.crafting = { autoEnabled: false, ingredients: { 30001: 3 }, history: [] };
+    const woodRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === 2);
+    saved.themes.opened = [...new Set([...saved.themes.opened, ...woodRows.slice(0, Math.ceil(woodRows.length * .3)).map((row) => row.id)])];
+    saved.crafting = { ingredients: { 30040: 1, 30041: 1 }, history: [], selected: [] };
     saved.ownedRecipes = { 1: { level: 1, stack: 0, codexClaimed: true } };
     localStorage.setItem(key, JSON.stringify(saved));
   });
@@ -70,28 +65,26 @@ try {
       throw new Error("Bottom navigation button escaped its dock while a menu was open");
     }
   }
-  await page.locator('[data-action="craft-recipe"][data-id="1"]').click();
+  await page.locator('[data-action="select-ingredient"][data-id="30040"]').click();
+  await page.locator('[data-action="select-ingredient"][data-id="30041"]').click();
+  await page.locator('[data-action="discover-combination"]').click();
   const crafted = await state();
-  if (crafted.recipes.owned !== 1 || crafted.recipes.levels[1] !== 2 || crafted.progression.ingredients[30001] !== 0) throw new Error("Base salad upgrade failed");
+  if (crafted.recipes.owned !== 2 || crafted.recipes.levels[10003] !== 1
+    || Number(crafted.progression.ingredients[30040] || 0) !== 0
+    || Number(crafted.progression.ingredients[30041] || 0) !== 0) throw new Error(`Manual recipe discovery failed: ${JSON.stringify(crafted.recipes)}`);
   await page.screenshot({ path: path.join(out, "03-research-upgrade.png"), fullPage: true });
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")));
-  if (saved.ownedRecipes[1]?.level !== 2 || saved.metrics.recipesCrafted !== 1) throw new Error("Crafted recipe state mismatch");
+  if (saved.ownedRecipes[10003]?.level !== 1 || saved.metrics.recipesCrafted !== 1) throw new Error("Crafted recipe state mismatch");
 
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const current = JSON.parse(localStorage.getItem(key));
     current.resources.acorns = 100000000;
-    current.resources.stickers = 5;
     current.installed = [...new Set([...current.installed, 10])];
     current.performance.cooldown = 0;
     localStorage.setItem(key, JSON.stringify(current));
   });
   await page.reload({ waitUntil: "load" });
-  await page.locator('[data-screen="staff"]').click();
-  await page.locator('[data-action="hire-staff"][data-id="1"]').click();
-  for (let i = 0; i < 3; i += 1) await page.locator('[data-action="attach-sticker"][data-id="1"]').click();
-  await page.locator('[data-action="level-staff"][data-id="1"]').click();
-  await page.locator("#menu-close-btn").click();
   await clickCanvas(70, 405);
   await page.locator('[data-action="start-performance"]').click();
   await page.locator("#menu-close-btn").click();
@@ -100,7 +93,7 @@ try {
   await page.locator('[data-action="buy-theme"][data-id="6001"]').click();
   await page.screenshot({ path: path.join(out, "04-theme.png"), fullPage: true });
   const managed = await page.evaluate(() => JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")));
-  if (managed.staff[1].level !== 2 || managed.performance.activeId <= 0 || managed.themes.activeByFacility[1] !== 6001 || managed.themes.unlockedThemeIds.includes(6)) {
+  if (managed.performance.activeId <= 0 || managed.themes.activeByFacility[1] !== 6001 || managed.themes.unlockedThemeIds.includes(6)) {
     throw new Error("Management state mismatch");
   }
 
@@ -134,7 +127,7 @@ try {
   const navBox = await page.locator(".bottom-nav").boundingBox();
   if (!canvasBox || !navBox || canvasBox.y + canvasBox.height > navBox.y) throw new Error("Bottom navigation overlaps the game canvas");
   const restaurantNavButtons = await page.locator(".bottom-nav .nav-button").all();
-  if (restaurantNavButtons.length !== 4) throw new Error("Restaurant view lost bottom navigation buttons");
+  if (restaurantNavButtons.length !== 3) throw new Error("Restaurant view lost bottom navigation buttons");
   for (const button of restaurantNavButtons) {
     const box = await button.boundingBox();
     if (!box || box.x < navBox.x || box.x + box.width > navBox.x + navBox.width) {

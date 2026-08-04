@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const codexHome = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
 const playwrightUrl = pathToFileURL(path.join(codexHome, "node_modules", "playwright", "index.mjs")).href;
 const { chromium } = await import(playwrightUrl);
-const out = path.join(root, "output", "theme-chick-milestones");
+const out = path.join(root, "output", "theme-chick-milestones-stone-3");
 fs.mkdirSync(out, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -45,8 +45,8 @@ try {
     throw new Error("The starting Stone theme must only unlock the base chick before all facilities are installed");
   }
   const baseRoute = current.progression.unlockedChickRoutes.find((route) => route.customerId === 3);
-  if (baseRoute?.ingredientId !== 30001 || baseRoute?.recipeId !== 1 || current.recipes.craftCosts[1] !== 3) {
-    throw new Error(`The base chick must upgrade the starting salad with lettuce: ${JSON.stringify(baseRoute)}`);
+  if (baseRoute?.ingredientId !== 30039 || baseRoute?.recipeId !== 1 || current.recipes.craftCosts[1] !== 2) {
+    throw new Error(`The base chick must upgrade the starting salad with two leaves: ${JSON.stringify(baseRoute)}`);
   }
   if (current.progression.unlockedChickRoutes.some((route) => route.customerId === 10013)) {
     throw new Error("The Stone completion chick must remain locked before all facilities are installed");
@@ -69,7 +69,7 @@ try {
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
-    saved.crafting.ingredients[30001] = 3;
+    saved.crafting.ingredients[30039] = 3;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
@@ -87,16 +87,40 @@ try {
     const stoneTypes = new Set(window.CHICK_TABLE_SOURCE.ThemeFacility
       .filter((row) => row.areaType === 1 && row.facilityTheme === 1)
       .map((row) => row.facilityType));
-    saved.installed = window.CHICK_TABLE_SOURCE.InstallFacility
-      .filter((row) => row.areaType === 1 && stoneTypes.has(row.facilityType))
-      .map((row) => row.id);
+    const stoneInstalls = window.CHICK_TABLE_SOURCE.InstallFacility
+      .filter((row) => row.areaType === 1 && stoneTypes.has(row.facilityType));
+    saved.installed = stoneInstalls.slice(0, Math.ceil(stoneInstalls.length * .7)).map((row) => row.id);
     saved.resources.acorns = 100000;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
   current = await state();
   if (current.progression.themeChickProgress[1].unlocked.length !== 2) {
-    throw new Error("Installing every Stone facility must unlock the completion chick");
+    throw new Error("Installing 70% of Stone facilities must unlock the second chick");
+  }
+  const stoneMiddleRoute = current.progression.unlockedChickRoutes.find((route) => route.customerId === 10012);
+  if (stoneMiddleRoute?.customerName !== "공룡 병아리") {
+    throw new Error(`The Stone 70% chick must be the dinosaur chick: ${JSON.stringify(stoneMiddleRoute)}`);
+  }
+  await page.locator('[data-screen="theme"]').click();
+  await page.waitForTimeout(200);
+  await page.screenshot({ path: path.join(out, "00c-stone-three-chicks-70-percent.png"), fullPage: true });
+
+  await page.evaluate(() => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    const stoneTypes = new Set(window.CHICK_TABLE_SOURCE.ThemeFacility
+      .filter((row) => row.areaType === 1 && row.facilityTheme === 1)
+      .map((row) => row.facilityType));
+    saved.installed = window.CHICK_TABLE_SOURCE.InstallFacility
+      .filter((row) => row.areaType === 1 && stoneTypes.has(row.facilityType))
+      .map((row) => row.id);
+    localStorage.setItem(key, JSON.stringify(saved));
+  });
+  await page.reload({ waitUntil: "load" });
+  current = await state();
+  if (current.progression.themeChickProgress[1].unlocked.length !== 3) {
+    throw new Error("Installing every Stone facility must unlock all three chicks");
   }
   const stoneBonusRoute = current.progression.unlockedChickRoutes.find((route) => route.customerId === 10013);
   if (stoneBonusRoute?.ingredientId !== 30003 || stoneBonusRoute?.recipeId !== 2 || stoneBonusRoute?.recipeName !== "샌드위치") {
@@ -111,7 +135,7 @@ try {
   await page.waitForFunction(() => [...document.images].every((image) => image.complete));
   await page.waitForTimeout(500);
   await page.locator("#menu-content").evaluate((element) => { element.scrollTop = 0; });
-  await page.screenshot({ path: path.join(out, "00c-stone-completion-unlocked.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "00d-stone-three-chicks-complete.png"), fullPage: true });
 
   const total = current.progression.themeChickProgress[6].total;
   const required30 = Math.ceil(total * .3);
@@ -190,7 +214,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`THEME_CHICK_MILESTONES_OK total=${total} thresholds=${required30}/${required70}/${total}`);
+  console.log(`THEME_CHICK_MILESTONES_OK stone=1/2/3 campingTotal=${total} thresholds=${required30}/${required70}/${total}`);
 } finally {
   await browser.close();
 }

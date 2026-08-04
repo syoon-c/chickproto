@@ -72,24 +72,24 @@ try {
   }
   await page.screenshot({ path: path.join(out, "01-theme-chick-preview.png"), fullPage: true });
 
-  await page.locator("#collection-btn").click();
+  await page.locator('[data-screen="collection"]').click();
   await page.waitForTimeout(200);
-  const codexText = await page.locator("#menu-content").innerText();
   for (const route of campingRoutes) {
+    await page.locator(`[data-action="select-customer"][data-id="${route.customerId}"]`).click();
+    const codexText = await page.locator(".customer-profile").innerText();
     const expectedDetails = [
       route.customerName,
-      route.recipeName,
       ...route.rewardItems.map((item) => item.name),
     ].filter(Boolean);
     if (expectedDetails.some((detail) => !codexText.includes(detail))) {
       throw new Error(`Codex is missing unlocked chick detail for ${route.customerName}: ${codexText}`);
     }
-  }
-  if (!codexText.includes("캠핑 테마") || !codexText.includes("연결 레시피") || !codexText.includes("선물")) {
-    throw new Error(`Codex is missing source/reward/recipe labels: ${codexText}`);
+    if (!codexText.includes("캠핑 테마") || !codexText.includes("드랍 재료") || codexText.includes("연결 레시피") || codexText.includes(route.recipeName)) {
+      throw new Error(`Codex source/material separation is incorrect for ${route.customerName}: ${codexText}`);
+    }
   }
   await page.screenshot({ path: path.join(out, "02-codex-chick-details.png"), fullPage: true });
-  const campingCard = page.locator(".collection-cell", { hasText: campingRoutes[0].customerName });
+  const campingCard = page.locator(`[data-action="select-customer"][data-id="${campingRoutes[0].customerId}"]`);
   await campingCard.scrollIntoViewIfNeeded();
   await page.waitForTimeout(100);
   await page.screenshot({ path: path.join(out, "03-codex-camping-details.png"), fullPage: true });

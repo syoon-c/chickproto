@@ -595,11 +595,11 @@
       10
     ]
   },
-  "missions": {
-    "mainGroup": 1,
-    "rewardReady": true,
-    "dailyClaimed": 0
+  "activeSystems": {
+    "missions": false,
+    "staff": false
   },
+  "currentTab": "craft",
   "collection": {
     "customers": 0,
     "specialCustomers": 0,

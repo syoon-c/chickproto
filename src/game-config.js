@@ -52,11 +52,15 @@ const THEME_CHICK_THRESHOLDS = [0.3, 0.7, 1];
 
 const GUEST_GRADES = [
   { id: 1, name: "첫 방문", minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
-  { id: 2, name: "단골", minVisits: 80, primaryCount: 2, secondaryCount: 0, rareCount: 0 },
-  { id: 3, name: "VIP", minVisits: 250, primaryCount: 2, secondaryCount: 1, rareCount: 0 },
-  { id: 4, name: "최고의 단골", minVisits: 700, primaryCount: 2, secondaryCount: 2, rareCount: 1 },
+  { id: 2, name: "단골", minVisits: 40, primaryCount: 1, secondaryCount: 1, rareCount: 0 },
+  { id: 3, name: "최고의 단골", minVisits: 300, primaryCount: 1, secondaryCount: 1, rareCount: 1 },
 ];
-const GUEST_INGREDIENT_DROP_CHANCE = 0.08;
+const GUEST_INGREDIENT_DROP_CHANCE = 0.15;
+const INGREDIENT_SLOT_WEIGHTS = Object.freeze({ primary: 0.5, secondary: 0.3, special: 0.2 });
+const INGREDIENT_STORAGE_INITIAL_CAPACITY = 20;
+const INGREDIENT_STORAGE_EXPANSION_AMOUNT = 5;
+const INGREDIENT_STORAGE_EXPANSION_GEM_COST = 10;
+const RECIPE_LEVEL_PRICE_BONUS = 0.10;
 
 const RESTAURANT_THEME_PRICE_MULTIPLIER = 10;
 
@@ -85,73 +89,206 @@ const GAME_INGREDIENTS = {
   fruit: { id: 30033, name: "과일", emoji: "🍎" }, onion: { id: 30034, name: "양파", emoji: "🧅" },
   chili: { id: 30035, name: "고추", emoji: "🌶️" }, jam: { id: 30036, name: "잼", emoji: "🍓" },
   cabbage: { id: 30037, name: "양배추", emoji: "🥬" }, yeast: { id: 30038, name: "이스트", emoji: "🍞" },
+  leaf: { id: 30039, name: "나뭇잎", emoji: "🍃" }, berry: { id: 30040, name: "산딸기", emoji: "🫐" },
+  fern: { id: 30041, name: "고사리", emoji: "🌿" }, insect: { id: 30042, name: "식용 벌레", emoji: "🐛" },
+  corn: { id: 30043, name: "옥수수", emoji: "🌽" }, cucumber: { id: 30044, name: "오이", emoji: "🥒" },
+  broccoli: { id: 30045, name: "브로콜리", emoji: "🥦" }, avocado: { id: 30046, name: "아보카도", emoji: "🥑" },
+  sugar: { id: 30047, name: "설탕", emoji: "🧂" }, beef: { id: 30048, name: "소고기", emoji: "🥩" },
+  pork: { id: 30049, name: "돼지고기", emoji: "🥓" }, lamb: { id: 30050, name: "양고기", emoji: "🍖" },
+  parsley: { id: 30051, name: "파슬리", emoji: "🌿" }, basil: { id: 30052, name: "바질", emoji: "🌿" },
+  paprika: { id: 30053, name: "파프리카", emoji: "🫑" }, rosemary: { id: 30054, name: "로즈마리", emoji: "🌿" },
+  mushroom: { id: 30055, name: "버섯", emoji: "🍄" }, eggplant: { id: 30056, name: "가지", emoji: "🍆" },
+  zucchini: { id: 30057, name: "애호박", emoji: "🥒" }, pumpkin: { id: 30058, name: "호박", emoji: "🎃" },
+  pasta: { id: 30059, name: "파스타면", emoji: "🍝" }, olive: { id: 30060, name: "올리브", emoji: "🫒" },
+  cherry: { id: 30061, name: "체리", emoji: "🍒" }, banana: { id: 30062, name: "바나나", emoji: "🍌" },
+  strawberry: { id: 30063, name: "딸기", emoji: "🍓" }, apple: { id: 30064, name: "사과", emoji: "🍎" },
+  bakingPowder: { id: 30065, name: "베이킹파우더", emoji: "🥄" }, bean: { id: 30066, name: "콩", emoji: "🫘" },
+  water: { id: 30067, name: "물", emoji: "💧" }, vinegar: { id: 30068, name: "식초", emoji: "🫗" },
+  ginseng: { id: 30069, name: "인삼", emoji: "🫚" }, mandrake: { id: 30070, name: "만드라고라", emoji: "🌱" },
+  mulberry: { id: 30071, name: "오디", emoji: "🫐" }, dragonFruit: { id: 30072, name: "용과", emoji: "🐉" },
+  rambutan: { id: 30073, name: "람부탄", emoji: "🔴" }, starFruit: { id: 30074, name: "스타프루트", emoji: "⭐" },
+  ham: { id: 30075, name: "햄", emoji: "🥓" }, ketchup: { id: 30076, name: "케첩", emoji: "🍅" },
+  cannedCorn: { id: 30077, name: "통조림 옥수수", emoji: "🥫" }, soda: { id: 30078, name: "탄산음료", emoji: "🥤" },
 };
 
-const RECIPE_INGREDIENT_KEYS = [
-  ["lettuce", "tomato", "mixedVeg"], ["bread", "cheese", "egg"], ["sausage", "bread", "onion"], ["milk", "potato", "onion"],
-  ["meat", "onion", "pepper"], ["rice", "seaweed", "carrot"], ["tomato", "cheese", "flour"], ["oil", "rice", "egg"],
-  ["cheese", "bread", "meat"], ["potato", "oil", "salt"], ["egg", "rice", "mixedVeg"], ["flour", "meat", "cabbage"],
-  ["noodles", "tomato", "cheese"], ["tortilla", "meat", "tomato"], ["broth", "noodles", "egg"], ["breadcrumbs", "meat", "flour"],
-  ["curry", "potato", "onion"], ["fish", "rice", "seaweed"], ["soy", "meat", "garlic"], ["truffle", "meat", "butter"],
-  ["butter", "egg", "salt"], ["milk", "egg", "butter"], ["pepper", "meat", "oil"], ["mixedVeg", "rice", "egg"],
-  ["seaweed", "rice", "fish"], ["carrot", "lettuce", "tomato"], ["cream", "milk", "flour"], ["garlic", "egg", "milk"],
-  ["seed", "flour", "butter"], ["salt", "potato", "oil"], ["tofu", "rice", "soy"], ["acorn", "salt", "tofu"],
-  ["pickle", "bread", "meat"], ["fruit", "milk", "cream"], ["egg", "salt", "milk"], ["onion", "meat", "potato"],
-  ["chili", "noodles", "cheese"], ["jam", "bread", "egg"], ["cabbage", "broth", "meat"], ["yeast", "flour", "egg"],
+// 첫 테마는 ABC/DEF/GHI, 이후 테마는 기존 재료와 신규 3개만 교차 배치한다.
+const THEME_NEW_INGREDIENT_KEYS = {
+  1: ["leaf", "lettuce", "tomato", "mushroom", "flour", "meat", "bread", "egg", "butter"],
+  2: ["rice", "oil", "mixedVeg"],
+  3: ["potato", "cheese", "sausage"],
+  4: ["broth", "noodles", "seaweed"],
+  5: ["tortilla", "beef", "chili"],
+  6: ["breadcrumbs", "pork", "cabbage"],
+  7: ["pasta", "garlic", "paprika"],
+  8: ["fish", "soy", "vinegar"],
+  9: ["carrot", "sugar", "avocado"],
+  10: ["milk", "cream", "seed"],
+  11: ["tofu", "acorn", "corn"],
+  12: ["ham", "ketchup", "fruit"],
+  13: ["curry", "onion", "water"],
+  14: ["strawberry", "apple", "truffle"],
+  15: ["pepper", "rosemary", "salt"],
+};
+
+// 사용 레시피가 많은 재료를 후속 병아리의 주·보조 재료로 다시 공급한다.
+// 각 배열은 slot0의 3종, slot1의 보조 1종, slot2의 주·보조 2종 순서다.
+const THEME_REPEAT_INGREDIENT_KEYS = {
+  2: ["egg", "butter", "meat", "bread", "tomato", "flour"],
+  3: ["oil", "mixedVeg", "rice", "egg", "tomato", "butter"],
+  4: ["cheese", "rice", "egg", "bread", "mushroom", "mixedVeg"],
+  5: ["broth", "egg", "rice", "noodles", "sausage", "seaweed"],
+  6: ["beef", "chili", "butter", "flour", "oil", "rice"],
+  7: ["pork", "cabbage", "bread", "egg", "potato", "beef"],
+  8: ["garlic", "butter", "bread", "egg", "rice", "tomato"],
+  9: ["vinegar", "soy", "lettuce", "flour", "mixedVeg", "bread"],
+  10: ["avocado", "broth", "leaf", "egg", "cheese", "butter"],
+  11: ["cream", "seed", "milk", "egg", "oil", "tomato"],
+  12: ["corn", "milk", "rice", "bread", "flour", "beef"],
+  13: ["fruit", "ketchup", "acorn", "paprika", "rice", "egg"],
+  14: ["onion", "water", "broth", "rice", "butter", "cream"],
+  15: ["truffle", "apple", "leaf", "meat", "onion", "pork"],
+};
+
+// 레시피는 테마가 아니라 재료 조합만으로 이해할 수 있도록 직접 정의한다.
+const GAME_RECIPE_CATALOG = [
+  { name: RECIPE_NAMES[0], keys: ["leaf"], count: 2, iconRecipeId: 1 },
+  { name: "버섯전", keys: ["flour", "mushroom"], iconRecipeId: 36 },
+  { name: RECIPE_NAMES[1], keys: ["bread", "leaf"], iconRecipeId: 2 },
+  { name: RECIPE_NAMES[2], keys: ["bread", "sausage", "ketchup"], iconRecipeId: 3 },
+  { name: RECIPE_NAMES[3], keys: ["broth", "mixedVeg"], iconRecipeId: 4 },
+  { name: RECIPE_NAMES[4], keys: ["meat", "onion", "paprika"], iconRecipeId: 5 },
+  { name: RECIPE_NAMES[5], keys: ["rice", "seaweed", "mixedVeg"], iconRecipeId: 6 },
+  { name: RECIPE_NAMES[6], keys: ["flour", "tomato", "cheese"], iconRecipeId: 7 },
+  { name: RECIPE_NAMES[7], keys: ["rice", "oil", "mixedVeg"], iconRecipeId: 8 },
+  { name: RECIPE_NAMES[8], keys: ["bread", "beef", "cheese"], iconRecipeId: 9 },
+  { name: RECIPE_NAMES[9], keys: ["potato", "oil"], iconRecipeId: 10 },
+  { name: RECIPE_NAMES[10], keys: ["rice", "mixedVeg", "egg"], iconRecipeId: 11 },
+  { name: RECIPE_NAMES[11], keys: ["flour", "pork", "cabbage"], iconRecipeId: 12 },
+  { name: RECIPE_NAMES[12], keys: ["pasta", "tomato", "garlic"], iconRecipeId: 13 },
+  { name: RECIPE_NAMES[13], keys: ["tortilla", "beef", "tomato"], iconRecipeId: 14 },
+  { name: RECIPE_NAMES[14], keys: ["noodles", "broth", "egg"], iconRecipeId: 15 },
+  { name: RECIPE_NAMES[15], keys: ["pork", "breadcrumbs", "oil"], iconRecipeId: 16 },
+  { name: RECIPE_NAMES[16], keys: ["rice", "curry", "onion"], iconRecipeId: 17 },
+  { name: RECIPE_NAMES[17], keys: ["rice", "fish", "vinegar"], iconRecipeId: 18 },
+  { name: RECIPE_NAMES[18], keys: ["beef", "soy", "onion"], iconRecipeId: 19 },
+  { name: RECIPE_NAMES[19], keys: ["beef", "rosemary", "butter"], iconRecipeId: 20 },
+  { name: RECIPE_NAMES[20], keys: ["egg", "oil"], iconRecipeId: 21 },
+  { name: RECIPE_NAMES[21], keys: ["egg", "rice", "ketchup"], iconRecipeId: 22 },
+  { name: RECIPE_NAMES[22], keys: ["meat", "pepper", "butter"], iconRecipeId: 23 },
+  { name: RECIPE_NAMES[23], keys: ["rice", "sausage", "mixedVeg"], iconRecipeId: 24 },
+  { name: RECIPE_NAMES[24], keys: ["rice", "seaweed"], iconRecipeId: 25 },
+  { name: RECIPE_NAMES[25], keys: ["carrot", "vinegar", "sugar"], iconRecipeId: 26 },
+  { name: RECIPE_NAMES[26], keys: ["flour", "mushroom", "cream"], iconRecipeId: 27 },
+  { name: RECIPE_NAMES[27], keys: ["egg", "broth"], iconRecipeId: 28 },
+  { name: RECIPE_NAMES[28], keys: ["seed", "flour", "butter"], iconRecipeId: 29 },
+  { name: RECIPE_NAMES[29], keys: ["potato", "oil", "salt"], iconRecipeId: 30 },
+  { name: RECIPE_NAMES[30], keys: ["rice", "tofu", "vinegar"], iconRecipeId: 31 },
+  { name: RECIPE_NAMES[31], keys: ["acorn", "water"], iconRecipeId: 32 },
+  { name: RECIPE_NAMES[32], keys: ["bread", "beef", "truffle"], iconRecipeId: 33 },
+  { name: RECIPE_NAMES[33], keys: ["fruit", "strawberry", "apple"], iconRecipeId: 34 },
+  { name: RECIPE_NAMES[34], keys: ["egg", "rice", "water"], iconRecipeId: 35 },
+  { name: RECIPE_NAMES[35], keys: ["meat", "potato", "broth"], iconRecipeId: 36 },
+  { name: RECIPE_NAMES[36], keys: ["noodles", "egg", "chili"], iconRecipeId: 37 },
+  { name: RECIPE_NAMES[37], keys: ["bread", "egg", "milk"], iconRecipeId: 38 },
+  { name: RECIPE_NAMES[38], keys: ["broth", "tofu", "pepper"], iconRecipeId: 39 },
+  { name: RECIPE_NAMES[39], keys: ["flour", "egg", "milk"], iconRecipeId: 40 },
+  { name: "콘수프", keys: ["corn", "milk", "butter"], iconRecipeId: 4 },
+  { name: "햄 샌드위치", keys: ["bread", "ham", "lettuce"], iconRecipeId: 2 },
+  { name: "트러플 크림 파스타", keys: ["pasta", "truffle", "cream"], iconRecipeId: 13 },
+  { name: "아보카도 샐러드", keys: ["avocado", "lettuce", "tomato"], iconRecipeId: 1 },
 ];
 
-const PRIMARY_ROUTE_OVERRIDES = {
-  1: { customerId: 3, commonId: 1001, customerName: "기본 병아리", recipeId: 1, baseRecipeId: 1, recipeName: "샐러드" },
-  6: { customerId: 4, commonId: 1020, customerName: "카우보이 병아리", recipeId: 10, baseRecipeId: 10, recipeName: "웨지감자" },
-  8: { customerId: 5, commonId: 1003, customerName: "공룡 병아리", recipeId: 7, baseRecipeId: 7, recipeName: "피자" },
-};
-
-const STONE_COMPLETION_BONUS = {
-  customerId: 10013,
-  commonId: 1002,
-  customerName: "알껍질 병아리",
-  recipeId: 2,
-  baseRecipeId: 2,
-  recipeName: "샌드위치",
-};
-
-function shortThemeName(themeId) {
-  return (THEME_NAMES[themeId] || `테마 ${themeId}`).replace(/ 테마$/, "");
+function themeRewardIngredientKeys(themeId, slot) {
+  const current = THEME_NEW_INGREDIENT_KEYS[themeId];
+  if (themeId === 1) return current.slice(slot * 3, slot * 3 + 3);
+  const repeated = THEME_REPEAT_INGREDIENT_KEYS[themeId];
+  if (slot === 0) return repeated.slice(0, 3);
+  if (slot === 1) return [current[0], repeated[3], current[1]];
+  return [repeated[4], repeated[5], current[2]];
 }
+
+const THEME_CHICK_PROFILES = {
+  1: [[1001, "기본 병아리"], [1003, "공룡 병아리"], [1002, "알껍질 병아리"]],
+  2: [[1004, "도토리 병아리"], [1022, "난쟁이 병아리"], [1040, "광부 병아리"]],
+  3: [[1012, "아보카도 병아리"], [1031, "양배추 병아리"], [1017, "선인장 병아리"]],
+  4: [[1006, "눈사람 병아리"], [1032, "간호사 병아리"], [1044, "졸업생 병아리"]],
+  5: [[1018, "닭 병아리"], [1027, "핫도그 병아리"], [1026, "프라이팬 병아리"]],
+  6: [[1020, "카우보이 병아리"], [1039, "바이킹 병아리"], [1014, "캠프파이어 병아리"]],
+  7: [[1034, "잠옷 병아리"], [1029, "건물주 병아리"], [1045, "유치원생 병아리"]],
+  8: [[1035, "빨간 재킷 병아리"], [1028, "왕 병아리"], [1042, "미용실 병아리"]],
+  9: [[1023, "꽃 병아리"], [1024, "화분 병아리"], [1005, "사과 병아리"]],
+  10: [[1016, "식빵 병아리"], [1015, "상자 병아리"], [1013, "바나나 병아리"]],
+  11: [[1033, "오니기리 병아리"], [1021, "튀김 병아리"], [1030, "근육 병아리"]],
+  12: [[1008, "자동차 병아리"], [1019, "콜라 병아리"], [1025, "감자튀김 병아리"]],
+  13: [[1043, "마법사 병아리"], [1038, "유니콘 병아리"], [1009, "키위 병아리"]],
+  14: [[1036, "사우나 병아리"], [1007, "여름 병아리"], [1041, "라멘 장인 병아리"]],
+  15: [[1010, "외계인 병아리"], [1011, "우주비행사 병아리"], [1037, "초밥 병아리"]],
+};
 
 const CORE_PROGRESSION = Object.keys(THEME_NAMES).flatMap((themeIdText) => {
   const themeId = Number(themeIdText);
   return THEME_CHICK_THRESHOLDS.map((threshold, slot) => {
     const globalIndex = (themeId - 1) * 3 + slot;
-    const override = themeId === 1 && slot === 2 ? STONE_COMPLETION_BONUS : slot === 0 ? PRIMARY_ROUTE_OVERRIDES[themeId] : null;
-    const baseRecipeId = override?.baseRecipeId || globalIndex % RECIPE_NAMES.length + 1;
-    const ingredientTypeCount = globalIndex < 12 ? 1 : globalIndex < 39 ? 2 : 3;
-    const rewardIngredientKeys = [...RECIPE_INGREDIENT_KEYS[baseRecipeId - 1]];
-    if (baseRecipeId === 12) rewardIngredientKeys[2] = "breadcrumbs";
-    const rewardIngredients = rewardIngredientKeys.map((key) => GAME_INGREDIENTS[key]);
-    const ingredientRequirements = rewardIngredients.slice(0, ingredientTypeCount);
+    const catalogRecipe = GAME_RECIPE_CATALOG[globalIndex];
+    const profile = THEME_CHICK_PROFILES[themeId][slot];
+    const rewardIngredients = themeRewardIngredientKeys(themeId, slot).map((key) => GAME_INGREDIENTS[key]);
     const dropIngredient = rewardIngredients[0];
-    const commonIndex = globalIndex % 45 + 1;
+    const ingredientRequirements = catalogRecipe.keys.map((key) => GAME_INGREDIENTS[key]);
+    const isBase = themeId === 1 && slot === 0;
+    const isStoneCompletion = themeId === 1 && slot === 2;
     return {
       themeId,
       slot,
       threshold,
-      customerId: override?.customerId || 10000 + themeId * 10 + slot + 1,
-      customerName: override?.customerName || `${THEME_NAMES[themeId]} 병아리 ${slot + 1}`,
-      commonId: override?.commonId || 1000 + commonIndex,
+      customerId: isBase ? 3 : 10000 + themeId * 10 + slot + 1,
+      customerName: profile[1],
+      commonId: profile[0],
       ingredientId: dropIngredient.id,
       ingredientName: dropIngredient.name,
       ingredientEmoji: dropIngredient.emoji,
       rewardIngredients,
       ingredientRequirements,
-      recipeId: override?.recipeId || 10000 + globalIndex,
-      baseRecipeId: override?.baseRecipeId || baseRecipeId,
-      recipeName: override?.recipeName || `${shortThemeName(themeId)} ${RECIPE_NAMES[baseRecipeId - 1]}`,
-      ingredientCount: 2,
+      recipeId: isBase ? 1 : isStoneCompletion ? 2 : 10000 + globalIndex,
+      baseRecipeId: catalogRecipe.iconRecipeId,
+      recipeName: catalogRecipe.name,
+      ingredientCount: Number(catalogRecipe.count || catalogRecipe.keys.length),
       dropChance: GUEST_INGREDIENT_DROP_CHANCE,
     };
   });
 });
+
+// 병아리 해금과 무관하게 초반 재료를 조합해 발견하는 저가 레시피다.
+const EARLY_RECIPE_CATALOG = [
+  { recipeId: 20001, recipeName: "버터 토스트", keys: ["bread", "butter"], baseRecipeId: 38, foodPrice: 35 },
+  { recipeId: 20002, recipeName: "토마토 샌드위치", keys: ["bread", "tomato"], baseRecipeId: 2, foodPrice: 40 },
+  { recipeId: 20003, recipeName: "달걀 샌드위치", keys: ["bread", "egg"], baseRecipeId: 2, foodPrice: 42 },
+  { recipeId: 20004, recipeName: "토마토 달걀볶음", keys: ["tomato", "egg"], baseRecipeId: 21, foodPrice: 38 },
+  { recipeId: 20005, recipeName: "버터빵", keys: ["flour", "egg", "butter"], baseRecipeId: 40, foodPrice: 50 },
+  { recipeId: 20006, recipeName: "마늘 버섯볶음", keys: ["garlic", "mushroom", "oil"], baseRecipeId: 8, foodPrice: 58 },
+  { recipeId: 20007, recipeName: "양배추 돼지고기볶음", keys: ["cabbage", "pork", "soy"], baseRecipeId: 19, foodPrice: 64 },
+  { recipeId: 20008, recipeName: "콘치즈", keys: ["corn", "cheese", "butter"], baseRecipeId: 7, foodPrice: 62 },
+  { recipeId: 20009, recipeName: "씨앗 샐러드", keys: ["leaf", "seed"], baseRecipeId: 1, foodPrice: 48 },
+  { recipeId: 20010, recipeName: "당근 크림수프", keys: ["carrot", "broth", "cream"], baseRecipeId: 4, foodPrice: 66 },
+  { recipeId: 20011, recipeName: "아보카도 에그", keys: ["avocado", "egg"], baseRecipeId: 21, foodPrice: 56 },
+  { recipeId: 20012, recipeName: "과일 우유", keys: ["fruit", "milk"], baseRecipeId: 34, foodPrice: 52 },
+  { recipeId: 20013, recipeName: "매콤 치즈 감자", keys: ["potato", "chili", "cheese"], baseRecipeId: 10, foodPrice: 60 },
+  { recipeId: 20014, recipeName: "새싹 샐러드", keys: ["leaf", "lettuce"], baseRecipeId: 1, foodPrice: 32 },
+];
+
+const EARLY_RECIPE_PROGRESSION = EARLY_RECIPE_CATALOG.map((recipe) => ({
+  themeId: 0,
+  slot: -1,
+  threshold: 0,
+  isEarlyRecipe: true,
+  recipeId: recipe.recipeId,
+  baseRecipeId: recipe.baseRecipeId,
+  recipeName: recipe.recipeName,
+  foodPrice: recipe.foodPrice,
+  ingredientCount: recipe.keys.length,
+  ingredientRequirements: recipe.keys.map((key) => GAME_INGREDIENTS[key]),
+}));
+
+const RECIPE_PROGRESSION = [...CORE_PROGRESSION, ...EARLY_RECIPE_PROGRESSION];
 
 function themeChickMilestones(themeId) {
   return CORE_PROGRESSION.filter((entry) => entry.themeId === Number(themeId));
@@ -173,7 +310,7 @@ const FACILITY_META = {
   3: { key: "tipbox", name: "팁박스", description: "손님이 남긴 팁을 모아 한 번에 받을 수 있어요.", icon: "assets/ui/facility/icon_facility_1_tipbox_stone.png" },
   4: { key: "entrance", name: "출입구", description: "손님이 들어오고 나가는 레스토랑의 입구예요.", icon: "assets/ui/facility/icon_facility_1_entrance_stone.png" },
   5: { key: "stage", name: "무대", description: "공연팀이 수익 버프 공연을 진행하는 공간이에요.", icon: "assets/ui/facility/icon_facility_1_stage_stone.png" },
-  6: { key: "fridge", name: "냉장고", description: "레시피 연구 연출에 사용하는 주방 설비예요.", icon: "assets/ui/facility/icon_facility_1_fridge_stone.png" },
+  6: { key: "fridge", name: "냉장고", description: "터치하면 보유한 재료를 확인할 수 있어요.", icon: "assets/ui/facility/icon_facility_1_fridge_stone.png" },
   7: { key: "sink", name: "싱크대", description: "레시피 연구 연출에 사용하는 주방 설비예요.", icon: "assets/ui/facility/icon_facility_1_sink_stone.png" },
   8: { key: "countertop", name: "도마 테이블", description: "요리사가 레시피를 연구하는 중심 설비예요.", icon: "assets/ui/facility/icon_facility_1_countertop_stone.png" },
   9: { key: "kitchenware", name: "조리도구함", description: "주방 공간을 채우는 장식 설비예요.", icon: "assets/ui/facility/icon_facility_1_kitchenware_stone.png" },
@@ -228,12 +365,21 @@ window.CHICK_CONFIG = {
   seatPositions,
   recipeName,
   recipeIcon,
+  RECIPE_NAMES,
   THEME_NAMES,
   CORE_PROGRESSION,
+  RECIPE_PROGRESSION,
+  EARLY_RECIPE_CATALOG,
+  GAME_RECIPE_CATALOG,
   GAME_INGREDIENTS,
   THEME_CHICK_THRESHOLDS,
   GUEST_GRADES,
   GUEST_INGREDIENT_DROP_CHANCE,
+  INGREDIENT_SLOT_WEIGHTS,
+  INGREDIENT_STORAGE_INITIAL_CAPACITY,
+  INGREDIENT_STORAGE_EXPANSION_AMOUNT,
+  INGREDIENT_STORAGE_EXPANSION_GEM_COST,
+  RECIPE_LEVEL_PRICE_BONUS,
   RESTAURANT_THEME_PRICE_MULTIPLIER,
   restaurantThemePartPrice,
   themeChickMilestones,

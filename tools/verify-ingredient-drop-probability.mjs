@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const codexHome = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
 const playwrightUrl = pathToFileURL(path.join(codexHome, "node_modules", "playwright", "index.mjs")).href;
 const { chromium } = await import(playwrightUrl);
-const out = path.join(root, "output", "ingredient-drop-probability");
+const out = path.join(root, "output", "ingredient-drop-probability-sensible-recipes");
 fs.mkdirSync(out, { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -61,8 +61,8 @@ async function runVisitGroup(visits, expectedCountsByIngredientId) {
     throw new Error(`Drop counters do not add up at ${visits} visits: attempts=${attempts} hits=${hits} misses=${misses}`);
   }
   const rate = hits / attempts;
-  if (rate < 0.05 || rate > 0.11) {
-    throw new Error(`Seeded drop rate is inconsistent with 8% at ${visits} visits: ${rate}`);
+  if (rate < 0.11 || rate > 0.19) {
+    throw new Error(`Seeded drop rate is inconsistent with 15% at ${visits} visits: ${rate}`);
   }
   if (current.ingredientDrops.some((drop) => {
     const expectedCount = expectedCountsByIngredientId[drop.ingredientId];
@@ -92,26 +92,25 @@ try {
   await page.locator("#reset-btn").click();
 
   let current = await state();
-  if (current.progression.ingredientDropRule.overallChance !== 0.08
+  if (current.progression.ingredientDropRule.overallChance !== 0.15
     || current.progression.ingredientDropRule.ingredientTypesOnSuccess !== 1
+    || JSON.stringify(current.progression.ingredientDropRule.slotChances) !== JSON.stringify({ primary: 0.5, secondary: 0.3, special: 0.2 })
     || JSON.stringify(current.progression.ingredientDropRule.grades) !== JSON.stringify([
       { minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
-      { minVisits: 80, primaryCount: 2, secondaryCount: 0, rareCount: 0 },
-      { minVisits: 250, primaryCount: 2, secondaryCount: 1, rareCount: 0 },
-      { minVisits: 700, primaryCount: 2, secondaryCount: 2, rareCount: 1 },
+      { minVisits: 40, primaryCount: 1, secondaryCount: 1, rareCount: 0 },
+      { minVisits: 300, primaryCount: 1, secondaryCount: 1, rareCount: 1 },
     ])) {
     throw new Error(`Drop rule mismatch: ${JSON.stringify(current.progression.ingredientDropRule)}`);
   }
 
-  const first = await runVisitGroup(1, { 30001: 1 });
-  const regular = await runVisitGroup(80, { 30001: 2 });
-  const vip = await runVisitGroup(250, { 30001: 2, 30002: 1 });
-  const best = await runVisitGroup(700, { 30001: 2, 30002: 2, 30023: 1 });
+  const first = await runVisitGroup(1, { 30039: 1 });
+  const regular = await runVisitGroup(40, { 30039: 1, 30001: 1 });
+  const best = await runVisitGroup(300, { 30039: 1, 30001: 1, 30002: 1 });
   current = best.current;
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
-    const secondaryDrop = saved.ingredientDrops.find((drop) => drop.ingredientId === 30002 && drop.totalCount === 2);
+    const secondaryDrop = saved.ingredientDrops.find((drop) => drop.ingredientId === 30001 && drop.totalCount === 1);
     saved.guests = [];
     saved.orders = [];
     saved.cooking = [];
@@ -124,15 +123,14 @@ try {
 
   const result = {
     configuredChance: current.progression.ingredientDropRule.overallChance,
-    first: { hits: first.hits, misses: first.misses, rate: first.rate, counts: { 30001: 1 } },
-    regular: { hits: regular.hits, misses: regular.misses, rate: regular.rate, counts: { 30001: 2 } },
-    vip: { hits: vip.hits, misses: vip.misses, rate: vip.rate, counts: { 30001: 2, 30002: 1 } },
-    best: { hits: best.hits, misses: best.misses, rate: best.rate, counts: { 30001: 2, 30002: 2, 30023: 1 } },
+    first: { hits: first.hits, misses: first.misses, rate: first.rate, counts: { 30039: 1 } },
+    regular: { hits: regular.hits, misses: regular.misses, rate: regular.rate, counts: { 30039: 1, 30001: 1 } },
+    best: { hits: best.hits, misses: best.misses, rate: best.rate, counts: { 30039: 1, 30001: 1, 30002: 1 } },
   };
   fs.writeFileSync(path.join(out, "result.json"), JSON.stringify(result, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`INGREDIENT_DROP_8_PERCENT_QUANTITY_OK first=${first.hits}/600 regular=${regular.hits}/600 vip=${vip.hits}/600 best=${best.hits}/600`);
+  console.log(`INGREDIENT_DROP_15_PERCENT_QUANTITY_OK first=${first.hits}/600 regular=${regular.hits}/600 best=${best.hits}/600`);
 } finally {
   await browser.close();
 }

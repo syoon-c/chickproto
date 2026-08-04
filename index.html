@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-    <link rel="stylesheet" href="styles.css?v=20260728-theme-progress" />
+  <link rel="stylesheet" href="styles.css?v=20260804-early-lettuce-recipe" />
   </head>
   <body>
     <main class="app-shell">
@@ -27,16 +27,8 @@
             <img src="assets/ui/currency/icon_currency_002.png" alt="보석" />
             <strong id="gem-count">0</strong>
           </div>
-          <button id="collection-btn" class="round-button collection-button" type="button" aria-label="도감 열기"><img src="assets/ui/common/icon_btn_book.png" alt="" /><i id="collection-dot" hidden></i></button>
           <button id="reset-btn" class="round-button" type="button" aria-label="처음부터 다시 시작">↺</button>
         </header>
-
-        <button id="promotion-btn" class="promotion-button" type="button" disabled>
-          <img class="promotion-icon" src="assets/ui/common/icon_promotion.png" alt="" />
-          <span class="promotion-copy">
-            <strong>홍보하기</strong>
-          </span>
-        </button>
 
         <section id="menu-screen" class="menu-screen" hidden aria-live="polite">
           <header class="menu-header">
@@ -45,6 +37,7 @@
           </header>
           <div id="menu-tabs" class="menu-tabs"></div>
           <div id="menu-content" class="menu-content"></div>
+          <div id="recipe-reveal" class="recipe-reveal" hidden></div>
         </section>
 
         <section id="install-panel" class="install-panel" hidden aria-live="polite">
@@ -65,18 +58,23 @@
         <div id="toast" class="toast" hidden></div>
         </div>
 
-        <nav class="bottom-nav" aria-label="주요 메뉴">
-          <button class="nav-button" type="button" data-screen="recipe"><span><img src="assets/ui/common/icon_mainmenu_recipe.png" alt="" /></span><strong id="recipe-nav-label">레시피</strong><i id="recipe-dot" hidden></i></button>
-          <button class="nav-button" type="button" data-screen="missions"><span><img src="assets/ui/common/icon_mainmenu_todo.png" alt="" /></span><strong>할 일</strong><i id="mission-dot" hidden></i></button>
-          <button class="nav-button" type="button" data-screen="staff"><span><img src="assets/ui/common/icon_mainmenu_staff.png" alt="" /></span><strong>직원</strong></button>
-          <button class="nav-button" type="button" data-screen="theme"><span><img src="assets/ui/common/icon_mainmenu_theme.png" alt="" /></span><strong id="theme-nav-label">테마</strong></button>
-        </nav>
+        <div class="bottom-controls">
+          <nav class="bottom-nav" aria-label="주요 메뉴">
+            <button class="nav-button" type="button" data-screen="theme"><span><img src="assets/ui/common/icon_mainmenu_theme.png" alt="" /></span><strong id="theme-nav-label">테마</strong></button>
+            <button class="nav-button" type="button" data-screen="recipe"><span><img src="assets/ui/common/icon_mainmenu_recipe.png" alt="" /></span><strong id="recipe-nav-label">레시피</strong><i id="recipe-dot" hidden></i></button>
+            <button class="nav-button" type="button" data-screen="collection"><span><img src="assets/ui/chick/icon_chick_001.png" alt="" /></span><strong>손님</strong><i id="collection-dot" hidden></i></button>
+          </nav>
+          <button id="promotion-btn" class="promotion-button" type="button" disabled>
+            <img class="promotion-icon" src="assets/ui/common/icon_promotion.png" alt="" />
+            <span class="promotion-copy"><strong>홍보하기</strong></span>
+          </button>
+        </div>
       </section>
     </main>
 
     <script src="data/runtime-tables.js?v=20260729-restaurant-only"></script>
-    <script src="src/game-config.js?v=20260729-restaurant-only"></script>
+  <script src="src/game-config.js?v=20260804-early-lettuce-recipe"></script>
     <script src="src/data-loader.js?v=20260729-restaurant-only"></script>
-    <script src="game.js?v=20260729-restaurant-only"></script>
+  <script src="game.js?v=20260804-early-lettuce-recipe"></script>
   </body>
 </html>

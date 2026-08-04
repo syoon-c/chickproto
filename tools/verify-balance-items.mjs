@@ -68,8 +68,8 @@ try {
   current = await state();
   if (current.resources.acorns !== 100) throw new Error(`Core installation should leave 100 acorns, got ${current.resources.acorns}`);
   if (current.recipes.prices[1] !== 40) throw new Error(`Salad price should be 40, got ${current.recipes.prices[1]}`);
-  if (Object.values(current.progression.ingredientDropChances).some((chance) => chance !== 0.08)) {
-    throw new Error(`Guest ingredient drop chance should be 8%: ${JSON.stringify(current.progression.ingredientDropChances)}`);
+  if (Object.values(current.progression.ingredientDropChances).some((chance) => chance !== 0.15)) {
+    throw new Error(`Guest ingredient drop chance should be 15%: ${JSON.stringify(current.progression.ingredientDropChances)}`);
   }
 
   await page.evaluate(() => {
@@ -113,7 +113,7 @@ try {
   await page.locator('[data-screen="recipe"]').click();
   await page.locator('[data-action="auto-craft"]').click();
   current = await state();
-  if (current.recipes.levels[1] !== 2 || current.recipes.prices[1] !== 42 || current.progression.ingredients[30001] !== 0 || current.recipes.craftCosts[1] !== 4) {
+  if (current.recipes.levels[1] !== 2 || current.recipes.prices[1] !== 44 || current.progression.ingredients[30001] !== 1 || current.recipes.craftCosts[1] !== 2) {
     throw new Error(`Base chick did not upgrade salad: ${JSON.stringify(current.recipes)}`);
   }
   await page.locator(".game-frame").screenshot({ path: path.join(out, "02-base-chick-upgraded-salad.png") });
@@ -128,10 +128,10 @@ try {
   await page.locator('[data-screen="recipe"]').click();
   await page.locator('[data-action="craft-recipe"][data-id="1"]').click();
   current = await state();
-  if (current.recipes.levels[1] !== 3 || current.recipes.prices[1] !== 44
-    || current.progression.ingredients[30001] !== lettuceBeforeSecondUpgrade - 4
-    || current.recipes.craftCosts[1] !== 5) {
-    throw new Error(`Duplicate craft did not level salad by 5%: ${JSON.stringify(current.recipes)}`);
+  if (current.recipes.levels[1] !== 3 || current.recipes.prices[1] !== 48
+    || current.progression.ingredients[30001] !== lettuceBeforeSecondUpgrade - 2
+    || current.recipes.craftCosts[1] !== 2) {
+    throw new Error(`Duplicate craft did not level salad by 10%: ${JSON.stringify(current.recipes)}`);
   }
   await page.locator(".game-frame").screenshot({ path: path.join(out, "03-salad-level-3.png") });
 

@@ -9,7 +9,7 @@
     "acorns": 100000,
     "gems": 0,
     "ideas": 0,
-    "stickers": 2
+    "stickers": 5
   },
   "installedFacilityIds": [
     1,
@@ -68,26 +68,26 @@
       "y": 432,
       "recipeId": 1,
       "recipeName": "샐러드",
-      "wait": 0.8,
+      "wait": 0.7,
       "mealDuration": 7,
       "mealElapsed": null,
       "mealRemaining": null,
       "mood": "normal",
-      "dropIngredient": 30001,
+      "dropIngredient": 30039,
       "guestGrade": "첫 방문",
       "visits": 1,
       "rewardItems": [
         {
-          "ingredientId": 30001,
-          "name": "양상추"
+          "ingredientId": 30039,
+          "name": "나뭇잎"
         },
         {
-          "ingredientId": 30002,
-          "name": "토마토"
+          "ingredientId": 30040,
+          "name": "산딸기"
         },
         {
-          "ingredientId": 30023,
-          "name": "모둠 채소"
+          "ingredientId": 30041,
+          "name": "고사리"
         }
       ],
       "themeId": 1,
@@ -103,26 +103,26 @@
       "y": 432,
       "recipeId": 1,
       "recipeName": "샐러드",
-      "wait": 0.8,
+      "wait": 0.7,
       "mealDuration": 7,
       "mealElapsed": null,
       "mealRemaining": null,
       "mood": "normal",
-      "dropIngredient": 30001,
+      "dropIngredient": 30039,
       "guestGrade": "첫 방문",
       "visits": 2,
       "rewardItems": [
         {
-          "ingredientId": 30001,
-          "name": "양상추"
+          "ingredientId": 30039,
+          "name": "나뭇잎"
         },
         {
-          "ingredientId": 30002,
-          "name": "토마토"
+          "ingredientId": 30040,
+          "name": "산딸기"
         },
         {
-          "ingredientId": 30023,
-          "name": "모둠 채소"
+          "ingredientId": 30041,
+          "name": "고사리"
         }
       ],
       "themeId": 1,
@@ -149,26 +149,50 @@
   },
   "currentScreen": "restaurant",
   "recipes": {
-    "owned": 1,
-    "globalRevenueBonus": 0,
+    "owned": 2,
+    "combinationCapacity": 3,
+    "selectedIngredients": [],
+    "autoResearchUnlocked": false,
+    "autoResearchTarget": null,
+    "globalRevenueBonus": 0.05,
     "craftable": [],
     "craftCosts": {
-      "1": 4
+      "1": 3,
+      "10003": 3
     },
     "craftRequirements": {
       "1": [
         {
-          "ingredientId": 30001,
-          "name": "양상추",
-          "count": 4
+          "ingredientId": 30039,
+          "name": "나뭇잎",
+          "count": 2
+        },
+        {
+          "ingredientId": 30040,
+          "name": "산딸기",
+          "count": 1
+        }
+      ],
+      "10003": [
+        {
+          "ingredientId": 30040,
+          "name": "산딸기",
+          "count": 2
+        },
+        {
+          "ingredientId": 30041,
+          "name": "고사리",
+          "count": 1
         }
       ]
     },
     "levels": {
-      "1": 2
+      "1": 1,
+      "10003": 1
     },
     "prices": {
-      "1": 42
+      "1": 40,
+      "10003": 70
     }
   },
   "progression": {
@@ -191,7 +215,8 @@
       "13": 1013
     },
     "unlockedCustomers": [
-      3
+      3,
+      10021
     ],
     "unlockedChickRoutes": [
       {
@@ -199,31 +224,72 @@
         "slot": 0,
         "customerId": 3,
         "customerName": "기본 병아리",
-        "ingredientId": 30001,
-        "ingredientName": "양상추",
+        "ingredientId": 30039,
+        "ingredientName": "나뭇잎",
         "rewardItems": [
           {
             "slot": "primary",
-            "ingredientId": 30001,
-            "name": "양상추"
+            "ingredientId": 30039,
+            "name": "나뭇잎"
           },
           {
             "slot": "secondary",
-            "ingredientId": 30002,
-            "name": "토마토"
+            "ingredientId": 30040,
+            "name": "산딸기"
           },
           {
-            "slot": "rare",
-            "ingredientId": 30023,
-            "name": "모둠 채소"
+            "slot": "special",
+            "ingredientId": 30041,
+            "name": "고사리"
           }
         ],
         "recipeId": 1,
         "recipeName": "샐러드",
         "recipeIngredients": [
           {
-            "ingredientId": 30001,
-            "name": "양상추"
+            "ingredientId": 30039,
+            "name": "나뭇잎"
+          },
+          {
+            "ingredientId": 30040,
+            "name": "산딸기"
+          }
+        ]
+      },
+      {
+        "themeId": 2,
+        "slot": 0,
+        "customerId": 10021,
+        "customerName": "도토리 병아리",
+        "ingredientId": 30040,
+        "ingredientName": "산딸기",
+        "rewardItems": [
+          {
+            "slot": "primary",
+            "ingredientId": 30040,
+            "name": "산딸기"
+          },
+          {
+            "slot": "secondary",
+            "ingredientId": 30041,
+            "name": "고사리"
+          },
+          {
+            "slot": "special",
+            "ingredientId": 30003,
+            "name": "빵"
+          }
+        ],
+        "recipeId": 10003,
+        "recipeName": "나무 수프",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30040,
+            "name": "산딸기"
+          },
+          {
+            "ingredientId": 30041,
+            "name": "고사리"
           }
         ]
       }
@@ -339,10 +405,12 @@
         ]
       },
       "2": {
-        "opened": 0,
+        "opened": 4,
         "total": 11,
-        "ratio": 0,
-        "unlocked": []
+        "ratio": 0.36363636363636365,
+        "unlocked": [
+          10021
+        ]
       },
       "3": {
         "opened": 0,
@@ -424,7 +492,6 @@
       }
     },
     "ingredientDropChances": {
-      "30001": 0.08,
       "30002": 0.08,
       "30003": 0.08,
       "30004": 0.08,
@@ -433,38 +500,52 @@
       "30007": 0.08,
       "30008": 0.08,
       "30009": 0.08,
-      "30010": 0.08,
       "30011": 0.08,
-      "30012": 0.08,
-      "30013": 0.08,
-      "30014": 0.08,
-      "30016": 0.08,
-      "30017": 0.08,
       "30018": 0.08,
-      "30019": 0.08,
       "30020": 0.08,
-      "30021": 0.08,
       "30022": 0.08,
-      "30023": 0.08,
-      "30024": 0.08,
-      "30025": 0.08,
       "30026": 0.08,
-      "30027": 0.08,
-      "30028": 0.08,
       "30029": 0.08,
       "30030": 0.08,
       "30031": 0.08,
-      "30032": 0.08,
-      "30033": 0.08,
       "30034": 0.08,
-      "30035": 0.08,
-      "30036": 0.08,
       "30037": 0.08,
-      "30038": 0.08
+      "30039": 0.08,
+      "30040": 0.08,
+      "30041": 0.08,
+      "30042": 0.08,
+      "30043": 0.08,
+      "30044": 0.08,
+      "30046": 0.08,
+      "30047": 0.08,
+      "30048": 0.08,
+      "30052": 0.08,
+      "30053": 0.08,
+      "30054": 0.08,
+      "30055": 0.08,
+      "30056": 0.08,
+      "30059": 0.08,
+      "30060": 0.08,
+      "30061": 0.08,
+      "30063": 0.08,
+      "30064": 0.08,
+      "30065": 0.08,
+      "30066": 0.08,
+      "30067": 0.08,
+      "30069": 0.08,
+      "30071": 0.08,
+      "30075": 0.08,
+      "30076": 0.08,
+      "30078": 0.08
     },
     "ingredientDropRule": {
       "overallChance": 0.08,
       "ingredientTypesOnSuccess": 1,
+      "slotChances": {
+        "primary": 0.7,
+        "secondary": 0.2,
+        "special": 0.1
+      },
       "grades": [
         {
           "minVisits": 1,
@@ -493,18 +574,19 @@
       ]
     },
     "ingredients": {
-      "30001": 0
+      "30040": 0,
+      "30041": 0
     },
-    "autoCraft": "click-to-craft-one",
+    "autoCraft": "locked-until-5-recipes",
     "craftedRecipes": [
-      1
+      10003
     ]
   },
-  "missions": {
-    "mainGroup": 1,
-    "rewardReady": true,
-    "dailyClaimed": 1
+  "activeSystems": {
+    "missions": false,
+    "staff": false
   },
+  "currentTab": "craft",
   "collection": {
     "customers": 1,
     "specialCustomers": 0,

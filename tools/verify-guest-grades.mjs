@@ -9,12 +9,11 @@ vm.runInThisContext(fs.readFileSync(path.join(root, "src", "game-config.js"), "u
   filename: "src/game-config.js",
 });
 
-const { CORE_PROGRESSION, GAME_INGREDIENTS, GUEST_GRADES, GUEST_INGREDIENT_DROP_CHANCE } = globalThis.CHICK_CONFIG;
+const { CORE_PROGRESSION, GAME_INGREDIENTS, GUEST_GRADES, GUEST_INGREDIENT_DROP_CHANCE, INGREDIENT_SLOT_WEIGHTS } = globalThis.CHICK_CONFIG;
 const expectedGrades = [
   [1, "첫 방문", 1, 1, 0, 0],
-  [2, "단골", 80, 2, 0, 0],
-  [3, "VIP", 250, 2, 1, 0],
-  [4, "최고의 단골", 700, 2, 2, 1],
+  [2, "단골", 40, 1, 1, 0],
+  [3, "최고의 단골", 300, 1, 1, 1],
 ];
 
 if (JSON.stringify(GUEST_GRADES.map((grade) => [
@@ -31,8 +30,8 @@ if (JSON.stringify(GUEST_GRADES.map((grade) => [
 if (CORE_PROGRESSION.length !== 45) {
   throw new Error(`Expected 45 chick routes, got ${CORE_PROGRESSION.length}`);
 }
-if (GUEST_INGREDIENT_DROP_CHANCE !== 0.08) {
-  throw new Error(`Guest ingredient drop chance must be 8%, got ${GUEST_INGREDIENT_DROP_CHANCE}`);
+if (GUEST_INGREDIENT_DROP_CHANCE !== 0.15) {
+  throw new Error(`Guest ingredient drop chance must be 15%, got ${GUEST_INGREDIENT_DROP_CHANCE}`);
 }
 
 const validIngredientIds = new Set(Object.values(GAME_INGREDIENTS).map((ingredient) => ingredient.id));
@@ -52,9 +51,9 @@ for (const route of CORE_PROGRESSION) {
 }
 
 const assignedIngredientIds = new Set(CORE_PROGRESSION.flatMap((route) => route.rewardIngredients.map((ingredient) => ingredient.id)));
-if (assignedIngredientIds.size !== validIngredientIds.size) {
-  const missing = [...validIngredientIds].filter((id) => !assignedIngredientIds.has(id));
-  throw new Error(`Expected all ${validIngredientIds.size} shared ingredients to be assigned, got ${assignedIngredientIds.size}; missing=${missing.join(",")}`);
+if (assignedIngredientIds.size !== 51) throw new Error(`Expected 51 introduced ingredients, got ${assignedIngredientIds.size}`);
+if (JSON.stringify(INGREDIENT_SLOT_WEIGHTS) !== JSON.stringify({ primary: 0.5, secondary: 0.3, special: 0.2 })) {
+  throw new Error(`Ingredient slot weights mismatch: ${JSON.stringify(INGREDIENT_SLOT_WEIGHTS)}`);
 }
 
-console.log(`GUEST_GRADES_OK routes=${CORE_PROGRESSION.length} sharedIngredients=${assignedIngredientIds.size} dropChance=${GUEST_INGREDIENT_DROP_CHANCE} thresholds=${GUEST_GRADES.map((grade) => grade.minVisits).join("/")}`);
+console.log(`GUEST_GRADES_OK routes=${CORE_PROGRESSION.length} introducedIngredients=${assignedIngredientIds.size} dropChance=${GUEST_INGREDIENT_DROP_CHANCE} slotWeights=50/30/20 thresholds=${GUEST_GRADES.map((grade) => grade.minVisits).join("/")}`);
