@@ -8,6 +8,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 globalThis.window = globalThis;
 vm.runInThisContext(fs.readFileSync(path.join(root, "src", "game-config.js"), "utf8"), { filename: "src/game-config.js" });
 const { CORE_PROGRESSION, RECIPE_PROGRESSION, EARLY_RECIPE_CATALOG, GAME_INGREDIENTS } = globalThis.CHICK_CONFIG;
+const rawRecipes = JSON.parse(fs.readFileSync(path.join(root, "data", "Recipe.json"), "utf8"));
+const rawRecipeById = new Map(rawRecipes.map((recipe) => [Number(recipe.id), recipe]));
 
 const earlyIngredientIds = new Set(CORE_PROGRESSION
   .filter((route) => route.themeId <= 2)
@@ -28,6 +30,25 @@ const combinations = RECIPE_PROGRESSION.map((route) => route.ingredientRequireme
 if (new Set(combinations).size !== combinations.length) throw new Error("An early recipe duplicates an existing ingredient combination");
 if (EARLY_RECIPE_CATALOG.slice(0, 5).some((recipe) => recipe.foodPrice > 50)) throw new Error("An added early recipe is not low-priced");
 if (EARLY_RECIPE_CATALOG.slice(5).some((recipe) => recipe.foodPrice > 70)) throw new Error("A surplus-material recipe is priced too high");
+const earlyPrices = Object.fromEntries(earlyRecipes.map((route) => {
+  const sourceId = Number(route.baseRecipeId || route.recipeId);
+  const rawPrice = Number(rawRecipeById.get(sourceId)?.foodPrice || 0) + ([1, 4].includes(sourceId) ? 10 : 0);
+  return [route.recipeName, Number(route.foodPrice || rawPrice)];
+}));
+const expectedEarlyPrices = {
+  "샐러드": 40, "버섯전": 38, "샌드위치": 43, "버터 토스트": 35, "토마토 샌드위치": 40,
+  "달걀 샌드위치": 42, "토마토 달걀볶음": 38, "버터빵": 50, "새싹 샐러드": 32,
+  "양상추 샌드위치": 36, "버섯 토스트": 38, "달걀밥": 40, "버터 라이스": 38, "토마토 리조또": 50,
+};
+if (JSON.stringify(earlyPrices) !== JSON.stringify(expectedEarlyPrices)) {
+  throw new Error(`Early recipe prices are not normalized: ${JSON.stringify(earlyPrices)}`);
+}
+const twoIngredientPrices = earlyRecipes
+  .filter((route) => Number(route.ingredientCount) === 2)
+  .map((route) => earlyPrices[route.recipeName]);
+if (Math.min(...twoIngredientPrices) < 30 || Math.max(...twoIngredientPrices) > 45) {
+  throw new Error(`Two-ingredient early recipe price outlier: ${JSON.stringify(earlyPrices)}`);
+}
 
 const codexHome = process.env.CODEX_HOME || path.join(os.homedir(), ".codex");
 const playwrightUrl = pathToFileURL(path.join(codexHome, "node_modules", "playwright", "index.mjs")).href;
@@ -79,7 +100,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`EARLY_RECIPES_OK ingredients=${earlyIngredientIds.size} recipes=${earlyRecipes.length} total=${RECIPE_PROGRESSION.length} butterToast=35`);
+  console.log(`EARLY_RECIPES_OK ingredients=${earlyIngredientIds.size} recipes=${earlyRecipes.length} total=${RECIPE_PROGRESSION.length} priceRange=${Math.min(...Object.values(earlyPrices))}-${Math.max(...Object.values(earlyPrices))}`);
 } finally {
   await browser.close();
 }

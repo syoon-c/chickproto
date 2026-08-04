@@ -1332,3 +1332,26 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 수동 샐러드 업그레이드, 자동 토마토 샌드위치 업그레이드, 4/5재료 신규 발견, 자동 괴식 회귀 테스트를 통과했다.
 - 공식 `develop-web-game` 클라이언트에서 레벨 가격 보너스 10%, 레시피 64종과 콘솔 오류 없음 확인.
 - 화면 확인: `output/owned-ingredient-discovery-sensible/02-salad-levelup-price-reveal.png`, `output/ingredient-demand-balance/03-surplus-auto-research.png`.
+
+## 2026-08-04 레스토랑 판매가 곱연산 통일 및 초반 가격 정리
+
+- 실제 유니티 `CustomerPriceHelper`와 `AbilityMgr`를 확인해 판매가를 `레시피 레벨 가격 × RestaurantPriceUp × 만족 배율 × 공연 버프` 순서의 곱연산으로 통일했다.
+- `RestaurantPriceUp`은 유니티와 동일하게 현재 적용 중인 외형만이 아니라 구매·해금한 레스토랑 테마 설비 효과를 모두 누적한다.
+- 만족 손님, 일반 손님, 달래지 못한 불만 손님 모두 같은 가격 계산 함수를 사용하도록 결제 경로를 합쳤다.
+- 공식에 없던 `보유 레시피 수당 전체 수익 +5%` 효과와 UI 문구를 삭제했다.
+- 초반 1~2테마 재료로 제작 가능한 14종을 조사했다. 2재료 레시피는 32~43원, 3재료 레시피는 50원으로 정리되어 있다.
+- 버섯전만 아이콘 원본 레시피 가격 360원을 잘못 상속해 단독 이상치였으므로 38원으로 조정했다.
+- 6개 레시피 보유 상태에서 `44 × 1.1 × 1.5 × 1.2 = 87원`, 불만 상태는 `44 × 1.1 × 1 × 1.2 = 58원` 결제를 확인해 보유 개수 보너스가 섞이지 않음을 검증했다.
+- 초반 가격, 레시피 레벨 가격, 레시피 발견 순서, 테마 가격, 테마/도감 분리 회귀 테스트를 통과했다.
+- 공식 `develop-web-game` 클라이언트에서 새 계산식과 기본 배율 상태를 확인했고 콘솔 오류가 없었다.
+- 화면 확인: `output/restaurant-price-formula/01-multiplied-happy-payment.png`, `02-owned-recipes-no-collection-bonus.png`, `official-client/shot-0.png`.
+
+## 2026-08-04 팁 최종 판매가 기준 10% 적용
+
+- 팁이 최종 판매가가 아니라 `recipe.foodPrice × CommonCustomer.tipRatio`로 계산되던 문제를 수정했다.
+- 이제 팁 발생 여부는 기존 규칙을 유지하되, 발생 금액은 손님 종류와 무관하게 `최종 결제 가격 × 10%`로 계산한다.
+- 최종 판매가에는 레시피 레벨, 누적 RestaurantPriceUp, 만족 배율, 공연 버프가 모두 반영되므로 팁에도 해당 효과가 자연스럽게 반영된다.
+- 정수 재화는 기존과 동일하게 반올림하며, 최종 결제 87원에서 팁 9원이 팁박스에 쌓이는 것을 확인했다.
+- 만족 결제·불만 결제 및 레시피 레벨 가격 회귀 테스트를 통과했다.
+- 공식 `develop-web-game` 클라이언트에서 `tipRule: final-meal-price / 0.1`과 콘솔 오류 없음 확인.
+- 화면 확인: `output/restaurant-price-formula/01-multiplied-happy-payment.png`.

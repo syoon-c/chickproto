@@ -157,7 +157,8 @@ const THEME_REPEAT_INGREDIENT_KEYS = {
 // 레시피는 테마가 아니라 재료 조합만으로 이해할 수 있도록 직접 정의한다.
 const GAME_RECIPE_CATALOG = [
   { name: RECIPE_NAMES[0], keys: ["leaf"], count: 2, iconRecipeId: 1 },
-  { name: "버섯전", keys: ["flour", "mushroom"], iconRecipeId: 36 },
+  // 원본 아이콘 레시피(360원)의 가격은 초반 2재료 요리와 맞지 않아 프로토타입용으로 분리한다.
+  { name: "버섯전", keys: ["flour", "mushroom"], iconRecipeId: 36, foodPrice: 38 },
   { name: RECIPE_NAMES[1], keys: ["bread", "leaf"], iconRecipeId: 2 },
   { name: RECIPE_NAMES[2], keys: ["bread", "sausage", "ketchup"], iconRecipeId: 3 },
   { name: RECIPE_NAMES[3], keys: ["broth", "mixedVeg"], iconRecipeId: 4 },
@@ -263,6 +264,7 @@ const CORE_PROGRESSION = Object.keys(THEME_NAMES).flatMap((themeIdText) => {
       recipeId: isBase ? 1 : isStoneCompletion ? 2 : 10000 + globalIndex,
       baseRecipeId: catalogRecipe.iconRecipeId,
       recipeName: catalogRecipe.name,
+      foodPrice: catalogRecipe.foodPrice,
       ingredientCount: Number(catalogRecipe.count || catalogRecipe.keys.length),
       dropChance: GUEST_INGREDIENT_DROP_CHANCE,
     };

@@ -347,6 +347,35 @@ function recipeLevelPrice(recipe, owned) {
     * (1 + Math.max(0, Number(owned?.level || 1) - 1) * RECIPE_LEVEL_PRICE_BONUS);
 }
 
+function restaurantPriceUpMultiplier() {
+  const opened = new Set((state.themes.opened || []).map(Number));
+  const bonus = tables.restaurantThemes.reduce((sum, row) => (
+    opened.has(Number(row.id)) ? sum + Number(row.abilityValue || 0) : sum
+  ), 0);
+  return 1 + Math.max(0, bonus);
+}
+
+function satisfactionPriceMultiplier(mood) {
+  return mood === "satisfied"
+    ? Number(tables.customerSetting.FoodPriceSatisfactionMultiple || 1.5)
+    : 1;
+}
+
+function performancePriceMultiplier() {
+  return 1 + Math.max(0, Number(activePerformance()?.abilityValue || 0));
+}
+
+function restaurantMealPrice(recipeId, mood = "normal") {
+  const recipe = getRecipe(recipeId);
+  const owned = recipeData(recipeId) || { level: 1 };
+  return Math.max(1, Math.round(
+    recipeLevelPrice(recipe, owned)
+      * restaurantPriceUpMultiplier()
+      * satisfactionPriceMultiplier(mood)
+      * performancePriceMultiplier()
+  ));
+}
+
 function progressionForCustomer(customerId) {
   return CORE_PROGRESSION.find((entry) => entry.customerId === Number(customerId));
 }
@@ -1456,23 +1485,13 @@ function resolveMeal(guest, forcedSatisfied = false) {
     return;
   }
 
-  const multiplier = mood === "satisfied" ? Number(tables.customerSetting.FoodPriceSatisfactionMultiple || 1.5) : 1;
-  const owned = recipeData(guest.recipeId) || { level: 1 };
-  const performanceBonus = Number(activePerformance()?.abilityValue || 0);
-  const themeBonus = Object.values(state.themes.activeByFacility || {}).reduce((sum, id) => {
-    const row = tables.restaurantThemes.find((item) => item.id === Number(id));
-    return sum + Number(row?.abilityValue || 0);
-  }, 0);
-  const recipeCollectionBonus = Math.max(0, unlockedRecipeCount() - 1) * .05;
-  const upgradedPrice = recipeLevelPrice(recipe, owned)
-    * (1 + performanceBonus + themeBonus + recipeCollectionBonus);
-  const mealPrice = Math.max(1, Math.round(upgradedPrice * multiplier));
+  const mealPrice = restaurantMealPrice(guest.recipeId, mood);
   addPayment(guest, mealPrice);
   grantGuestIngredient(guest);
 
   const hasTipbox = installedRows(3).length > 0;
   if (hasTipbox && (mood === "satisfied" || random() < Number(common.tipProbability || 0))) {
-    state.tipbox += Math.max(1, Math.round(Number(recipe?.foodPrice || 1) * Number(common.tipRatio || 0)));
+    state.tipbox += Math.max(1, Math.round(mealPrice * .1));
   }
 
   guest.mood = mood;
@@ -1552,8 +1571,7 @@ function updateGuests(dt) {
       resolveMeal(guest);
     } else if (guest.state === "disappointed" && guest.stateTime >= 6) {
       guest.mood = "disappointed";
-      const recipe = getRecipe(guest.recipeId);
-      addPayment(guest, Math.max(1, Math.round(recipeLevelPrice(recipe, recipeData(guest.recipeId)))));
+      addPayment(guest, restaurantMealPrice(guest.recipeId, "disappointed"));
       grantGuestIngredient(guest);
       guest.state = "leaving";
       guest.targetX = 240;
@@ -2233,7 +2251,7 @@ function renderRecipeMenu() {
     <div class="recipe-catalog-grid">${discoveryOrderedRecipeRoutes().map(recipeCatalogCard).join("")}</div>`;
   } else if (state.ui.tab === "owned") {
     const owned = Object.keys(state.ownedRecipes).map((id) => getRecipe(Number(id))).filter(Boolean);
-    dom.menuContent.innerHTML = `<p class="section-note">레시피 ${owned.length} · 전체 수익 +${Math.max(0, owned.length - 1) * 5}%</p>${owned.map(recipeCard).join("")}`;
+    dom.menuContent.innerHTML = `<p class="section-note">발견한 레시피 ${owned.length}</p>${owned.map(recipeCard).join("")}`;
   } else {
     const ingredients = storedIngredientIds()
       .map((id) => ingredientData(id))
@@ -2600,6 +2618,7 @@ function renderGameToText() {
       y: Math.round(drop.y),
     })),
     tipbox: state.tipbox,
+    tipRule: { basis: "final-meal-price", rate: .1 },
     metrics: state.metrics,
     currentScreen: state.ui.screen,
     recipes: {
@@ -2659,7 +2678,13 @@ function renderGameToText() {
         .sort(compareAutoResearchRoutes)[0]?.recipeId || null,
       autoResearchPriority: "new-first-lowest-level-then-highest-inventory-pressure",
       autoResearchWhenNoRecipe: "random-ingredients-up-to-bowl-capacity-then-weird-dish",
-      globalRevenueBonus: Math.max(0, unlockedRecipeCount() - 1) * .05,
+      salePriceFormula: "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
+      salePriceMultipliers: {
+        restaurantPriceUp: restaurantPriceUpMultiplier(),
+        satisfactionNormal: satisfactionPriceMultiplier("normal"),
+        satisfactionHappy: satisfactionPriceMultiplier("satisfied"),
+        performanceBuff: performancePriceMultiplier(),
+      },
       recipeLevelPriceBonus: RECIPE_LEVEL_PRICE_BONUS,
       craftable: RECIPE_PROGRESSION.filter((route) => canCraftRecipe(route.recipeId)).map((route) => route.recipeId),
       searchScope: "all-recipes-by-owned-ingredients",

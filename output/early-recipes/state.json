@@ -144,7 +144,13 @@
     "autoResearchTarget": null,
     "autoResearchPriority": "new-first-lowest-level-then-highest-inventory-pressure",
     "autoResearchWhenNoRecipe": "random-ingredients-up-to-bowl-capacity-then-weird-dish",
-    "globalRevenueBonus": 0.05,
+    "salePriceFormula": "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
+    "salePriceMultipliers": {
+      "restaurantPriceUp": 1,
+      "satisfactionNormal": 1,
+      "satisfactionHappy": 1.5,
+      "performanceBuff": 1
+    },
     "recipeLevelPriceBonus": 0.1,
     "craftable": [],
     "searchScope": "all-recipes-by-owned-ingredients",

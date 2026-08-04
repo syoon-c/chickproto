@@ -46,6 +46,10 @@
   "payments": [],
   "ingredientDrops": [],
   "tipbox": 0,
+  "tipRule": {
+    "basis": "final-meal-price",
+    "rate": 0.1
+  },
   "metrics": {
     "visitors": 0,
     "orders": 0,
@@ -149,7 +153,13 @@
     "autoResearchTarget": null,
     "autoResearchPriority": "new-first-lowest-level-then-highest-inventory-pressure",
     "autoResearchWhenNoRecipe": "random-ingredients-up-to-bowl-capacity-then-weird-dish",
-    "globalRevenueBonus": 0.15000000000000002,
+    "salePriceFormula": "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
+    "salePriceMultipliers": {
+      "restaurantPriceUp": 1,
+      "satisfactionNormal": 1,
+      "satisfactionHappy": 1.5,
+      "performanceBuff": 1
+    },
     "recipeLevelPriceBonus": 0.1,
     "craftable": [],
     "searchScope": "all-recipes-by-owned-ingredients",
@@ -1344,7 +1354,7 @@
     "prices": {
       "1": 40,
       "2": 43,
-      "10001": 360,
+      "10001": 38,
       "10042": 43
     }
   },

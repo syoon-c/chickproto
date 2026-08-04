@@ -11,7 +11,9 @@
     "ideas": 0,
     "stickers": 5
   },
-  "installedFacilityIds": [],
+  "installedFacilityIds": [
+    11
+  ],
   "installCandidates": [
     {
       "id": 16,
@@ -40,20 +42,66 @@
     "threshold": 1,
     "enabled": false
   },
-  "guests": [],
+  "guests": [
+    {
+      "id": "formula-disappointed",
+      "customerId": 3,
+      "customerName": "기본 병아리",
+      "icon": "assets/ui/chick/icon_chick_001.png",
+      "state": "leaving",
+      "x": 240,
+      "y": 448,
+      "recipeId": 1,
+      "recipeName": "샐러드",
+      "wait": 0,
+      "mealDuration": 7,
+      "mealElapsed": null,
+      "mealRemaining": null,
+      "mood": "disappointed",
+      "dropIngredient": 30039,
+      "guestGrade": "첫 방문",
+      "visits": 1,
+      "rewardItems": [
+        {
+          "ingredientId": 30039,
+          "name": "나뭇잎"
+        },
+        {
+          "ingredientId": 30001,
+          "name": "양상추"
+        },
+        {
+          "ingredientId": 30002,
+          "name": "토마토"
+        }
+      ],
+      "themeId": 1,
+      "chickSlot": 0
+    }
+  ],
   "ordersQueued": 0,
   "cooking": [],
-  "payments": [],
+  "payments": [
+    {
+      "x": 240,
+      "y": 480,
+      "amount": 58
+    }
+  ],
   "ingredientDrops": [],
   "tipbox": 0,
+  "tipRule": {
+    "basis": "final-meal-price",
+    "rate": 0.1
+  },
   "metrics": {
     "visitors": 0,
     "orders": 0,
-    "served": 0,
+    "served": 2,
     "collected": 0,
     "angryLeaves": 0,
-    "ingredientDropAttempts": 0,
-    "ingredientDropMisses": 0,
+    "ingredientDropAttempts": 2,
+    "ingredientDropMisses": 2,
     "ingredientsFound": 0,
     "giftBundles": 0,
     "giftItems": 0,
@@ -61,10 +109,10 @@
     "recipeResearchAttempts": 0,
     "failedRecipeResearches": 0
   },
-  "currentScreen": "collection",
+  "currentScreen": "restaurant",
   "recipes": {
-    "owned": 1,
-    "combinationCapacity": 2,
+    "owned": 6,
+    "combinationCapacity": 5,
     "selectedIngredients": [],
     "mixingPresentation": "cutting-board-and-bowl",
     "research": null,
@@ -138,18 +186,18 @@
     ],
     "reveal": null,
     "hintRule": "same-size-at-least-one-correct-reveals-name-and-missing-clues",
-    "mysteryRecipeCount": 63,
+    "mysteryRecipeCount": 58,
     "hintedRecipes": {},
-    "autoResearchUnlocked": false,
+    "autoResearchUnlocked": true,
     "autoResearchTarget": null,
     "autoResearchPriority": "new-first-lowest-level-then-highest-inventory-pressure",
     "autoResearchWhenNoRecipe": "random-ingredients-up-to-bowl-capacity-then-weird-dish",
     "salePriceFormula": "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
     "salePriceMultipliers": {
-      "restaurantPriceUp": 5.3999999999999995,
+      "restaurantPriceUp": 1.1,
       "satisfactionNormal": 1,
       "satisfactionHappy": 1.5,
-      "performanceBuff": 1
+      "performanceBuff": 1.2
     },
     "recipeLevelPriceBonus": 0.1,
     "craftable": [],
@@ -1337,10 +1385,20 @@
       ]
     },
     "levels": {
-      "1": 1
+      "1": 2,
+      "2": 1,
+      "10001": 1,
+      "20001": 1,
+      "20002": 1,
+      "20003": 1
     },
     "prices": {
-      "1": 40
+      "1": 44,
+      "2": 43,
+      "10001": 38,
+      "20001": 35,
+      "20002": 40,
+      "20003": 42
     }
   },
   "ingredientStorage": {
@@ -1356,8 +1414,7 @@
   },
   "progression": {
     "unlockedThemes": [
-      1,
-      6
+      1
     ],
     "activeThemeParts": {
       "1": 1001,
@@ -1375,10 +1432,7 @@
       "13": 1013
     },
     "unlockedCustomers": [
-      3,
-      10061,
-      10062,
-      10063
+      3
     ],
     "unlockedChickRoutes": [
       {
@@ -1411,145 +1465,6 @@
           {
             "ingredientId": 30039,
             "name": "나뭇잎"
-          }
-        ]
-      },
-      {
-        "themeId": 6,
-        "slot": 0,
-        "customerId": 10061,
-        "customerName": "카우보이 병아리",
-        "ingredientId": 30048,
-        "ingredientName": "소고기",
-        "rewardItems": [
-          {
-            "slot": "primary",
-            "ingredientId": 30048,
-            "name": "소고기"
-          },
-          {
-            "slot": "secondary",
-            "ingredientId": 30035,
-            "name": "고추"
-          },
-          {
-            "slot": "special",
-            "ingredientId": 30020,
-            "name": "버터"
-          }
-        ],
-        "recipeId": 10015,
-        "recipeName": "라멘",
-        "recipeIngredients": [
-          {
-            "ingredientId": 30012,
-            "name": "면"
-          },
-          {
-            "ingredientId": 30014,
-            "name": "육수"
-          },
-          {
-            "ingredientId": 30005,
-            "name": "달걀"
-          },
-          {
-            "ingredientId": 30049,
-            "name": "돼지고기"
-          },
-          {
-            "ingredientId": 30024,
-            "name": "김"
-          }
-        ]
-      },
-      {
-        "themeId": 6,
-        "slot": 1,
-        "customerId": 10062,
-        "customerName": "바이킹 병아리",
-        "ingredientId": 30015,
-        "ingredientName": "빵가루",
-        "rewardItems": [
-          {
-            "slot": "primary",
-            "ingredientId": 30015,
-            "name": "빵가루"
-          },
-          {
-            "slot": "secondary",
-            "ingredientId": 30011,
-            "name": "밀가루"
-          },
-          {
-            "slot": "special",
-            "ingredientId": 30049,
-            "name": "돼지고기"
-          }
-        ],
-        "recipeId": 10016,
-        "recipeName": "돈까스",
-        "recipeIngredients": [
-          {
-            "ingredientId": 30049,
-            "name": "돼지고기"
-          },
-          {
-            "ingredientId": 30015,
-            "name": "빵가루"
-          },
-          {
-            "ingredientId": 30010,
-            "name": "식용유"
-          },
-          {
-            "ingredientId": 30037,
-            "name": "양배추"
-          }
-        ]
-      },
-      {
-        "themeId": 6,
-        "slot": 2,
-        "customerId": 10063,
-        "customerName": "캠프파이어 병아리",
-        "ingredientId": 30010,
-        "ingredientName": "식용유",
-        "rewardItems": [
-          {
-            "slot": "primary",
-            "ingredientId": 30010,
-            "name": "식용유"
-          },
-          {
-            "slot": "secondary",
-            "ingredientId": 30009,
-            "name": "쌀"
-          },
-          {
-            "slot": "special",
-            "ingredientId": 30037,
-            "name": "양배추"
-          }
-        ],
-        "recipeId": 10017,
-        "recipeName": "카레",
-        "recipeIngredients": [
-          {
-            "ingredientId": 30009,
-            "name": "쌀"
-          },
-          {
-            "ingredientId": 30016,
-            "name": "카레가루"
-          },
-          {
-            "ingredientId": 30034,
-            "name": "양파"
-          },
-          {
-            "ingredientId": 30008,
-            "name": "고기"
           }
         ]
       }
@@ -1649,17 +1564,17 @@
     ],
     "themeChickProgress": {
       "1": {
-        "opened": 0,
+        "opened": 1,
         "total": 18,
-        "ratio": 0,
+        "ratio": 0.05555555555555555,
         "unlocked": [
           3
         ]
       },
       "2": {
-        "opened": 0,
+        "opened": 2,
         "total": 11,
-        "ratio": 0,
+        "ratio": 0.18181818181818182,
         "unlocked": []
       },
       "3": {
@@ -1681,14 +1596,10 @@
         "unlocked": []
       },
       "6": {
-        "opened": 11,
+        "opened": 0,
         "total": 11,
-        "ratio": 1,
-        "unlocked": [
-          10061,
-          10062,
-          10063
-        ]
+        "ratio": 0,
+        "unlocked": []
       },
       "7": {
         "opened": 0,
@@ -1812,14 +1723,14 @@
       ]
     },
     "ingredients": {},
-    "autoCraft": "locked-until-5-recipes",
+    "autoCraft": "new-first-then-lowest-level",
     "craftedRecipes": []
   },
   "activeSystems": {
     "missions": false,
     "staff": false
   },
-  "currentTab": "customers",
+  "currentTab": "craft",
   "collection": {
     "customers": 0,
     "specialCustomers": 0,
