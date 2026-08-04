@@ -57,15 +57,21 @@ try {
 
   let current = await gameState();
   const hint = current.recipes.hintedRecipes[String(recipeInfo.sandwich.recipeId)];
-  if (current.recipes.hintRule !== "same-size-and-all-but-one-correct"
+  if (current.recipes.hintRule !== "same-size-at-least-one-correct-reveals-name-and-missing-clues"
+    || hint?.recipeName !== "샌드위치"
     || hint?.revealedCount !== 1
     || hint?.totalCount !== 2
-    || JSON.stringify(hint.revealedIngredients) !== JSON.stringify(["빵"])) {
+    || JSON.stringify(hint.revealedIngredients) !== JSON.stringify(["빵"])
+    || JSON.stringify(hint.missingClues) !== JSON.stringify(["초록색 채소"])) {
     throw new Error(`Near-miss did not reveal only the correct ingredient: ${JSON.stringify(current.recipes)}`);
   }
   const sandwichCard = page.locator(`.recipe-catalog-card[data-recipe-id="${recipeInfo.sandwich.recipeId}"]`);
   const sandwichText = await sandwichCard.innerText();
-  if (!sandwichText.includes("???") || !sandwichText.includes("빵") || !sandwichText.includes("?") || sandwichText.includes("쌀")) {
+  if (!sandwichText.includes("샌드위치")
+    || !sandwichText.includes("빵")
+    || !sandwichText.includes("초록색 채소가 더 필요할 것 같아요")
+    || sandwichText.includes("쌀")
+    || sandwichText.includes("나뭇잎")) {
     throw new Error(`Wrong ingredient leaked into the recipe hint: ${sandwichText}`);
   }
   await sandwichCard.scrollIntoViewIfNeeded();
@@ -109,7 +115,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log("RECIPE_HINTS_OK catalog=59 nearMiss=bread-only persisted=true discovered=sandwich");
+  console.log("RECIPE_HINTS_OK catalog=59 oneMatch=bread name=sandwich clue=green-vegetable persisted=true discovered=sandwich");
 } finally {
   await browser.close();
 }

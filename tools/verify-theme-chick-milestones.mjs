@@ -64,7 +64,7 @@ try {
     }));
   });
   if (themePrices.some((row) => row.actual !== row.expected)) {
-    throw new Error(`Restaurant theme prices do not follow the 10x curve: ${JSON.stringify(themePrices)}`);
+    throw new Error(`Restaurant theme prices do not follow the 2x curve: ${JSON.stringify(themePrices)}`);
   }
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";

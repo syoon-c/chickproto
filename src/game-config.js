@@ -62,7 +62,7 @@ const INGREDIENT_STORAGE_EXPANSION_AMOUNT = 5;
 const INGREDIENT_STORAGE_EXPANSION_GEM_COST = 10;
 const RECIPE_LEVEL_PRICE_BONUS = 0.10;
 
-const RESTAURANT_THEME_PRICE_MULTIPLIER = 10;
+const RESTAURANT_THEME_PRICE_MULTIPLIER = 2;
 
 function restaurantThemePartPrice(themeId, woodPartPrice) {
   if (Number(themeId) <= 1) return 0;

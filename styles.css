@@ -528,7 +528,8 @@ button.combination-slot { cursor: pointer; }
 .recipe-catalog-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; padding-bottom: 5px; }
 .recipe-catalog-card { min-width: 0; min-height: 87px; display: grid; grid-template-columns: 43px minmax(0,1fr); align-items: center; gap: 7px; padding: 8px; border: 2px solid rgba(117,76,38,.27); border-radius: 15px; background: rgba(255,255,255,.72); box-shadow: 0 2px 0 rgba(103,65,31,.1); }
 .recipe-catalog-card.is-mystery { border-style: dashed; background: linear-gradient(145deg,rgba(237,228,203,.74),rgba(218,205,177,.6)); }
-.recipe-catalog-card.has-hint { border-style: solid; border-color: #d69a36; background: linear-gradient(145deg,#fff9dc,#f7e1a0); box-shadow: 0 2px 0 rgba(154,94,26,.16),inset 0 0 0 2px rgba(255,255,255,.42); }
+.recipe-catalog-card.has-hint { min-height: 124px; align-items: start; border-style: solid; border-color: #d69a36; background: linear-gradient(145deg,#fff9dc,#f7e1a0); box-shadow: 0 2px 0 rgba(154,94,26,.16),inset 0 0 0 2px rgba(255,255,255,.42); }
+.recipe-catalog-card.has-hint .recipe-catalog-icon { margin-top: 14px; }
 .recipe-catalog-icon { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 13px; background: #fff7d7; }
 .recipe-catalog-icon img { width: 40px; height: 40px; object-fit: contain; filter: drop-shadow(0 2px 1px rgba(72,43,24,.18)); }
 .recipe-catalog-icon.mystery-icon { border: 2px dashed rgba(106,83,61,.4); background: rgba(119,99,76,.1); color: #806f5d; font-size: 24px; font-weight: 1000; }
@@ -544,6 +545,9 @@ button.combination-slot { cursor: pointer; }
 .recipe-hint-slot small { display: none; max-width: 42px; overflow: hidden; color: #775237; font-size: 6px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
 .recipe-hint-slot.is-revealed { min-width: 34px; height: 35px; border-style: solid; border-color: #d28b2f; background: #fff5ba; animation: recipe-hint-reveal .52s cubic-bezier(.2,.85,.3,1.15) both; }
 .recipe-hint-slot.is-revealed small { display: block; }
+.recipe-hint-slot.is-clue { min-width: 52px; height: 35px; border-style: solid; border-color: #9ca65e; background: #eef3c5; color: #65713d; }
+.recipe-hint-slot.is-clue small { display: block; max-width: 58px; color: #626c3b; font-size: 7px; }
+.recipe-clue-copy { display: flex; flex-direction: column; gap: 2px; margin-top: 5px; color: #6d673b; font-size: 8px; font-weight: 900; line-height: 1.3; }
 @keyframes recipe-hint-reveal { 0% { opacity: 0; transform: scale(.45) rotate(-9deg); } 70% { transform: scale(1.1) rotate(2deg); } 100% { opacity: 1; transform: none; } }
 .recipe-reveal { position: absolute; z-index: 48; inset: 0; display: grid; place-items: center; overflow: hidden; padding: 24px; background: radial-gradient(circle at center,rgba(255,246,174,.97),rgba(96,55,27,.78)); backdrop-filter: blur(3px); }
 .recipe-reveal[hidden] { display: none; }

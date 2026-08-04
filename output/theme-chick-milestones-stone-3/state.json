@@ -66,17 +66,17 @@
       "mealElapsed": null,
       "mealRemaining": null,
       "mood": "normal",
-      "dropIngredient": 30006,
+      "dropIngredient": 30010,
       "guestGrade": "첫 방문",
       "visits": 4,
       "rewardItems": [
         {
-          "ingredientId": 30006,
-          "name": "소시지"
+          "ingredientId": 30010,
+          "name": "식용유"
         },
         {
-          "ingredientId": 30035,
-          "name": "고추"
+          "ingredientId": 30009,
+          "name": "쌀"
         },
         {
           "ingredientId": 30037,
@@ -110,8 +110,8 @@
           "name": "빵가루"
         },
         {
-          "ingredientId": 30012,
-          "name": "면"
+          "ingredientId": 30011,
+          "name": "밀가루"
         },
         {
           "ingredientId": 30049,
@@ -136,21 +136,21 @@
       "mealElapsed": null,
       "mealRemaining": null,
       "mood": "normal",
-      "dropIngredient": 30004,
+      "dropIngredient": 30048,
       "guestGrade": "첫 방문",
       "visits": 6,
       "rewardItems": [
         {
-          "ingredientId": 30004,
-          "name": "치즈"
-        },
-        {
-          "ingredientId": 30006,
-          "name": "소시지"
-        },
-        {
           "ingredientId": 30048,
           "name": "소고기"
+        },
+        {
+          "ingredientId": 30035,
+          "name": "고추"
+        },
+        {
+          "ingredientId": 30020,
+          "name": "버터"
         }
       ],
       "themeId": 6,
@@ -180,8 +180,8 @@
           "name": "빵가루"
         },
         {
-          "ingredientId": 30012,
-          "name": "면"
+          "ingredientId": 30011,
+          "name": "밀가루"
         },
         {
           "ingredientId": 30049,
@@ -206,21 +206,21 @@
       "mealElapsed": null,
       "mealRemaining": null,
       "mood": "normal",
-      "dropIngredient": 30004,
+      "dropIngredient": 30048,
       "guestGrade": "첫 방문",
       "visits": 7,
       "rewardItems": [
         {
-          "ingredientId": 30004,
-          "name": "치즈"
-        },
-        {
-          "ingredientId": 30006,
-          "name": "소시지"
-        },
-        {
           "ingredientId": 30048,
           "name": "소고기"
+        },
+        {
+          "ingredientId": 30035,
+          "name": "고추"
+        },
+        {
+          "ingredientId": 30020,
+          "name": "버터"
         }
       ],
       "themeId": 6,
@@ -243,7 +243,9 @@
     "ingredientsFound": 0,
     "giftBundles": 0,
     "giftItems": 0,
-    "recipesCrafted": 0
+    "recipesCrafted": 0,
+    "recipeResearchAttempts": 0,
+    "failedRecipeResearches": 0
   },
   "currentScreen": "restaurant",
   "recipes": {
@@ -251,9 +253,77 @@
     "combinationCapacity": 2,
     "selectedIngredients": [],
     "mixingPresentation": "cutting-board-and-bowl",
+    "research": null,
+    "catalogTotal": 59,
+    "catalogSort": "earliest-ingredient-discovery-stage",
+    "catalogOrder": [
+      1,
+      20014,
+      10001,
+      2,
+      20002,
+      20003,
+      20004,
+      20001,
+      20005,
+      10021,
+      10011,
+      10008,
+      10010,
+      10007,
+      10024,
+      10028,
+      10004,
+      10036,
+      10015,
+      10025,
+      10006,
+      10009,
+      10014,
+      10037,
+      20013,
+      10016,
+      10012,
+      20006,
+      10013,
+      20007,
+      10018,
+      10026,
+      20011,
+      10044,
+      10040,
+      10038,
+      10027,
+      20010,
+      20009,
+      10029,
+      10031,
+      20008,
+      10041,
+      10042,
+      10022,
+      10003,
+      20012,
+      10005,
+      10019,
+      10017,
+      10035,
+      10032,
+      10034,
+      10033,
+      10043,
+      10023,
+      10039,
+      10020,
+      10030
+    ],
     "reveal": null,
+    "hintRule": "same-size-and-all-but-one-correct",
+    "mysteryRecipeCount": 58,
+    "hintedRecipes": {},
     "autoResearchUnlocked": false,
     "autoResearchTarget": null,
+    "autoResearchPriority": "new-first-lowest-level-then-highest-inventory-pressure",
     "globalRevenueBonus": 0,
     "recipeLevelPriceBonus": 0.1,
     "craftable": [
@@ -305,7 +375,21 @@
       "10041": 3,
       "10042": 3,
       "10043": 3,
-      "10044": 3
+      "10044": 3,
+      "20001": 2,
+      "20002": 2,
+      "20003": 2,
+      "20004": 2,
+      "20005": 3,
+      "20006": 3,
+      "20007": 3,
+      "20008": 3,
+      "20009": 2,
+      "20010": 3,
+      "20011": 2,
+      "20012": 2,
+      "20013": 3,
+      "20014": 2
     },
     "upgradeIngredientCostRule": "fixed-per-recipe",
     "craftRequirements": {
@@ -1023,6 +1107,204 @@
           "name": "토마토",
           "count": 1
         }
+      ],
+      "20001": [
+        {
+          "ingredientId": 30003,
+          "name": "빵",
+          "count": 1
+        },
+        {
+          "ingredientId": 30020,
+          "name": "버터",
+          "count": 1
+        }
+      ],
+      "20002": [
+        {
+          "ingredientId": 30003,
+          "name": "빵",
+          "count": 1
+        },
+        {
+          "ingredientId": 30002,
+          "name": "토마토",
+          "count": 1
+        }
+      ],
+      "20003": [
+        {
+          "ingredientId": 30003,
+          "name": "빵",
+          "count": 1
+        },
+        {
+          "ingredientId": 30005,
+          "name": "달걀",
+          "count": 1
+        }
+      ],
+      "20004": [
+        {
+          "ingredientId": 30002,
+          "name": "토마토",
+          "count": 1
+        },
+        {
+          "ingredientId": 30005,
+          "name": "달걀",
+          "count": 1
+        }
+      ],
+      "20005": [
+        {
+          "ingredientId": 30011,
+          "name": "밀가루",
+          "count": 1
+        },
+        {
+          "ingredientId": 30005,
+          "name": "달걀",
+          "count": 1
+        },
+        {
+          "ingredientId": 30020,
+          "name": "버터",
+          "count": 1
+        }
+      ],
+      "20006": [
+        {
+          "ingredientId": 30027,
+          "name": "마늘",
+          "count": 1
+        },
+        {
+          "ingredientId": 30055,
+          "name": "버섯",
+          "count": 1
+        },
+        {
+          "ingredientId": 30010,
+          "name": "식용유",
+          "count": 1
+        }
+      ],
+      "20007": [
+        {
+          "ingredientId": 30037,
+          "name": "양배추",
+          "count": 1
+        },
+        {
+          "ingredientId": 30049,
+          "name": "돼지고기",
+          "count": 1
+        },
+        {
+          "ingredientId": 30018,
+          "name": "간장",
+          "count": 1
+        }
+      ],
+      "20008": [
+        {
+          "ingredientId": 30043,
+          "name": "옥수수",
+          "count": 1
+        },
+        {
+          "ingredientId": 30004,
+          "name": "치즈",
+          "count": 1
+        },
+        {
+          "ingredientId": 30020,
+          "name": "버터",
+          "count": 1
+        }
+      ],
+      "20009": [
+        {
+          "ingredientId": 30039,
+          "name": "나뭇잎",
+          "count": 1
+        },
+        {
+          "ingredientId": 30028,
+          "name": "해바라기씨",
+          "count": 1
+        }
+      ],
+      "20010": [
+        {
+          "ingredientId": 30025,
+          "name": "당근",
+          "count": 1
+        },
+        {
+          "ingredientId": 30014,
+          "name": "육수",
+          "count": 1
+        },
+        {
+          "ingredientId": 30026,
+          "name": "생크림",
+          "count": 1
+        }
+      ],
+      "20011": [
+        {
+          "ingredientId": 30046,
+          "name": "아보카도",
+          "count": 1
+        },
+        {
+          "ingredientId": 30005,
+          "name": "달걀",
+          "count": 1
+        }
+      ],
+      "20012": [
+        {
+          "ingredientId": 30033,
+          "name": "과일",
+          "count": 1
+        },
+        {
+          "ingredientId": 30021,
+          "name": "우유",
+          "count": 1
+        }
+      ],
+      "20013": [
+        {
+          "ingredientId": 30007,
+          "name": "감자",
+          "count": 1
+        },
+        {
+          "ingredientId": 30035,
+          "name": "고추",
+          "count": 1
+        },
+        {
+          "ingredientId": 30004,
+          "name": "치즈",
+          "count": 1
+        }
+      ],
+      "20014": [
+        {
+          "ingredientId": 30039,
+          "name": "나뭇잎",
+          "count": 1
+        },
+        {
+          "ingredientId": 30001,
+          "name": "양상추",
+          "count": 1
+        }
       ]
     },
     "levels": {
@@ -1033,12 +1315,15 @@
     }
   },
   "ingredientStorage": {
-    "usedSlots": 1,
-    "slotLimit": 10,
+    "usedSlots": 3,
+    "slotLimit": 20,
     "totalItems": 3,
-    "totalLimit": 100,
-    "stackLimit": 10,
-    "fullIngredientIds": []
+    "totalLimit": 20,
+    "capacity": 20,
+    "remaining": 17,
+    "expansionAmount": 5,
+    "expansionGemCost": 10,
+    "ingredientTypes": 1
   },
   "progression": {
     "unlockedThemes": [
@@ -1107,18 +1392,18 @@
         "slot": 1,
         "customerId": 10012,
         "customerName": "공룡 병아리",
-        "ingredientId": 30011,
-        "ingredientName": "밀가루",
+        "ingredientId": 30055,
+        "ingredientName": "버섯",
         "rewardItems": [
           {
             "slot": "primary",
-            "ingredientId": 30011,
-            "name": "밀가루"
+            "ingredientId": 30055,
+            "name": "버섯"
           },
           {
             "slot": "secondary",
-            "ingredientId": 30055,
-            "name": "버섯"
+            "ingredientId": 30011,
+            "name": "밀가루"
           },
           {
             "slot": "special",
@@ -1181,23 +1466,23 @@
         "slot": 0,
         "customerId": 10061,
         "customerName": "카우보이 병아리",
-        "ingredientId": 30004,
-        "ingredientName": "치즈",
+        "ingredientId": 30048,
+        "ingredientName": "소고기",
         "rewardItems": [
           {
             "slot": "primary",
-            "ingredientId": 30004,
-            "name": "치즈"
+            "ingredientId": 30048,
+            "name": "소고기"
           },
           {
             "slot": "secondary",
-            "ingredientId": 30006,
-            "name": "소시지"
+            "ingredientId": 30035,
+            "name": "고추"
           },
           {
             "slot": "special",
-            "ingredientId": 30048,
-            "name": "소고기"
+            "ingredientId": 30020,
+            "name": "버터"
           }
         ],
         "recipeId": 10015,
@@ -1232,8 +1517,8 @@
           },
           {
             "slot": "secondary",
-            "ingredientId": 30012,
-            "name": "면"
+            "ingredientId": 30011,
+            "name": "밀가루"
           },
           {
             "slot": "special",
@@ -1263,18 +1548,18 @@
         "slot": 2,
         "customerId": 10063,
         "customerName": "캠프파이어 병아리",
-        "ingredientId": 30006,
-        "ingredientName": "소시지",
+        "ingredientId": 30010,
+        "ingredientName": "식용유",
         "rewardItems": [
           {
             "slot": "primary",
-            "ingredientId": 30006,
-            "name": "소시지"
+            "ingredientId": 30010,
+            "name": "식용유"
           },
           {
             "slot": "secondary",
-            "ingredientId": 30035,
-            "name": "고추"
+            "ingredientId": 30009,
+            "name": "쌀"
           },
           {
             "slot": "special",
@@ -1315,56 +1600,56 @@
         "max": 2250
       },
       "3": {
-        "min": 13000,
-        "max": 22500
+        "min": 2600,
+        "max": 4500
       },
       "4": {
-        "min": 130000,
-        "max": 225000
+        "min": 5200,
+        "max": 9000
       },
       "5": {
-        "min": 1300000,
-        "max": 2250000
+        "min": 10400,
+        "max": 18000
       },
       "6": {
-        "min": 13000000,
-        "max": 22500000
+        "min": 20800,
+        "max": 36000
       },
       "7": {
-        "min": 130000000,
-        "max": 225000000
+        "min": 41600,
+        "max": 72000
       },
       "8": {
-        "min": 1300000000,
-        "max": 2250000000
+        "min": 83200,
+        "max": 144000
       },
       "9": {
-        "min": 13000000000,
-        "max": 22500000000
+        "min": 166400,
+        "max": 288000
       },
       "10": {
-        "min": 130000000000,
-        "max": 225000000000
+        "min": 332800,
+        "max": 576000
       },
       "11": {
-        "min": 1300000000000,
-        "max": 2250000000000
+        "min": 665600,
+        "max": 1152000
       },
       "12": {
-        "min": 13000000000000,
-        "max": 22500000000000
+        "min": 1331200,
+        "max": 2304000
       },
       "13": {
-        "min": 130000000000000,
-        "max": 225000000000000
+        "min": 2662400,
+        "max": 4608000
       },
       "14": {
-        "min": 1300000000000000,
-        "max": 2250000000000000
+        "min": 5324800,
+        "max": 9216000
       },
       "15": {
-        "min": 13000000000000000,
-        "max": 22500000000000000
+        "min": 10649600,
+        "max": 18432000
       }
     },
     "guestGrades": [
@@ -1379,7 +1664,7 @@
       {
         "id": 2,
         "name": "단골",
-        "minVisits": 80,
+        "minVisits": 40,
         "primaryCount": 1,
         "secondaryCount": 1,
         "rareCount": 0
@@ -1494,59 +1779,49 @@
       }
     },
     "ingredientDropChances": {
-      "30001": 0.1,
-      "30002": 0.1,
-      "30003": 0.1,
-      "30004": 0.1,
-      "30005": 0.1,
-      "30006": 0.1,
-      "30007": 0.1,
-      "30008": 0.1,
-      "30009": 0.1,
-      "30010": 0.1,
-      "30011": 0.1,
-      "30012": 0.1,
-      "30013": 0.1,
-      "30014": 0.1,
-      "30015": 0.1,
-      "30016": 0.1,
-      "30017": 0.1,
-      "30018": 0.1,
-      "30020": 0.1,
-      "30021": 0.1,
-      "30023": 0.1,
-      "30024": 0.1,
-      "30025": 0.1,
-      "30026": 0.1,
-      "30027": 0.1,
-      "30028": 0.1,
-      "30030": 0.1,
-      "30031": 0.1,
-      "30033": 0.1,
-      "30035": 0.1,
-      "30037": 0.1,
-      "30039": 0.1,
-      "30043": 0.1,
-      "30046": 0.1,
-      "30047": 0.1,
-      "30048": 0.1,
-      "30049": 0.1,
-      "30053": 0.1,
-      "30054": 0.1,
-      "30055": 0.1,
-      "30059": 0.1,
-      "30063": 0.1,
-      "30068": 0.1,
-      "30075": 0.1,
-      "30076": 0.1
+      "30002": 0.15,
+      "30003": 0.15,
+      "30004": 0.15,
+      "30005": 0.15,
+      "30006": 0.15,
+      "30007": 0.15,
+      "30009": 0.15,
+      "30010": 0.15,
+      "30011": 0.15,
+      "30013": 0.15,
+      "30014": 0.15,
+      "30015": 0.15,
+      "30016": 0.15,
+      "30017": 0.15,
+      "30019": 0.15,
+      "30020": 0.15,
+      "30021": 0.15,
+      "30022": 0.15,
+      "30023": 0.15,
+      "30025": 0.15,
+      "30026": 0.15,
+      "30027": 0.15,
+      "30030": 0.15,
+      "30033": 0.15,
+      "30034": 0.15,
+      "30039": 0.15,
+      "30043": 0.15,
+      "30046": 0.15,
+      "30048": 0.15,
+      "30049": 0.15,
+      "30055": 0.15,
+      "30059": 0.15,
+      "30063": 0.15,
+      "30068": 0.15,
+      "30075": 0.15
     },
     "ingredientDropRule": {
-      "overallChance": 0.1,
+      "overallChance": 0.15,
       "ingredientTypesOnSuccess": 1,
       "slotChances": {
-        "primary": 0.7,
-        "secondary": 0.2,
-        "special": 0.1
+        "primary": 0.5,
+        "secondary": 0.3,
+        "special": 0.2
       },
       "grades": [
         {
@@ -1556,7 +1831,7 @@
           "rareCount": 0
         },
         {
-          "minVisits": 80,
+          "minVisits": 40,
           "primaryCount": 1,
           "secondaryCount": 1,
           "rareCount": 0
@@ -1589,37 +1864,37 @@
         "visits": 3,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 80
+        "nextAt": 40
       },
       "10012": {
         "visits": 3,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 80
+        "nextAt": 40
       },
       "10013": {
         "visits": 8,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 80
+        "nextAt": 40
       },
       "10061": {
         "visits": 7,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 80
+        "nextAt": 40
       },
       "10062": {
         "visits": 10,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 80
+        "nextAt": 40
       },
       "10063": {
         "visits": 4,
         "gradeId": 1,
         "gradeName": "첫 방문",
-        "nextAt": 80
+        "nextAt": 40
       }
     }
   },

@@ -58,10 +58,10 @@
     "giftBundles": 0,
     "giftItems": 0,
     "recipesCrafted": 0,
-    "recipeResearchAttempts": 0,
-    "failedRecipeResearches": 0
+    "recipeResearchAttempts": 1,
+    "failedRecipeResearches": 1
   },
-  "currentScreen": "collection",
+  "currentScreen": "recipe",
   "recipes": {
     "owned": 1,
     "combinationCapacity": 2,
@@ -132,9 +132,21 @@
       10030
     ],
     "reveal": null,
-    "hintRule": "same-size-and-all-but-one-correct",
+    "hintRule": "same-size-at-least-one-correct-reveals-name-and-missing-clues",
     "mysteryRecipeCount": 58,
-    "hintedRecipes": {},
+    "hintedRecipes": {
+      "20014": {
+        "recipeName": "새싹 샐러드",
+        "revealedIngredients": [
+          "나뭇잎"
+        ],
+        "missingClues": [
+          "초록색 채소"
+        ],
+        "revealedCount": 1,
+        "totalCount": 2
+      }
+    },
     "autoResearchUnlocked": false,
     "autoResearchTarget": null,
     "autoResearchPriority": "new-first-lowest-level-then-highest-inventory-pressure",
@@ -1139,8 +1151,7 @@
   },
   "progression": {
     "unlockedThemes": [
-      1,
-      6
+      1
     ],
     "activeThemeParts": {
       "1": 1001,
@@ -1158,10 +1169,7 @@
       "13": 1013
     },
     "unlockedCustomers": [
-      3,
-      10061,
-      10062,
-      10063
+      3
     ],
     "unlockedChickRoutes": [
       {
@@ -1194,129 +1202,6 @@
           {
             "ingredientId": 30039,
             "name": "나뭇잎"
-          }
-        ]
-      },
-      {
-        "themeId": 6,
-        "slot": 0,
-        "customerId": 10061,
-        "customerName": "카우보이 병아리",
-        "ingredientId": 30048,
-        "ingredientName": "소고기",
-        "rewardItems": [
-          {
-            "slot": "primary",
-            "ingredientId": 30048,
-            "name": "소고기"
-          },
-          {
-            "slot": "secondary",
-            "ingredientId": 30035,
-            "name": "고추"
-          },
-          {
-            "slot": "special",
-            "ingredientId": 30020,
-            "name": "버터"
-          }
-        ],
-        "recipeId": 10015,
-        "recipeName": "라멘",
-        "recipeIngredients": [
-          {
-            "ingredientId": 30012,
-            "name": "면"
-          },
-          {
-            "ingredientId": 30014,
-            "name": "육수"
-          },
-          {
-            "ingredientId": 30005,
-            "name": "달걀"
-          }
-        ]
-      },
-      {
-        "themeId": 6,
-        "slot": 1,
-        "customerId": 10062,
-        "customerName": "바이킹 병아리",
-        "ingredientId": 30015,
-        "ingredientName": "빵가루",
-        "rewardItems": [
-          {
-            "slot": "primary",
-            "ingredientId": 30015,
-            "name": "빵가루"
-          },
-          {
-            "slot": "secondary",
-            "ingredientId": 30011,
-            "name": "밀가루"
-          },
-          {
-            "slot": "special",
-            "ingredientId": 30049,
-            "name": "돼지고기"
-          }
-        ],
-        "recipeId": 10016,
-        "recipeName": "돈까스",
-        "recipeIngredients": [
-          {
-            "ingredientId": 30049,
-            "name": "돼지고기"
-          },
-          {
-            "ingredientId": 30015,
-            "name": "빵가루"
-          },
-          {
-            "ingredientId": 30010,
-            "name": "식용유"
-          }
-        ]
-      },
-      {
-        "themeId": 6,
-        "slot": 2,
-        "customerId": 10063,
-        "customerName": "캠프파이어 병아리",
-        "ingredientId": 30010,
-        "ingredientName": "식용유",
-        "rewardItems": [
-          {
-            "slot": "primary",
-            "ingredientId": 30010,
-            "name": "식용유"
-          },
-          {
-            "slot": "secondary",
-            "ingredientId": 30009,
-            "name": "쌀"
-          },
-          {
-            "slot": "special",
-            "ingredientId": 30037,
-            "name": "양배추"
-          }
-        ],
-        "recipeId": 10017,
-        "recipeName": "카레",
-        "recipeIngredients": [
-          {
-            "ingredientId": 30009,
-            "name": "쌀"
-          },
-          {
-            "ingredientId": 30016,
-            "name": "카레가루"
-          },
-          {
-            "ingredientId": 30034,
-            "name": "양파"
           }
         ]
       }
@@ -1448,14 +1333,10 @@
         "unlocked": []
       },
       "6": {
-        "opened": 11,
+        "opened": 0,
         "total": 11,
-        "ratio": 1,
-        "unlocked": [
-          10061,
-          10062,
-          10063
-        ]
+        "ratio": 0,
+        "unlocked": []
       },
       "7": {
         "opened": 0,
@@ -1578,15 +1459,20 @@
         }
       ]
     },
-    "ingredients": {},
+    "ingredients": {
+      "30009": 0,
+      "30039": 0
+    },
     "autoCraft": "locked-until-5-recipes",
-    "craftedRecipes": []
+    "craftedRecipes": [
+      0
+    ]
   },
   "activeSystems": {
     "missions": false,
     "staff": false
   },
-  "currentTab": "customers",
+  "currentTab": "craft",
   "collection": {
     "customers": 0,
     "specialCustomers": 0,

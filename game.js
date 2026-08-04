@@ -1168,7 +1168,7 @@ function finishRecipeResearch() {
   state.crafting.history = state.crafting.history.slice(0, 12);
   startWeirdDishReveal(completed.automatic);
   showToast(hintedRecipe
-    ? `괴식이 됐지만 맞은 재료 ${hintedRecipe.matches.length}개를 찾았어요.`
+    ? `괴식이 됐지만 ${routeRecipeName(hintedRecipe.route.recipeId)} 힌트를 찾았어요.`
     : "괴식이 됐어요. 사용한 재료는 사라졌습니다.", 3);
   saveState();
   updateHud();
@@ -1262,7 +1262,6 @@ function mergeRecipeHints(requirements, previousHints, newHints) {
 
 function revealClosestRecipeHint(selectedIngredients = state.crafting.selected, announce = true) {
   const selectedCount = selectedIngredients.length;
-  const requiredMatchCount = Math.max(1, selectedCount - 1);
   const candidates = discoveryOrderedRecipeRoutes()
     .map((route, routeIndex) => {
       const requirements = craftIngredientRequirements(route);
@@ -1277,7 +1276,7 @@ function revealClosestRecipeHint(selectedIngredients = state.crafting.selected, 
     })
     .filter((candidate) => !recipeData(candidate.route.recipeId)
       && craftIngredientCost(candidate.route) === selectedCount
-      && candidate.matches.length >= requiredMatchCount)
+      && candidate.matches.length >= 1)
     .sort((a, b) => b.matches.length - a.matches.length
       || b.previousHintCount - a.previousHintCount
       || a.routeIndex - b.routeIndex);
@@ -1292,7 +1291,7 @@ function revealClosestRecipeHint(selectedIngredients = state.crafting.selected, 
   saveState();
   if (announce) {
     renderMenu();
-    showToast(`비슷한 조합이에요! 맞은 재료 ${closest.matches.length}개를 공개했어요.`, 3);
+    showToast(`${routeRecipeName(closest.route.recipeId)} 힌트 발견! 맞은 재료 ${closest.matches.length}개를 찾았어요.`, 3);
   }
   return closest;
 }
@@ -2062,6 +2061,34 @@ function discoveryOrderedRecipeRoutes() {
     .map((entry) => entry.route);
 }
 
+const INGREDIENT_DISCOVERY_CLUES = new Map([
+  [[30001, 30024, 30037, 30039], "초록색 채소"],
+  [[30002, 30023, 30025, 30035, 30043, 30046, 30053], "알록달록한 채소"],
+  [[30007, 30027, 30034], "땅에서 자라는 채소"],
+  [[30003, 30009, 30011, 30012, 30013, 30015, 30059], "든든한 곡물 재료"],
+  [[30005], "동그란 단백질 재료"],
+  [[30006, 30008, 30017, 30048, 30049, 30075], "감칠맛 나는 단백질"],
+  [[30004, 30020, 30021, 30026], "고소한 유제품"],
+  [[30010, 30016, 30018, 30022, 30029, 30047, 30068, 30076], "맛을 더하는 양념"],
+  [[30014, 30067], "촉촉한 국물 재료"],
+  [[30019, 30055], "향긋한 버섯 재료"],
+  [[30028, 30031], "고소한 씨앗 재료"],
+  [[30030], "부드러운 콩 재료"],
+  [[30033, 30063, 30064], "달콤한 과일"],
+  [[30054], "향긋한 허브"],
+].flatMap(([ingredientIds, clue]) => ingredientIds.map((ingredientId) => [ingredientId, clue])));
+
+function ingredientDiscoveryClue(ingredientId) {
+  return INGREDIENT_DISCOVERY_CLUES.get(Number(ingredientId)) || "다른 맛의 재료";
+}
+
+function clueWithSubjectParticle(clue) {
+  const lastCharacter = clue.at(-1) || "";
+  const code = lastCharacter.charCodeAt(0);
+  const hasFinalConsonant = code >= 0xac00 && code <= 0xd7a3 && (code - 0xac00) % 28 !== 0;
+  return `${clue}${hasFinalConsonant ? "이" : "가"}`;
+}
+
 function recipeCatalogCard(route, index) {
   const owned = recipeData(route.recipeId);
   const requirements = craftIngredientRequirements(route);
@@ -2076,17 +2103,24 @@ function recipeCatalogCard(route, index) {
   (state.crafting.hints?.[route.recipeId] || []).forEach((ingredientId) => {
     hintCounts.set(Number(ingredientId), Number(hintCounts.get(Number(ingredientId)) || 0) + 1);
   });
+  const hasHint = Number(state.crafting.hints?.[route.recipeId]?.length || 0) > 0;
+  const missingClues = [];
   const hintSlots = expandedCraftIngredientIds(route).map((ingredientId) => {
     const ingredient = ingredientData(ingredientId);
     const revealed = Number(hintCounts.get(ingredientId) || 0) > 0;
     if (revealed) hintCounts.set(ingredientId, Number(hintCounts.get(ingredientId)) - 1);
-    return revealed
-      ? `<span class="recipe-hint-slot is-revealed" title="${ingredient.ingredientName}"><b>${ingredient.emoji}</b><small>${ingredient.ingredientName}</small></span>`
+    if (revealed) return `<span class="recipe-hint-slot is-revealed" title="${ingredient.ingredientName}"><b>${ingredient.emoji}</b><small>${ingredient.ingredientName}</small></span>`;
+    const clue = ingredientDiscoveryClue(ingredientId);
+    if (hasHint) missingClues.push(clue);
+    return hasHint
+      ? `<span class="recipe-hint-slot is-clue" title="${clue}"><b>?</b><small>${clue}</small></span>`
       : `<span class="recipe-hint-slot"><b>?</b></span>`;
   }).join("");
-  return `<article class="recipe-catalog-card is-mystery ${state.crafting.hints?.[route.recipeId]?.length ? "has-hint" : ""}" data-recipe-id="${route.recipeId}">
+  const clueSentences = [...new Set(missingClues)]
+    .map((clue) => `<span>${clueWithSubjectParticle(clue)} 더 필요할 것 같아요</span>`).join("");
+  return `<article class="recipe-catalog-card is-mystery ${hasHint ? "has-hint" : ""}" data-recipe-id="${route.recipeId}">
     <div class="recipe-catalog-icon mystery-icon">?</div>
-    <div class="recipe-catalog-copy"><small>NO.${String(index + 1).padStart(2, "0")} · ${craftIngredientCost(route)}재료</small><strong>???</strong><div class="recipe-hint-slots">${hintSlots}</div></div>
+    <div class="recipe-catalog-copy"><small>NO.${String(index + 1).padStart(2, "0")} · ${craftIngredientCost(route)}재료</small><strong>${hasHint ? routeRecipeName(route.recipeId) : "???"}</strong><div class="recipe-hint-slots">${hintSlots}</div>${hasHint ? `<div class="recipe-clue-copy">${clueSentences}</div>` : ""}</div>
   </article>`;
 }
 
@@ -2533,15 +2567,30 @@ function renderGameToText() {
         recipeName: recipeReveal.result === "failure" ? "괴식" : routeRecipeName(recipeReveal.recipeId),
         result: recipeReveal.result,
       } : null,
-      hintRule: "same-size-and-all-but-one-correct",
+      hintRule: "same-size-at-least-one-correct-reveals-name-and-missing-clues",
       mysteryRecipeCount: RECIPE_PROGRESSION.filter((route) => !recipeData(route.recipeId)).length,
       hintedRecipes: Object.fromEntries(Object.entries(state.crafting.hints || {})
         .filter(([recipeId, ingredientIds]) => !recipeData(Number(recipeId)) && ingredientIds.length)
-        .map(([recipeId, ingredientIds]) => [recipeId, {
-          revealedIngredients: ingredientIds.map((ingredientId) => ingredientData(ingredientId)?.ingredientName).filter(Boolean),
-          revealedCount: ingredientIds.length,
-          totalCount: craftIngredientCost(progressionForRecipe(Number(recipeId))),
-        }])),
+        .map(([recipeId, ingredientIds]) => {
+          const numericRecipeId = Number(recipeId);
+          const revealedCounts = new Map();
+          ingredientIds.forEach((ingredientId) => revealedCounts.set(Number(ingredientId),
+            Number(revealedCounts.get(Number(ingredientId)) || 0) + 1));
+          const missingIngredientIds = expandedCraftIngredientIds(progressionForRecipe(numericRecipeId))
+            .filter((ingredientId) => {
+              const count = Number(revealedCounts.get(ingredientId) || 0);
+              if (!count) return true;
+              revealedCounts.set(ingredientId, count - 1);
+              return false;
+            });
+          return [recipeId, {
+            recipeName: routeRecipeName(numericRecipeId),
+            revealedIngredients: ingredientIds.map((ingredientId) => ingredientData(ingredientId)?.ingredientName).filter(Boolean),
+            missingClues: [...new Set(missingIngredientIds.map(ingredientDiscoveryClue))],
+            revealedCount: ingredientIds.length,
+            totalCount: craftIngredientCost(progressionForRecipe(numericRecipeId)),
+          }];
+        })),
       autoResearchUnlocked: unlockedRecipeCount() >= 5,
       autoResearchTarget: unlockedRecipeCount() < 5 ? null : RECIPE_PROGRESSION
         .filter((route) => canCraftRecipe(route.recipeId))
