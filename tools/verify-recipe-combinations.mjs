@@ -64,6 +64,8 @@ try {
     const saved = JSON.parse(localStorage.getItem(key));
     const stoneRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === 1);
     const targetRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => row.areaType === 1 && row.facilityTheme === middle.themeId);
+    const countertop = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, countertop.id])];
     saved.themes.opened = [...stoneRows.map((row) => row.id), ...targetRows.slice(0, Math.ceil(targetRows.length * .7)).map((row) => row.id)];
     saved.ownedRecipes = {
       1: { level: 1, stack: 0, codexClaimed: true },
@@ -72,6 +74,7 @@ try {
       20001: { level: 1, stack: 0, codexClaimed: true },
     };
     saved.crafting.ingredients = Object.fromEntries(middle.ingredientRequirements.map((ingredient) => [ingredient.id, 1]));
+    saved.crafting.bowlCapacity = 4;
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));
   }, routeInfo);
@@ -115,6 +118,7 @@ try {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
     saved.crafting.ingredients = Object.fromEntries(route.ingredientRequirements.map((ingredient) => [ingredient.id, 1]));
+    saved.crafting.bowlCapacity = 5;
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));
   }, routeInfo.sunflower);

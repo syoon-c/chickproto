@@ -23,6 +23,15 @@ try {
   await page.reload({ waitUntil: "load" });
   page.once("dialog", (dialog) => dialog.accept());
   await page.locator("#reset-btn").click();
+  await page.evaluate(() => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    const countertop = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, countertop.id])];
+    saved.tutorial = { activeId: null, seen: ["welcome"] };
+    localStorage.setItem(key, JSON.stringify(saved));
+  });
+  await page.reload({ waitUntil: "load" });
 
   const info = await page.evaluate(() => ({
     bread: window.CHICK_CONFIG.GAME_INGREDIENTS.bread,
@@ -96,6 +105,7 @@ try {
       10005: { level: 1, stack: 0, codexClaimed: false },
     };
     saved.crafting.ingredients = { [bread.id]: 1, [leaf.id]: 1 };
+    saved.crafting.bowlCapacity = 5;
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));
   }, info);

@@ -6,13 +6,19 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-  <link rel="stylesheet" href="styles.css?v=20260804-recipe-levelup-reveal" />
+  <link rel="stylesheet" href="styles.css?v=20260805-special-promotion" />
   </head>
   <body>
     <main class="app-shell">
       <section class="game-frame" aria-label="식당아리 게임 화면">
         <div class="world-area">
           <canvas id="game-canvas" width="480" height="900" aria-label="레스토랑"></canvas>
+
+          <button id="chef-dialogue" class="chef-dialogue" type="button" hidden aria-live="polite">
+            <span>요리사 병아리</span>
+            <strong id="chef-dialogue-text"></strong>
+            <small>눌러서 계속</small>
+          </button>
 
         <header class="hud-top" aria-label="보유 재화">
           <div class="currency-pill primary">
@@ -55,7 +61,15 @@
           </button>
         </section>
 
-        <div id="toast" class="toast" hidden></div>
+        <section id="special-promotion-panel" class="special-promotion-panel" hidden aria-label="특별 홍보 재료 선택">
+          <header><div><small>손님 초대</small><strong>특별 홍보</strong></div><button id="special-promotion-close" type="button" aria-label="닫기">×</button></header>
+          <p>선택한 재료를 주는 손님만 1분간 찾아옵니다.</p>
+          <label class="special-promotion-search"><span aria-hidden="true">⌕</span><input id="special-promotion-search" type="search" placeholder="재료 이름 검색" autocomplete="off" /></label>
+          <div id="special-promotion-list" class="special-promotion-list"></div>
+        </section>
+
+        <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+        <div id="guest-toast" class="new-guest-alert" role="status" aria-live="polite" hidden></div>
         </div>
 
         <div class="bottom-controls">
@@ -64,10 +78,16 @@
             <button class="nav-button" type="button" data-screen="recipe"><span><img src="assets/ui/common/icon_mainmenu_recipe.png" alt="" /></span><strong id="recipe-nav-label">레시피</strong><i id="recipe-dot" hidden></i></button>
             <button class="nav-button" type="button" data-screen="collection"><span><img src="assets/ui/chick/icon_chick_001.png" alt="" /></span><strong>손님</strong><i id="collection-dot" hidden></i></button>
           </nav>
-          <button id="promotion-btn" class="promotion-button" type="button" disabled>
-            <img class="promotion-icon" src="assets/ui/common/icon_promotion.png" alt="" />
-            <span class="promotion-copy"><strong>홍보하기</strong></span>
-          </button>
+          <div class="promotion-stack">
+            <button id="special-promotion-btn" class="special-promotion-button" type="button" hidden>
+              <span class="special-promotion-spark" aria-hidden="true">✦</span>
+              <span id="special-promotion-label">특별 홍보</span>
+            </button>
+            <button id="promotion-btn" class="promotion-button" type="button" disabled>
+              <img class="promotion-icon" src="assets/ui/common/icon_promotion.png" alt="" />
+              <span class="promotion-copy"><strong>홍보하기</strong></span>
+            </button>
+          </div>
         </div>
       </section>
     </main>
@@ -75,6 +95,6 @@
     <script src="data/runtime-tables.js?v=20260729-restaurant-only"></script>
   <script src="src/game-config.js?v=20260804-special-ingredient-150"></script>
     <script src="src/data-loader.js?v=20260729-restaurant-only"></script>
-  <script src="game.js?v=20260804-final-price-tip"></script>
+  <script src="game.js?v=20260805-special-promotion-tutorial-fix"></script>
   </body>
 </html>

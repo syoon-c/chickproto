@@ -232,6 +232,10 @@
   "payments": [],
   "ingredientDrops": [],
   "tipbox": 0,
+  "tipRule": {
+    "basis": "final-meal-price",
+    "rate": 0.1
+  },
   "metrics": {
     "visitors": 35,
     "orders": 0,
@@ -254,46 +258,49 @@
     "selectedIngredients": [],
     "mixingPresentation": "cutting-board-and-bowl",
     "research": null,
-    "catalogTotal": 59,
+    "catalogTotal": 64,
     "catalogSort": "earliest-ingredient-discovery-stage",
     "catalogOrder": [
       1,
       20014,
       10001,
       2,
+      20015,
+      20016,
       20002,
       20003,
       20004,
       20001,
       20005,
+      20017,
+      20018,
+      20019,
       10021,
-      10011,
       10008,
       10010,
       10007,
       10024,
       10028,
       10004,
-      10036,
-      10015,
       10025,
       10006,
-      10009,
-      10014,
       10037,
       20013,
-      10016,
+      10014,
+      10015,
       10012,
+      10016,
       20006,
       10013,
+      10011,
       20007,
-      10018,
       10026,
       20011,
       10044,
-      10040,
+      10018,
       10038,
       10027,
+      10040,
       20010,
       20009,
       10029,
@@ -305,8 +312,10 @@
       10003,
       20012,
       10005,
+      10009,
       10019,
       10017,
+      10036,
       10035,
       10032,
       10034,
@@ -319,15 +328,34 @@
     ],
     "reveal": null,
     "hintRule": "same-size-at-least-one-correct-reveals-name-and-missing-clues",
-    "mysteryRecipeCount": 58,
+    "earlyFailureProtection": true,
+    "starterIngredients": {
+      "30001": {
+        "name": "양상추",
+        "count": 1
+      },
+      "30039": {
+        "name": "나뭇잎",
+        "count": 1
+      }
+    },
+    "mysteryRecipeCount": 63,
     "hintedRecipes": {},
     "autoResearchUnlocked": false,
     "autoResearchTarget": null,
     "autoResearchPriority": "new-first-lowest-level-then-highest-inventory-pressure",
-    "globalRevenueBonus": 0,
+    "autoResearchWhenNoRecipe": "random-ingredients-up-to-bowl-capacity-then-weird-dish",
+    "salePriceFormula": "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
+    "salePriceMultipliers": {
+      "restaurantPriceUp": 5.3999999999999995,
+      "satisfactionNormal": 1,
+      "satisfactionHappy": 1.5,
+      "performanceBuff": 1
+    },
     "recipeLevelPriceBonus": 0.1,
     "craftable": [
-      1
+      1,
+      20014
     ],
     "searchScope": "all-recipes-by-owned-ingredients",
     "craftCosts": {
@@ -337,21 +365,21 @@
       "10003": 3,
       "10004": 2,
       "10005": 3,
-      "10006": 3,
-      "10007": 3,
-      "10008": 3,
-      "10009": 3,
+      "10006": 4,
+      "10007": 4,
+      "10008": 4,
+      "10009": 5,
       "10010": 2,
-      "10011": 3,
+      "10011": 5,
       "10012": 3,
-      "10013": 3,
-      "10014": 3,
-      "10015": 3,
-      "10016": 3,
-      "10017": 3,
-      "10018": 3,
-      "10019": 3,
-      "10020": 3,
+      "10013": 4,
+      "10014": 5,
+      "10015": 5,
+      "10016": 4,
+      "10017": 4,
+      "10018": 4,
+      "10019": 4,
+      "10020": 5,
       "10021": 2,
       "10022": 3,
       "10023": 3,
@@ -364,18 +392,18 @@
       "10030": 3,
       "10031": 3,
       "10032": 2,
-      "10033": 3,
-      "10034": 3,
+      "10033": 5,
+      "10034": 4,
       "10035": 3,
-      "10036": 3,
+      "10036": 5,
       "10037": 3,
       "10038": 3,
       "10039": 3,
-      "10040": 3,
+      "10040": 4,
       "10041": 3,
       "10042": 3,
-      "10043": 3,
-      "10044": 3,
+      "10043": 5,
+      "10044": 4,
       "20001": 2,
       "20002": 2,
       "20003": 2,
@@ -389,7 +417,12 @@
       "20011": 2,
       "20012": 2,
       "20013": 3,
-      "20014": 2
+      "20014": 2,
+      "20015": 2,
+      "20016": 2,
+      "20017": 2,
+      "20018": 2,
+      "20019": 3
     },
     "upgradeIngredientCostRule": "fixed-per-recipe",
     "craftRequirements": {
@@ -485,6 +518,11 @@
           "ingredientId": 30023,
           "name": "모둠 채소",
           "count": 1
+        },
+        {
+          "ingredientId": 30005,
+          "name": "달걀",
+          "count": 1
         }
       ],
       "10007": [
@@ -501,6 +539,11 @@
         {
           "ingredientId": 30004,
           "name": "치즈",
+          "count": 1
+        },
+        {
+          "ingredientId": 30010,
+          "name": "식용유",
           "count": 1
         }
       ],
@@ -519,6 +562,11 @@
           "ingredientId": 30023,
           "name": "모둠 채소",
           "count": 1
+        },
+        {
+          "ingredientId": 30005,
+          "name": "달걀",
+          "count": 1
         }
       ],
       "10009": [
@@ -535,6 +583,16 @@
         {
           "ingredientId": 30004,
           "name": "치즈",
+          "count": 1
+        },
+        {
+          "ingredientId": 30002,
+          "name": "토마토",
+          "count": 1
+        },
+        {
+          "ingredientId": 30034,
+          "name": "양파",
           "count": 1
         }
       ],
@@ -564,6 +622,16 @@
         {
           "ingredientId": 30005,
           "name": "달걀",
+          "count": 1
+        },
+        {
+          "ingredientId": 30048,
+          "name": "소고기",
+          "count": 1
+        },
+        {
+          "ingredientId": 30018,
+          "name": "간장",
           "count": 1
         }
       ],
@@ -599,6 +667,11 @@
           "ingredientId": 30027,
           "name": "마늘",
           "count": 1
+        },
+        {
+          "ingredientId": 30010,
+          "name": "식용유",
+          "count": 1
         }
       ],
       "10014": [
@@ -615,6 +688,16 @@
         {
           "ingredientId": 30002,
           "name": "토마토",
+          "count": 1
+        },
+        {
+          "ingredientId": 30004,
+          "name": "치즈",
+          "count": 1
+        },
+        {
+          "ingredientId": 30035,
+          "name": "고추",
           "count": 1
         }
       ],
@@ -633,6 +716,16 @@
           "ingredientId": 30005,
           "name": "달걀",
           "count": 1
+        },
+        {
+          "ingredientId": 30049,
+          "name": "돼지고기",
+          "count": 1
+        },
+        {
+          "ingredientId": 30024,
+          "name": "김",
+          "count": 1
         }
       ],
       "10016": [
@@ -649,6 +742,11 @@
         {
           "ingredientId": 30010,
           "name": "식용유",
+          "count": 1
+        },
+        {
+          "ingredientId": 30037,
+          "name": "양배추",
           "count": 1
         }
       ],
@@ -667,6 +765,11 @@
           "ingredientId": 30034,
           "name": "양파",
           "count": 1
+        },
+        {
+          "ingredientId": 30008,
+          "name": "고기",
+          "count": 1
         }
       ],
       "10018": [
@@ -683,6 +786,11 @@
         {
           "ingredientId": 30068,
           "name": "식초",
+          "count": 1
+        },
+        {
+          "ingredientId": 30046,
+          "name": "아보카도",
           "count": 1
         }
       ],
@@ -701,6 +809,11 @@
           "ingredientId": 30034,
           "name": "양파",
           "count": 1
+        },
+        {
+          "ingredientId": 30009,
+          "name": "쌀",
+          "count": 1
         }
       ],
       "10020": [
@@ -717,6 +830,16 @@
         {
           "ingredientId": 30020,
           "name": "버터",
+          "count": 1
+        },
+        {
+          "ingredientId": 30027,
+          "name": "마늘",
+          "count": 1
+        },
+        {
+          "ingredientId": 30022,
+          "name": "후추",
           "count": 1
         }
       ],
@@ -919,6 +1042,16 @@
           "ingredientId": 30019,
           "name": "트러플",
           "count": 1
+        },
+        {
+          "ingredientId": 30004,
+          "name": "치즈",
+          "count": 1
+        },
+        {
+          "ingredientId": 30034,
+          "name": "양파",
+          "count": 1
         }
       ],
       "10034": [
@@ -935,6 +1068,11 @@
         {
           "ingredientId": 30064,
           "name": "사과",
+          "count": 1
+        },
+        {
+          "ingredientId": 30026,
+          "name": "생크림",
           "count": 1
         }
       ],
@@ -969,6 +1107,16 @@
         {
           "ingredientId": 30014,
           "name": "육수",
+          "count": 1
+        },
+        {
+          "ingredientId": 30034,
+          "name": "양파",
+          "count": 1
+        },
+        {
+          "ingredientId": 30025,
+          "name": "당근",
           "count": 1
         }
       ],
@@ -1038,6 +1186,11 @@
           "ingredientId": 30021,
           "name": "우유",
           "count": 1
+        },
+        {
+          "ingredientId": 30026,
+          "name": "생크림",
+          "count": 1
         }
       ],
       "10041": [
@@ -1069,8 +1222,8 @@
           "count": 1
         },
         {
-          "ingredientId": 30001,
-          "name": "양상추",
+          "ingredientId": 30004,
+          "name": "치즈",
           "count": 1
         }
       ],
@@ -1089,6 +1242,16 @@
           "ingredientId": 30026,
           "name": "생크림",
           "count": 1
+        },
+        {
+          "ingredientId": 30027,
+          "name": "마늘",
+          "count": 1
+        },
+        {
+          "ingredientId": 30020,
+          "name": "버터",
+          "count": 1
         }
       ],
       "10044": [
@@ -1105,6 +1268,11 @@
         {
           "ingredientId": 30002,
           "name": "토마토",
+          "count": 1
+        },
+        {
+          "ingredientId": 30010,
+          "name": "식용유",
           "count": 1
         }
       ],
@@ -1305,6 +1473,71 @@
           "name": "양상추",
           "count": 1
         }
+      ],
+      "20015": [
+        {
+          "ingredientId": 30003,
+          "name": "빵",
+          "count": 1
+        },
+        {
+          "ingredientId": 30001,
+          "name": "양상추",
+          "count": 1
+        }
+      ],
+      "20016": [
+        {
+          "ingredientId": 30003,
+          "name": "빵",
+          "count": 1
+        },
+        {
+          "ingredientId": 30055,
+          "name": "버섯",
+          "count": 1
+        }
+      ],
+      "20017": [
+        {
+          "ingredientId": 30009,
+          "name": "쌀",
+          "count": 1
+        },
+        {
+          "ingredientId": 30005,
+          "name": "달걀",
+          "count": 1
+        }
+      ],
+      "20018": [
+        {
+          "ingredientId": 30009,
+          "name": "쌀",
+          "count": 1
+        },
+        {
+          "ingredientId": 30020,
+          "name": "버터",
+          "count": 1
+        }
+      ],
+      "20019": [
+        {
+          "ingredientId": 30009,
+          "name": "쌀",
+          "count": 1
+        },
+        {
+          "ingredientId": 30002,
+          "name": "토마토",
+          "count": 1
+        },
+        {
+          "ingredientId": 30020,
+          "name": "버터",
+          "count": 1
+        }
       ]
     },
     "levels": {
@@ -1315,15 +1548,15 @@
     }
   },
   "ingredientStorage": {
-    "usedSlots": 3,
+    "usedSlots": 4,
     "slotLimit": 20,
-    "totalItems": 3,
+    "totalItems": 4,
     "totalLimit": 20,
     "capacity": 20,
-    "remaining": 17,
+    "remaining": 16,
     "expansionAmount": 5,
     "expansionGemCost": 10,
-    "ingredientTypes": 1
+    "ingredientTypes": 2
   },
   "progression": {
     "unlockedThemes": [
@@ -1499,6 +1732,14 @@
           {
             "ingredientId": 30005,
             "name": "달걀"
+          },
+          {
+            "ingredientId": 30049,
+            "name": "돼지고기"
+          },
+          {
+            "ingredientId": 30024,
+            "name": "김"
           }
         ]
       },
@@ -1540,6 +1781,10 @@
           {
             "ingredientId": 30010,
             "name": "식용유"
+          },
+          {
+            "ingredientId": 30037,
+            "name": "양배추"
           }
         ]
       },
@@ -1581,6 +1826,10 @@
           {
             "ingredientId": 30034,
             "name": "양파"
+          },
+          {
+            "ingredientId": 30008,
+            "name": "고기"
           }
         ]
       }
@@ -1672,7 +1921,7 @@
       {
         "id": 3,
         "name": "최고의 단골",
-        "minVisits": 300,
+        "minVisits": 150,
         "primaryCount": 1,
         "secondaryCount": 1,
         "rareCount": 1
@@ -1837,7 +2086,7 @@
           "rareCount": 0
         },
         {
-          "minVisits": 300,
+          "minVisits": 150,
           "primaryCount": 1,
           "secondaryCount": 1,
           "rareCount": 1
@@ -1845,6 +2094,7 @@
       ]
     },
     "ingredients": {
+      "30001": 1,
       "30039": 3
     },
     "autoCraft": "locked-until-5-recipes",

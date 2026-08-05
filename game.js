@@ -36,6 +36,12 @@ const dom = {
   ideas: document.querySelector("#idea-count"),
   gems: document.querySelector("#gem-count"),
   promoButton: document.querySelector("#promotion-btn"),
+  specialPromoButton: document.querySelector("#special-promotion-btn"),
+  specialPromoLabel: document.querySelector("#special-promotion-label"),
+  specialPromoPanel: document.querySelector("#special-promotion-panel"),
+  specialPromoClose: document.querySelector("#special-promotion-close"),
+  specialPromoSearch: document.querySelector("#special-promotion-search"),
+  specialPromoList: document.querySelector("#special-promotion-list"),
   resetButton: document.querySelector("#reset-btn"),
   installPanel: document.querySelector("#install-panel"),
   installClose: document.querySelector("#install-close-btn"),
@@ -52,9 +58,12 @@ const dom = {
   recipeReveal: document.querySelector("#recipe-reveal"),
   menuClose: document.querySelector("#menu-close-btn"),
   navButtons: [...document.querySelectorAll(".nav-button")],
+  chefDialogue: document.querySelector("#chef-dialogue"),
+  chefDialogueText: document.querySelector("#chef-dialogue-text"),
   recipeDot: document.querySelector("#recipe-dot"),
   collectionDot: document.querySelector("#collection-dot"),
   toast: document.querySelector("#toast"),
+  guestToast: document.querySelector("#guest-toast"),
   recipeNavLabel: document.querySelector("#recipe-nav-label"),
   themeNavLabel: document.querySelector("#theme-nav-label"),
 };
@@ -64,6 +73,8 @@ let state;
 let lastFrame = performance.now();
 let deterministicStepping = false;
 let toastTimer = 0;
+let guestToastTimer = 0;
+let guestToastQueue = [];
 const imageCache = new Map();
 const DRAG_SCROLL_THRESHOLD = 6;
 let dragScrollGesture = null;
@@ -74,6 +85,26 @@ let recipeRevealTimer = 0;
 let recipeResearch = null;
 const RECIPE_RESEARCH_DURATION = 2.4;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
+const STARTER_INGREDIENTS = Object.freeze({
+  [GAME_INGREDIENTS.leaf.id]: 1,
+  [GAME_INGREDIENTS.lettuce.id]: 1,
+});
+const BOWL_CAPACITY_INITIAL = 2;
+const BOWL_CAPACITY_MAX = Math.max(BOWL_CAPACITY_INITIAL, ...RECIPE_PROGRESSION.map((route) => Number(route.ingredientCount
+  || route.ingredientRequirements?.length || 0)));
+const BOWL_CAPACITY_EXPANSION_AMOUNT = 1;
+const BOWL_CAPACITY_EXPANSION_GEM_COST = 10;
+const SPECIAL_PROMOTION_RECIPE_REQUIREMENT = 5;
+const SPECIAL_PROMOTION_DURATION = 60;
+const SPECIAL_PROMOTION_COOLDOWN = 30;
+const TUTORIAL_DIALOGUES = Object.freeze({
+  welcome: "작은 식당부터 차근차근 준비해 볼까요?",
+  "recipe-locked": "도마 테이블을 설치하면 레시피 연구를 시작할 수 있어요!",
+  "recipe-unlocked": "도마 테이블 완성! 이제 새로운 레시피를 연구해 봐요.",
+  "fridge-next": "다음은 냉장고예요. 설치하면 손님들이 재료를 떨어뜨릴 거예요!",
+  "drops-unlocked": "냉장고 완성! 이제 손님에게서 재료를 얻을 수 있어요.",
+  "special-promotion-unlocked": "레시피 5개 발견! 이제 특별 홍보로 원하는 재료의 손님을 초대할 수 있어요.",
+});
 
 function scrollableAncestors(target) {
   const result = { x: null, y: null };
@@ -165,7 +196,7 @@ function initialAcorns() {
 
 function createInitialState() {
   return {
-    version: 9,
+    version: 13,
     clock: 0,
     rng: 20260714,
     resources: {
@@ -186,7 +217,15 @@ function createInitialState() {
       activeByFacility: Object.fromEntries(tables.restaurantThemes.filter((row) => row.facilityTheme === 1).map((row) => [row.facilityType, row.id])),
       unlockedThemeIds: [1],
     },
-    crafting: { ingredients: {}, history: [], selected: [], hints: {}, storageCapacity: INGREDIENT_STORAGE_INITIAL_CAPACITY },
+    crafting: {
+      ingredients: { ...STARTER_INGREDIENTS },
+      starterIngredientsGranted: true,
+      history: [],
+      selected: [],
+      hints: {},
+      storageCapacity: INGREDIENT_STORAGE_INITIAL_CAPACITY,
+      bowlCapacity: BOWL_CAPACITY_INITIAL,
+    },
     specialActors: [],
     specialLastSpawn: {},
     missions: {
@@ -198,7 +237,8 @@ function createInitialState() {
       mainProgress: {},
       mainClaimed: [],
     },
-    promotion: { progress: 0, queued: 0, totalClicks: 0 },
+    promotion: { progress: 0, queued: 0, totalClicks: 0, queueTargets: [] },
+    specialPromotion: { ingredientId: null, remaining: 0, cooldown: 0, lastUpdatedAt: Date.now() },
     guests: [],
     guestSequence: 1,
     orders: [],
@@ -216,6 +256,7 @@ function createInitialState() {
       collectionCustomerId: 3,
       lastResearch: null,
     },
+    tutorial: { activeId: "welcome", seen: [] },
   };
 }
 
@@ -224,7 +265,7 @@ function loadState() {
     const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!parsed) return null;
     const defaults = createInitialState();
-    if (![2, 3, 4, 5, 6, 7, 8, 9].includes(parsed.version)) return null;
+    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].includes(parsed.version)) return null;
     const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
       typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
     const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
@@ -259,23 +300,68 @@ function loadState() {
     } = parsed.ui || {};
     const metrics = Object.fromEntries(Object.keys(defaults.metrics)
       .map((key) => [key, Number(parsed.metrics?.[key] ?? defaults.metrics[key])]));
-    const normalizedIngredients = normalizeIngredientInventory({ ...defaults.crafting.ingredients, ...parsed.crafting?.ingredients });
+    const savedIngredients = { ...(parsed.crafting?.ingredients || {}) };
+    const shouldGrantStarterIngredients = parsed.crafting?.starterIngredientsGranted !== true
+      && Object.keys(ownedRecipes).length <= 1;
+    if (shouldGrantStarterIngredients) {
+      Object.entries(STARTER_INGREDIENTS).forEach(([ingredientId, amount]) => {
+        savedIngredients[ingredientId] = Number(savedIngredients[ingredientId] || 0) + Number(amount);
+      });
+    }
+    const normalizedIngredients = normalizeIngredientInventory(savedIngredients);
     const storedIngredientTotal = Object.values(normalizedIngredients).reduce((sum, amount) => sum + Number(amount || 0), 0);
     const migratedStorageCapacity = Math.max(
       INGREDIENT_STORAGE_INITIAL_CAPACITY,
       Math.floor(Number(parsed.crafting?.storageCapacity || 0)),
       Math.ceil(storedIngredientTotal / INGREDIENT_STORAGE_EXPANSION_AMOUNT) * INGREDIENT_STORAGE_EXPANSION_AMOUNT,
     );
+    const legacyBowlCapacity = Math.min(BOWL_CAPACITY_MAX,
+      BOWL_CAPACITY_INITIAL + Math.floor(Object.keys(ownedRecipes).filter((id) => getRecipe(Number(id))).length / 2));
+    const savedBowlCapacity = Number(parsed.crafting?.bowlCapacity);
+    const migratedBowlCapacity = Math.max(BOWL_CAPACITY_INITIAL, Math.min(BOWL_CAPACITY_MAX,
+      Number.isFinite(savedBowlCapacity) && savedBowlCapacity > 0
+        ? Math.floor(savedBowlCapacity)
+        : Number(parsed.version) < 12 ? legacyBowlCapacity : BOWL_CAPACITY_INITIAL));
+    const savedSpecialPromotion = { ...defaults.specialPromotion, ...parsed.specialPromotion };
+    let specialRemaining = Math.max(0, Number(savedSpecialPromotion.remaining || 0));
+    let specialCooldown = Math.max(0, Number(savedSpecialPromotion.cooldown || 0));
+    let elapsedRealSeconds = Math.max(0, (Date.now() - Number(savedSpecialPromotion.lastUpdatedAt || Date.now())) / 1000);
+    if (specialRemaining > 0) {
+      const activeElapsed = Math.min(specialRemaining, elapsedRealSeconds);
+      specialRemaining -= activeElapsed;
+      elapsedRealSeconds -= activeElapsed;
+      if (specialRemaining <= 0) specialCooldown = SPECIAL_PROMOTION_COOLDOWN;
+    }
+    if (specialRemaining <= 0 && elapsedRealSeconds > 0) specialCooldown = Math.max(0, specialCooldown - elapsedRealSeconds);
+    const savedPromotion = { ...defaults.promotion, ...parsed.promotion };
+    const savedQueueTargets = Array.isArray(parsed.promotion?.queueTargets)
+      ? parsed.promotion.queueTargets.map((id) => Number(id) || null)
+      : [];
+    while (savedQueueTargets.length < Number(savedPromotion.queued || 0)) savedQueueTargets.unshift(null);
+    savedQueueTargets.splice(Number(savedPromotion.queued || 0));
     return {
       ...defaults,
       ...restaurantSave,
-      version: 9,
+      version: 13,
       resources: { ...defaults.resources, ...parsed.resources },
       ownedRecipes,
       collections: { ...defaults.collections, ...parsed.collections },
       missions: { ...defaults.missions, ...parsed.missions },
       metrics,
+      promotion: {
+        ...savedPromotion,
+        queueTargets: savedQueueTargets,
+      },
+      specialPromotion: {
+        ingredientId: specialRemaining > 0 ? Number(savedSpecialPromotion.ingredientId) || null : null,
+        remaining: specialRemaining,
+        cooldown: specialCooldown,
+        lastUpdatedAt: Date.now(),
+      },
       ui: { ...defaults.ui, ...savedUi, screen: "restaurant", tab: "craft" },
+      tutorial: parsed.tutorial
+        ? { activeId: parsed.tutorial.activeId || null, seen: [...new Set(parsed.tutorial.seen || [])] }
+        : { activeId: null, seen: ["welcome"] },
       staff: parsed.staff || {},
       performance: { ...defaults.performance, ...parsed.performance },
       themes: {
@@ -289,9 +375,11 @@ function loadState() {
         ...defaults.crafting,
         ...parsed.crafting,
         ingredients: normalizedIngredients,
+        starterIngredientsGranted: true,
         history: parsed.crafting?.history || [],
-        selected: (parsed.crafting?.selected || []).map(Number).filter((id) => ingredientData(id)),
+        selected: (parsed.crafting?.selected || []).map(Number).filter((id) => ingredientData(id)).slice(0, migratedBowlCapacity),
         storageCapacity: migratedStorageCapacity,
+        bowlCapacity: migratedBowlCapacity,
         hints: Object.fromEntries(Object.entries(parsed.crafting?.hints || {})
           .map(([recipeId, ingredientIds]) => [Number(recipeId), (Array.isArray(ingredientIds) ? ingredientIds : [])
             .map(Number).filter((ingredientId) => ingredientData(ingredientId))])
@@ -308,7 +396,10 @@ function loadState() {
 }
 
 function saveState() {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch { /* storage is optional */ }
+  try {
+    if (state?.specialPromotion) state.specialPromotion.lastUpdatedAt = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  } catch { /* storage is optional */ }
 }
 
 function random() {
@@ -502,9 +593,8 @@ function unlockedRecipeCount() {
 }
 
 function recipeCombinationCapacity() {
-  const maximumRecipeSize = Math.max(2, ...RECIPE_PROGRESSION.map((route) => Number(route.ingredientCount
-    || route.ingredientRequirements?.length || 0)));
-  return Math.min(maximumRecipeSize, 2 + Math.floor(unlockedRecipeCount() / 2));
+  return Math.max(BOWL_CAPACITY_INITIAL, Math.min(BOWL_CAPACITY_MAX,
+    Math.floor(Number(state.crafting.bowlCapacity) || BOWL_CAPACITY_INITIAL)));
 }
 
 function rewardRows(rewardId) { return tables.rewards.get(Number(rewardId)) || []; }
@@ -785,6 +875,56 @@ function installedRows(type = null) {
 
 function isInstalled(rowId) { return state.installed.includes(rowId); }
 
+function isRecipeSystemUnlocked() {
+  return installedRows(8).length > 0;
+}
+
+function isIngredientDropUnlocked() {
+  return installedRows(6).length > 0;
+}
+
+function isSpecialPromotionUnlocked() {
+  return unlockedRecipeCount() >= SPECIAL_PROMOTION_RECIPE_REQUIREMENT
+    && state.tutorial?.seen?.includes("special-promotion-unlocked");
+}
+
+function ensureSpecialPromotionTutorial() {
+  if (unlockedRecipeCount() < SPECIAL_PROMOTION_RECIPE_REQUIREMENT
+    || state.tutorial?.seen?.includes("special-promotion-unlocked")
+    || state.tutorial?.activeId) return false;
+  state.tutorial.activeId = "special-promotion-unlocked";
+  return true;
+}
+
+function showTutorialDialogue(dialogueId) {
+  if (!TUTORIAL_DIALOGUES[dialogueId]) return false;
+  state.tutorial ||= { activeId: null, seen: [] };
+  state.tutorial.activeId = dialogueId;
+  saveState();
+  updateTutorialDialogue();
+  return true;
+}
+
+function advanceTutorialDialogue() {
+  const dialogueId = state.tutorial?.activeId;
+  if (!dialogueId) return;
+  state.tutorial.seen = [...new Set([...(state.tutorial.seen || []), dialogueId])];
+  state.tutorial.activeId = dialogueId === "recipe-unlocked" && !isIngredientDropUnlocked()
+    ? "fridge-next"
+    : null;
+  ensureSpecialPromotionTutorial();
+  saveState();
+  updateTutorialDialogue();
+  updateHud();
+}
+
+function updateTutorialDialogue() {
+  const dialogueId = state?.tutorial?.activeId;
+  const text = TUTORIAL_DIALOGUES[dialogueId];
+  dom.chefDialogue.hidden = !text || !dom.menuScreen.hidden || !dom.installPanel.hidden || !dom.specialPromoPanel.hidden;
+  dom.chefDialogueText.textContent = text || "";
+}
+
 function installCandidates() {
   return tables.installs.filter((row) => !isInstalled(row.id)).slice(0, 2);
 }
@@ -818,9 +958,28 @@ function routeRecipeIcon(id) {
 function getGuest(id) { return state.guests.find((guest) => guest.id === id); }
 
 function showToast(message, seconds = 2.4) {
+  dom.toast.className = "toast";
+  delete dom.toast.dataset.variant;
   dom.toast.textContent = message;
   dom.toast.hidden = false;
   toastTimer = seconds;
+}
+
+function displayFirstGuestToast(guest, seconds = 4) {
+  const customerName = guest.customerName || progressionForCustomer(guest.customerId)?.customerName || "새로운 병아리";
+  dom.guestToast.innerHTML = `<img class="new-guest-toast-icon" src="${guestIcon(guest)}" alt="" />
+    <span class="new-guest-toast-copy"><small>새로운 손님 첫 방문!</small><strong>${customerName}</strong><em>손님 도감에 등록됐어요</em></span>
+    <b class="new-guest-toast-badge">NEW</b>`;
+  dom.guestToast.hidden = false;
+  guestToastTimer = seconds;
+}
+
+function showFirstGuestToast(guest) {
+  if (!dom.guestToast.hidden && guestToastTimer > 0) {
+    guestToastQueue.push(guest);
+    return;
+  }
+  displayFirstGuestToast(guest);
 }
 
 function renderRecipeReveal() {
@@ -864,10 +1023,19 @@ function renderRecipeReveal() {
 }
 
 function dismissRecipeReveal() {
+  const shouldSurfaceSpecialPromotionTutorial = state?.tutorial?.activeId === "special-promotion-unlocked"
+    && !state.tutorial?.seen?.includes("special-promotion-unlocked");
   recipeReveal = null;
   if (recipeRevealTimer) window.clearTimeout(recipeRevealTimer);
   recipeRevealTimer = 0;
   renderRecipeReveal();
+  if (shouldSurfaceSpecialPromotionTutorial && !dom.menuScreen.hidden) {
+    state.ui.screen = "restaurant";
+    dom.menuScreen.hidden = true;
+    setActiveNav("");
+    saveState();
+  }
+  updateTutorialDialogue();
 }
 
 function startRecipeReveal(recipeId, automatic) {
@@ -900,6 +1068,7 @@ function startWeirdDishReveal(automatic) {
 function closeInstallPanel() {
   state.ui.selectedInstallId = null;
   dom.installPanel.hidden = true;
+  updateTutorialDialogue();
   render();
 }
 
@@ -912,6 +1081,7 @@ function openInstallPanel(row) {
   dom.installCost.textContent = formatNumber(row.facilityPrice);
   dom.installConfirm.disabled = state.resources.acorns < row.facilityPrice;
   dom.installPanel.hidden = false;
+  updateTutorialDialogue();
 }
 
 function confirmInstall() {
@@ -925,14 +1095,111 @@ function confirmInstall() {
   state.installed.push(row.id);
   state.installed.sort((a, b) => a - b);
   dispatchAchievement(12, 1, 0, row.id);
+  if (row.facilityType === 8) state.tutorial.activeId = "recipe-unlocked";
+  if (row.facilityType === 6) state.tutorial.activeId = "drops-unlocked";
   closeInstallPanel();
   const meta = FACILITY_META[row.facilityType] || FACILITY_META[1];
-  showToast(`${meta.name} 설치 완료!`);
+  if ([6, 8].includes(Number(row.facilityType))) {
+    dom.toast.hidden = true;
+    toastTimer = 0;
+  } else showToast(`${meta.name} 설치 완료!`);
   saveState();
   updateHud();
 }
 
 function promotionThreshold() { return 1; }
+
+function formatPromotionTimer(seconds) {
+  const total = Math.max(0, Math.ceil(Number(seconds) || 0));
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+}
+
+function specialPromotionChoices() {
+  const choices = new Map();
+  allUnlockedThemeChicks().forEach((chick) => {
+    const visits = Number(state.collections.customers[chick.customerId]?.count || 0);
+    guestRewardItems(chick, visits).forEach((reward) => {
+      const current = choices.get(reward.ingredientId) || {
+        ingredientId: reward.ingredientId,
+        name: reward.name,
+        emoji: reward.emoji,
+        guests: [],
+      };
+      if (!current.guests.some((guest) => guest.customerId === chick.customerId)) current.guests.push(chick);
+      choices.set(reward.ingredientId, current);
+    });
+  });
+  return [...choices.values()].sort((a, b) => a.name.localeCompare(b.name, "ko") || a.ingredientId - b.ingredientId);
+}
+
+function renderSpecialPromotionChoices(query = dom.specialPromoSearch.value) {
+  const normalizedQuery = String(query || "").trim().toLocaleLowerCase("ko");
+  const choices = specialPromotionChoices().filter((choice) => !normalizedQuery
+    || choice.name.toLocaleLowerCase("ko").includes(normalizedQuery)
+    || choice.guests.some((guest) => guest.customerName.toLocaleLowerCase("ko").includes(normalizedQuery)));
+  dom.specialPromoList.innerHTML = choices.length ? choices.map((choice) => `<button type="button" class="special-promotion-choice" data-ingredient-id="${choice.ingredientId}" title="${choice.guests.map((guest) => guest.customerName).join(", ")}"><span>${choice.emoji}</span><strong>${choice.name}</strong><small>손님 ${choice.guests.length}종</small></button>`).join("")
+    : `<p class="special-promotion-empty">찾을 수 있는 재료가 없어요.</p>`;
+}
+
+function closeSpecialPromotionPanel() {
+  dom.specialPromoPanel.hidden = true;
+  dom.specialPromoSearch.value = "";
+  updateTutorialDialogue();
+}
+
+function openSpecialPromotionPanel() {
+  if (!isSpecialPromotionUnlocked() || state.specialPromotion.remaining > 0 || state.specialPromotion.cooldown > 0) return;
+  closeMenu();
+  dom.installPanel.hidden = true;
+  dom.specialPromoPanel.hidden = false;
+  dom.specialPromoSearch.value = "";
+  renderSpecialPromotionChoices();
+  updateTutorialDialogue();
+  requestAnimationFrame(() => dom.specialPromoSearch.focus());
+}
+
+function startSpecialPromotion(ingredientId) {
+  if (!isSpecialPromotionUnlocked() || state.specialPromotion.remaining > 0 || state.specialPromotion.cooldown > 0) return false;
+  const choice = specialPromotionChoices().find((item) => item.ingredientId === Number(ingredientId));
+  if (!choice?.guests.length) return false;
+  state.specialPromotion.ingredientId = choice.ingredientId;
+  state.specialPromotion.remaining = SPECIAL_PROMOTION_DURATION;
+  state.specialPromotion.cooldown = 0;
+  const openSeatCount = availableSeats().length;
+  const invitationCount = Math.max(3, openSeatCount);
+  state.promotion.queued += invitationCount;
+  state.promotion.queueTargets ||= [];
+  state.promotion.queueTargets.push(...Array.from({ length: invitationCount }, () => choice.ingredientId));
+  closeSpecialPromotionPanel();
+  for (let index = 0; index < openSeatCount; index += 1) trySpawnQueuedGuest();
+  showToast(`${choice.emoji} ${choice.name} 특별 홍보 시작!`, 3);
+  saveState();
+  updateHud();
+  render();
+  return true;
+}
+
+function updateSpecialPromotion(dt) {
+  const beforeRemaining = Math.ceil(state.specialPromotion.remaining);
+  const beforeCooldown = Math.ceil(state.specialPromotion.cooldown);
+  let elapsed = Math.max(0, Number(dt) || 0);
+  if (state.specialPromotion.remaining > 0) {
+    const activeElapsed = Math.min(state.specialPromotion.remaining, elapsed);
+    state.specialPromotion.remaining = Math.max(0, state.specialPromotion.remaining - activeElapsed);
+    elapsed -= activeElapsed;
+    if (state.specialPromotion.remaining <= .0001) {
+      state.specialPromotion.remaining = 0;
+      state.specialPromotion.ingredientId = null;
+      state.specialPromotion.cooldown = SPECIAL_PROMOTION_COOLDOWN;
+    }
+  }
+  if (state.specialPromotion.remaining <= 0 && elapsed > 0) {
+    state.specialPromotion.cooldown = Math.max(0, state.specialPromotion.cooldown - elapsed);
+    if (state.specialPromotion.cooldown <= .0001) state.specialPromotion.cooldown = 0;
+  }
+  if (beforeRemaining !== Math.ceil(state.specialPromotion.remaining)
+    || beforeCooldown !== Math.ceil(state.specialPromotion.cooldown)) saveState();
+}
 
 function promote() {
   if (!coreReady()) return;
@@ -940,13 +1207,15 @@ function promote() {
   state.promotion.totalClicks += 1;
   state.promotion.progress = 0;
   state.promotion.queued += 1;
+  state.promotion.queueTargets ||= [];
+  state.promotion.queueTargets.push(state.specialPromotion.remaining > 0 ? state.specialPromotion.ingredientId : null);
   trySpawnQueuedGuest();
   saveState();
   updateHud();
   render();
 }
 
-function chooseCustomer() {
+function chooseCustomer(targetIngredientId = state.specialPromotion.remaining > 0 ? state.specialPromotion.ingredientId : null) {
   const specialCustomers = tables.customers.filter((row) => {
     const unlocked = row.unlockConditionType === 0
       || (row.unlockConditionType === 1 && isInstalled(row.unlockConditionValue));
@@ -963,7 +1232,14 @@ function chooseCustomer() {
     customerAppearWeight: 100,
     chickMilestone: chick,
   }));
-  const eligible = [...normalCustomers, ...specialCustomers];
+  const targetedCustomerIds = targetIngredientId
+    ? new Set((specialPromotionChoices().find((choice) => choice.ingredientId === Number(targetIngredientId))?.guests || [])
+      .map((chick) => chick.customerId))
+    : null;
+  const targetedCustomers = targetedCustomerIds
+    ? normalCustomers.filter((customer) => targetedCustomerIds.has(customer.id))
+    : [];
+  const eligible = targetedCustomerIds?.size ? targetedCustomers : [...normalCustomers, ...specialCustomers];
   if (!eligible.length) {
     const chick = themeChickMilestones(1)[0];
     return { id: chick.customerId, assetType: 105, assetId: chick.commonId, customerAppearWeight: 100, chickMilestone: chick };
@@ -988,10 +1264,15 @@ function chooseRecipe(common) {
 
 function trySpawnQueuedGuest() {
   if (state.promotion.queued <= 0) return;
-  const customer = chooseCustomer();
+  state.promotion.queueTargets ||= [];
+  const queuedTarget = state.specialPromotion.remaining > 0
+    ? state.specialPromotion.ingredientId
+    : state.promotion.queueTargets[0] || null;
+  const customer = chooseCustomer(queuedTarget);
   if (customer?.assetType === 107) {
     spawnSpecialCustomer(customer.assetId);
     state.promotion.queued -= 1;
+    if (state.promotion.queueTargets.length) state.promotion.queueTargets.shift();
     return;
   }
   const seat = availableSeats()[0];
@@ -1026,11 +1307,13 @@ function trySpawnQueuedGuest() {
   };
   state.guests.push(guest);
   state.promotion.queued -= 1;
+  if (state.promotion.queueTargets.length) state.promotion.queueTargets.shift();
   state.metrics.visitors += 1;
+  const isFirstVisit = !state.collections.customers[customer.id];
   registerCollection(customer.id, "customers");
   guest.visitNumber = Number(state.collections.customers[customer.id]?.count || 1);
   dispatchAchievement(14);
-  showToast("손님이 레스토랑에 찾아왔어요!");
+  if (isFirstVisit) showFirstGuestToast(guest);
 }
 
 function spawnSpecialCustomer(specialId) {
@@ -1089,7 +1372,6 @@ function takeOrder(guest) {
   state.orders.push({ guestId: guest.id, recipeId: guest.recipeId, orderedAt: state.clock });
   state.metrics.orders += 1;
   dispatchAchievement(2);
-  showToast(`${routeRecipeName(guest.recipeId)} 주문을 받았어요.`);
   startCookingIfPossible();
   saveState();
 }
@@ -1121,7 +1403,6 @@ function finishCooking(task) {
   if (!guest || guest.state !== "waiting_food") return;
   guest.state = "eating";
   guest.stateTime = 0;
-  showToast(`${routeRecipeName(task.recipeId)} 완성! 음식이 전달됐어요.`);
 }
 
 function commonForGuest(guest) {
@@ -1132,7 +1413,8 @@ function canCraftRecipe(recipeId) {
   const route = progressionForRecipe(recipeId);
   const recipe = getRecipe(recipeId);
   const owned = recipeData(recipeId);
-  return Boolean(route
+  return Boolean(isRecipeSystemUnlocked()
+    && route
     && recipe
     && (!owned || owned.level < Number(recipe.maxLevel || 20))
     && craftIngredientCost(route) <= recipeCombinationCapacity()
@@ -1177,7 +1459,7 @@ function completeRecipeCraft(recipeId, automatic = false) {
     startRecipeUpgradeReveal(route.recipeId, automatic, previousLevel, level, previousPrice, newPrice);
   } else {
     startRecipeReveal(route.recipeId, automatic);
-    showToast(`${automatic ? "자동 요리 연구" : "새 조합 발견"} · ${routeRecipeName(route.recipeId)} 완성!`, 3);
+    ensureSpecialPromotionTutorial();
   }
   saveState();
   updateHud();
@@ -1228,7 +1510,7 @@ function finishRecipeResearch() {
     completeRecipeCraft(completed.recipeId, completed.automatic);
     return;
   }
-  const hintedRecipe = revealClosestRecipeHint(completed.ingredientIds, false);
+  const revealedHints = revealMatchingRecipeHints(completed.ingredientIds, false);
   state.metrics.failedRecipeResearches += 1;
   state.crafting.history.unshift({
     recipeId: 0,
@@ -1239,8 +1521,8 @@ function finishRecipeResearch() {
   });
   state.crafting.history = state.crafting.history.slice(0, 12);
   startWeirdDishReveal(completed.automatic);
-  showToast(hintedRecipe
-    ? `괴식이 됐지만 ${routeRecipeName(hintedRecipe.route.recipeId)} 힌트를 찾았어요.`
+  showToast(revealedHints.length
+    ? `괴식이 됐지만 ${recipeHintDiscoveryLabel(revealedHints)} 찾았어요.`
     : "괴식이 됐어요. 사용한 재료는 사라졌습니다.", 3);
   saveState();
   updateHud();
@@ -1345,7 +1627,21 @@ function mergeRecipeHints(requirements, previousHints, newHints) {
   }, () => requirement.ingredientId));
 }
 
-function revealClosestRecipeHint(selectedIngredients = state.crafting.selected, announce = true) {
+const RECIPE_HINT_MATCH_THRESHOLDS = Object.freeze({ 2: 1, 3: 2, 4: 2, 5: 3 });
+
+function recipeHintMatchThreshold(ingredientCount) {
+  return Number(RECIPE_HINT_MATCH_THRESHOLDS[ingredientCount]
+    || Math.max(1, Math.ceil(Number(ingredientCount || 0) / 2)));
+}
+
+function recipeHintDiscoveryLabel(revealedHints) {
+  if (revealedHints.length === 1) {
+    return `${routeRecipeName(revealedHints[0].route.recipeId)} 힌트를`;
+  }
+  return `${routeRecipeName(revealedHints[0].route.recipeId)} 외 ${revealedHints.length - 1}개 레시피 힌트를`;
+}
+
+function revealMatchingRecipeHints(selectedIngredients = state.crafting.selected, announce = true) {
   const selectedCount = selectedIngredients.length;
   const candidates = discoveryOrderedRecipeRoutes()
     .map((route, routeIndex) => {
@@ -1356,29 +1652,31 @@ function revealClosestRecipeHint(selectedIngredients = state.crafting.selected, 
         routeIndex,
         requirements,
         matches,
-        previousHintCount: Number(state.crafting.hints?.[route.recipeId]?.length || 0),
+        threshold: recipeHintMatchThreshold(craftIngredientCost(route)),
       };
     })
     .filter((candidate) => !recipeData(candidate.route.recipeId)
       && craftIngredientCost(candidate.route) === selectedCount
-      && candidate.matches.length >= 1)
-    .sort((a, b) => b.matches.length - a.matches.length
-      || b.previousHintCount - a.previousHintCount
-      || a.routeIndex - b.routeIndex);
-  const closest = candidates[0];
-  if (!closest) return false;
+      && candidate.matches.length >= candidate.threshold)
+    .sort((a, b) => a.routeIndex - b.routeIndex);
+  if (!candidates.length) return [];
   state.crafting.hints ||= {};
-  state.crafting.hints[closest.route.recipeId] = mergeRecipeHints(
-    closest.requirements,
-    state.crafting.hints[closest.route.recipeId] || [],
-    closest.matches,
-  );
+  const revealedHints = candidates.flatMap((candidate) => {
+    const previousHints = state.crafting.hints[candidate.route.recipeId] || [];
+    const mergedHints = mergeRecipeHints(candidate.requirements, previousHints, candidate.matches);
+    const newlyRevealedCount = mergedHints.length - previousHints.length;
+    if (newlyRevealedCount <= 0) return [];
+    state.crafting.hints[candidate.route.recipeId] = mergedHints;
+    return [{ ...candidate, newlyRevealedCount, revealedIngredients: mergedHints }];
+  });
+  if (!revealedHints.length) return [];
   saveState();
   if (announce) {
     renderMenu();
-    showToast(`${routeRecipeName(closest.route.recipeId)} 힌트 발견! 맞은 재료 ${closest.matches.length}개를 찾았어요.`, 3);
+    const newSlotCount = revealedHints.reduce((sum, hint) => sum + hint.newlyRevealedCount, 0);
+    showToast(`${recipeHintDiscoveryLabel(revealedHints)} 찾았어요. 새 재료 힌트 ${newSlotCount}칸!`, 3);
   }
-  return closest;
+  return revealedHints;
 }
 
 function discoverSelectedCombination() {
@@ -1397,7 +1695,7 @@ function discoverSelectedCombination() {
 }
 
 function grantGuestIngredient(guest) {
-  if (guest.itemGranted) return;
+  if (guest.itemGranted || !isIngredientDropUnlocked()) return;
   const route = progressionForCustomer(guest.customerId);
   const customerName = guest.customerName || route?.customerName || `손님 ${guest.customerId}`;
   const visits = Number(guest.visitNumber || state.collections.customers[guest.customerId]?.count || 1);
@@ -1458,11 +1756,6 @@ function collectIngredientDrop(drop) {
   state.ingredientDrops = state.ingredientDrops.filter((item) => item.id !== drop.id);
   const total = items.reduce((sum, item) => sum + Number(item.count || 1), 0);
   state.metrics.ingredientsFound += total;
-  const summary = items.map((item) => {
-    const ingredient = ingredientData(item.ingredientId);
-    return `${ingredient?.ingredientName || "재료"} ×${Number(item.count || 1)}`;
-  }).join(" · ");
-  showToast(`${summary} 획득!`, 3);
   saveState();
   updateHud();
   render();
@@ -1521,14 +1814,12 @@ function calmGuest(guest) {
   if (guest.state !== "disappointed") return;
   guest.mood = "satisfied";
   resolveMeal(guest, true);
-  showToast("손님이 기분을 풀었어요!", 2);
 }
 
 function collectPayment(payment) {
   state.resources.acorns += payment.amount;
   state.metrics.collected += payment.amount;
   state.payments = state.payments.filter((item) => item.id !== payment.id);
-  showToast(`도토리 ${formatNumber(payment.amount)} 획득!`);
   saveState();
   updateHud();
 }
@@ -1539,7 +1830,6 @@ function collectTipbox() {
   state.tipbox = 0;
   state.resources.acorns += amount;
   dispatchAchievement(7);
-  showToast(`팁 ${formatNumber(amount)} 획득!`);
   saveState();
   updateHud();
 }
@@ -1608,6 +1898,15 @@ function update(dt) {
     toastTimer -= dt;
     if (toastTimer <= 0) dom.toast.hidden = true;
   }
+  if (guestToastTimer > 0) {
+    guestToastTimer -= dt;
+    if (guestToastTimer <= 0) {
+      const nextGuest = guestToastQueue.shift();
+      if (nextGuest) displayFirstGuestToast(nextGuest);
+      else dom.guestToast.hidden = true;
+    }
+  }
+  updateSpecialPromotion(dt);
   updateGuests(dt);
   updateSpecialCustomers(dt);
   updateCooking(dt);
@@ -1647,6 +1946,22 @@ function expandIngredientStorage() {
   state.resources.gems -= INGREDIENT_STORAGE_EXPANSION_GEM_COST;
   state.crafting.storageCapacity = storage.capacity + INGREDIENT_STORAGE_EXPANSION_AMOUNT;
   showToast(`재료 보관함 ${state.crafting.storageCapacity}칸으로 확장!`);
+  saveState();
+  updateHud();
+  renderMenu();
+  return true;
+}
+
+function expandBowlCapacity() {
+  const capacity = recipeCombinationCapacity();
+  if (capacity >= BOWL_CAPACITY_MAX) return false;
+  if (state.resources.gems < BOWL_CAPACITY_EXPANSION_GEM_COST) {
+    showToast(`보석 ${BOWL_CAPACITY_EXPANSION_GEM_COST}개가 필요해요.`);
+    return false;
+  }
+  state.resources.gems -= BOWL_CAPACITY_EXPANSION_GEM_COST;
+  state.crafting.bowlCapacity = Math.min(BOWL_CAPACITY_MAX, capacity + BOWL_CAPACITY_EXPANSION_AMOUNT);
+  showToast(`보울 용량 ${state.crafting.bowlCapacity}칸으로 확장!`);
   saveState();
   updateHud();
   renderMenu();
@@ -1912,6 +2227,8 @@ function currentObjective() {
   const required = [10, 1, 2].map((type) => tables.installs.find((row) => row.facilityType === type));
   const missing = required.find((row) => row && !isInstalled(row.id));
   if (missing) return `${FACILITY_META[missing.facilityType].name} 설치하기`;
+  if (!isRecipeSystemUnlocked()) return "도마 테이블을 설치해 레시피 열기";
+  if (!isIngredientDropUnlocked()) return "냉장고를 설치해 재료 드랍 열기";
   if (state.ingredientDrops.length) return "필드의 병아리 아이템을 눌러 수집하기";
   if (state.payments.length) return "테이블의 도토리를 눌러 회수하기";
   const disappointed = state.guests.find((guest) => guest.state === "disappointed");
@@ -1932,11 +2249,35 @@ function updateHud() {
   dom.gems.textContent = formatNumber(state.resources.gems);
   dom.promoButton.hidden = false;
   dom.promoButton.disabled = !coreReady();
-  dom.recipeDot.hidden = !RECIPE_PROGRESSION.some((route) => canCraftRecipe(route.recipeId))
-    && !Object.values(state.ownedRecipes).some((owned) => !owned.codexClaimed || owned.stack > 0);
+  const specialPromotionUnlocked = isSpecialPromotionUnlocked();
+  const specialPromotionActive = state.specialPromotion.remaining > 0;
+  const specialPromotionCoolingDown = !specialPromotionActive && state.specialPromotion.cooldown > 0;
+  dom.specialPromoButton.hidden = !specialPromotionUnlocked;
+  dom.specialPromoButton.disabled = !coreReady() || specialPromotionActive || specialPromotionCoolingDown;
+  dom.specialPromoButton.classList.toggle("is-active", specialPromotionActive);
+  dom.specialPromoButton.classList.toggle("is-cooldown", specialPromotionCoolingDown);
+  if (specialPromotionActive) {
+    const ingredient = ingredientData(state.specialPromotion.ingredientId);
+    dom.specialPromoLabel.textContent = `${ingredient?.emoji || "✦"} ${formatPromotionTimer(state.specialPromotion.remaining)}`;
+    dom.specialPromoButton.setAttribute("aria-label", `${ingredient?.ingredientName || "재료"} 특별 홍보 ${formatPromotionTimer(state.specialPromotion.remaining)} 남음`);
+  } else if (specialPromotionCoolingDown) {
+    dom.specialPromoLabel.textContent = `재사용 ${formatPromotionTimer(state.specialPromotion.cooldown)}`;
+    dom.specialPromoButton.setAttribute("aria-label", `특별 홍보 재사용까지 ${formatPromotionTimer(state.specialPromotion.cooldown)}`);
+  } else {
+    dom.specialPromoLabel.textContent = "특별 홍보";
+    dom.specialPromoButton.setAttribute("aria-label", "특별 홍보 재료 선택");
+  }
+  const recipeUnlocked = isRecipeSystemUnlocked();
+  const recipeNav = dom.navButtons.find((button) => button.dataset.screen === "recipe");
+  recipeNav?.classList.toggle("is-locked", !recipeUnlocked);
+  recipeNav?.setAttribute("aria-label", recipeUnlocked ? "레시피" : "레시피 · 도마 테이블 설치 후 해금");
+  recipeNav?.setAttribute("title", recipeUnlocked ? "레시피" : "도마 테이블 설치 후 해금");
+  dom.recipeDot.hidden = !recipeUnlocked || (!RECIPE_PROGRESSION.some((route) => canCraftRecipe(route.recipeId))
+    && !Object.values(state.ownedRecipes).some((owned) => !owned.codexClaimed || owned.stack > 0));
   dom.collectionDot.hidden = !Object.values(state.collections).some((dict) => Object.values(dict).some((entry) => entry.isNew));
   dom.recipeNavLabel.textContent = "레시피";
   dom.themeNavLabel.textContent = "테마";
+  updateTutorialDialogue();
 }
 
 function pointerPosition(event) {
@@ -1995,14 +2336,20 @@ function closeMenu() {
   dom.menuScreen.hidden = true;
   setActiveNav("");
   saveState();
+  updateTutorialDialogue();
 }
 
 function openMenu(screen, preferredTab = null) {
   if ((screen === "missions" && !SYSTEM_ENABLED.missions) || (screen === "staff" && !SYSTEM_ENABLED.staff)) return;
+  if (screen === "recipe" && !isRecipeSystemUnlocked()) {
+    showTutorialDialogue("recipe-locked");
+    return;
+  }
   state.ui.screen = screen;
   state.ui.tab = preferredTab || (screen === "recipe" ? "craft" : screen === "missions" ? "main" : screen === "collection" ? "customers" : screen);
   dom.menuScreen.hidden = false;
   setActiveNav(screen);
+  updateTutorialDialogue();
   renderMenu();
 }
 
@@ -2228,6 +2575,10 @@ function renderRecipeMenu() {
     </div>` : "";
     dom.menuContent.innerHTML = `<section class="combination-lab">
       <div class="combination-heading"><div><h3>요리 연구</h3><small>보울 용량 ${selected.length}/${capacity}</small></div><button type="button" data-action="clear-combination" ${selected.length ? "" : "disabled"}>비우기</button></div>
+      <div class="bowl-upgrade-bar">
+        <div><strong>보울 확장</strong><small>${capacity}/${BOWL_CAPACITY_MAX}칸</small></div>
+        <button type="button" data-action="expand-bowl-capacity" ${capacity >= BOWL_CAPACITY_MAX || state.resources.gems < BOWL_CAPACITY_EXPANSION_GEM_COST ? "disabled" : ""}>${capacity >= BOWL_CAPACITY_MAX ? `<strong>최대 용량</strong>` : `<img src="assets/ui/currency/icon_currency_002.png" alt="보석"/><span>${BOWL_CAPACITY_EXPANSION_GEM_COST}</span><strong>+${BOWL_CAPACITY_EXPANSION_AMOUNT}칸</strong>`}</button>
+      </div>
       <div class="mixing-board">
         <span class="board-grain grain-one" aria-hidden="true"></span><span class="board-grain grain-two" aria-hidden="true"></span>
         <div class="mixing-bowl" aria-label="재료를 담는 보울">
@@ -2533,6 +2884,11 @@ function resetGame() {
   if (!window.confirm("현재 진행을 지우고 처음부터 다시 시작할까요?")) return;
   localStorage.removeItem(SAVE_KEY);
   recipeResearch = null;
+  guestToastQueue = [];
+  toastTimer = 0;
+  guestToastTimer = 0;
+  dom.guestToast.hidden = true;
+  dom.specialPromoPanel.hidden = true;
   dismissRecipeReveal();
   state = createInitialState();
   dom.installPanel.hidden = true;
@@ -2540,6 +2896,7 @@ function resetGame() {
   showToast("새 식당을 시작합니다.");
   saveState();
   updateHud();
+  updateTutorialDialogue();
   render();
 }
 
@@ -2568,8 +2925,44 @@ function renderGameToText() {
     resources: state.resources,
     installedFacilityIds: state.installed,
     installCandidates: candidates,
+    tutorial: {
+      activeId: state.tutorial?.activeId || null,
+      text: TUTORIAL_DIALOGUES[state.tutorial?.activeId] || null,
+      seen: [...(state.tutorial?.seen || [])],
+    },
+    toast: {
+      visible: !dom.toast.hidden,
+      text: dom.toast.hidden ? null : dom.toast.textContent,
+      variant: dom.toast.hidden ? null : dom.toast.dataset.variant || "default",
+      routineEventsSilent: ["guest-arrival", "order-taken", "food-delivered", "ingredient-collected", "payment-collected", "tip-collected"],
+    },
+    newGuestAlert: {
+      visible: !dom.guestToast.hidden,
+      text: dom.guestToast.hidden ? null : dom.guestToast.textContent,
+      queued: guestToastQueue.length,
+      presentation: "separate-upper-right-card",
+    },
     mealDurationSeconds: GUEST_MEAL_DURATION_SECONDS,
     promotion: { ...state.promotion, threshold: promotionThreshold(), enabled: coreReady() },
+    specialPromotion: {
+      unlocked: isSpecialPromotionUnlocked(),
+      recipeRequirement: SPECIAL_PROMOTION_RECIPE_REQUIREMENT,
+      tutorialSeen: state.tutorial?.seen?.includes("special-promotion-unlocked") || false,
+      ingredientId: state.specialPromotion.ingredientId,
+      ingredientName: ingredientData(state.specialPromotion.ingredientId)?.ingredientName || null,
+      remaining: Number(state.specialPromotion.remaining.toFixed(2)),
+      cooldown: Number(state.specialPromotion.cooldown.toFixed(2)),
+      duration: SPECIAL_PROMOTION_DURATION,
+      cooldownDuration: SPECIAL_PROMOTION_COOLDOWN,
+      availableIngredients: specialPromotionChoices().map((choice) => ({
+        ingredientId: choice.ingredientId,
+        name: choice.name,
+        guestIds: choice.guests.map((guest) => guest.customerId),
+        guestNames: choice.guests.map((guest) => guest.customerName),
+      })),
+      panelVisible: !dom.specialPromoPanel.hidden,
+      filterRule: "unlocked-guests-and-currently-unlocked-reward-slots-only",
+    },
     guests: state.guests.map((guest) => ({
       id: guest.id,
       customerId: guest.customerId,
@@ -2622,8 +3015,14 @@ function renderGameToText() {
     metrics: state.metrics,
     currentScreen: state.ui.screen,
     recipes: {
+      systemUnlocked: isRecipeSystemUnlocked(),
+      unlockFacility: "도마 테이블",
       owned: Object.keys(state.ownedRecipes).length,
       combinationCapacity: recipeCombinationCapacity(),
+      combinationCapacityGrowth: "gem-upgrade-only",
+      combinationCapacityInitial: BOWL_CAPACITY_INITIAL,
+      combinationCapacityMax: BOWL_CAPACITY_MAX,
+      combinationCapacityExpansion: { gems: BOWL_CAPACITY_EXPANSION_GEM_COST, amount: BOWL_CAPACITY_EXPANSION_AMOUNT },
       selectedIngredients: [...state.crafting.selected],
       mixingPresentation: "cutting-board-and-bowl",
       research: recipeResearch ? {
@@ -2648,7 +3047,17 @@ function renderGameToText() {
         newPrice: recipeReveal.newPrice,
         priceIncrease: recipeReveal.priceIncrease,
       } : null,
-      hintRule: "same-size-at-least-one-correct-reveals-name-and-missing-clues",
+      hintRule: {
+        sameRecipeSizeOnly: true,
+        matchUnit: "ingredient-slots",
+        thresholds: { ...RECIPE_HINT_MATCH_THRESHOLDS },
+        revealAllQualifyingRecipes: true,
+        repeatRequiresNewMatchedSlot: true,
+      },
+      starterIngredients: Object.fromEntries(Object.entries(STARTER_INGREDIENTS).map(([ingredientId, count]) => [ingredientId, {
+        name: ingredientData(Number(ingredientId))?.ingredientName,
+        count,
+      }])),
       mysteryRecipeCount: RECIPE_PROGRESSION.filter((route) => !recipeData(route.recipeId)).length,
       hintedRecipes: Object.fromEntries(Object.entries(state.crafting.hints || {})
         .filter(([recipeId, ingredientIds]) => !recipeData(Number(recipeId)) && ingredientIds.length)
@@ -2733,6 +3142,8 @@ function renderGameToText() {
       })),
       ingredientDropChances: Object.fromEntries(CORE_PROGRESSION.map((route) => [route.ingredientId, GUEST_INGREDIENT_DROP_CHANCE])),
       ingredientDropRule: {
+        unlocked: isIngredientDropUnlocked(),
+        unlockFacility: "냉장고",
         overallChance: GUEST_INGREDIENT_DROP_CHANCE,
         ingredientTypesOnSuccess: 1,
         slotChances: { ...INGREDIENT_SLOT_WEIGHTS },
@@ -2768,10 +3179,12 @@ async function init() {
   try {
     tables = await loadTables();
     state = loadState() || createInitialState();
+    if (ensureSpecialPromotionTutorial()) saveState();
     state.ui.screen = "restaurant";
     dom.menuScreen.hidden = true;
     setActiveNav("");
     updateHud();
+    updateTutorialDialogue();
     render();
     requestAnimationFrame(frame);
   } catch (error) {
@@ -2782,10 +3195,18 @@ async function init() {
 
 canvas.addEventListener("pointerdown", handleCanvasTap);
 dom.promoButton.addEventListener("click", promote);
+dom.specialPromoButton.addEventListener("click", openSpecialPromotionPanel);
+dom.specialPromoClose.addEventListener("click", closeSpecialPromotionPanel);
+dom.specialPromoSearch.addEventListener("input", () => renderSpecialPromotionChoices());
+dom.specialPromoList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-ingredient-id]");
+  if (button) startSpecialPromotion(Number(button.dataset.ingredientId));
+});
 dom.resetButton.addEventListener("click", resetGame);
 dom.installClose.addEventListener("click", closeInstallPanel);
 dom.installConfirm.addEventListener("click", confirmInstall);
 dom.menuClose.addEventListener("click", closeMenu);
+dom.chefDialogue.addEventListener("click", advanceTutorialDialogue);
 dom.navButtons.forEach((button) => button.addEventListener("click", () => openMenu(button.dataset.screen)));
 dom.menuTabs.addEventListener("click", (event) => {
   const button = event.target.closest("[data-tab]");
@@ -2823,6 +3244,7 @@ dom.menuContent.addEventListener("click", (event) => {
     renderMenu();
   }
   if (button.dataset.action === "expand-ingredient-storage") expandIngredientStorage();
+  if (button.dataset.action === "expand-bowl-capacity") expandBowlCapacity();
   if (button.dataset.action === "theme-filter") { state.ui.themeFacilityType = id; renderMenu(); }
   if (button.dataset.action === "select-customer") { state.ui.collectionCustomerId = id; saveState(); renderMenu(); }
 });

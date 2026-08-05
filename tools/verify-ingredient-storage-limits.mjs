@@ -36,6 +36,9 @@ async function setSave({ ingredients, storageCapacity = 20, gems = 0, drop = nul
   await page.evaluate((payload) => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const countertop = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, countertop.id])];
+    saved.tutorial = { activeId: null, seen: ["welcome"] };
     saved.crafting.ingredients = payload.ingredients;
     if (payload.omitCapacity) delete saved.crafting.storageCapacity;
     else saved.crafting.storageCapacity = payload.storageCapacity;
@@ -66,8 +69,8 @@ try {
 
   let current = await state();
   if (JSON.stringify(current.ingredientStorage) !== JSON.stringify({
-    usedSlots: 0, slotLimit: 20, totalItems: 0, totalLimit: 20, capacity: 20, remaining: 20,
-    expansionAmount: 5, expansionGemCost: 10, ingredientTypes: 0,
+    usedSlots: 2, slotLimit: 20, totalItems: 2, totalLimit: 20, capacity: 20, remaining: 18,
+    expansionAmount: 5, expansionGemCost: 10, ingredientTypes: 2,
   })) throw new Error(`Initial storage state mismatch: ${JSON.stringify(current.ingredientStorage)}`);
 
   await setSave({ ingredients: { 30039: 12, 30040: 8 }, storageCapacity: 20, gems: 10, drop: makeDrop(30041) });

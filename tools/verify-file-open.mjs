@@ -44,6 +44,7 @@ try {
   const initial = await readState();
   fs.writeFileSync(path.join(outputDir, "01-initial.json"), JSON.stringify(initial, null, 2));
   await page.screenshot({ path: path.join(outputDir, "01-initial.png"), fullPage: true });
+  if (await page.locator("#chef-dialogue").isVisible()) await page.locator("#chef-dialogue").click();
 
   for (const name of ["조명", "테이블", "조리기구"]) {
     const current = await readState();

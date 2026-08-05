@@ -32,6 +32,8 @@ try {
   await page.evaluate(({ bread, rice }) => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const countertop = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, countertop.id])];
     saved.crafting.ingredients = { [bread.id]: 1, [rice.id]: 1 };
     saved.crafting.selected = [];
     saved.crafting.hints = {};
@@ -57,7 +59,8 @@ try {
 
   let current = await gameState();
   const hint = current.recipes.hintedRecipes[String(recipeInfo.sandwich.recipeId)];
-  if (current.recipes.hintRule !== "same-size-at-least-one-correct-reveals-name-and-missing-clues"
+  if (JSON.stringify(current.recipes.hintRule?.thresholds) !== JSON.stringify({ 2: 1, 3: 2, 4: 2, 5: 3 })
+    || !current.recipes.hintRule?.revealAllQualifyingRecipes
     || hint?.recipeName !== "샌드위치"
     || hint?.revealedCount !== 1
     || hint?.totalCount !== 2

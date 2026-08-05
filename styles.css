@@ -46,6 +46,45 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 
 .world-area { position: relative; width: 100%; aspect-ratio: 8 / 15; flex: 0 0 auto; overflow: hidden; background: #8ca662; }
 #game-canvas { display: block; width: 100%; height: 100%; }
+.chef-dialogue {
+  position: absolute;
+  z-index: 17;
+  top: 21%;
+  left: 10%;
+  width: 67%;
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  padding: 11px 16px 10px;
+  border: 3px solid #6d4527;
+  border-radius: 19px;
+  background: linear-gradient(180deg,rgba(255,253,235,.98),rgba(255,232,156,.98));
+  box-shadow: 0 6px 0 rgba(104,61,26,.28),0 12px 24px rgba(62,43,24,.2);
+  text-align: left;
+  cursor: pointer;
+  animation: chef-dialogue-in .28s cubic-bezier(.2,.85,.3,1.15) both;
+}
+.chef-dialogue[hidden] { display: none; }
+.chef-dialogue::after {
+  content: "";
+  position: absolute;
+  right: -18px;
+  bottom: 13px;
+  width: 28px;
+  height: 25px;
+  border-right: 3px solid #6d4527;
+  border-bottom: 3px solid #6d4527;
+  background: #ffe99f;
+  transform: skewX(-34deg) rotate(-10deg);
+  clip-path: polygon(0 0,100% 100%,0 100%);
+}
+.chef-dialogue span { color: #c46427; font-size: 9px; font-weight: 1000; }
+.chef-dialogue strong { position: relative; z-index: 1; font-size: 13px; line-height: 1.35; word-break: keep-all; }
+.chef-dialogue small { position: relative; z-index: 1; align-self: flex-end; color: #9b7b55; font-size: 8px; font-weight: 900; }
+@keyframes chef-dialogue-in { from { opacity: 0; transform: translateY(8px) scale(.94); } to { opacity: 1; transform: none; } }
 .world-area-navigation {
   position: absolute;
   z-index: 11;
@@ -239,6 +278,13 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
   cursor: pointer;
 }
 .promotion-button[hidden] { display: none; }
+.promotion-stack { position: relative; width: 96px; height: 66px; }
+.special-promotion-button { position: absolute; z-index: 4; left: 0; bottom: calc(100% + 8px); width: 96px; min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 6px 7px; border: 2px solid #624077; border-radius: 13px; background: linear-gradient(#f1d8ff,#ad78d4); box-shadow: 0 4px 0 #694274,0 8px 15px rgba(61,39,73,.2); color: #4d2d5d; font-size: 10px; font-weight: 1000; cursor: pointer; }
+.special-promotion-button[hidden] { display: none; }
+.special-promotion-button:disabled { filter: grayscale(.45); opacity: .78; box-shadow: 0 2px 0 #6d5a72; cursor: default; }
+.special-promotion-button.is-active { border-color: #764126; background: linear-gradient(#fff2a4,#ffb847); color: #6b3d1d; }
+.special-promotion-button.is-cooldown { background: linear-gradient(#e9e3ec,#bdb0c4); color: #625767; }
+.special-promotion-spark { font-size: 16px; line-height: 1; }
 
 .bottom-controls {
   position: relative;
@@ -288,6 +334,9 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .nav-button strong { font-size: 11px; }
 .nav-button.is-active { background: #f6c74c; box-shadow: inset 0 -3px 0 rgba(169, 93, 27, .22); }
 .nav-button i { position: absolute; top: 5px; right: 14px; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; background: #e74736; }
+.nav-button.is-locked { color: #8a7967; filter: saturate(.35); }
+.nav-button.is-locked::after { content: "🔒"; position: absolute; top: 3px; right: 9px; font-size: 12px; filter: none; }
+.nav-button.is-locked span img { opacity: .55; }
 
 .menu-screen {
   position: absolute;
@@ -466,6 +515,15 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .combination-heading small { display: block; margin-top: 2px; color: #76583d; font-size: 10px; font-weight: 900; }
 .combination-heading button { padding: 6px 9px; border: 1px solid #9d7857; border-radius: 9px; background: #fffaf0; font-size: 10px; font-weight: 900; cursor: pointer; }
 .combination-heading button:disabled { opacity: .42; }
+.bowl-upgrade-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding: 7px 9px; border: 1px solid rgba(139,91,44,.34); border-radius: 12px; background: rgba(255,250,224,.7); }
+.bowl-upgrade-bar > div { display: flex; align-items: baseline; gap: 6px; }
+.bowl-upgrade-bar > div strong { color: #684326; font-size: 11px; }
+.bowl-upgrade-bar > div small { color: #927052; font-size: 9px; font-weight: 900; }
+.bowl-upgrade-bar button { min-width: 82px; display: flex; align-items: center; justify-content: center; gap: 3px; padding: 5px 8px; border: 2px solid #8c5b2e; border-radius: 10px; background: linear-gradient(#fff1a9,#f4bd48); box-shadow: 0 2px 0 #a76626; color: #5e4029; font-size: 10px; font-weight: 900; cursor: pointer; }
+.bowl-upgrade-bar button:disabled { filter: grayscale(.55); opacity: .55; box-shadow: none; cursor: default; }
+.bowl-upgrade-bar button img { width: 17px; height: 17px; object-fit: contain; }
+.bowl-upgrade-bar button span { font-size: 11px; }
+.bowl-upgrade-bar button strong { font-size: 10px; }
 .mixing-board { position: relative; min-height: 193px; margin: 10px 0 9px; padding: 7px 12px 5px; overflow: hidden; border: 3px solid #8d572b; border-radius: 21px 21px 28px 28px; background: repeating-linear-gradient(0deg,rgba(126,71,28,.08) 0 2px,transparent 2px 18px),linear-gradient(105deg,#e8ad58,#f7cf7a 48%,#dda052); box-shadow: inset 0 0 0 3px rgba(255,239,178,.58), inset 0 -9px 16px rgba(119,66,25,.15), 0 4px 0 #75451f; }
 .mixing-board::before { content: ""; position: absolute; inset: 8px; border: 1px solid rgba(118,65,27,.2); border-radius: 15px 15px 22px 22px; pointer-events: none; }
 .mixing-board::after { content: ""; position: absolute; right: -18px; top: 56px; width: 48px; height: 76px; border: 3px solid #8d572b; border-radius: 45%; background: #f4c86f; box-shadow: inset 0 0 0 4px rgba(255,239,178,.45); }
@@ -536,7 +594,7 @@ button.combination-slot { cursor: pointer; }
 .recipe-catalog-copy { min-width: 0; }
 .recipe-catalog-copy > small { display: block; color: #91765b; font-size: 8px; font-weight: 900; }
 .recipe-catalog-copy > strong { display: block; margin: 2px 0 5px; overflow: hidden; color: #684326; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-.recipe-catalog-formula,.recipe-hint-slots { display: flex; align-items: center; gap: 3px; min-width: 0; }
+.recipe-catalog-formula,.recipe-hint-slots { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; min-width: 0; }
 .recipe-catalog-formula span { min-width: 22px; padding: 3px 4px; border-radius: 8px; background: #fff3bf; text-align: center; font: 15px/1 "Segoe UI Emoji",sans-serif; }
 .recipe-catalog-formula span b { margin-left: 1px; color: #765137; font: 7px/1 sans-serif; }
 .recipe-catalog-formula i { color: #a1784d; font-size: 8px; font-style: normal; font-weight: 900; }
@@ -680,7 +738,7 @@ button.combination-slot { cursor: pointer; }
   box-shadow: 0 12px 34px rgba(55, 37, 19, .34);
 }
 
-.install-panel[hidden], .toast[hidden] { display: none; }
+.install-panel[hidden], .toast[hidden], .new-guest-alert[hidden] { display: none; }
 .panel-close { position: absolute; top: 7px; right: 10px; width: 30px; height: 30px; border: 0; background: transparent; font-size: 25px; font-weight: 900; cursor: pointer; }
 .install-icon { width: 84px; height: 84px; object-fit: contain; filter: drop-shadow(0 5px 3px rgba(67,45,24,.22)); }
 .install-copy { min-width: 0; display: flex; flex-direction: column; padding-right: 18px; }
@@ -711,6 +769,73 @@ button.combination-slot { cursor: pointer; }
   font-weight: 800;
   pointer-events: none;
 }
+
+.special-promotion-panel { position: absolute; z-index: 45; left: 50%; bottom: 24px; width: calc(100% - 28px); max-height: 590px; display: flex; flex-direction: column; padding: 14px; transform: translateX(-50%); border: 3px solid #704579; border-radius: 23px; background: linear-gradient(160deg,#fffdf1,#f2ddff); box-shadow: 0 10px 0 rgba(73,43,78,.28),0 24px 40px rgba(42,29,45,.32); }
+.special-promotion-panel[hidden] { display: none; }
+.special-promotion-panel header { display: flex; align-items: center; justify-content: space-between; }
+.special-promotion-panel header div { display: flex; flex-direction: column; }
+.special-promotion-panel header small { color: #a85f25; font-size: 9px; font-weight: 1000; }
+.special-promotion-panel header strong { color: #4e3158; font-size: 21px; }
+.special-promotion-panel header button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #e5cee9; color: #5f4168; font-size: 24px; font-weight: 1000; cursor: pointer; }
+.special-promotion-panel > p { margin: 5px 0 9px; color: #765a7c; font-size: 10px; font-weight: 800; }
+.special-promotion-search { display: flex; align-items: center; gap: 6px; height: 38px; padding: 0 10px; border: 2px solid #bda2c5; border-radius: 12px; background: white; color: #805d89; }
+.special-promotion-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #4e3a54; font: 900 11px/1 sans-serif; }
+.special-promotion-list { min-height: 100px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; margin-top: 9px; padding: 1px 2px 8px; overflow-y: auto; }
+.special-promotion-choice { min-width: 0; min-height: 86px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 7px 3px; border: 2px solid rgba(111,72,120,.3); border-radius: 14px; background: rgba(255,255,255,.82); color: #593d61; cursor: pointer; }
+.special-promotion-choice:hover { border-color: #9b5ea9; background: #fff8d8; }
+.special-promotion-choice > span { font: 27px/1 "Segoe UI Emoji",sans-serif; }
+.special-promotion-choice strong { width: 100%; margin-top: 5px; overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.special-promotion-choice small { margin-top: 2px; color: #8a6f90; font-size: 8px; font-weight: 900; }
+.special-promotion-empty { grid-column: 1/-1; margin: 24px 0; color: #846e89; font-size: 11px; font-weight: 900; text-align: center; }
+.new-guest-alert {
+  position: absolute;
+  z-index: 31;
+  right: 12px;
+  top: 222px;
+  width: min(286px,calc(100% - 24px));
+  min-height: 88px;
+  display: grid;
+  grid-template-columns: 62px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  overflow: hidden;
+  border: 3px solid #9d5823;
+  border-radius: 22px;
+  background: linear-gradient(135deg,#fffdf0 0%,#ffed9f 58%,#ffc94d 100%);
+  box-shadow: 0 7px 0 rgba(117,63,26,.32),0 14px 28px rgba(66,42,20,.28),inset 0 0 0 2px rgba(255,255,255,.56);
+  color: #633b20;
+  text-align: left;
+  animation: new-guest-toast-in .52s cubic-bezier(.2,.9,.25,1.18) both;
+  pointer-events: none;
+}
+.new-guest-alert::before {
+  content: "";
+  position: absolute;
+  inset: -70% auto -70% -22%;
+  width: 42%;
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.78),transparent);
+  transform: rotate(18deg);
+  animation: new-guest-toast-shine 1.4s .2s ease-out both;
+}
+.new-guest-toast-icon {
+  position: relative;
+  z-index: 1;
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border: 2px solid rgba(139,76,30,.42);
+  border-radius: 18px;
+  background: rgba(255,255,255,.68);
+  filter: drop-shadow(0 3px 2px rgba(81,47,23,.2));
+}
+.new-guest-toast-copy { position: relative; z-index: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.new-guest-toast-copy small { color: #d16a22; font-size: 9px; font-weight: 1000; letter-spacing: .04em; }
+.new-guest-toast-copy strong { overflow: hidden; font-size: 17px; font-weight: 1000; text-overflow: ellipsis; white-space: nowrap; }
+.new-guest-toast-copy em { color: #86613d; font-size: 9px; font-style: normal; font-weight: 900; }
+.new-guest-toast-badge { position: relative; z-index: 1; align-self: start; padding: 4px 7px; border-radius: 99px; background: #ee6f2d; box-shadow: 0 2px 0 #9d4c22; color: white; font-size: 9px; font-weight: 1000; }
+@keyframes new-guest-toast-in { from { opacity: 0; transform: translateX(24px) translateY(-8px) scale(.86); } to { opacity: 1; transform: none; } }
+@keyframes new-guest-toast-shine { from { left: -30%; } to { left: 118%; } }
 
 @media (max-height: 720px) {
   .hud-top { inset: 10px 10px auto; transform: scale(.88); transform-origin: top left; width: 113%; }

@@ -31,6 +31,8 @@ try {
   await page.evaluate(({ leaf, rice }) => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const countertop = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, countertop.id])];
     saved.crafting.ingredients = { [leaf.id]: 1, [rice.id]: 1 };
     saved.crafting.selected = [];
     saved.crafting.hints = {};
@@ -46,7 +48,8 @@ try {
 
   const current = await gameState();
   const hint = current.recipes.hintedRecipes["20014"];
-  if (current.recipes.hintRule !== "same-size-at-least-one-correct-reveals-name-and-missing-clues"
+  if (JSON.stringify(current.recipes.hintRule?.thresholds) !== JSON.stringify({ 2: 1, 3: 2, 4: 2, 5: 3 })
+    || !current.recipes.hintRule?.revealAllQualifyingRecipes
     || hint?.recipeName !== "새싹 샐러드"
     || JSON.stringify(hint.revealedIngredients) !== JSON.stringify(["나뭇잎"])
     || JSON.stringify(hint.missingClues) !== JSON.stringify(["초록색 채소"])) {
@@ -64,6 +67,9 @@ try {
   }
   const unrelatedName = await page.locator('.recipe-catalog-card[data-recipe-id="20002"] .recipe-catalog-copy > strong').innerText();
   if (unrelatedName !== "???") throw new Error(`Unrelated recipe name leaked: ${unrelatedName}`);
+  if (Object.keys(current.recipes.hintedRecipes).length < 2) {
+    throw new Error(`One combination did not reveal every qualifying recipe: ${JSON.stringify(current.recipes.hintedRecipes)}`);
+  }
 
   await hintedCard.scrollIntoViewIfNeeded();
   await page.waitForTimeout(350);
@@ -71,7 +77,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log("ONE_MATCH_RECIPE_CLUES_OK recipe=sprout-salad correct=leaf clue=green-vegetable exact-lettuce-hidden=true");
+  console.log(`ONE_MATCH_RECIPE_CLUES_OK recipe=sprout-salad correct=leaf multiHints=${Object.keys(current.recipes.hintedRecipes).length} clue=green-vegetable`);
 } finally {
   await browser.close();
 }

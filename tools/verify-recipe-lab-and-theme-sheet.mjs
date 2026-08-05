@@ -52,6 +52,16 @@ try {
   await page.reload({ waitUntil: "load" });
   page.once("dialog", (dialog) => dialog.accept());
   await page.locator("#reset-btn").click();
+  await setSave(() => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    const unlockFacilities = window.CHICK_TABLE_SOURCE.InstallFacility
+      .filter((row) => Number(row.areaType) === 1 && [6, 8].includes(Number(row.facilityType)))
+      .map((row) => row.id);
+    saved.installed = [...new Set([...saved.installed, ...unlockFacilities])];
+    saved.tutorial = { activeId: null, seen: ["welcome"] };
+    localStorage.setItem(key, JSON.stringify(saved));
+  });
 
   const routes = await page.evaluate(() => ({
     base: window.CHICK_CONFIG.CORE_PROGRESSION.find((route) => route.themeId === 1 && route.slot === 0),
@@ -76,6 +86,7 @@ try {
     saved.ownedRecipes[2] = { level: 1, stack: 0, codexClaimed: true };
     saved.ownedRecipes[10001] = { level: 1, stack: 0, codexClaimed: true };
     saved.crafting.ingredients = Object.fromEntries(target.ingredientRequirements.map((ingredient) => [ingredient.id, 1]));
+    saved.crafting.bowlCapacity = 3;
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));
   });
@@ -110,6 +121,7 @@ try {
       2: { level: 1, stack: 0, codexClaimed: true },
     };
     saved.crafting.ingredients = Object.fromEntries(wood[2].ingredientRequirements.map((ingredient) => [ingredient.id, 2]));
+    saved.crafting.bowlCapacity = 4;
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));
   });
@@ -177,7 +189,7 @@ try {
   fs.writeFileSync(path.join(out, "result.json"), JSON.stringify({ hits, ratios }, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`RECIPE_LAB_THEME_SHEET_OK routes=45 capacity=2->4 auto=new-first/lowest-level slots=${JSON.stringify(ratios)}`);
+  console.log(`RECIPE_LAB_THEME_SHEET_OK routes=45 bowl=gem-upgrade-2-to-4 auto=new-first/lowest-level slots=${JSON.stringify(ratios)}`);
 } finally {
   await browser.close();
 }

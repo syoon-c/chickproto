@@ -147,6 +147,17 @@
       "automatic": false
     },
     "hintRule": "same-size-at-least-one-correct-reveals-name-and-missing-clues",
+    "earlyFailureProtection": false,
+    "starterIngredients": {
+      "30001": {
+        "name": "양상추",
+        "count": 1
+      },
+      "30039": {
+        "name": "나뭇잎",
+        "count": 1
+      }
+    },
     "mysteryRecipeCount": 60,
     "hintedRecipes": {},
     "autoResearchUnlocked": false,
@@ -1513,7 +1524,7 @@
       {
         "id": 3,
         "name": "최고의 단골",
-        "minVisits": 300,
+        "minVisits": 150,
         "primaryCount": 1,
         "secondaryCount": 1,
         "rareCount": 1
@@ -1672,7 +1683,7 @@
           "rareCount": 0
         },
         {
-          "minVisits": 300,
+          "minVisits": 150,
           "primaryCount": 1,
           "secondaryCount": 1,
           "rareCount": 1

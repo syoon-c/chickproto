@@ -21,6 +21,8 @@ async function runVisitGroup(visits, expectedCountsByIngredientId) {
   await page.evaluate(({ visitCount, guestCount }) => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const fridge = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 6);
+    saved.installed = [...new Set([...saved.installed, fridge.id])];
     saved.rng = 20260727 + visitCount;
     saved.guests = Array.from({ length: guestCount }, (_, index) => ({
       id: 50000 + visitCount * 1000 + index,
@@ -92,7 +94,9 @@ try {
   await page.locator("#reset-btn").click();
 
   let current = await state();
-  if (current.progression.ingredientDropRule.overallChance !== 0.15
+  if (current.progression.ingredientDropRule.unlocked
+    || current.progression.ingredientDropRule.unlockFacility !== "냉장고"
+    || current.progression.ingredientDropRule.overallChance !== 0.15
     || current.progression.ingredientDropRule.ingredientTypesOnSuccess !== 1
     || JSON.stringify(current.progression.ingredientDropRule.slotChances) !== JSON.stringify({ primary: 0.5, secondary: 0.3, special: 0.2 })
     || JSON.stringify(current.progression.ingredientDropRule.grades) !== JSON.stringify([

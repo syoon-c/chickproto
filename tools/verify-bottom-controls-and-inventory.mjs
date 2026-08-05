@@ -42,6 +42,20 @@ try {
   await page.screenshot({ path: path.join(out, "01-bottom-controls.png"), fullPage: true });
 
   await page.locator('[data-screen="recipe"]').click();
+  if ((await state()).currentScreen !== "restaurant" || !await page.locator('[data-screen="recipe"]').evaluate((element) => element.classList.contains("is-locked"))) {
+    throw new Error("Recipe navigation should stay locked before the countertop is installed");
+  }
+  await page.evaluate(async () => {
+    const key = "chick-bistro-planning-prototype-v2";
+    const saved = JSON.parse(localStorage.getItem(key));
+    const tables = await window.ChickData.loadTables();
+    const countertop = tables.installs.find((row) => Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, countertop.id])];
+    saved.tutorial = { activeId: null, seen: ["welcome"] };
+    localStorage.setItem(key, JSON.stringify(saved));
+  });
+  await page.reload({ waitUntil: "load" });
+  await page.locator('[data-screen="recipe"]').click();
   const recipeTabs = await page.locator("#menu-tabs button").allTextContents();
   if (recipeTabs.join(",") !== "제작,레시피 1,재료 보관함") throw new Error(`Unexpected recipe tabs: ${recipeTabs.join(",")}`);
   await page.locator('[data-tab="ingredients"]').click();
@@ -74,7 +88,7 @@ try {
   }
   const lettuceCount = await page.locator('[data-ingredient-id="30001"] b').textContent();
   if (lettuceCount !== "7개") throw new Error(`Stored ingredient count mismatch: ${lettuceCount}`);
-  if (await page.locator(".ingredient-inventory-item").count() !== 1
+  if (await page.locator(".ingredient-inventory-item").count() < 1
     || await page.locator(".ingredient-storage-panel").count() !== 1) throw new Error("Ingredient storage does not render the shared-capacity layout");
   await page.screenshot({ path: path.join(out, "02-fridge-inventory.png"), fullPage: true });
 
