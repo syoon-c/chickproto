@@ -20,6 +20,320 @@
       "ideas",
       "gems",
       "stickers"
+    ],
+    "supportedIngredients": [
+      {
+        "id": 30001,
+        "name": "양상추"
+      },
+      {
+        "id": 30002,
+        "name": "토마토"
+      },
+      {
+        "id": 30003,
+        "name": "빵"
+      },
+      {
+        "id": 30004,
+        "name": "치즈"
+      },
+      {
+        "id": 30005,
+        "name": "달걀"
+      },
+      {
+        "id": 30006,
+        "name": "소시지"
+      },
+      {
+        "id": 30007,
+        "name": "감자"
+      },
+      {
+        "id": 30008,
+        "name": "고기"
+      },
+      {
+        "id": 30009,
+        "name": "쌀"
+      },
+      {
+        "id": 30010,
+        "name": "식용유"
+      },
+      {
+        "id": 30011,
+        "name": "밀가루"
+      },
+      {
+        "id": 30012,
+        "name": "면"
+      },
+      {
+        "id": 30013,
+        "name": "또띠아"
+      },
+      {
+        "id": 30014,
+        "name": "육수"
+      },
+      {
+        "id": 30015,
+        "name": "빵가루"
+      },
+      {
+        "id": 30016,
+        "name": "카레가루"
+      },
+      {
+        "id": 30017,
+        "name": "생선"
+      },
+      {
+        "id": 30018,
+        "name": "간장"
+      },
+      {
+        "id": 30019,
+        "name": "트러플"
+      },
+      {
+        "id": 30020,
+        "name": "버터"
+      },
+      {
+        "id": 30021,
+        "name": "우유"
+      },
+      {
+        "id": 30022,
+        "name": "후추"
+      },
+      {
+        "id": 30023,
+        "name": "모둠 채소"
+      },
+      {
+        "id": 30024,
+        "name": "김"
+      },
+      {
+        "id": 30025,
+        "name": "당근"
+      },
+      {
+        "id": 30026,
+        "name": "생크림"
+      },
+      {
+        "id": 30027,
+        "name": "마늘"
+      },
+      {
+        "id": 30028,
+        "name": "해바라기씨"
+      },
+      {
+        "id": 30029,
+        "name": "소금"
+      },
+      {
+        "id": 30030,
+        "name": "두부"
+      },
+      {
+        "id": 30031,
+        "name": "도토리"
+      },
+      {
+        "id": 30032,
+        "name": "피클"
+      },
+      {
+        "id": 30033,
+        "name": "과일"
+      },
+      {
+        "id": 30034,
+        "name": "양파"
+      },
+      {
+        "id": 30035,
+        "name": "고추"
+      },
+      {
+        "id": 30036,
+        "name": "잼"
+      },
+      {
+        "id": 30037,
+        "name": "양배추"
+      },
+      {
+        "id": 30038,
+        "name": "이스트"
+      },
+      {
+        "id": 30039,
+        "name": "나뭇잎"
+      },
+      {
+        "id": 30040,
+        "name": "산딸기"
+      },
+      {
+        "id": 30041,
+        "name": "고사리"
+      },
+      {
+        "id": 30042,
+        "name": "식용 벌레"
+      },
+      {
+        "id": 30043,
+        "name": "옥수수"
+      },
+      {
+        "id": 30044,
+        "name": "오이"
+      },
+      {
+        "id": 30045,
+        "name": "브로콜리"
+      },
+      {
+        "id": 30046,
+        "name": "아보카도"
+      },
+      {
+        "id": 30047,
+        "name": "설탕"
+      },
+      {
+        "id": 30048,
+        "name": "소고기"
+      },
+      {
+        "id": 30049,
+        "name": "돼지고기"
+      },
+      {
+        "id": 30050,
+        "name": "양고기"
+      },
+      {
+        "id": 30051,
+        "name": "파슬리"
+      },
+      {
+        "id": 30052,
+        "name": "바질"
+      },
+      {
+        "id": 30053,
+        "name": "파프리카"
+      },
+      {
+        "id": 30054,
+        "name": "로즈마리"
+      },
+      {
+        "id": 30055,
+        "name": "버섯"
+      },
+      {
+        "id": 30056,
+        "name": "가지"
+      },
+      {
+        "id": 30057,
+        "name": "애호박"
+      },
+      {
+        "id": 30058,
+        "name": "호박"
+      },
+      {
+        "id": 30059,
+        "name": "파스타면"
+      },
+      {
+        "id": 30060,
+        "name": "올리브"
+      },
+      {
+        "id": 30061,
+        "name": "체리"
+      },
+      {
+        "id": 30062,
+        "name": "바나나"
+      },
+      {
+        "id": 30063,
+        "name": "딸기"
+      },
+      {
+        "id": 30064,
+        "name": "사과"
+      },
+      {
+        "id": 30065,
+        "name": "베이킹파우더"
+      },
+      {
+        "id": 30066,
+        "name": "콩"
+      },
+      {
+        "id": 30067,
+        "name": "물"
+      },
+      {
+        "id": 30068,
+        "name": "식초"
+      },
+      {
+        "id": 30069,
+        "name": "인삼"
+      },
+      {
+        "id": 30070,
+        "name": "만드라고라"
+      },
+      {
+        "id": 30071,
+        "name": "오디"
+      },
+      {
+        "id": 30072,
+        "name": "용과"
+      },
+      {
+        "id": 30073,
+        "name": "람부탄"
+      },
+      {
+        "id": 30074,
+        "name": "스타프루트"
+      },
+      {
+        "id": 30075,
+        "name": "햄"
+      },
+      {
+        "id": 30076,
+        "name": "케첩"
+      },
+      {
+        "id": 30077,
+        "name": "통조림 옥수수"
+      },
+      {
+        "id": 30078,
+        "name": "탄산음료"
+      }
     ]
   },
   "installedFacilityIds": [
@@ -71,6 +385,187 @@
     "presentation": "separate-upper-right-card"
   },
   "mealDurationSeconds": 7,
+  "bottomNavigation": [
+    "theme",
+    "recipe",
+    "collection",
+    "knowhow"
+  ],
+  "knowhow": {
+    "name": "식당 노하우",
+    "xp": 0,
+    "xpPerPoint": 100,
+    "points": 0,
+    "totalXp": 0,
+    "xpRewards": {
+      "recipeResearchSuccessOrFailure": 20,
+      "guestMealCooking": 5
+    },
+    "selectedSkillId": "auto_collect",
+    "graphPresentation": "connected-mind-map",
+    "effects": {
+      "ingredientDropChance": 0.15,
+      "cookingSpeedReduction": 0,
+      "researchSpeedReduction": 0,
+      "buffetOfflineCapSeconds": 7200,
+      "contestPrizeMultiplier": 1
+    },
+    "automation": {
+      "collectInterval": null,
+      "orderDelay": null,
+      "promotionInterval": null
+    },
+    "nodes": [
+      {
+        "id": "restaurant_basics",
+        "name": "식당 노하우",
+        "level": 1,
+        "maxLevel": 1,
+        "cost": 0,
+        "prerequisitesMet": true,
+        "prerequisites": [],
+        "effect": "요리하며 식당 운영 경험을 쌓아요",
+        "x": 306,
+        "y": 270
+      },
+      {
+        "id": "auto_collect",
+        "name": "척척 회수",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 1,
+        "prerequisitesMet": true,
+        "prerequisites": [
+          {
+            "id": "restaurant_basics",
+            "level": 1
+          }
+        ],
+        "effect": "필드의 재료와 도토리를 자동 회수",
+        "x": 105,
+        "y": 260
+      },
+      {
+        "id": "auto_order",
+        "name": "주문 척척",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_collect",
+            "level": 1
+          }
+        ],
+        "effect": "기다리는 손님의 주문을 자동 접수",
+        "x": 80,
+        "y": 420
+      },
+      {
+        "id": "auto_promotion",
+        "name": "입소문",
+        "level": 0,
+        "maxLevel": 2,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_order",
+            "level": 2
+          }
+        ],
+        "effect": "쉬지 않고 손님을 자동으로 홍보",
+        "x": 205,
+        "y": 555
+      },
+      {
+        "id": "drop_bonus",
+        "name": "단골의 선물",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 1,
+        "prerequisitesMet": true,
+        "prerequisites": [
+          {
+            "id": "restaurant_basics",
+            "level": 1
+          }
+        ],
+        "effect": "재료 드랍 확률 +0%p",
+        "x": 295,
+        "y": 85
+      },
+      {
+        "id": "cooking_speed",
+        "name": "손에 익은 요리",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 1,
+        "prerequisitesMet": true,
+        "prerequisites": [
+          {
+            "id": "restaurant_basics",
+            "level": 1
+          }
+        ],
+        "effect": "손님 음식 조리 시간 -0%",
+        "x": 505,
+        "y": 255
+      },
+      {
+        "id": "research_speed",
+        "name": "빠른 실험",
+        "level": 0,
+        "maxLevel": 2,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed",
+            "level": 1
+          }
+        ],
+        "effect": "레시피 연구 시간 -0%",
+        "x": 585,
+        "y": 85
+      },
+      {
+        "id": "offline_bonus",
+        "name": "든든한 준비",
+        "level": 0,
+        "maxLevel": 2,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed",
+            "level": 1
+          }
+        ],
+        "effect": "뷔페 오프라인 보상 상한 +0시간",
+        "x": 500,
+        "y": 425
+      },
+      {
+        "id": "contest_prize",
+        "name": "승부 요령",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed",
+            "level": 2
+          }
+        ],
+        "effect": "요리 대회 상금 +0%",
+        "x": 585,
+        "y": 565
+      }
+    ]
+  },
   "promotion": {
     "progress": 0,
     "queued": 0,
@@ -105,6 +600,205 @@
     "panelVisible": false,
     "filterRule": "unlocked-guests-and-currently-unlocked-reward-slots-only"
   },
+  "buffet": {
+    "unlocked": false,
+    "recipeRequirement": 8,
+    "area": "restaurant",
+    "standCount": 0,
+    "maxStandCount": 8,
+    "standUnlockRequirements": [
+      8,
+      8,
+      8,
+      8,
+      12,
+      16,
+      20,
+      24
+    ],
+    "nextStandRecipeRequirement": 8,
+    "stands": [],
+    "perMinute": 0,
+    "collectionBonusPercent": 0,
+    "nextIncomeIn": 60,
+    "cashbox": 0,
+    "offlineCapSeconds": 7200,
+    "offlinePending": 0,
+    "offlinePanelVisible": false,
+    "visitorRule": {
+      "visitChance": {
+        "normal": 0.5,
+        "satisfied": 0.8
+      },
+      "purchaseChance": {
+        "normal": 0.25,
+        "satisfied": 0.55
+      },
+      "purchaseRate": 0.25
+    },
+    "visitors": []
+  },
+  "contest": {
+    "unlocked": false,
+    "recipeRequirement": 6,
+    "freeEntriesPerDay": 1,
+    "extraEntryGemCost": 10,
+    "dayKey": "2026-08-06",
+    "entriesToday": 0,
+    "nextEntryCost": 0,
+    "firstPlaceTierIds": [],
+    "selectedTierId": 1,
+    "selectedRecipeId": 1,
+    "selectedIngredientId": 30039,
+    "tiers": [
+      {
+        "id": 1,
+        "name": "동네 새싹 요리대회",
+        "recipeRequirement": 6,
+        "previousTierId": null,
+        "unlocked": true,
+        "requirementText": "참가 가능",
+        "firstPlaceScore": 62,
+        "prizes": [
+          800,
+          400,
+          200
+        ],
+        "judges": [
+          {
+            "key": "fresh",
+            "name": "새싹 심사위원",
+            "hint": "싱그러운 채소가 좋아요"
+          },
+          {
+            "key": "hearty",
+            "name": "든든이 심사위원",
+            "hint": "배부른 주재료가 최고예요"
+          },
+          {
+            "key": "rich",
+            "name": "고소미 심사위원",
+            "hint": "고소하고 부드러운 맛!"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "숲속 요리축제",
+        "recipeRequirement": 12,
+        "previousTierId": 1,
+        "unlocked": false,
+        "requirementText": "레시피 12개 필요",
+        "firstPlaceScore": 66,
+        "prizes": [
+          5000,
+          2500,
+          1200
+        ],
+        "judges": [
+          {
+            "key": "savory",
+            "name": "감칠맛 심사위원",
+            "hint": "진한 고기와 해산물 취향"
+          },
+          {
+            "key": "fresh",
+            "name": "새싹 심사위원",
+            "hint": "싱그러운 채소가 좋아요"
+          },
+          {
+            "key": "aroma",
+            "name": "향긋이 심사위원",
+            "hint": "향신 재료를 찾아요"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "왕국 미식대회",
+        "recipeRequirement": 20,
+        "previousTierId": 2,
+        "unlocked": false,
+        "requirementText": "레시피 20개 필요",
+        "firstPlaceScore": 70,
+        "prizes": [
+          25000,
+          12000,
+          6000
+        ],
+        "judges": [
+          {
+            "key": "rich",
+            "name": "고소미 심사위원",
+            "hint": "고소하고 부드러운 맛!"
+          },
+          {
+            "key": "savory",
+            "name": "감칠맛 심사위원",
+            "hint": "진한 고기와 해산물 취향"
+          },
+          {
+            "key": "tangy",
+            "name": "새콤이 심사위원",
+            "hint": "새콤하고 톡 쏘는 맛!"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "별빛 그랑프리",
+        "recipeRequirement": 32,
+        "previousTierId": 3,
+        "unlocked": false,
+        "requirementText": "레시피 32개 필요",
+        "firstPlaceScore": 74,
+        "prizes": [
+          120000,
+          60000,
+          30000
+        ],
+        "judges": [
+          {
+            "key": "sweet",
+            "name": "달콤이 심사위원",
+            "hint": "달콤한 과일이 좋아요"
+          },
+          {
+            "key": "aroma",
+            "name": "향긋이 심사위원",
+            "hint": "향신 재료를 찾아요"
+          },
+          {
+            "key": "rich",
+            "name": "고소미 심사위원",
+            "hint": "고소하고 부드러운 맛!"
+          }
+        ]
+      }
+    ],
+    "judging": null,
+    "result": null,
+    "availableRecipeIds": [
+      1,
+      10001,
+      2,
+      20002,
+      20003,
+      20001
+    ],
+    "availableIngredients": [
+      {
+        "id": 30001,
+        "name": "양상추",
+        "count": 1
+      },
+      {
+        "id": 30039,
+        "name": "나뭇잎",
+        "count": 1
+      }
+    ]
+  },
   "guests": [
     {
       "id": "formula-disappointed",
@@ -121,6 +815,7 @@
       "mealElapsed": null,
       "mealRemaining": null,
       "mood": "disappointed",
+      "buffetQueued": false,
       "dropIngredient": 30039,
       "guestGrade": "첫 방문",
       "visits": 1,
@@ -175,7 +870,21 @@
     "merchantPurchases": 0,
     "fairyBuffs": 0,
     "trades": 0,
-    "futureTrades": 0
+    "futureTrades": 0,
+    "buffetVisitors": 0,
+    "buffetPurchases": 0,
+    "buffetRevenue": 0,
+    "buffetClaims": 0,
+    "buffetOfflineRevenue": 0,
+    "contestEntries": 0,
+    "contestFirstPlaces": 0,
+    "contestPrizeMoney": 0,
+    "knowhowXpEarned": 0,
+    "knowhowPointsEarned": 0,
+    "knowhowUpgrades": 0,
+    "autoCollected": 0,
+    "autoOrders": 0,
+    "autoPromotions": 0
   },
   "currentScreen": "restaurant",
   "recipes": {
@@ -298,12 +1007,13 @@
       "performanceBuff": 1.2
     },
     "cookingTimeRule": {
-      "formula": "clamp(roundToHalfSecond(2+basePrice/20),4,24)*recipeLevelSpeedReduction",
+      "formula": "clamp(roundToHalfSecond(2+basePrice/20),4,24)*recipeLevelSpeedReduction*knowhowSpeedReduction",
       "baseSeconds": 2,
       "pricePerSecond": 20,
       "minimumSeconds": 4,
       "maximumSeconds": 24,
-      "stepSeconds": 0.5
+      "stepSeconds": 0.5,
+      "knowhowReduction": 0
     },
     "recipeLevelPriceBonus": 0.1,
     "craftable": [
@@ -1845,6 +2555,7 @@
       "overallChance": 0.15,
       "currentChance": 0.15,
       "activeMultiplier": 1,
+      "knowhowBonusPercentagePoints": 0,
       "ingredientTypesOnSuccess": 1,
       "slotChances": {
         "primary": 0.5,
@@ -1892,7 +2603,7 @@
   },
   "specialVisitor": {
     "interval": 120,
-    "nextIn": 106.86,
+    "nextIn": 106.87,
     "lastType": null,
     "dropBoostRemaining": 0,
     "dropMultiplier": 1,

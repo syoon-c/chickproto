@@ -24,7 +24,7 @@ try {
   await page.reload({ waitUntil: "load" });
 
   const labels = await page.locator(".bottom-nav .nav-button strong").allTextContents();
-  if (labels.join(",") !== "테마,레시피,손님") throw new Error(`Unexpected bottom navigation: ${labels.join(",")}`);
+  if (labels.join(",") !== "테마,레시피,손님,노하우") throw new Error(`Unexpected bottom navigation: ${labels.join(",")}`);
   if (await page.locator("[data-screen='missions'],[data-screen='staff'],#collection-btn").count()) {
     throw new Error("Removed task/staff/top collection controls remain");
   }
@@ -99,7 +99,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(await state(), null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log("BOTTOM_CONTROLS_INVENTORY_OK nav=theme/recipe/guests fridge=inventory systems=disabled");
+  console.log("BOTTOM_CONTROLS_INVENTORY_OK nav=theme/recipe/guests/knowhow fridge=inventory systems=disabled");
 } finally {
   await browser.close();
 }

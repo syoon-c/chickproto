@@ -48,7 +48,11 @@ try {
     await page.locator("#debug-add-resource-btn").click();
   }
 
-  const debugIngredientId = await page.evaluate(() => window.CHICK_CONFIG.GAME_INGREDIENTS.truffle.id);
+  const debugIngredientId = await page.evaluate(() => window.CHICK_CONFIG.GAME_INGREDIENTS.leaf.id);
+  if (await page.locator("#debug-ingredient-type").inputValue() !== String(debugIngredientId)
+    || !(await page.locator("#debug-ingredient-type").innerText()).includes("나뭇잎")) {
+    throw new Error("Leaf is not pinned to the top of the debug ingredient picker");
+  }
   const ingredientBefore = current.progression.ingredients[String(debugIngredientId)] || 0;
   await page.locator("#debug-ingredient-type").selectOption(String(debugIngredientId));
   await page.locator("#debug-ingredient-amount").fill("27");
@@ -86,7 +90,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(reloaded, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`DEBUG_PANEL_OK install=${reloaded.debug.installedFacilities}/${reloaded.debug.totalInstallFacilities} acorns=+12345 ideas=+321 gems=+17 stickers=+9 ingredient=truffle+27 persisted=yes`);
+  console.log(`DEBUG_PANEL_OK install=${reloaded.debug.installedFacilities}/${reloaded.debug.totalInstallFacilities} acorns=+12345 ideas=+321 gems=+17 stickers=+9 ingredient=leaf+27 persisted=yes`);
 } finally {
   await browser.close();
 }

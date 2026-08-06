@@ -345,7 +345,7 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
   height: 68px;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 5px;
   padding: 6px;
   border: 3px solid #694526;
@@ -366,9 +366,9 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
   background: transparent;
   cursor: pointer;
 }
-.nav-button span { width: 28px; height: 28px; display: grid; place-items: center; line-height: 1; }
-.nav-button span img { width: 28px; height: 28px; object-fit: contain; }
-.nav-button strong { font-size: 11px; }
+.nav-button span { width: 26px; height: 26px; display: grid; place-items: center; line-height: 1; }
+.nav-button span img { width: 26px; height: 26px; object-fit: contain; }
+.nav-button strong { font-size: 10px; }
 .nav-button.is-active { background: #f6c74c; box-shadow: inset 0 -3px 0 rgba(169, 93, 27, .22); }
 .nav-button i { position: absolute; top: 5px; right: 14px; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; background: #e74736; }
 .nav-button.is-locked { color: #8a7967; filter: saturate(.35); }
@@ -413,6 +413,41 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .theme-summary > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .theme-summary strong { font-size: 17px; }
 .theme-summary span, .theme-summary small { margin-top: 3px; color: #76583d; font-size: 11px; }
+.knowhow-progress-card { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: center; margin-bottom: 8px; padding: 11px 13px; border: 2px solid #8d5a2c; border-radius: 19px; background: linear-gradient(135deg,#fff4bc,#f6c75d); box-shadow: 0 4px 0 rgba(126,76,33,.18); }
+.knowhow-progress-card > img { width: 68px; height: 68px; object-fit: contain; filter: drop-shadow(0 3px 2px rgba(85,54,24,.2)); }
+.knowhow-progress-card > div { min-width: 0; }
+.knowhow-progress-card span { display: block; color: #94602c; font-size: 10px; font-weight: 1000; }
+.knowhow-progress-card strong { display: block; margin: 1px 0 5px; color: #533417; font-size: 20px; }
+.knowhow-progress-card small { display: block; margin-top: 4px; color: #75502f; font-size: 10px; font-weight: 800; }
+.knowhow-xp-bar { height: 12px; overflow: hidden; border: 2px solid #72451f; border-radius: 99px; background: rgba(255,255,255,.72); }
+.knowhow-xp-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#77c659,#42a94f); transition: width .25s ease; }
+.knowhow-guide { margin: 8px 3px; color: #806044; font-size: 11px; font-weight: 800; text-align: center; }
+.knowhow-map-viewport { height: 380px; overflow: auto; border: 2px solid rgba(108,76,46,.38); border-radius: 20px; background-color: #f9f1d7; background-image: radial-gradient(rgba(135,100,58,.18) 1.4px,transparent 1.4px); background-size: 18px 18px; box-shadow: inset 0 3px 10px rgba(91,64,38,.1); cursor: grab; overscroll-behavior: contain; }
+.knowhow-map { position: relative; width: 680px; height: 650px; }
+.knowhow-map svg { position: absolute; inset: 0; width: 680px; height: 650px; pointer-events: none; }
+.knowhow-map line { stroke: #c3ad8b; stroke-width: 8; stroke-linecap: round; }
+.knowhow-map line.is-active { stroke: #e2a536; filter: drop-shadow(0 2px 0 rgba(115,75,28,.16)); }
+.knowhow-node { position: absolute; left: calc(var(--node-x) - 56px); top: calc(var(--node-y) - 42px); width: 112px; height: 84px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 5px; border: 3px solid #9f7953; border-radius: 20px; background: linear-gradient(#fffdf4,#eadbb9); color: #5c4029; box-shadow: 0 5px 0 rgba(104,70,38,.26),0 8px 15px rgba(72,50,31,.12); cursor: pointer; }
+.knowhow-node > span { font-size: 25px; line-height: 1; }
+.knowhow-node > strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.knowhow-node > small { color: #826449; font-size: 9px; font-weight: 1000; }
+.knowhow-node.is-locked { filter: grayscale(1); opacity: .56; }
+.knowhow-node.is-available { border-color: #df9b28; background: linear-gradient(#fff7bd,#f1c65a); animation: knowhow-ready 1.4s ease-in-out infinite alternate; }
+.knowhow-node.is-owned { border-color: #58a34d; background: linear-gradient(#efffce,#a8dc72); }
+.knowhow-node.is-maxed { border-color: #3e8e58; background: linear-gradient(#e5ffd8,#7acb7d); }
+.knowhow-node.is-selected { outline: 4px solid rgba(237,111,45,.32); transform: translateY(-2px); }
+@keyframes knowhow-ready { from { box-shadow: 0 5px 0 rgba(104,70,38,.26),0 0 0 rgba(255,190,47,0); } to { box-shadow: 0 5px 0 rgba(104,70,38,.26),0 0 16px rgba(255,174,36,.75); } }
+.knowhow-detail { display: grid; grid-template-columns: 46px 1fr; gap: 9px; margin-top: 10px; padding: 12px; border: 2px solid #8c6844; border-radius: 18px; background: rgba(255,252,239,.92); }
+.knowhow-detail.is-locked { filter: grayscale(.55); }
+.knowhow-detail-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: #f3d77f; font-size: 27px; }
+.knowhow-detail-copy { min-width: 0; }
+.knowhow-detail-copy > small { color: #99714b; font-size: 10px; font-weight: 900; }
+.knowhow-detail-copy h3 { margin: 2px 0 3px; color: #52371f; font-size: 16px; }
+.knowhow-detail-copy h3 b { color: #a8652f; font-size: 11px; }
+.knowhow-detail-copy p { margin: 0; color: #634b36; font-size: 11px; font-weight: 800; }
+.knowhow-detail-copy em { display: block; margin-top: 5px; color: #388149; font-size: 10px; font-style: normal; font-weight: 1000; }
+.knowhow-detail > button { grid-column: 1 / -1; min-height: 40px; border: 0; border-radius: 13px; background: linear-gradient(#ffd86b,#eca52e); color: #573518; box-shadow: 0 4px 0 #a76925; font-size: 12px; font-weight: 1000; cursor: pointer; }
+.knowhow-detail > button:disabled { background: #d8cdb7; color: #827663; box-shadow: 0 3px 0 #a89c87; cursor: default; }
 .theme-progress-gauge { position: relative; width: 100%; padding-bottom: 15px; }
 .theme-progress-gauge .progress-track { margin-top: 8px; }
 .theme-progress-markers { position: relative; height: 10px; margin-top: 3px; }

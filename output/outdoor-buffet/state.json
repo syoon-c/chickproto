@@ -387,6 +387,187 @@
     "presentation": "separate-upper-right-card"
   },
   "mealDurationSeconds": 7,
+  "bottomNavigation": [
+    "theme",
+    "recipe",
+    "collection",
+    "knowhow"
+  ],
+  "knowhow": {
+    "name": "식당 노하우",
+    "xp": 0,
+    "xpPerPoint": 100,
+    "points": 0,
+    "totalXp": 0,
+    "xpRewards": {
+      "recipeResearchSuccessOrFailure": 20,
+      "guestMealCooking": 5
+    },
+    "selectedSkillId": "auto_collect",
+    "graphPresentation": "connected-mind-map",
+    "effects": {
+      "ingredientDropChance": 0.15,
+      "cookingSpeedReduction": 0,
+      "researchSpeedReduction": 0,
+      "buffetOfflineCapSeconds": 7200,
+      "contestPrizeMultiplier": 1
+    },
+    "automation": {
+      "collectInterval": null,
+      "orderDelay": null,
+      "promotionInterval": null
+    },
+    "nodes": [
+      {
+        "id": "restaurant_basics",
+        "name": "식당 노하우",
+        "level": 1,
+        "maxLevel": 1,
+        "cost": 0,
+        "prerequisitesMet": true,
+        "prerequisites": [],
+        "effect": "요리하며 식당 운영 경험을 쌓아요",
+        "x": 306,
+        "y": 270
+      },
+      {
+        "id": "auto_collect",
+        "name": "척척 회수",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 1,
+        "prerequisitesMet": true,
+        "prerequisites": [
+          {
+            "id": "restaurant_basics",
+            "level": 1
+          }
+        ],
+        "effect": "필드의 재료와 도토리를 자동 회수",
+        "x": 105,
+        "y": 260
+      },
+      {
+        "id": "auto_order",
+        "name": "주문 척척",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_collect",
+            "level": 1
+          }
+        ],
+        "effect": "기다리는 손님의 주문을 자동 접수",
+        "x": 80,
+        "y": 420
+      },
+      {
+        "id": "auto_promotion",
+        "name": "입소문",
+        "level": 0,
+        "maxLevel": 2,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_order",
+            "level": 2
+          }
+        ],
+        "effect": "쉬지 않고 손님을 자동으로 홍보",
+        "x": 205,
+        "y": 555
+      },
+      {
+        "id": "drop_bonus",
+        "name": "단골의 선물",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 1,
+        "prerequisitesMet": true,
+        "prerequisites": [
+          {
+            "id": "restaurant_basics",
+            "level": 1
+          }
+        ],
+        "effect": "재료 드랍 확률 +0%p",
+        "x": 295,
+        "y": 85
+      },
+      {
+        "id": "cooking_speed",
+        "name": "손에 익은 요리",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 1,
+        "prerequisitesMet": true,
+        "prerequisites": [
+          {
+            "id": "restaurant_basics",
+            "level": 1
+          }
+        ],
+        "effect": "손님 음식 조리 시간 -0%",
+        "x": 505,
+        "y": 255
+      },
+      {
+        "id": "research_speed",
+        "name": "빠른 실험",
+        "level": 0,
+        "maxLevel": 2,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed",
+            "level": 1
+          }
+        ],
+        "effect": "레시피 연구 시간 -0%",
+        "x": 585,
+        "y": 85
+      },
+      {
+        "id": "offline_bonus",
+        "name": "든든한 준비",
+        "level": 0,
+        "maxLevel": 2,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed",
+            "level": 1
+          }
+        ],
+        "effect": "뷔페 오프라인 보상 상한 +0시간",
+        "x": 500,
+        "y": 425
+      },
+      {
+        "id": "contest_prize",
+        "name": "승부 요령",
+        "level": 0,
+        "maxLevel": 3,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed",
+            "level": 2
+          }
+        ],
+        "effect": "요리 대회 상금 +0%",
+        "x": 585,
+        "y": 565
+      }
+    ]
+  },
   "promotion": {
     "progress": 0,
     "queued": 0,
@@ -506,7 +687,7 @@
     ],
     "perMinute": 80,
     "collectionBonusPercent": 16,
-    "nextIncomeIn": 52.53,
+    "nextIncomeIn": 52.54,
     "cashbox": 12,
     "offlineCapSeconds": 7200,
     "offlinePending": 0,
@@ -753,7 +934,13 @@
     "buffetOfflineRevenue": 9600,
     "contestEntries": 0,
     "contestFirstPlaces": 0,
-    "contestPrizeMoney": 0
+    "contestPrizeMoney": 0,
+    "knowhowXpEarned": 0,
+    "knowhowPointsEarned": 0,
+    "knowhowUpgrades": 0,
+    "autoCollected": 0,
+    "autoOrders": 0,
+    "autoPromotions": 0
   },
   "currentScreen": "restaurant",
   "recipes": {
@@ -876,12 +1063,13 @@
       "performanceBuff": 1
     },
     "cookingTimeRule": {
-      "formula": "clamp(roundToHalfSecond(2+basePrice/20),4,24)*recipeLevelSpeedReduction",
+      "formula": "clamp(roundToHalfSecond(2+basePrice/20),4,24)*recipeLevelSpeedReduction*knowhowSpeedReduction",
       "baseSeconds": 2,
       "pricePerSecond": 20,
       "minimumSeconds": 4,
       "maximumSeconds": 24,
-      "stepSeconds": 0.5
+      "stepSeconds": 0.5,
+      "knowhowReduction": 0
     },
     "recipeLevelPriceBonus": 0.1,
     "craftable": [],
@@ -2565,6 +2753,7 @@
       "overallChance": 0.15,
       "currentChance": 0.15,
       "activeMultiplier": 1,
+      "knowhowBonusPercentagePoints": 0,
       "ingredientTypesOnSuccess": 1,
       "slotChances": {
         "primary": 0.5,
@@ -2612,7 +2801,7 @@
   },
   "specialVisitor": {
     "interval": 120,
-    "nextIn": 51.05,
+    "nextIn": 51.15,
     "lastType": null,
     "dropBoostRemaining": 0,
     "dropMultiplier": 1,
