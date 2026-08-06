@@ -122,6 +122,11 @@ const FUTURE_TRADE_CHANCE = 0.15;
 const MERCHANT_THEME_BASE_PRICES = Object.freeze([120, 300, 1200]);
 const MERCHANT_LATE_THEME_MULTIPLIER = 2;
 const MERCHANT_STAGE_PRICE_STEP = 0.08;
+const COOKING_TIME_BASE_SECONDS = 2;
+const COOKING_PRICE_PER_SECOND = 20;
+const COOKING_TIME_MIN_SECONDS = 4;
+const COOKING_TIME_MAX_SECONDS = 24;
+const COOKING_TIME_STEP_SECONDS = 0.5;
 const SPECIAL_VISITOR_TYPES = Object.freeze({
   thief: { name: "도둑 병아리", icon: "assets/ui/chick/icon_chick_007.png", marker: "!" },
   merchant: { name: "재료 상인", icon: "assets/ui/chick/icon_chick_rich.png", marker: "₩" },
@@ -379,6 +384,15 @@ function loadState() {
       : [];
     while (savedQueueTargets.length < Number(savedPromotion.queued || 0)) savedQueueTargets.unshift(null);
     savedQueueTargets.splice(Number(savedPromotion.queued || 0));
+    const migratedCooking = (parsed.cooking || []).map((task) => {
+      const recipe = getRecipe(task.recipeId);
+      const owned = ownedRecipes[task.recipeId] || { level: 1 };
+      const duration = recipe ? recipeCookingDuration(recipe, owned.level) : Number(task.duration || COOKING_TIME_MIN_SECONDS);
+      const previousProgress = Number(task.duration) > 0
+        ? Math.max(0, Math.min(1, Number(task.elapsed || 0) / Number(task.duration)))
+        : 0;
+      return { ...task, duration, elapsed: previousProgress * duration };
+    });
     return {
       ...defaults,
       ...restaurantSave,
@@ -398,6 +412,7 @@ function loadState() {
         cooldown: specialCooldown,
         lastUpdatedAt: Date.now(),
       },
+      cooking: migratedCooking,
       specialVisitor: savedSpecialVisitor,
       ui: { ...defaults.ui, ...savedUi, screen: "restaurant", tab: "craft" },
       tutorial: parsed.tutorial
@@ -1003,6 +1018,28 @@ function getRecipe(id) {
     ? configuredPrice
     : Math.max(configuredPrice, Number(route.minimumFoodPrice || 0));
   return { ...base, id: numericId, foodPrice };
+}
+
+function baseRecipeCookingDuration(recipe) {
+  const price = Math.max(0, Number(recipe?.foodPrice || 0));
+  const rawDuration = COOKING_TIME_BASE_SECONDS + price / COOKING_PRICE_PER_SECOND;
+  const steppedDuration = Math.round(rawDuration / COOKING_TIME_STEP_SECONDS) * COOKING_TIME_STEP_SECONDS;
+  return Math.max(COOKING_TIME_MIN_SECONDS, Math.min(COOKING_TIME_MAX_SECONDS, steppedDuration));
+}
+
+function recipeCookingDuration(recipe, level = 1) {
+  const reductions = {
+    1: Number(tables.recipeSetting.MenuCoolDownNormal || 0),
+    2: Number(tables.recipeSetting.MenuCoolDownFancy || 0),
+    3: Number(tables.recipeSetting.MenuCoolDownSpecial || 0),
+  };
+  const levelReduction = Math.max(0, Number(level || 1) - 1) * (reductions[recipe?.recipeGrade] || 0);
+  return Math.max(Number(tables.recipeSetting.CookTimeLimit || 2), baseRecipeCookingDuration(recipe) * Math.max(0, 1 - levelReduction));
+}
+
+function formatCookingDuration(seconds) {
+  const duration = Math.round(Number(seconds || 0) * 10) / 10;
+  return Number.isInteger(duration) ? `${duration}초` : `${duration.toFixed(1)}초`;
 }
 
 function routeRecipeName(id) {
@@ -1726,14 +1763,13 @@ function startCookingIfPossible() {
     if (!guest || guest.state !== "waiting_food") continue;
     const recipe = getRecipe(order.recipeId);
     const owned = recipeData(order.recipeId) || { level: 1 };
-    const reductions = { 1: Number(tables.recipeSetting.MenuCoolDownNormal || 0), 2: Number(tables.recipeSetting.MenuCoolDownFancy || 0), 3: Number(tables.recipeSetting.MenuCoolDownSpecial || 0) };
-    const duration = Number(recipe?.cookTime || 4) * (1 - Math.max(0, owned.level - 1) * (reductions[recipe?.recipeGrade] || 0));
+    const duration = recipeCookingDuration(recipe, owned.level);
     state.cooking.push({
       stoveId: stove.id,
       guestId: order.guestId,
       recipeId: order.recipeId,
       elapsed: 0,
-      duration: Math.max(Number(tables.recipeSetting.CookTimeLimit || 2), duration),
+      duration,
     });
   }
 }
@@ -2795,7 +2831,8 @@ function recipeCard(recipe) {
     <img class="feature-icon" src="${routeRecipeIcon(recipe.id)}" alt="" />
     <div class="feature-copy"><strong>${locked ? "???" : routeRecipeName(recipe.id)}</strong>
     <small class="grade">${grade} · ${locked ? "미획득" : `Lv.${owned.level}/${recipe.maxLevel}`}</small>
-    <small>${locked ? "보유 재료 조합으로 발견할 수 있어요" : `Lv.UP당 가격 +${Math.round(RECIPE_LEVEL_PRICE_BONUS * 100)}% · 현재 가격 ${formatNumber(currentPrice)}`}</small></div>${action}</article>`;
+    <small>${locked ? "보유 재료 조합으로 발견할 수 있어요" : `현재 가격 ${formatNumber(currentPrice)} · 조리 ${formatCookingDuration(recipeCookingDuration(recipe, owned.level))}`}</small>
+    ${locked ? "" : `<small>Lv.UP당 가격 +${Math.round(RECIPE_LEVEL_PRICE_BONUS * 100)}% · 조리 시간 단축</small>`}</div>${action}</article>`;
 }
 
 function expandedCraftIngredientIds(route) {
@@ -3513,6 +3550,14 @@ function renderGameToText() {
         satisfactionHappy: satisfactionPriceMultiplier("satisfied"),
         performanceBuff: performancePriceMultiplier(),
       },
+      cookingTimeRule: {
+        formula: "clamp(roundToHalfSecond(2+basePrice/20),4,24)*recipeLevelSpeedReduction",
+        baseSeconds: COOKING_TIME_BASE_SECONDS,
+        pricePerSecond: COOKING_PRICE_PER_SECOND,
+        minimumSeconds: COOKING_TIME_MIN_SECONDS,
+        maximumSeconds: COOKING_TIME_MAX_SECONDS,
+        stepSeconds: COOKING_TIME_STEP_SECONDS,
+      },
       recipeLevelPriceBonus: RECIPE_LEVEL_PRICE_BONUS,
       craftable: RECIPE_PROGRESSION.filter((route) => canCraftRecipe(route.recipeId)).map((route) => route.recipeId),
       searchScope: "all-recipes-by-owned-ingredients",
@@ -3524,6 +3569,15 @@ function renderGameToText() {
       prices: Object.fromEntries(Object.entries(state.ownedRecipes).map(([id, owned]) => {
         const recipe = getRecipe(Number(id));
         return [id, Math.round(recipeLevelPrice(recipe, owned))];
+      })),
+      cookingTimes: Object.fromEntries(Object.entries(state.ownedRecipes).map(([id, owned]) => {
+        const recipe = getRecipe(Number(id));
+        return [id, {
+          basePrice: Number(recipe.foodPrice),
+          baseDuration: baseRecipeCookingDuration(recipe),
+          level: Number(owned.level || 1),
+          currentDuration: Number(recipeCookingDuration(recipe, owned.level).toFixed(2)),
+        }];
       })),
     },
     ingredientStorage: ingredientStorageStatus(),
