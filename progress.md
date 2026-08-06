@@ -1503,3 +1503,32 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - `tools/verify-special-promotion.mjs`를 저장 데이터 직접 주입 방식에서 실제 `4개 보유 → 수동 조합으로 5번째 발견 → 발견 연출 닫기 → 메뉴 자동 종료 → 말풍선 노출` 흐름으로 강화했다.
 - 검증: 특별 홍보 전체 흐름, 직접 열기 영업, 기존 설비 튜토리얼, 2~5재료 레시피 조합, 중요 토스트 회귀 테스트 통과. 공식 클라이언트 콘솔 오류 없음.
 - 화면 확인: `output/special-promotion/01-five-recipes-tutorial.png`.
+
+## 2026-08-06 재료별 드랍 손님 확인 팝업
+
+- 특별 홍보 재료를 눌러도 즉시 홍보가 시작되지 않고, 작은 재료 출처 팝업이 먼저 열린다.
+- 팝업에는 재료 보유량, 해당 재료를 드랍하는 해금 손님의 실제 아이콘과 이름, 주/보조/특별 재료 구분, 드랍 성공 시 슬롯 비율을 표시한다.
+- 방문 등급이 부족한 슬롯도 출처로는 보여주되 `40회 방문 시` 또는 `150회 방문 시`로 잠금 조건을 표시한다. 실제 특별 홍보 대상에는 지금 획득 가능한 손님만 계속 포함한다.
+- 팝업의 `이 재료로 홍보`를 눌러야 기존 60초 특별 홍보가 시작된다. 바깥 영역/닫기 버튼 및 검색어 변경 시 상세 팝업이 닫힌다.
+- `render_game_to_text.specialPromotion.detail`에 선택한 재료와 출처 손님 상태를 추가했다.
+- 검증: `node tools/verify-special-promotion.mjs` → `SPECIAL_PROMOTION_OK recipes=5 tutorial=required target=당근 source-popup=1 duration=60 cooldown=30 filter=unlocked-only`.
+- 화면 확인: `output/special-promotion/03-carrot-source-popup.png`. 현재 데이터에서 당근은 해금된 화분 병아리의 주재료로 표시된다.
+- 공식 `develop-web-game` 클라이언트도 실행해 초기 게임 상태 출력과 캔버스 렌더링을 확인했다. 새 브라우저 콘솔 오류는 없었다.
+
+## 2026-08-06 테스트용 디버그 팝업
+
+- 오른쪽 상단 초기화 버튼 바로 아래에 작은 `DEBUG` 버튼을 추가했다. 누르면 일반 플레이를 가리지 않는 작은 테스트 도구 팝업이 열린다.
+- `초기 설비 전체 설치`는 현재 레스토랑의 초기 설치 대상 19개를 비용 없이 한 번에 설치한다. 이미 설치된 설비는 중복되지 않으며 도마 테이블·냉장고를 포함한 관련 시스템도 즉시 사용할 수 있다.
+- 재화 종류(도토리·아이디어·보석·스티커)와 원하는 양을 직접 입력해 추가할 수 있다. 0 이하/잘못된 입력은 거부하고, 결과는 즉시 HUD와 저장 데이터에 반영된다.
+- 디버그 적용 결과는 재접속 후에도 유지된다. 게임 초기화 시 디버그 팝업은 닫힌 상태로 돌아간다.
+- `render_game_to_text.debug`에 팝업 표시 여부와 설치 완료 수, 지원 재화 목록을 추가했다.
+- 검증: `node tools/verify-debug-panel.mjs` → `DEBUG_PANEL_OK install=19/19 acorns=+12345 ideas=+321 gems=+17 stickers=+9 persisted=yes`.
+- 특별 홍보 전체 흐름 회귀 테스트도 통과했다. 공식 `develop-web-game` 클라이언트에서 DEBUG 버튼 클릭 및 `panelVisible: true` 상태를 확인했다.
+- 화면 확인: `output/debug-panel/01-debug-panel.png`, `02-resources-and-install-all.png`.
+
+## 2026-08-06 상단 아이디어 재화 표시 제거
+
+- 상단 HUD의 아이디어 아이콘과 수량 표시를 제거해 도토리와 보석만 남겼다.
+- 기존 저장 데이터의 아이디어 값은 호환성을 위해 보존하며, 화면 요소를 참조하던 HUD 갱신 코드만 함께 제거했다.
+- 검증: 디버그 팝업 전체 설치·재화 추가·재접속 유지 테스트 통과. 상단 두 재화와 DEBUG 버튼 배치를 `output/debug-panel/01-debug-panel.png`에서 확인했다.
+- 공식 `develop-web-game` 클라이언트로 초기 상태와 콘솔 오류 없음도 재확인했다.

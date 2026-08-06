@@ -52,14 +52,22 @@ try {
       && route.ingredientRequirements[0].id !== route.ingredientRequirements[1].id);
     saved.crafting.ingredients = Object.fromEntries(craftRoute.ingredientRequirements.map((ingredient) => [ingredient.id, 1]));
     saved.crafting.selected = [];
-    const woodRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => Number(row.areaType) === 1 && Number(row.facilityTheme) === 2);
-    saved.themes.opened = [...new Set([...saved.themes.opened, ...woodRows.slice(0, Math.ceil(woodRows.length * .3)).map((row) => row.id)])];
+    const carrot = window.CHICK_CONFIG.GAME_INGREDIENTS.carrot;
+    const carrotSources = window.CHICK_CONFIG.CORE_PROGRESSION.filter((route) => route.rewardIngredients
+      .some((ingredient) => Number(ingredient.id) === carrot.id));
+    const carrotThemeIds = new Set(carrotSources.map((route) => Number(route.themeId)));
+    const sourceThemeRows = window.CHICK_TABLE_SOURCE.ThemeFacility.filter((row) => Number(row.areaType) === 1
+      && carrotThemeIds.has(Number(row.facilityTheme)));
+    saved.themes.opened = [...new Set([...saved.themes.opened, ...sourceThemeRows.map((row) => row.id)])];
+    saved.collections.customers ||= {};
+    carrotSources.forEach((source) => {
+      saved.collections.customers[source.customerId] = { count: 150, codexClaimed: true };
+    });
     localStorage.setItem(key, JSON.stringify(saved));
-    const chick = window.CHICK_CONFIG.CORE_PROGRESSION.find((route) => route.themeId === 2 && route.slot === 0);
     return {
-      customerId: chick.customerId,
-      ingredientId: chick.rewardIngredients[0].id,
-      ingredientName: chick.rewardIngredients[0].name,
+      sourceIds: carrotSources.map((source) => source.customerId),
+      ingredientId: carrot.id,
+      ingredientName: carrot.name,
       craftIngredientIds: craftRoute.ingredientRequirements.map((ingredient) => ingredient.id),
     };
   });
@@ -103,6 +111,23 @@ try {
   await choice.click();
 
   current = await gameState();
+  if (current.specialPromotion.ingredientId !== null || current.specialPromotion.remaining !== 0
+    || current.specialPromotion.detail?.ingredientId !== target.ingredientId
+    || !current.specialPromotion.detail.sources.length
+    || current.specialPromotion.detail.sources.some((source) => !target.sourceIds.includes(source.customerId))
+    || !await page.locator("#special-promotion-detail").isVisible()) {
+    throw new Error(`Ingredient source popup is incorrect or promotion started too early: ${JSON.stringify(current.specialPromotion)}`);
+  }
+  const sourceRows = page.locator(".special-promotion-source");
+  if (await sourceRows.count() !== current.specialPromotion.detail.sources.length
+    || !(await page.locator(".special-promotion-detail-title").innerText()).includes("당근")
+    || !(await sourceRows.first().innerText()).includes("재료")) {
+    throw new Error("Ingredient source popup did not render compact guest source details");
+  }
+  await page.screenshot({ path: path.join(out, "03-carrot-source-popup.png"), fullPage: true });
+  await page.locator('[data-action="confirm-special-promotion"]').click();
+
+  current = await gameState();
   if (current.specialPromotion.ingredientId !== target.ingredientId || current.specialPromotion.remaining < 59
     || !await page.locator("#special-promotion-btn").isDisabled()
     || !(await page.locator("#special-promotion-label").innerText()).includes(":")) {
@@ -110,10 +135,10 @@ try {
   }
   await page.locator("#promotion-btn").click();
   current = await gameState();
-  if (!current.guests.length || current.guests.some((guest) => guest.customerId !== target.customerId)) {
+  if (!current.guests.length || current.guests.some((guest) => !target.sourceIds.includes(guest.customerId))) {
     throw new Error(`Non-target guests appeared during special promotion: ${JSON.stringify(current.guests)}`);
   }
-  await page.screenshot({ path: path.join(out, "03-active-target-promotion.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "04-active-target-promotion.png"), fullPage: true });
 
   await page.evaluate(() => window.advanceTime(30000));
   current = await gameState();
@@ -129,7 +154,7 @@ try {
     || !(await page.locator("#special-promotion-label").innerText()).includes("재사용")) {
     throw new Error(`Thirty-second cooldown did not start: ${JSON.stringify(current.specialPromotion)}`);
   }
-  await page.screenshot({ path: path.join(out, "04-cooldown.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "05-cooldown.png"), fullPage: true });
 
   await page.evaluate(() => window.advanceTime(30000));
   current = await gameState();
@@ -141,7 +166,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`SPECIAL_PROMOTION_OK recipes=5 tutorial=required target=${target.ingredientName} duration=60 cooldown=30 filter=unlocked-only`);
+  console.log(`SPECIAL_PROMOTION_OK recipes=5 tutorial=required target=${target.ingredientName} source-popup=${target.sourceIds.length} duration=60 cooldown=30 filter=unlocked-only`);
 } finally {
   await browser.close();
 }

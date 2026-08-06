@@ -33,7 +33,6 @@ const ctx = canvas.getContext("2d");
 const SYSTEM_ENABLED = Object.freeze({ missions: false, staff: false });
 const dom = {
   acorns: document.querySelector("#acorn-count"),
-  ideas: document.querySelector("#idea-count"),
   gems: document.querySelector("#gem-count"),
   promoButton: document.querySelector("#promotion-btn"),
   specialPromoButton: document.querySelector("#special-promotion-btn"),
@@ -42,7 +41,15 @@ const dom = {
   specialPromoClose: document.querySelector("#special-promotion-close"),
   specialPromoSearch: document.querySelector("#special-promotion-search"),
   specialPromoList: document.querySelector("#special-promotion-list"),
+  specialPromoDetail: document.querySelector("#special-promotion-detail"),
   resetButton: document.querySelector("#reset-btn"),
+  debugToggleButton: document.querySelector("#debug-toggle-btn"),
+  debugPanel: document.querySelector("#debug-panel"),
+  debugCloseButton: document.querySelector("#debug-close-btn"),
+  debugInstallAllButton: document.querySelector("#debug-install-all-btn"),
+  debugResourceType: document.querySelector("#debug-resource-type"),
+  debugResourceAmount: document.querySelector("#debug-resource-amount"),
+  debugAddResourceButton: document.querySelector("#debug-add-resource-btn"),
   installPanel: document.querySelector("#install-panel"),
   installClose: document.querySelector("#install-close-btn"),
   installIcon: document.querySelector("#install-icon"),
@@ -83,6 +90,7 @@ let mixingDropIndex = -1;
 let recipeReveal = null;
 let recipeRevealTimer = 0;
 let recipeResearch = null;
+let specialPromotionDetailIngredientId = null;
 const RECIPE_RESEARCH_DURATION = 2.4;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
 const STARTER_INGREDIENTS = Object.freeze({
@@ -1132,6 +1140,62 @@ function specialPromotionChoices() {
   return [...choices.values()].sort((a, b) => a.name.localeCompare(b.name, "ko") || a.ingredientId - b.ingredientId);
 }
 
+const SPECIAL_PROMOTION_SLOT_META = Object.freeze([
+  { key: "primary", label: "주재료", requiredVisits: Number(GUEST_GRADES[0]?.minVisits || 1), weight: INGREDIENT_SLOT_WEIGHTS.primary },
+  { key: "secondary", label: "보조재료", requiredVisits: Number(GUEST_GRADES[1]?.minVisits || 40), weight: INGREDIENT_SLOT_WEIGHTS.secondary },
+  { key: "special", label: "특별재료", requiredVisits: Number(GUEST_GRADES[2]?.minVisits || 150), weight: INGREDIENT_SLOT_WEIGHTS.special },
+]);
+
+function specialPromotionIngredientSources(ingredientId) {
+  const numericId = Number(ingredientId);
+  return allUnlockedThemeChicks().flatMap((chick) => {
+    const slotIndex = (chick.rewardIngredients || []).findIndex((ingredient) => Number(ingredient.id) === numericId);
+    if (slotIndex < 0 || slotIndex >= SPECIAL_PROMOTION_SLOT_META.length) return [];
+    const visits = Number(state.collections.customers[chick.customerId]?.count || 0);
+    const slot = SPECIAL_PROMOTION_SLOT_META[slotIndex];
+    const eligible = guestRewardItems(chick, visits).some((reward) => Number(reward.ingredientId) === numericId);
+    return [{
+      customerId: chick.customerId,
+      customerName: chick.customerName,
+      commonId: chick.commonId,
+      icon: guestIcon(chick),
+      slot: slot.key,
+      slotLabel: slot.label,
+      weight: slot.weight,
+      visits,
+      requiredVisits: slot.requiredVisits,
+      eligible,
+    }];
+  }).sort((a, b) => Number(b.eligible) - Number(a.eligible)
+    || a.requiredVisits - b.requiredVisits
+    || a.customerName.localeCompare(b.customerName, "ko"));
+}
+
+function closeSpecialPromotionDetail() {
+  specialPromotionDetailIngredientId = null;
+  dom.specialPromoDetail.hidden = true;
+  dom.specialPromoDetail.innerHTML = "";
+}
+
+function openSpecialPromotionDetail(ingredientId) {
+  const choice = specialPromotionChoices().find((item) => item.ingredientId === Number(ingredientId));
+  if (!choice) return;
+  specialPromotionDetailIngredientId = choice.ingredientId;
+  const sources = specialPromotionIngredientSources(choice.ingredientId);
+  dom.specialPromoDetail.innerHTML = `<div class="special-promotion-detail-card" role="dialog" aria-modal="true" aria-label="${choice.name} 드랍 손님">
+    <button type="button" class="special-promotion-detail-close" data-action="close-special-promotion-detail" aria-label="닫기">×</button>
+    <div class="special-promotion-detail-title"><span>${choice.emoji}</span><div><small>재료 출처</small><strong>${choice.name}</strong><em>보유 ${ingredientAmount(choice.ingredientId)}개</em></div></div>
+    <p class="special-promotion-detail-rule">재료 드랍 ${Math.round(GUEST_INGREDIENT_DROP_CHANCE * 100)}% · 아래 비율은 드랍 성공 시</p>
+    <div class="special-promotion-source-list">${sources.map((source) => `<article class="special-promotion-source ${source.eligible ? "is-ready" : "is-locked"}">
+      <img src="${source.icon}" alt="" />
+      <div><strong>${source.customerName}</strong><span>${source.slotLabel} · ${Math.round(source.weight * 100)}%</span></div>
+      <small>${source.eligible ? "획득 가능" : `${source.requiredVisits}회 방문 시`}</small>
+    </article>`).join("") || `<p class="special-promotion-empty">해금된 손님 중 드랍하는 손님이 없어요.</p>`}</div>
+    <button type="button" class="special-promotion-detail-confirm" data-action="confirm-special-promotion" data-ingredient-id="${choice.ingredientId}">이 재료로 홍보</button>
+  </div>`;
+  dom.specialPromoDetail.hidden = false;
+}
+
 function renderSpecialPromotionChoices(query = dom.specialPromoSearch.value) {
   const normalizedQuery = String(query || "").trim().toLocaleLowerCase("ko");
   const choices = specialPromotionChoices().filter((choice) => !normalizedQuery
@@ -1142,6 +1206,7 @@ function renderSpecialPromotionChoices(query = dom.specialPromoSearch.value) {
 }
 
 function closeSpecialPromotionPanel() {
+  closeSpecialPromotionDetail();
   dom.specialPromoPanel.hidden = true;
   dom.specialPromoSearch.value = "";
   updateTutorialDialogue();
@@ -1153,6 +1218,7 @@ function openSpecialPromotionPanel() {
   dom.installPanel.hidden = true;
   dom.specialPromoPanel.hidden = false;
   dom.specialPromoSearch.value = "";
+  closeSpecialPromotionDetail();
   renderSpecialPromotionChoices();
   updateTutorialDialogue();
   requestAnimationFrame(() => dom.specialPromoSearch.focus());
@@ -2245,7 +2311,6 @@ function updateHud() {
   if (!state) return;
   ensureDailyReset();
   dom.acorns.textContent = formatNumber(state.resources.acorns);
-  dom.ideas.textContent = formatNumber(state.resources.ideas);
   dom.gems.textContent = formatNumber(state.resources.gems);
   dom.promoButton.hidden = false;
   dom.promoButton.disabled = !coreReady();
@@ -2889,6 +2954,7 @@ function resetGame() {
   guestToastTimer = 0;
   dom.guestToast.hidden = true;
   dom.specialPromoPanel.hidden = true;
+  toggleDebugPanel(false);
   dismissRecipeReveal();
   state = createInitialState();
   dom.installPanel.hidden = true;
@@ -2898,6 +2964,52 @@ function resetGame() {
   updateHud();
   updateTutorialDialogue();
   render();
+}
+
+const DEBUG_RESOURCE_NAMES = Object.freeze({
+  acorns: "도토리",
+  ideas: "아이디어",
+  gems: "보석",
+  stickers: "스티커",
+});
+
+function toggleDebugPanel(force) {
+  const shouldOpen = typeof force === "boolean" ? force : dom.debugPanel.hidden;
+  dom.debugPanel.hidden = !shouldOpen;
+  dom.debugToggleButton.classList.toggle("is-open", shouldOpen);
+  dom.debugToggleButton.setAttribute("aria-expanded", String(shouldOpen));
+  if (shouldOpen) closeSpecialPromotionPanel();
+}
+
+function debugInstallAllFacilities() {
+  const before = new Set(state.installed);
+  const added = tables.installs.filter((row) => !before.has(row.id));
+  state.installed = [...new Set([...state.installed, ...tables.installs.map((row) => row.id)])].sort((a, b) => a - b);
+  dom.installPanel.hidden = true;
+  saveState();
+  updateHud();
+  render();
+  showToast(added.length ? `초기 설비 ${added.length}개를 설치했어요.` : "초기 설비가 이미 모두 설치되어 있어요.", 3);
+}
+
+function debugAddResource() {
+  const resourceKey = dom.debugResourceType.value;
+  const requested = Math.floor(Number(dom.debugResourceAmount.value));
+  if (!Object.prototype.hasOwnProperty.call(DEBUG_RESOURCE_NAMES, resourceKey) || !Number.isFinite(requested) || requested <= 0) {
+    showToast("추가할 재화 수량을 확인해 주세요.");
+    dom.debugResourceAmount.focus();
+    return;
+  }
+  const amount = Math.min(requested, Number.MAX_SAFE_INTEGER - Number(state.resources[resourceKey] || 0));
+  if (amount <= 0) {
+    showToast("더 이상 재화를 추가할 수 없어요.");
+    return;
+  }
+  state.resources[resourceKey] = Number(state.resources[resourceKey] || 0) + amount;
+  saveState();
+  updateHud();
+  render();
+  showToast(`${DEBUG_RESOURCE_NAMES[resourceKey]} ${formatNumber(amount)} 추가!`, 2.5);
 }
 
 function frame(now) {
@@ -2923,6 +3035,12 @@ function renderGameToText() {
     visibleThemeType: "restaurant",
     objective: currentObjective(),
     resources: state.resources,
+    debug: {
+      panelVisible: !dom.debugPanel.hidden,
+      installedFacilities: state.installed.length,
+      totalInstallFacilities: tables.installs.length,
+      supportedResources: Object.keys(DEBUG_RESOURCE_NAMES),
+    },
     installedFacilityIds: state.installed,
     installCandidates: candidates,
     tutorial: {
@@ -2960,6 +3078,11 @@ function renderGameToText() {
         guestIds: choice.guests.map((guest) => guest.customerId),
         guestNames: choice.guests.map((guest) => guest.customerName),
       })),
+      detail: specialPromotionDetailIngredientId ? {
+        ingredientId: specialPromotionDetailIngredientId,
+        name: ingredientData(specialPromotionDetailIngredientId)?.ingredientName || null,
+        sources: specialPromotionIngredientSources(specialPromotionDetailIngredientId),
+      } : null,
       panelVisible: !dom.specialPromoPanel.hidden,
       filterRule: "unlocked-guests-and-currently-unlocked-reward-slots-only",
     },
@@ -3197,12 +3320,30 @@ canvas.addEventListener("pointerdown", handleCanvasTap);
 dom.promoButton.addEventListener("click", promote);
 dom.specialPromoButton.addEventListener("click", openSpecialPromotionPanel);
 dom.specialPromoClose.addEventListener("click", closeSpecialPromotionPanel);
-dom.specialPromoSearch.addEventListener("input", () => renderSpecialPromotionChoices());
+dom.specialPromoSearch.addEventListener("input", () => {
+  closeSpecialPromotionDetail();
+  renderSpecialPromotionChoices();
+});
 dom.specialPromoList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-ingredient-id]");
-  if (button) startSpecialPromotion(Number(button.dataset.ingredientId));
+  if (button) openSpecialPromotionDetail(Number(button.dataset.ingredientId));
+});
+dom.specialPromoDetail.addEventListener("click", (event) => {
+  if (event.target === dom.specialPromoDetail || event.target.closest('[data-action="close-special-promotion-detail"]')) {
+    closeSpecialPromotionDetail();
+    return;
+  }
+  const confirm = event.target.closest('[data-action="confirm-special-promotion"]');
+  if (confirm) startSpecialPromotion(Number(confirm.dataset.ingredientId));
 });
 dom.resetButton.addEventListener("click", resetGame);
+dom.debugToggleButton.addEventListener("click", () => toggleDebugPanel());
+dom.debugCloseButton.addEventListener("click", () => toggleDebugPanel(false));
+dom.debugInstallAllButton.addEventListener("click", debugInstallAllFacilities);
+dom.debugAddResourceButton.addEventListener("click", debugAddResource);
+dom.debugResourceAmount.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") debugAddResource();
+});
 dom.installClose.addEventListener("click", closeInstallPanel);
 dom.installConfirm.addEventListener("click", confirmInstall);
 dom.menuClose.addEventListener("click", closeMenu);

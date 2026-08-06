@@ -4,16 +4,16 @@
   "menuContext": "restaurant",
   "visibleRecipeType": "restaurant",
   "visibleThemeType": "restaurant",
-  "objective": "냉장고를 설치해 재료 드랍 열기",
+  "objective": "홍보 게이지를 채워 손님 부르기",
   "resources": {
-    "acorns": 150,
-    "gems": 0,
-    "ideas": 0,
-    "stickers": 5
+    "acorns": 12495,
+    "gems": 17,
+    "ideas": 321,
+    "stickers": 14
   },
   "debug": {
     "panelVisible": false,
-    "installedFacilities": 10,
+    "installedFacilities": 19,
     "totalInstallFacilities": 19,
     "supportedResources": [
       "acorns",
@@ -31,36 +31,23 @@
     6,
     7,
     8,
+    9,
+    10,
+    11,
+    12,
+    13,
     14,
-    16
+    15,
+    16,
+    17,
+    18,
+    19
   ],
-  "installCandidates": [
-    {
-      "id": 11,
-      "name": "팁박스",
-      "cost": 150,
-      "x": 425,
-      "y": 455,
-      "w": 72,
-      "h": 76
-    },
-    {
-      "id": 13,
-      "name": "싱크대",
-      "cost": 170,
-      "x": 274,
-      "y": 174,
-      "w": 78,
-      "h": 82
-    }
-  ],
+  "installCandidates": [],
   "tutorial": {
-    "activeId": null,
-    "text": null,
-    "seen": [
-      "welcome",
-      "special-promotion-unlocked"
-    ]
+    "activeId": "welcome",
+    "text": "작은 식당부터 차근차근 준비해 볼까요?",
+    "seen": []
   },
   "toast": {
     "visible": false,
@@ -84,18 +71,16 @@
   "mealDurationSeconds": 7,
   "promotion": {
     "progress": 0,
-    "queued": 1,
-    "totalClicks": 1,
-    "queueTargets": [
-      30025
-    ],
+    "queued": 0,
+    "totalClicks": 0,
+    "queueTargets": [],
     "threshold": 1,
     "enabled": true
   },
   "specialPromotion": {
-    "unlocked": true,
+    "unlocked": false,
     "recipeRequirement": 5,
-    "tutorialSeen": true,
+    "tutorialSeen": false,
     "ingredientId": null,
     "ingredientName": null,
     "remaining": 0,
@@ -114,53 +99,23 @@
         ]
       },
       {
-        "ingredientId": 30025,
-        "name": "당근",
+        "ingredientId": 30055,
+        "name": "버섯",
         "guestIds": [
-          10092
+          10012
         ],
         "guestNames": [
-          "화분 병아리"
+          "공룡 병아리"
         ]
       },
       {
-        "ingredientId": 30023,
-        "name": "모둠 채소",
+        "ingredientId": 30003,
+        "name": "빵",
         "guestIds": [
-          10093
+          10013
         ],
         "guestNames": [
-          "사과 병아리"
-        ]
-      },
-      {
-        "ingredientId": 30011,
-        "name": "밀가루",
-        "guestIds": [
-          10092
-        ],
-        "guestNames": [
-          "화분 병아리"
-        ]
-      },
-      {
-        "ingredientId": 30047,
-        "name": "설탕",
-        "guestIds": [
-          10092
-        ],
-        "guestNames": [
-          "화분 병아리"
-        ]
-      },
-      {
-        "ingredientId": 30068,
-        "name": "식초",
-        "guestIds": [
-          10091
-        ],
-        "guestNames": [
-          "꽃 병아리"
+          "알껍질 병아리"
         ]
       }
     ],
@@ -168,288 +123,7 @@
     "panelVisible": false,
     "filterRule": "unlocked-guests-and-currently-unlocked-reward-slots-only"
   },
-  "guests": [
-    {
-      "id": 1,
-      "customerId": 10092,
-      "customerName": "화분 병아리",
-      "icon": "assets/ui/chick/icon_chick_024.png",
-      "state": "awaiting_order",
-      "x": 188,
-      "y": 432,
-      "recipeId": 2,
-      "recipeName": "샌드위치",
-      "wait": 87.2,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "normal",
-      "dropIngredient": 30025,
-      "guestGrade": "최고의 단골",
-      "visits": 151,
-      "rewardItems": [
-        {
-          "ingredientId": 30025,
-          "name": "당근"
-        },
-        {
-          "ingredientId": 30011,
-          "name": "밀가루"
-        },
-        {
-          "ingredientId": 30047,
-          "name": "설탕"
-        }
-      ],
-      "themeId": 9,
-      "chickSlot": 1
-    },
-    {
-      "id": 2,
-      "customerId": 10092,
-      "customerName": "화분 병아리",
-      "icon": "assets/ui/chick/icon_chick_024.png",
-      "state": "awaiting_order",
-      "x": 292,
-      "y": 432,
-      "recipeId": 2,
-      "recipeName": "샌드위치",
-      "wait": 87.2,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "normal",
-      "dropIngredient": 30025,
-      "guestGrade": "최고의 단골",
-      "visits": 152,
-      "rewardItems": [
-        {
-          "ingredientId": 30025,
-          "name": "당근"
-        },
-        {
-          "ingredientId": 30011,
-          "name": "밀가루"
-        },
-        {
-          "ingredientId": 30047,
-          "name": "설탕"
-        }
-      ],
-      "themeId": 9,
-      "chickSlot": 1
-    },
-    {
-      "id": 3,
-      "customerId": 10092,
-      "customerName": "화분 병아리",
-      "icon": "assets/ui/chick/icon_chick_024.png",
-      "state": "awaiting_order",
-      "x": 83,
-      "y": 552,
-      "recipeId": 1,
-      "recipeName": "샐러드",
-      "wait": 87.8,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "normal",
-      "dropIngredient": 30025,
-      "guestGrade": "최고의 단골",
-      "visits": 153,
-      "rewardItems": [
-        {
-          "ingredientId": 30025,
-          "name": "당근"
-        },
-        {
-          "ingredientId": 30011,
-          "name": "밀가루"
-        },
-        {
-          "ingredientId": 30047,
-          "name": "설탕"
-        }
-      ],
-      "themeId": 9,
-      "chickSlot": 1
-    },
-    {
-      "id": 4,
-      "customerId": 10092,
-      "customerName": "화분 병아리",
-      "icon": "assets/ui/chick/icon_chick_024.png",
-      "state": "awaiting_order",
-      "x": 187,
-      "y": 552,
-      "recipeId": 10001,
-      "recipeName": "버섯전",
-      "wait": 88,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "normal",
-      "dropIngredient": 30025,
-      "guestGrade": "최고의 단골",
-      "visits": 154,
-      "rewardItems": [
-        {
-          "ingredientId": 30025,
-          "name": "당근"
-        },
-        {
-          "ingredientId": 30011,
-          "name": "밀가루"
-        },
-        {
-          "ingredientId": 30047,
-          "name": "설탕"
-        }
-      ],
-      "themeId": 9,
-      "chickSlot": 1
-    },
-    {
-      "id": 5,
-      "customerId": 10092,
-      "customerName": "화분 병아리",
-      "icon": "assets/ui/chick/icon_chick_024.png",
-      "state": "awaiting_order",
-      "x": 293,
-      "y": 552,
-      "recipeId": 10003,
-      "recipeName": "핫도그",
-      "wait": 88,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "normal",
-      "dropIngredient": 30025,
-      "guestGrade": "최고의 단골",
-      "visits": 155,
-      "rewardItems": [
-        {
-          "ingredientId": 30025,
-          "name": "당근"
-        },
-        {
-          "ingredientId": 30011,
-          "name": "밀가루"
-        },
-        {
-          "ingredientId": 30047,
-          "name": "설탕"
-        }
-      ],
-      "themeId": 9,
-      "chickSlot": 1
-    },
-    {
-      "id": 6,
-      "customerId": 10092,
-      "customerName": "화분 병아리",
-      "icon": "assets/ui/chick/icon_chick_024.png",
-      "state": "awaiting_order",
-      "x": 397,
-      "y": 552,
-      "recipeId": 2,
-      "recipeName": "샌드위치",
-      "wait": 87.8,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "normal",
-      "dropIngredient": 30025,
-      "guestGrade": "최고의 단골",
-      "visits": 156,
-      "rewardItems": [
-        {
-          "ingredientId": 30025,
-          "name": "당근"
-        },
-        {
-          "ingredientId": 30011,
-          "name": "밀가루"
-        },
-        {
-          "ingredientId": 30047,
-          "name": "설탕"
-        }
-      ],
-      "themeId": 9,
-      "chickSlot": 1
-    },
-    {
-      "id": 7,
-      "customerId": 10092,
-      "customerName": "화분 병아리",
-      "icon": "assets/ui/chick/icon_chick_024.png",
-      "state": "awaiting_order",
-      "x": 188,
-      "y": 672,
-      "recipeId": 10004,
-      "recipeName": "수프",
-      "wait": 88.7,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "normal",
-      "dropIngredient": 30025,
-      "guestGrade": "최고의 단골",
-      "visits": 157,
-      "rewardItems": [
-        {
-          "ingredientId": 30025,
-          "name": "당근"
-        },
-        {
-          "ingredientId": 30011,
-          "name": "밀가루"
-        },
-        {
-          "ingredientId": 30047,
-          "name": "설탕"
-        }
-      ],
-      "themeId": 9,
-      "chickSlot": 1
-    },
-    {
-      "id": 8,
-      "customerId": 10092,
-      "customerName": "화분 병아리",
-      "icon": "assets/ui/chick/icon_chick_024.png",
-      "state": "awaiting_order",
-      "x": 292,
-      "y": 672,
-      "recipeId": 1,
-      "recipeName": "샐러드",
-      "wait": 88.7,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "normal",
-      "dropIngredient": 30025,
-      "guestGrade": "최고의 단골",
-      "visits": 158,
-      "rewardItems": [
-        {
-          "ingredientId": 30025,
-          "name": "당근"
-        },
-        {
-          "ingredientId": 30011,
-          "name": "밀가루"
-        },
-        {
-          "ingredientId": 30047,
-          "name": "설탕"
-        }
-      ],
-      "themeId": 9,
-      "chickSlot": 1
-    }
-  ],
+  "guests": [],
   "ordersQueued": 0,
   "cooking": [],
   "payments": [],
@@ -460,7 +134,7 @@
     "rate": 0.1
   },
   "metrics": {
-    "visitors": 8,
+    "visitors": 0,
     "orders": 0,
     "served": 0,
     "collected": 0,
@@ -470,15 +144,15 @@
     "ingredientsFound": 0,
     "giftBundles": 0,
     "giftItems": 0,
-    "recipesCrafted": 1,
-    "recipeResearchAttempts": 1,
+    "recipesCrafted": 0,
+    "recipeResearchAttempts": 0,
     "failedRecipeResearches": 0
   },
   "currentScreen": "restaurant",
   "recipes": {
     "systemUnlocked": true,
     "unlockFacility": "도마 테이블",
-    "owned": 5,
+    "owned": 1,
     "combinationCapacity": 2,
     "combinationCapacityGrowth": "gem-upgrade-only",
     "combinationCapacityInitial": 2,
@@ -581,21 +255,23 @@
         "count": 1
       }
     },
-    "mysteryRecipeCount": 59,
+    "mysteryRecipeCount": 63,
     "hintedRecipes": {},
-    "autoResearchUnlocked": true,
+    "autoResearchUnlocked": false,
     "autoResearchTarget": null,
     "autoResearchPriority": "new-first-lowest-level-then-highest-inventory-pressure",
     "autoResearchWhenNoRecipe": "random-ingredients-up-to-bowl-capacity-then-weird-dish",
     "salePriceFormula": "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
     "salePriceMultipliers": {
-      "restaurantPriceUp": 6.2,
+      "restaurantPriceUp": 1,
       "satisfactionNormal": 1,
       "satisfactionHappy": 1.5,
       "performanceBuff": 1
     },
     "recipeLevelPriceBonus": 0.1,
-    "craftable": [],
+    "craftable": [
+      20014
+    ],
     "searchScope": "all-recipes-by-owned-ingredients",
     "craftCosts": {
       "1": 2,
@@ -1780,35 +1456,26 @@
       ]
     },
     "levels": {
-      "1": 1,
-      "2": 1,
-      "10001": 1,
-      "10003": 1,
-      "10004": 1
+      "1": 1
     },
     "prices": {
-      "1": 40,
-      "2": 43,
-      "10001": 38,
-      "10003": 42,
-      "10004": 70
+      "1": 40
     }
   },
   "ingredientStorage": {
-    "usedSlots": 0,
+    "usedSlots": 2,
     "slotLimit": 20,
-    "totalItems": 0,
+    "totalItems": 2,
     "totalLimit": 20,
     "capacity": 20,
-    "remaining": 20,
+    "remaining": 18,
     "expansionAmount": 5,
     "expansionGemCost": 10,
-    "ingredientTypes": 0
+    "ingredientTypes": 2
   },
   "progression": {
     "unlockedThemes": [
-      1,
-      9
+      1
     ],
     "activeThemeParts": {
       "1": 1001,
@@ -1827,9 +1494,8 @@
     },
     "unlockedCustomers": [
       3,
-      10091,
-      10092,
-      10093
+      10012,
+      10013
     ],
     "unlockedChickRoutes": [
       {
@@ -1866,58 +1532,17 @@
         ]
       },
       {
-        "themeId": 9,
-        "slot": 0,
-        "customerId": 10091,
-        "customerName": "꽃 병아리",
-        "ingredientId": 30068,
-        "ingredientName": "식초",
-        "rewardItems": [
-          {
-            "slot": "primary",
-            "ingredientId": 30068,
-            "name": "식초"
-          },
-          {
-            "slot": "secondary",
-            "ingredientId": 30018,
-            "name": "간장"
-          },
-          {
-            "slot": "special",
-            "ingredientId": 30001,
-            "name": "양상추"
-          }
-        ],
-        "recipeId": 10024,
-        "recipeName": "꼬끼오 도시락",
-        "recipeIngredients": [
-          {
-            "ingredientId": 30009,
-            "name": "쌀"
-          },
-          {
-            "ingredientId": 30006,
-            "name": "소시지"
-          },
-          {
-            "ingredientId": 30023,
-            "name": "모둠 채소"
-          }
-        ]
-      },
-      {
-        "themeId": 9,
+        "themeId": 1,
         "slot": 1,
-        "customerId": 10092,
-        "customerName": "화분 병아리",
-        "ingredientId": 30025,
-        "ingredientName": "당근",
+        "customerId": 10012,
+        "customerName": "공룡 병아리",
+        "ingredientId": 30055,
+        "ingredientName": "버섯",
         "rewardItems": [
           {
             "slot": "primary",
-            "ingredientId": 30025,
-            "name": "당근"
+            "ingredientId": 30055,
+            "name": "버섯"
           },
           {
             "slot": "secondary",
@@ -1926,61 +1551,57 @@
           },
           {
             "slot": "special",
-            "ingredientId": 30047,
-            "name": "설탕"
+            "ingredientId": 30008,
+            "name": "고기"
           }
         ],
-        "recipeId": 10025,
-        "recipeName": "병아리 오니기리",
+        "recipeId": 10001,
+        "recipeName": "버섯전",
         "recipeIngredients": [
           {
-            "ingredientId": 30009,
-            "name": "쌀"
+            "ingredientId": 30011,
+            "name": "밀가루"
           },
           {
-            "ingredientId": 30024,
-            "name": "김"
+            "ingredientId": 30055,
+            "name": "버섯"
           }
         ]
       },
       {
-        "themeId": 9,
+        "themeId": 1,
         "slot": 2,
-        "customerId": 10093,
-        "customerName": "사과 병아리",
-        "ingredientId": 30023,
-        "ingredientName": "모둠 채소",
+        "customerId": 10013,
+        "customerName": "알껍질 병아리",
+        "ingredientId": 30003,
+        "ingredientName": "빵",
         "rewardItems": [
           {
             "slot": "primary",
-            "ingredientId": 30023,
-            "name": "모둠 채소"
-          },
-          {
-            "slot": "secondary",
             "ingredientId": 30003,
             "name": "빵"
           },
           {
+            "slot": "secondary",
+            "ingredientId": 30005,
+            "name": "달걀"
+          },
+          {
             "slot": "special",
-            "ingredientId": 30046,
-            "name": "아보카도"
+            "ingredientId": 30020,
+            "name": "버터"
           }
         ],
-        "recipeId": 10026,
-        "recipeName": "둥지 당근 라페",
+        "recipeId": 2,
+        "recipeName": "샌드위치",
         "recipeIngredients": [
           {
-            "ingredientId": 30025,
-            "name": "당근"
+            "ingredientId": 30003,
+            "name": "빵"
           },
           {
-            "ingredientId": 30068,
-            "name": "식초"
-          },
-          {
-            "ingredientId": 30047,
-            "name": "설탕"
+            "ingredientId": 30039,
+            "name": "나뭇잎"
           }
         ]
       }
@@ -2080,11 +1701,13 @@
     ],
     "themeChickProgress": {
       "1": {
-        "opened": 10,
+        "opened": 18,
         "total": 18,
-        "ratio": 0.5555555555555556,
+        "ratio": 1,
         "unlocked": [
-          3
+          3,
+          10012,
+          10013
         ]
       },
       "2": {
@@ -2130,14 +1753,10 @@
         "unlocked": []
       },
       "9": {
-        "opened": 13,
+        "opened": 0,
         "total": 13,
-        "ratio": 1,
-        "unlocked": [
-          10091,
-          10092,
-          10093
-        ]
+        "ratio": 0,
+        "unlocked": []
       },
       "10": {
         "opened": 0,
@@ -2214,7 +1833,7 @@
       "30075": 0.15
     },
     "ingredientDropRule": {
-      "unlocked": false,
+      "unlocked": true,
       "unlockFacility": "냉장고",
       "overallChance": 0.15,
       "ingredientTypesOnSuccess": 1,
@@ -2245,13 +1864,11 @@
       ]
     },
     "ingredients": {
-      "30014": 0,
-      "30023": 0
+      "30001": 1,
+      "30039": 1
     },
-    "autoCraft": "new-first-then-lowest-level",
-    "craftedRecipes": [
-      10004
-    ]
+    "autoCraft": "locked-until-5-recipes",
+    "craftedRecipes": []
   },
   "activeSystems": {
     "missions": false,
@@ -2259,17 +1876,10 @@
   },
   "currentTab": "craft",
   "collection": {
-    "customers": 1,
+    "customers": 0,
     "specialCustomers": 0,
     "performers": 0,
-    "customerGrades": {
-      "10092": {
-        "visits": 158,
-        "gradeId": 3,
-        "gradeName": "최고의 단골",
-        "nextAt": null
-      }
-    }
+    "customerGrades": {}
   },
   "specialCustomers": [],
   "selectedInstallId": null

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-  <link rel="stylesheet" href="styles.css?v=20260805-special-promotion" />
+  <link rel="stylesheet" href="styles.css?v=20260806-debug-panel" />
   </head>
   <body>
     <main class="app-shell">
@@ -25,16 +25,33 @@
             <img src="assets/ui/currency/icon_currency_001.png" alt="도토리" />
             <strong id="acorn-count">0</strong>
           </div>
-          <div class="currency-pill">
-            <img src="assets/ui/currency/icon_currency_003.png" alt="아이디어" />
-            <strong id="idea-count">0</strong>
-          </div>
           <div class="currency-pill compact">
             <img src="assets/ui/currency/icon_currency_002.png" alt="보석" />
             <strong id="gem-count">0</strong>
           </div>
-          <button id="reset-btn" class="round-button" type="button" aria-label="처음부터 다시 시작">↺</button>
+          <div class="debug-tools-anchor">
+            <button id="reset-btn" class="round-button" type="button" aria-label="처음부터 다시 시작">↺</button>
+            <button id="debug-toggle-btn" class="debug-toggle-button" type="button" aria-label="디버그 도구 열기" aria-expanded="false">DEBUG</button>
+          </div>
         </header>
+
+        <section id="debug-panel" class="debug-panel" hidden aria-label="테스트용 디버그 도구">
+          <header><div><small>TEST ONLY</small><strong>디버그 도구</strong></div><button id="debug-close-btn" type="button" aria-label="닫기">×</button></header>
+          <button id="debug-install-all-btn" class="debug-install-all" type="button">초기 설비 전체 설치</button>
+          <div class="debug-resource-tool">
+            <label for="debug-resource-type">재화 추가</label>
+            <div>
+              <select id="debug-resource-type" aria-label="추가할 재화">
+                <option value="acorns">도토리</option>
+                <option value="ideas">아이디어</option>
+                <option value="gems">보석</option>
+                <option value="stickers">스티커</option>
+              </select>
+              <input id="debug-resource-amount" type="number" min="1" step="1" value="1000" inputmode="numeric" aria-label="추가할 수량" />
+            </div>
+            <button id="debug-add-resource-btn" type="button">추가하기</button>
+          </div>
+        </section>
 
         <section id="menu-screen" class="menu-screen" hidden aria-live="polite">
           <header class="menu-header">
@@ -66,6 +83,7 @@
           <p>선택한 재료를 주는 손님만 1분간 찾아옵니다.</p>
           <label class="special-promotion-search"><span aria-hidden="true">⌕</span><input id="special-promotion-search" type="search" placeholder="재료 이름 검색" autocomplete="off" /></label>
           <div id="special-promotion-list" class="special-promotion-list"></div>
+          <div id="special-promotion-detail" class="special-promotion-detail" hidden></div>
         </section>
 
         <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
@@ -95,6 +113,6 @@
     <script src="data/runtime-tables.js?v=20260729-restaurant-only"></script>
   <script src="src/game-config.js?v=20260804-special-ingredient-150"></script>
     <script src="src/data-loader.js?v=20260729-restaurant-only"></script>
-  <script src="game.js?v=20260805-special-promotion-tutorial-fix"></script>
+  <script src="game.js?v=20260806-hide-idea-hud"></script>
   </body>
 </html>

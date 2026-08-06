@@ -240,6 +240,24 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .collection-button i { position: absolute; top: -2px; right: -2px; width: 11px; height: 11px; border: 2px solid white; border-radius: 50%; background: #e74736; }
 
 .round-button:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(91, 58, 28, .22); }
+.debug-tools-anchor { position: relative; margin-left: auto; display: grid; justify-items: center; gap: 5px; pointer-events: auto; }
+.debug-tools-anchor .round-button { margin-left: 0; }
+.debug-toggle-button { min-width: 40px; height: 17px; padding: 0 5px; border: 1px solid rgba(91,58,28,.72); border-radius: 7px; background: rgba(255,249,225,.92); box-shadow: 0 2px 0 rgba(91,58,28,.2); color: #76532f; font-size: 7px; font-weight: 1000; letter-spacing: .04em; cursor: pointer; }
+.debug-toggle-button.is-open { background: #5f4567; color: white; }
+.debug-panel { position: absolute; z-index: 48; top: 76px; right: 12px; width: 248px; padding: 12px; border: 3px solid #62456b; border-radius: 18px; background: linear-gradient(160deg,#fffdf3,#f1e4f7); box-shadow: 0 7px 0 rgba(64,43,70,.28),0 15px 28px rgba(45,31,48,.26); pointer-events: auto; }
+.debug-panel[hidden] { display: none; }
+.debug-panel > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.debug-panel > header > div { display: grid; }
+.debug-panel header small { color: #a6642c; font-size: 7px; font-weight: 1000; letter-spacing: .08em; }
+.debug-panel header strong { color: #4f3856; font-size: 15px; }
+.debug-panel header button { width: 27px; height: 27px; border: 0; border-radius: 50%; background: #e4d3e8; color: #684a70; font: 1000 18px/1 sans-serif; cursor: pointer; }
+.debug-install-all, .debug-resource-tool > button { width: 100%; min-height: 36px; border: 2px solid #6b4a73; border-radius: 11px; background: linear-gradient(#f2ddff,#c48be1); box-shadow: 0 3px 0 #75527c; color: #4f3457; font-size: 10px; font-weight: 1000; cursor: pointer; }
+.debug-resource-tool { display: grid; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 2px dashed #c9b2cf; }
+.debug-resource-tool > label { color: #6e5575; font-size: 9px; font-weight: 1000; }
+.debug-resource-tool > div { display: grid; grid-template-columns: 90px minmax(0,1fr); gap: 6px; }
+.debug-resource-tool select, .debug-resource-tool input { width: 100%; height: 34px; min-width: 0; padding: 0 7px; border: 2px solid #bda8c2; border-radius: 9px; outline: 0; background: white; color: #513c56; font-size: 10px; font-weight: 900; user-select: text; }
+.debug-resource-tool input:focus, .debug-resource-tool select:focus { border-color: #85608e; }
+.debug-install-all:active, .debug-resource-tool > button:active { transform: translateY(2px); box-shadow: 0 1px 0 #75527c; }
 
 .objective-card {
   position: absolute;
@@ -770,7 +788,7 @@ button.combination-slot { cursor: pointer; }
   pointer-events: none;
 }
 
-.special-promotion-panel { position: absolute; z-index: 45; left: 50%; bottom: 24px; width: calc(100% - 28px); max-height: 590px; display: flex; flex-direction: column; padding: 14px; transform: translateX(-50%); border: 3px solid #704579; border-radius: 23px; background: linear-gradient(160deg,#fffdf1,#f2ddff); box-shadow: 0 10px 0 rgba(73,43,78,.28),0 24px 40px rgba(42,29,45,.32); }
+.special-promotion-panel { position: absolute; z-index: 45; left: 50%; bottom: 24px; width: calc(100% - 28px); max-height: 590px; display: flex; flex-direction: column; padding: 14px; overflow: hidden; transform: translateX(-50%); border: 3px solid #704579; border-radius: 23px; background: linear-gradient(160deg,#fffdf1,#f2ddff); box-shadow: 0 10px 0 rgba(73,43,78,.28),0 24px 40px rgba(42,29,45,.32); }
 .special-promotion-panel[hidden] { display: none; }
 .special-promotion-panel header { display: flex; align-items: center; justify-content: space-between; }
 .special-promotion-panel header div { display: flex; flex-direction: column; }
@@ -787,6 +805,28 @@ button.combination-slot { cursor: pointer; }
 .special-promotion-choice strong { width: 100%; margin-top: 5px; overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .special-promotion-choice small { margin-top: 2px; color: #8a6f90; font-size: 8px; font-weight: 900; }
 .special-promotion-empty { grid-column: 1/-1; margin: 24px 0; color: #846e89; font-size: 11px; font-weight: 900; text-align: center; }
+.special-promotion-detail { position: absolute; z-index: 4; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(61,37,66,.42); }
+.special-promotion-detail[hidden] { display: none; }
+.special-promotion-detail-card { position: relative; width: min(336px,100%); max-height: 470px; display: flex; flex-direction: column; padding: 15px; border: 3px solid #744a7c; border-radius: 21px; background: linear-gradient(160deg,#fffdf1,#f7eaff); box-shadow: 0 8px 0 rgba(70,42,74,.3),0 16px 28px rgba(45,29,47,.3); }
+.special-promotion-detail-close { position: absolute; top: 10px; right: 10px; width: 31px; height: 31px; border: 0; border-radius: 50%; background: #ead8ed; color: #64436b; font: 1000 21px/1 sans-serif; cursor: pointer; }
+.special-promotion-detail-title { display: flex; align-items: center; gap: 10px; padding-right: 34px; }
+.special-promotion-detail-title > span { display: grid; width: 50px; height: 50px; place-items: center; border: 2px solid #ead5a1; border-radius: 15px; background: #fff8d8; font: 30px/1 "Segoe UI Emoji",sans-serif; }
+.special-promotion-detail-title > div { min-width: 0; display: grid; }
+.special-promotion-detail-title small { color: #9b662f; font-size: 9px; font-weight: 1000; }
+.special-promotion-detail-title strong { color: #52375a; font-size: 20px; line-height: 1.1; }
+.special-promotion-detail-title em { margin-top: 3px; color: #806985; font-size: 9px; font-style: normal; font-weight: 900; }
+.special-promotion-detail-rule { margin: 10px 0 7px; color: #85668b; font-size: 9px; font-weight: 900; }
+.special-promotion-source-list { min-height: 66px; display: grid; gap: 6px; overflow-y: auto; }
+.special-promotion-source { display: grid; grid-template-columns: 46px minmax(0,1fr) auto; align-items: center; gap: 8px; min-height: 59px; padding: 6px 8px; border: 2px solid #e0cce5; border-radius: 14px; background: rgba(255,255,255,.82); }
+.special-promotion-source img { width: 46px; height: 46px; object-fit: contain; }
+.special-promotion-source > div { min-width: 0; display: grid; gap: 2px; }
+.special-promotion-source strong { overflow: hidden; color: #573b5f; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.special-promotion-source span { color: #8b6c91; font-size: 8px; font-weight: 900; }
+.special-promotion-source > small { padding: 4px 6px; border-radius: 8px; background: #dff3bc; color: #507329; font-size: 8px; font-weight: 1000; white-space: nowrap; }
+.special-promotion-source.is-locked { opacity: .72; }
+.special-promotion-source.is-locked > small { background: #eee7ef; color: #76677a; }
+.special-promotion-detail-confirm { min-height: 43px; margin-top: 10px; border: 2px solid #684271; border-radius: 13px; background: linear-gradient(#eed6ff,#b97bdf); box-shadow: 0 4px 0 #70477a; color: #4f3158; font-size: 11px; font-weight: 1000; cursor: pointer; }
+.special-promotion-detail-confirm:active { transform: translateY(2px); box-shadow: 0 2px 0 #70477a; }
 .new-guest-alert {
   position: absolute;
   z-index: 31;
