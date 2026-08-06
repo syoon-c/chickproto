@@ -11,6 +11,17 @@
     "ideas": 0,
     "stickers": 5
   },
+  "debug": {
+    "panelVisible": false,
+    "installedFacilities": 1,
+    "totalInstallFacilities": 19,
+    "supportedResources": [
+      "acorns",
+      "ideas",
+      "gems",
+      "stickers"
+    ]
+  },
   "installedFacilityIds": [
     14
   ],
@@ -101,6 +112,7 @@
         ]
       }
     ],
+    "detail": null,
     "panelVisible": false,
     "filterRule": "unlocked-guests-and-currently-unlocked-reward-slots-only"
   },
@@ -1450,12 +1462,12 @@
     },
     "prices": {
       "1": 40,
-      "2": 43,
-      "10001": 38,
-      "10008": 65,
-      "10020": 160,
-      "10029": 200,
-      "20001": 35
+      "2": 52,
+      "10001": 48,
+      "10008": 105,
+      "10020": 455,
+      "10029": 305,
+      "20001": 60
     }
   },
   "ingredientStorage": {

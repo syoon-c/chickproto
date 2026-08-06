@@ -258,6 +258,16 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .debug-resource-tool select, .debug-resource-tool input { width: 100%; height: 34px; min-width: 0; padding: 0 7px; border: 2px solid #bda8c2; border-radius: 9px; outline: 0; background: white; color: #513c56; font-size: 10px; font-weight: 900; user-select: text; }
 .debug-resource-tool input:focus, .debug-resource-tool select:focus { border-color: #85608e; }
 .debug-install-all:active, .debug-resource-tool > button:active { transform: translateY(2px); box-shadow: 0 1px 0 #75527c; }
+.debug-special-tool { display: grid; gap: 6px; margin-top: 10px; padding-top: 9px; border-top: 2px dashed #c9b2cf; }
+.debug-special-tool > label { color: #6e5575; font-size: 9px; font-weight: 1000; }
+.debug-special-tool > div { display: grid; grid-template-columns: minmax(0,1fr) 54px; gap: 6px; }
+.debug-special-tool select, .debug-special-tool button { height: 32px; min-width: 0; border: 2px solid #bda8c2; border-radius: 9px; background: white; color: #513c56; font-size: 9px; font-weight: 1000; }
+.debug-special-tool button { border-color: #6b4a73; background: #dba8ef; cursor: pointer; }
+.drop-boost-badge { position: absolute; z-index: 16; top: 76px; left: 13px; min-width: 104px; height: 32px; display: flex; align-items: center; gap: 5px; padding: 4px 8px; border: 2px solid #4e8a7b; border-radius: 13px; background: linear-gradient(#efffdc,#b9eacb); box-shadow: 0 4px 0 rgba(41,105,86,.25); color: #2f6658; pointer-events: none; }
+.drop-boost-badge[hidden] { display: none; }
+.drop-boost-badge span { font-size: 17px; }
+.drop-boost-badge strong { font-size: 8px; font-weight: 1000; white-space: nowrap; }
+.drop-boost-badge b { margin-left: auto; font-size: 9px; }
 
 .objective-card {
   position: absolute;
@@ -827,6 +837,38 @@ button.combination-slot { cursor: pointer; }
 .special-promotion-source.is-locked > small { background: #eee7ef; color: #76677a; }
 .special-promotion-detail-confirm { min-height: 43px; margin-top: 10px; border: 2px solid #684271; border-radius: 13px; background: linear-gradient(#eed6ff,#b97bdf); box-shadow: 0 4px 0 #70477a; color: #4f3158; font-size: 11px; font-weight: 1000; cursor: pointer; }
 .special-promotion-detail-confirm:active { transform: translateY(2px); box-shadow: 0 2px 0 #70477a; }
+.special-visitor-panel { position: absolute; z-index: 52; left: 50%; bottom: 106px; width: calc(100% - 34px); max-height: 520px; display: flex; flex-direction: column; padding: 14px; overflow: hidden; transform: translateX(-50%); border: 3px solid #765126; border-radius: 22px; background: linear-gradient(160deg,#fffdf0,#ffe5a7); box-shadow: 0 9px 0 rgba(92,57,27,.3),0 20px 35px rgba(50,35,22,.3); }
+.special-visitor-panel[hidden] { display: none; }
+.special-visitor-panel > header { display: flex; align-items: center; justify-content: space-between; }
+.special-visitor-heading { display: flex; align-items: center; gap: 9px; }
+.special-visitor-heading img { width: 52px; height: 52px; object-fit: contain; }
+.special-visitor-heading > div { display: grid; }
+.special-visitor-heading small { color: #aa682a; font-size: 8px; font-weight: 1000; }
+.special-visitor-heading strong { color: #57391f; font-size: 18px; }
+.special-visitor-panel > header > button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: #edd4a3; color: #6b4926; font: 1000 22px/1 sans-serif; cursor: pointer; }
+.special-visitor-panel > p { margin: 7px 0 10px; color: #76532f; font-size: 10px; font-weight: 900; line-height: 1.4; }
+.special-visitor-content { min-height: 72px; display: grid; gap: 7px; overflow-y: auto; }
+.special-visitor-explanation { display: grid; grid-template-columns: 52px minmax(0,1fr); align-items: center; gap: 10px; padding: 11px; border: 2px solid #dfaa58; border-radius: 15px; background: rgba(255,255,255,.76); }
+.special-visitor-explanation > span { display: grid; width: 50px; height: 50px; place-items: center; border-radius: 14px; background: #ffe1ba; font: 28px/1 "Segoe UI Emoji",sans-serif; }
+.special-visitor-explanation.is-fairy > span { background: #dff6cf; }
+.special-visitor-explanation div { display: grid; gap: 4px; }
+.special-visitor-explanation strong { color: #68411f; font-size: 11px; }
+.special-visitor-explanation p { margin: 0; color: #88643b; font-size: 9px; font-weight: 850; line-height: 1.45; }
+.merchant-offer { min-height: 59px; display: grid; grid-template-columns: 44px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 6px 8px; border: 2px solid #d4a55c; border-radius: 14px; background: rgba(255,255,255,.78); }
+.merchant-offer > span { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 12px; background: #fff4ca; font: 25px/1 "Segoe UI Emoji",sans-serif; }
+.merchant-offer > div { min-width: 0; display: grid; gap: 2px; }
+.merchant-offer strong { font-size: 10px; }
+.merchant-offer small { color: #8c6a43; font-size: 8px; font-weight: 900; }
+.merchant-offer button, .special-trade-button { min-width: 70px; min-height: 36px; border: 2px solid #80562b; border-radius: 10px; background: linear-gradient(#ffe475,#f3ad35); box-shadow: 0 3px 0 #93602a; color: #65401d; font-size: 9px; font-weight: 1000; cursor: pointer; }
+.merchant-offer button:disabled { filter: grayscale(.8); opacity: .58; box-shadow: none; cursor: default; }
+.special-trade-card { display: grid; grid-template-columns: 1fr 24px 1fr; align-items: center; gap: 5px; padding: 11px; border: 2px solid #d4a55c; border-radius: 15px; background: rgba(255,255,255,.8); }
+.special-trade-item { display: grid; justify-items: center; gap: 3px; text-align: center; }
+.special-trade-item > span { font: 28px/1 "Segoe UI Emoji",sans-serif; }
+.special-trade-item strong { font-size: 9px; }
+.special-trade-item small { color: #8c6a43; font-size: 8px; font-weight: 900; }
+.special-trade-arrow { color: #a56a25; font-size: 18px; font-weight: 1000; text-align: center; }
+.special-trade-rare { margin: 0; padding: 5px 7px; border-radius: 9px; background: #eadbff; color: #69468a; font-size: 8px; font-weight: 1000; text-align: center; }
+.special-trade-button { width: 100%; margin-top: 2px; }
 .new-guest-alert {
   position: absolute;
   z-index: 31;

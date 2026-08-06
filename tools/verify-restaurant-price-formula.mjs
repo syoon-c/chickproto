@@ -26,10 +26,11 @@ async function configureSale(mood, guestState) {
       .filter((row) => Number(row.abilityValue || 0) > 0)
       .slice(0, 2);
     const tipbox = loadedTables.installs.find((row) => Number(row.facilityType) === 3);
+    const cuttingBoard = loadedTables.installs.find((row) => Number(row.facilityType) === 8);
     if (pricedThemeRows.length !== 2) throw new Error("Need two RestaurantPriceUp theme rows");
-    if (!tipbox) throw new Error("Need a tipbox install row");
+    if (!tipbox || !cuttingBoard) throw new Error("Need tipbox and cutting board install rows");
     saved.themes.opened = [...new Set([...saved.themes.opened, ...pricedThemeRows.map((row) => row.id)])];
-    saved.installed = [...new Set([...saved.installed, tipbox.id])];
+    saved.installed = [...new Set([...saved.installed, tipbox.id, cuttingBoard.id])];
     saved.ownedRecipes = {
       1: { level: 2, stack: 0, codexClaimed: true },
       2: { level: 1, stack: 0, codexClaimed: true },

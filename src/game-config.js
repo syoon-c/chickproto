@@ -309,6 +309,60 @@ const EARLY_RECIPE_PROGRESSION = EARLY_RECIPE_CATALOG.map((recipe) => ({
 
 const RECIPE_PROGRESSION = [...CORE_PROGRESSION, ...EARLY_RECIPE_PROGRESSION];
 
+// 레시피를 발견했는데 이전 음식보다 더 싸 보이지 않도록, 실제 재료 획득 시점과 조합 수를 가격 하한에 반영한다.
+const PROTOTYPE_RECIPE_PRICE_OVERRIDES = Object.freeze({
+  1: 40,
+  20014: 45,
+  10001: 48,
+  2: 52,
+  20015: 50,
+  20016: 52,
+  20002: 54,
+  20003: 56,
+  20004: 56,
+  20001: 60,
+  20005: 72,
+  20017: 65,
+  20018: 68,
+  20019: 78,
+  10021: 80,
+});
+
+function ingredientPriceDiscoveryStage(ingredientId) {
+  const visitStageOffsets = [0, 1, 4];
+  return CORE_PROGRESSION.reduce((earliestStage, chickRoute) => {
+    const rewardIndex = chickRoute.rewardIngredients.findIndex((ingredient) => ingredient.id === Number(ingredientId));
+    if (rewardIndex < 0) return earliestStage;
+    const stage = (chickRoute.themeId - 1) * 9 + chickRoute.slot * 2 + visitStageOffsets[rewardIndex];
+    return Math.min(earliestStage, stage);
+  }, Number.POSITIVE_INFINITY);
+}
+
+function recipeDiscoveryPriceFloor(route) {
+  const stages = route.ingredientRequirements.map((ingredient) => ingredientPriceDiscoveryStage(ingredient.id));
+  const stage = Math.max(...stages.filter(Number.isFinite), 0);
+  const ingredientCount = Math.max(2, Number(route.ingredientCount || route.ingredientRequirements.length));
+  let twoIngredientFloor = 40;
+  if (stage >= 1) twoIngredientFloor = 45;
+  if (stage >= 5) twoIngredientFloor = 55;
+  if (stage >= 9) twoIngredientFloor = 65;
+  if (stage >= 14) twoIngredientFloor = 80;
+  if (stage >= 19) twoIngredientFloor = 95;
+  if (stage >= 27) twoIngredientFloor = 115 + Math.ceil((stage - 26) / 9) * 25;
+  const rawFloor = twoIngredientFloor + Math.max(0, ingredientCount - 2) * 12;
+  return Math.ceil(rawFloor / 5) * 5;
+}
+
+RECIPE_PROGRESSION.forEach((route) => {
+  const override = PROTOTYPE_RECIPE_PRICE_OVERRIDES[route.recipeId];
+  route.minimumFoodPrice = recipeDiscoveryPriceFloor(route);
+  if (override !== undefined) {
+    route.foodPrice = override;
+    route.minimumFoodPrice = override;
+    route.hasPrototypePriceOverride = true;
+  }
+});
+
 function themeChickMilestones(themeId) {
   return CORE_PROGRESSION.filter((entry) => entry.themeId === Number(themeId));
 }
@@ -388,6 +442,7 @@ window.CHICK_CONFIG = {
   THEME_NAMES,
   CORE_PROGRESSION,
   RECIPE_PROGRESSION,
+  PROTOTYPE_RECIPE_PRICE_OVERRIDES,
   EARLY_RECIPE_CATALOG,
   GAME_RECIPE_CATALOG,
   GAME_INGREDIENTS,

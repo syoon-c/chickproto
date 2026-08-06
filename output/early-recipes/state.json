@@ -11,7 +11,20 @@
     "ideas": 0,
     "stickers": 5
   },
-  "installedFacilityIds": [],
+  "debug": {
+    "panelVisible": false,
+    "installedFacilities": 1,
+    "totalInstallFacilities": 19,
+    "supportedResources": [
+      "acorns",
+      "ideas",
+      "gems",
+      "stickers"
+    ]
+  },
+  "installedFacilityIds": [
+    14
+  ],
   "installCandidates": [
     {
       "id": 16,
@@ -32,13 +45,64 @@
       "h": 94
     }
   ],
+  "tutorial": {
+    "activeId": "welcome",
+    "text": "작은 식당부터 차근차근 준비해 볼까요?",
+    "seen": []
+  },
+  "toast": {
+    "visible": false,
+    "text": null,
+    "variant": null,
+    "routineEventsSilent": [
+      "guest-arrival",
+      "order-taken",
+      "food-delivered",
+      "ingredient-collected",
+      "payment-collected",
+      "tip-collected"
+    ]
+  },
+  "newGuestAlert": {
+    "visible": false,
+    "text": null,
+    "queued": 0,
+    "presentation": "separate-upper-right-card"
+  },
   "mealDurationSeconds": 7,
   "promotion": {
     "progress": 0,
     "queued": 0,
     "totalClicks": 0,
+    "queueTargets": [],
     "threshold": 1,
     "enabled": false
+  },
+  "specialPromotion": {
+    "unlocked": false,
+    "recipeRequirement": 5,
+    "tutorialSeen": false,
+    "ingredientId": null,
+    "ingredientName": null,
+    "remaining": 0,
+    "cooldown": 0,
+    "duration": 60,
+    "cooldownDuration": 30,
+    "availableIngredients": [
+      {
+        "ingredientId": 30039,
+        "name": "나뭇잎",
+        "guestIds": [
+          3
+        ],
+        "guestNames": [
+          "기본 병아리"
+        ]
+      }
+    ],
+    "detail": null,
+    "panelVisible": false,
+    "filterRule": "unlocked-guests-and-currently-unlocked-reward-slots-only"
   },
   "guests": [],
   "ordersQueued": 0,
@@ -67,8 +131,17 @@
   },
   "currentScreen": "recipe",
   "recipes": {
+    "systemUnlocked": true,
+    "unlockFacility": "도마 테이블",
     "owned": 2,
-    "combinationCapacity": 3,
+    "combinationCapacity": 2,
+    "combinationCapacityGrowth": "gem-upgrade-only",
+    "combinationCapacityInitial": 2,
+    "combinationCapacityMax": 5,
+    "combinationCapacityExpansion": {
+      "gems": 10,
+      "amount": 1
+    },
     "selectedIngredients": [],
     "mixingPresentation": "cutting-board-and-bowl",
     "research": null,
@@ -141,8 +214,18 @@
       10030
     ],
     "reveal": null,
-    "hintRule": "same-size-at-least-one-correct-reveals-name-and-missing-clues",
-    "earlyFailureProtection": false,
+    "hintRule": {
+      "sameRecipeSizeOnly": true,
+      "matchUnit": "ingredient-slots",
+      "thresholds": {
+        "2": 1,
+        "3": 2,
+        "4": 2,
+        "5": 3
+      },
+      "revealAllQualifyingRecipes": true,
+      "repeatRequiresNewMatchedSlot": true
+    },
     "starterIngredients": {
       "30001": {
         "name": "양상추",
@@ -1357,7 +1440,7 @@
     },
     "prices": {
       "1": 40,
-      "20001": 35
+      "20001": 60
     }
   },
   "ingredientStorage": {
@@ -1523,9 +1606,9 @@
     ],
     "themeChickProgress": {
       "1": {
-        "opened": 0,
+        "opened": 1,
         "total": 18,
-        "ratio": 0,
+        "ratio": 0.05555555555555555,
         "unlocked": [
           3
         ]
@@ -1653,6 +1736,8 @@
       "30075": 0.15
     },
     "ingredientDropRule": {
+      "unlocked": false,
+      "unlockFacility": "냉장고",
       "overallChance": 0.15,
       "ingredientTypesOnSuccess": 1,
       "slotChances": {

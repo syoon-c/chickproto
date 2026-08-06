@@ -28,17 +28,16 @@ if (earlyIngredientIds.size !== 9 || JSON.stringify(earlyRecipes.map((route) => 
 }
 const combinations = RECIPE_PROGRESSION.map((route) => route.ingredientRequirements.map((ingredient) => ingredient.id).sort().join("+"));
 if (new Set(combinations).size !== combinations.length) throw new Error("An early recipe duplicates an existing ingredient combination");
-if (EARLY_RECIPE_CATALOG.slice(0, 5).some((recipe) => recipe.foodPrice > 50)) throw new Error("An added early recipe is not low-priced");
-if (EARLY_RECIPE_CATALOG.slice(5).some((recipe) => recipe.foodPrice > 70)) throw new Error("A surplus-material recipe is priced too high");
+if (EARLY_RECIPE_CATALOG.some((recipe) => recipe.foodPrice > 80)) throw new Error("An early recipe exceeds the intended starter price band");
 const earlyPrices = Object.fromEntries(earlyRecipes.map((route) => {
   const sourceId = Number(route.baseRecipeId || route.recipeId);
   const rawPrice = Number(rawRecipeById.get(sourceId)?.foodPrice || 0) + ([1, 4].includes(sourceId) ? 10 : 0);
   return [route.recipeName, Number(route.foodPrice || rawPrice)];
 }));
 const expectedEarlyPrices = {
-  "샐러드": 40, "버섯전": 38, "샌드위치": 43, "버터 토스트": 35, "토마토 샌드위치": 40,
-  "달걀 샌드위치": 42, "토마토 달걀볶음": 38, "버터빵": 50, "새싹 샐러드": 32,
-  "양상추 샌드위치": 36, "버섯 토스트": 38, "달걀밥": 40, "버터 라이스": 38, "토마토 리조또": 50,
+  "샐러드": 40, "버섯전": 48, "샌드위치": 52, "버터 토스트": 60, "토마토 샌드위치": 54,
+  "달걀 샌드위치": 56, "토마토 달걀볶음": 56, "버터빵": 72, "새싹 샐러드": 45,
+  "양상추 샌드위치": 50, "버섯 토스트": 52, "달걀밥": 65, "버터 라이스": 68, "토마토 리조또": 78,
 };
 if (JSON.stringify(earlyPrices) !== JSON.stringify(expectedEarlyPrices)) {
   throw new Error(`Early recipe prices are not normalized: ${JSON.stringify(earlyPrices)}`);
@@ -46,7 +45,7 @@ if (JSON.stringify(earlyPrices) !== JSON.stringify(expectedEarlyPrices)) {
 const twoIngredientPrices = earlyRecipes
   .filter((route) => Number(route.ingredientCount) === 2)
   .map((route) => earlyPrices[route.recipeName]);
-if (Math.min(...twoIngredientPrices) < 30 || Math.max(...twoIngredientPrices) > 45) {
+if (Math.min(...twoIngredientPrices) < 40 || Math.max(...twoIngredientPrices) > 68) {
   throw new Error(`Two-ingredient early recipe price outlier: ${JSON.stringify(earlyPrices)}`);
 }
 
@@ -71,6 +70,8 @@ try {
   await page.evaluate(({ breadId, butterId }) => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const cuttingBoard = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, cuttingBoard.id])];
     saved.crafting.ingredients = { [breadId]: 1, [butterId]: 1 };
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));
@@ -85,9 +86,9 @@ try {
   let current = await state();
   if (current.recipes.catalogTotal !== 64
     || current.recipes.levels["20001"] !== 1
-    || current.recipes.prices["20001"] !== 35
+    || current.recipes.prices["20001"] !== 60
     || current.recipes.mysteryRecipeCount !== 62) {
-    throw new Error(`Butter toast was not discovered as a cheap early recipe: ${JSON.stringify(current.recipes)}`);
+    throw new Error(`Butter toast was not discovered at its balanced early price: ${JSON.stringify(current.recipes)}`);
   }
   const revealText = await page.locator("#recipe-reveal").innerText();
   if (!revealText.includes("버터 토스트")) throw new Error(`Wrong early recipe reveal: ${revealText}`);

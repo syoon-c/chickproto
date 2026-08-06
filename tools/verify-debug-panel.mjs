@@ -68,7 +68,7 @@ try {
   const reloaded = await gameState();
   if (reloaded.debug.installedFacilities !== reloaded.debug.totalInstallFacilities
     || additions.some(([resource, amount]) => reloaded.resources[resource] !== before[resource] + amount)) {
-    throw new Error("Debug changes did not persist after reload");
+    throw new Error(`Debug changes did not persist after reload: ${JSON.stringify({ before, after: current.resources, reloaded: reloaded.resources, debug: reloaded.debug, errors })}`);
   }
 
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(reloaded, null, 2));

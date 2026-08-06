@@ -6,10 +6,10 @@
   "visibleThemeType": "restaurant",
   "objective": "홍보 게이지를 채워 손님 부르기",
   "resources": {
-    "acorns": 12495,
-    "gems": 17,
-    "ideas": 321,
-    "stickers": 14
+    "acorns": 5010,
+    "gems": 0,
+    "ideas": 0,
+    "stickers": 5
   },
   "debug": {
     "panelVisible": false,
@@ -45,14 +45,18 @@
   ],
   "installCandidates": [],
   "tutorial": {
-    "activeId": "welcome",
-    "text": "작은 식당부터 차근차근 준비해 볼까요?",
-    "seen": []
+    "activeId": null,
+    "text": null,
+    "seen": [
+      "welcome",
+      "drops-unlocked",
+      "recipe-unlocked"
+    ]
   },
   "toast": {
-    "visible": false,
-    "text": null,
-    "variant": null,
+    "visible": true,
+    "text": "재료 상인이 왔어요! 눌러서 상품을 확인하세요.",
+    "variant": "default",
     "routineEventsSilent": [
       "guest-arrival",
       "order-taken",
@@ -147,11 +151,11 @@
     "recipesCrafted": 0,
     "recipeResearchAttempts": 0,
     "failedRecipeResearches": 0,
-    "specialVisitors": 0,
-    "merchantPurchases": 0,
-    "fairyBuffs": 0,
-    "trades": 0,
-    "futureTrades": 0
+    "specialVisitors": 6,
+    "merchantPurchases": 1,
+    "fairyBuffs": 1,
+    "trades": 1,
+    "futureTrades": 1
   },
   "currentScreen": "restaurant",
   "recipes": {
@@ -275,6 +279,7 @@
     },
     "recipeLevelPriceBonus": 0.1,
     "craftable": [
+      1,
       20014
     ],
     "searchScope": "all-recipes-by-owned-ingredients",
@@ -1468,15 +1473,15 @@
     }
   },
   "ingredientStorage": {
-    "usedSlots": 2,
+    "usedSlots": 9,
     "slotLimit": 20,
-    "totalItems": 2,
+    "totalItems": 9,
     "totalLimit": 20,
     "capacity": 20,
-    "remaining": 18,
+    "remaining": 11,
     "expansionAmount": 5,
     "expansionGemCost": 10,
-    "ingredientTypes": 2
+    "ingredientTypes": 4
   },
   "progression": {
     "unlockedThemes": [
@@ -1872,7 +1877,9 @@
     },
     "ingredients": {
       "30001": 1,
-      "30039": 1
+      "30015": 1,
+      "30039": 6,
+      "30055": 1
     },
     "autoCraft": "locked-until-5-recipes",
     "craftedRecipes": []
@@ -1884,14 +1891,14 @@
   "currentTab": "craft",
   "collection": {
     "customers": 0,
-    "specialCustomers": 0,
+    "specialCustomers": 1,
     "performers": 0,
     "customerGrades": {}
   },
   "specialVisitor": {
     "interval": 120,
-    "nextIn": 119.53,
-    "lastType": null,
+    "nextIn": 119,
+    "lastType": "merchant",
     "dropBoostRemaining": 0,
     "dropMultiplier": 1,
     "futureTradeChance": 0.15,
@@ -1907,6 +1914,50 @@
       "withinThemeStep": 0.08
     }
   },
-  "specialCustomers": [],
+  "specialCustomers": [
+    {
+      "id": "special-visitor-6",
+      "type": "merchant",
+      "name": "재료 상인",
+      "state": "approaching",
+      "canInteract": false,
+      "x": 115,
+      "y": 498,
+      "stolen": 0,
+      "offers": [
+        {
+          "id": 1,
+          "ingredientId": 30039,
+          "name": "나뭇잎",
+          "emoji": "🍃",
+          "quantity": 2,
+          "unitPrice": 120,
+          "price": 240,
+          "sold": false
+        },
+        {
+          "id": 2,
+          "ingredientId": 30055,
+          "name": "버섯",
+          "emoji": "🍄",
+          "quantity": 2,
+          "unitPrice": 140,
+          "price": 280,
+          "sold": false
+        },
+        {
+          "id": 3,
+          "ingredientId": 30003,
+          "name": "빵",
+          "emoji": "🍞",
+          "quantity": 1,
+          "unitPrice": 160,
+          "price": 160,
+          "sold": false
+        }
+      ],
+      "trade": null
+    }
+  ],
   "selectedInstallId": null
 }

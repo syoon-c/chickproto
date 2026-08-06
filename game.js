@@ -50,6 +50,16 @@ const dom = {
   debugResourceType: document.querySelector("#debug-resource-type"),
   debugResourceAmount: document.querySelector("#debug-resource-amount"),
   debugAddResourceButton: document.querySelector("#debug-add-resource-btn"),
+  debugSpecialType: document.querySelector("#debug-special-type"),
+  debugSpawnSpecialButton: document.querySelector("#debug-spawn-special-btn"),
+  dropBoostBadge: document.querySelector("#drop-boost-badge"),
+  dropBoostTime: document.querySelector("#drop-boost-time"),
+  specialVisitorPanel: document.querySelector("#special-visitor-panel"),
+  specialVisitorIcon: document.querySelector("#special-visitor-icon"),
+  specialVisitorTitle: document.querySelector("#special-visitor-title"),
+  specialVisitorMessage: document.querySelector("#special-visitor-message"),
+  specialVisitorContent: document.querySelector("#special-visitor-content"),
+  specialVisitorClose: document.querySelector("#special-visitor-close"),
   installPanel: document.querySelector("#install-panel"),
   installClose: document.querySelector("#install-close-btn"),
   installIcon: document.querySelector("#install-icon"),
@@ -105,6 +115,19 @@ const BOWL_CAPACITY_EXPANSION_GEM_COST = 10;
 const SPECIAL_PROMOTION_RECIPE_REQUIREMENT = 5;
 const SPECIAL_PROMOTION_DURATION = 60;
 const SPECIAL_PROMOTION_COOLDOWN = 30;
+const SPECIAL_VISITOR_INTERVAL = 120;
+const SPECIAL_VISITOR_WAIT_DURATION = 30;
+const WIND_FAIRY_DURATION = 60;
+const FUTURE_TRADE_CHANCE = 0.15;
+const MERCHANT_THEME_BASE_PRICES = Object.freeze([120, 300, 1200]);
+const MERCHANT_LATE_THEME_MULTIPLIER = 2;
+const MERCHANT_STAGE_PRICE_STEP = 0.08;
+const SPECIAL_VISITOR_TYPES = Object.freeze({
+  thief: { name: "도둑 병아리", icon: "assets/ui/chick/icon_chick_007.png", marker: "!" },
+  merchant: { name: "재료 상인", icon: "assets/ui/chick/icon_chick_rich.png", marker: "₩" },
+  fairy: { name: "바람의 요정", icon: "assets/ui/chick/icon_chick_038.png", marker: "✦" },
+  trader: { name: "재료 교환상", icon: "assets/ui/chick/icon_chick_015.png", marker: "↔" },
+});
 const TUTORIAL_DIALOGUES = Object.freeze({
   welcome: "작은 식당부터 차근차근 준비해 볼까요?",
   "recipe-locked": "도마 테이블을 설치하면 레시피 연구를 시작할 수 있어요!",
@@ -204,7 +227,7 @@ function initialAcorns() {
 
 function createInitialState() {
   return {
-    version: 13,
+    version: 14,
     clock: 0,
     rng: 20260714,
     resources: {
@@ -236,6 +259,7 @@ function createInitialState() {
     },
     specialActors: [],
     specialLastSpawn: {},
+    specialVisitor: { nextAt: SPECIAL_VISITOR_INTERVAL, sequence: 1, dropBoostRemaining: 0, lastType: null, lastUpdatedAt: Date.now() },
     missions: {
       dayKey: new Date().toISOString().slice(0, 10),
       dailyProgress: { 1001: 1 },
@@ -255,7 +279,7 @@ function createInitialState() {
     ingredientDrops: [],
     dropSequence: 1,
     tipbox: 0,
-    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, giftBundles: 0, giftItems: 0, recipesCrafted: 0, recipeResearchAttempts: 0, failedRecipeResearches: 0 },
+    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, giftBundles: 0, giftItems: 0, recipesCrafted: 0, recipeResearchAttempts: 0, failedRecipeResearches: 0, specialVisitors: 0, merchantPurchases: 0, fairyBuffs: 0, trades: 0, futureTrades: 0 },
     ui: {
       selectedInstallId: null,
       screen: "restaurant",
@@ -273,7 +297,7 @@ function loadState() {
     const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!parsed) return null;
     const defaults = createInitialState();
-    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].includes(parsed.version)) return null;
+    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].includes(parsed.version)) return null;
     const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
       typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
     const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
@@ -341,6 +365,14 @@ function loadState() {
       if (specialRemaining <= 0) specialCooldown = SPECIAL_PROMOTION_COOLDOWN;
     }
     if (specialRemaining <= 0 && elapsedRealSeconds > 0) specialCooldown = Math.max(0, specialCooldown - elapsedRealSeconds);
+    const savedSpecialVisitor = { ...defaults.specialVisitor, ...parsed.specialVisitor };
+    const specialVisitorElapsed = Math.max(0,
+      (Date.now() - Number(savedSpecialVisitor.lastUpdatedAt || Date.now())) / 1000);
+    savedSpecialVisitor.dropBoostRemaining = Math.max(0,
+      Number(savedSpecialVisitor.dropBoostRemaining || 0) - specialVisitorElapsed);
+    savedSpecialVisitor.nextAt = Math.max(0, Number(savedSpecialVisitor.nextAt || SPECIAL_VISITOR_INTERVAL));
+    savedSpecialVisitor.sequence = Math.max(1, Math.floor(Number(savedSpecialVisitor.sequence || 1)));
+    savedSpecialVisitor.lastUpdatedAt = Date.now();
     const savedPromotion = { ...defaults.promotion, ...parsed.promotion };
     const savedQueueTargets = Array.isArray(parsed.promotion?.queueTargets)
       ? parsed.promotion.queueTargets.map((id) => Number(id) || null)
@@ -350,7 +382,7 @@ function loadState() {
     return {
       ...defaults,
       ...restaurantSave,
-      version: 13,
+      version: 14,
       resources: { ...defaults.resources, ...parsed.resources },
       ownedRecipes,
       collections: { ...defaults.collections, ...parsed.collections },
@@ -366,6 +398,7 @@ function loadState() {
         cooldown: specialCooldown,
         lastUpdatedAt: Date.now(),
       },
+      specialVisitor: savedSpecialVisitor,
       ui: { ...defaults.ui, ...savedUi, screen: "restaurant", tab: "craft" },
       tutorial: parsed.tutorial
         ? { activeId: parsed.tutorial.activeId || null, seen: [...new Set(parsed.tutorial.seen || [])] }
@@ -393,12 +426,23 @@ function loadState() {
             .map(Number).filter((ingredientId) => ingredientData(ingredientId))])
           .filter(([recipeId]) => progressionForRecipe(recipeId))),
       },
-      specialActors: parsed.specialActors || [],
+      specialActors: (parsed.specialActors || []).map((actor) => ({
+        ...actor,
+        id: actor.id || `legacy-special-${actor.specialId || 1}`,
+        type: actor.type || (Number(actor.specialId) === 1 ? "thief" : "merchant"),
+        state: actor.state === "interacting" ? "waiting" : actor.state,
+        timer: actor.state === "interacting" ? 0 : Number(actor.timer || 0),
+        offers: Array.isArray(actor.offers) ? actor.offers.map((offer) => {
+          const unitPrice = merchantIngredientUnitPrice(offer.ingredientId);
+          return { ...offer, unitPrice, price: unitPrice * Math.max(1, Number(offer.quantity || 1)) };
+        }) : actor.offers,
+      })),
       specialLastSpawn: parsed.specialLastSpawn || {},
       ingredientDrops: parsed.ingredientDrops || [],
       dropSequence: Number(parsed.dropSequence || 1),
     };
-  } catch {
+  } catch (error) {
+    console.error("저장 데이터를 불러오지 못했습니다.", error);
     return null;
   }
 }
@@ -406,6 +450,7 @@ function loadState() {
 function saveState() {
   try {
     if (state?.specialPromotion) state.specialPromotion.lastUpdatedAt = Date.now();
+    if (state?.specialVisitor) state.specialVisitor.lastUpdatedAt = Date.now();
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   } catch { /* storage is optional */ }
 }
@@ -949,10 +994,15 @@ function availableSeats() {
 function getRecipe(id) {
   const numericId = Number(id);
   const row = tables.recipes.get(numericId);
-  if (row) return row;
   const route = progressionForRecipe(numericId);
-  const base = route ? tables.recipes.get(Number(route.baseRecipeId)) : null;
-  return base ? { ...base, id: numericId, foodPrice: Number(route.foodPrice || base.foodPrice) } : null;
+  if (!route) return row || null;
+  const base = row || tables.recipes.get(Number(route.baseRecipeId));
+  if (!base) return null;
+  const configuredPrice = Number(route.foodPrice ?? base.foodPrice);
+  const foodPrice = route.hasPrototypePriceOverride
+    ? configuredPrice
+    : Math.max(configuredPrice, Number(route.minimumFoodPrice || 0));
+  return { ...base, id: numericId, foodPrice };
 }
 
 function routeRecipeName(id) {
@@ -1282,15 +1332,6 @@ function promote() {
 }
 
 function chooseCustomer(targetIngredientId = state.specialPromotion.remaining > 0 ? state.specialPromotion.ingredientId : null) {
-  const specialCustomers = tables.customers.filter((row) => {
-    const unlocked = row.unlockConditionType === 0
-      || (row.unlockConditionType === 1 && isInstalled(row.unlockConditionValue));
-    if (!unlocked || row.assetType !== 107 || row.customerAppearWeight <= 0) return false;
-    const sp = tables.specialCustomers.find((item) => item.id === row.assetId);
-    const last = Number(state.specialLastSpawn[row.assetId] || -Infinity);
-    return !state.specialActors.some((actor) => actor.specialId === row.assetId)
-      && state.clock - last >= Number(sp?.appearCoolTime || 0);
-  });
   const normalCustomers = allUnlockedThemeChicks().map((chick) => ({
     id: chick.customerId,
     assetType: 105,
@@ -1305,7 +1346,7 @@ function chooseCustomer(targetIngredientId = state.specialPromotion.remaining > 
   const targetedCustomers = targetedCustomerIds
     ? normalCustomers.filter((customer) => targetedCustomerIds.has(customer.id))
     : [];
-  const eligible = targetedCustomerIds?.size ? targetedCustomers : [...normalCustomers, ...specialCustomers];
+  const eligible = targetedCustomerIds?.size ? targetedCustomers : normalCustomers;
   if (!eligible.length) {
     const chick = themeChickMilestones(1)[0];
     return { id: chick.customerId, assetType: 105, assetId: chick.commonId, customerAppearWeight: 100, chickMilestone: chick };
@@ -1382,31 +1423,262 @@ function trySpawnQueuedGuest() {
   if (isFirstVisit) showFirstGuestToast(guest);
 }
 
-function spawnSpecialCustomer(specialId) {
-  state.specialLastSpawn[specialId] = state.clock;
-  state.specialActors.push({ specialId, x: 28, y: 470, targetX: 410, targetY: 595, state: "approaching", timer: 0, stolen: 0 });
-  registerCollection(specialId, "specialCustomers");
-  showToast(specialId === 1 ? "도둑이 팁박스를 노리고 있어요! 눌러서 잡으세요." : "특별 손님이 찾아왔어요!", 4);
+function shuffleWithGameRandom(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
 }
 
-function catchSpecial(actor) {
-  if (!actor || actor.state === "caught") return;
-  if (actor.stolen > 0) state.tipbox += actor.stolen;
-  actor.state = "caught";
+function obtainableSpecialVisitorIngredients() {
+  const choices = specialPromotionChoices().map((choice) => ({
+    id: choice.ingredientId,
+    name: choice.name,
+    emoji: choice.emoji,
+  }));
+  if (!choices.length) {
+    const leaf = ingredientData(GAME_INGREDIENTS.leaf.id);
+    return [{ id: leaf.id, name: leaf.ingredientName, emoji: leaf.emoji }];
+  }
+  return choices;
+}
+
+function futureSpecialVisitorIngredients() {
+  const obtainable = new Set(obtainableSpecialVisitorIngredients().map((ingredient) => ingredient.id));
+  const future = new Map();
+  CORE_PROGRESSION.forEach((route) => route.rewardIngredients.forEach((ingredient) => {
+    if (!obtainable.has(ingredient.id)) future.set(ingredient.id, { id: ingredient.id, name: ingredient.name, emoji: ingredient.emoji });
+  }));
+  return [...future.values()];
+}
+
+function merchantIngredientUnitPrice(ingredientId) {
+  const rawStage = ingredientDiscoveryStage(ingredientId);
+  const stage = Number.isFinite(rawStage) ? Math.max(0, rawStage) : 0;
+  const themeIndex = Math.floor(stage / 9);
+  const withinThemeStage = stage % 9;
+  const basePrice = MERCHANT_THEME_BASE_PRICES[themeIndex]
+    ?? MERCHANT_THEME_BASE_PRICES[2] * MERCHANT_LATE_THEME_MULTIPLIER ** (themeIndex - 2);
+  return Math.max(10, Math.round(basePrice * (1 + withinThemeStage * MERCHANT_STAGE_PRICE_STEP) / 10) * 10);
+}
+
+function buildMerchantOffers() {
+  return shuffleWithGameRandom(obtainableSpecialVisitorIngredients()).slice(0, 3).map((ingredient, index) => {
+    const quantity = 1 + Math.floor(random() * 2);
+    const unitPrice = merchantIngredientUnitPrice(ingredient.id);
+    return { id: index + 1, ingredientId: ingredient.id, name: ingredient.name, emoji: ingredient.emoji, quantity, unitPrice, price: quantity * unitPrice, sold: false };
+  });
+}
+
+function buildTradeOffer() {
+  const owned = storedIngredientIds().filter((ingredientId) => ingredientAmount(ingredientId) >= 2);
+  const requestId = owned[Math.floor(random() * owned.length)] || GAME_INGREDIENTS.leaf.id;
+  const obtainable = obtainableSpecialVisitorIngredients().filter((ingredient) => ingredient.id !== requestId);
+  const future = futureSpecialVisitorIngredients();
+  const useFuture = future.length > 0 && (random() < FUTURE_TRADE_CHANCE || !obtainable.length);
+  const candidates = useFuture ? future : obtainable;
+  const reward = candidates[Math.floor(random() * candidates.length)] || ingredientData(requestId);
+  const request = ingredientData(requestId);
+  return {
+    requestIngredientId: requestId,
+    requestName: request.ingredientName,
+    requestEmoji: request.emoji,
+    requestCount: 2,
+    rewardIngredientId: reward.id,
+    rewardName: reward.name || reward.ingredientName,
+    rewardEmoji: reward.emoji,
+    rewardCount: 1,
+    isFuture: useFuture,
+    completed: false,
+  };
+}
+
+function chooseSpecialVisitorType() {
+  const types = Object.keys(SPECIAL_VISITOR_TYPES).filter((type) => type !== state.specialVisitor.lastType);
+  return types[Math.floor(random() * types.length)] || "thief";
+}
+
+function spawnSpecialVisitor(type = chooseSpecialVisitorType()) {
+  if (!SPECIAL_VISITOR_TYPES[type] || state.specialActors.some((actor) => actor.state !== "gone")) return false;
+  const actor = {
+    id: `special-visitor-${state.specialVisitor.sequence++}`,
+    type,
+    specialId: type === "thief" ? 1 : null,
+    x: 28,
+    y: 470,
+    targetX: 410,
+    targetY: 595,
+    state: "approaching",
+    timer: 0,
+    stolen: 0,
+    offers: type === "merchant" ? buildMerchantOffers() : null,
+    trade: type === "trader" ? buildTradeOffer() : null,
+  };
+  state.specialActors.push(actor);
+  state.specialVisitor.lastType = type;
+  state.specialVisitor.nextAt = state.clock + SPECIAL_VISITOR_INTERVAL;
+  state.metrics.specialVisitors += 1;
+  if (type === "thief") registerCollection(1, "specialCustomers");
+  const messages = {
+    thief: "도둑이 팁박스를 노리고 있어요! 눌러서 잡으세요.",
+    merchant: "재료 상인이 왔어요! 눌러서 상품을 확인하세요.",
+    fairy: "바람의 요정이 찾아왔어요! 눌러서 도움을 받아보세요.",
+    trader: "재료 교환상이 왔어요! 눌러서 제안을 확인하세요.",
+  };
+  showToast(messages[type], 4);
+  saveState();
+  return true;
+}
+
+function spawnSpecialCustomer(specialId) {
+  return spawnSpecialVisitor(Number(specialId) === 1 ? "thief" : "merchant");
+}
+
+function finishSpecialVisitor(actor, stateName = "caught") {
+  actor.state = stateName;
   actor.targetX = 28;
   actor.targetY = 470;
-  showToast(actor.specialId === 1 ? "도둑을 잡고 팁을 지켰어요!" : "특별 손님을 만났어요!");
   saveState();
 }
 
+function catchSpecial(actor) {
+  if (!actor || actor.type !== "thief" || actor.state === "caught") return;
+  if (actor.stolen > 0) state.tipbox += actor.stolen;
+  finishSpecialVisitor(actor, "caught");
+  showToast("도둑을 잡고 팁을 지켰어요!");
+}
+
+function specialVisitorActorFromPanel() {
+  return state.specialActors.find((actor) => actor.id === dom.specialVisitorPanel.dataset.actorId);
+}
+
+function closeSpecialVisitorPanel(leave = true) {
+  const actor = specialVisitorActorFromPanel();
+  dom.specialVisitorPanel.hidden = true;
+  dom.specialVisitorPanel.dataset.actorId = "";
+  if (leave && actor?.state === "interacting") finishSpecialVisitor(actor, "escaping");
+}
+
+function renderSpecialVisitorPanel(actor) {
+  const meta = SPECIAL_VISITOR_TYPES[actor.type];
+  dom.specialVisitorIcon.src = meta.icon;
+  dom.specialVisitorTitle.textContent = meta.name;
+  if (actor.type === "thief") {
+    dom.specialVisitorMessage.textContent = "팁 상자를 노리고 몰래 들어온 도둑이에요!";
+    dom.specialVisitorContent.innerHTML = `<div class="special-visitor-explanation"><span aria-hidden="true">🚨</span><div><strong>팁을 훔쳐 달아나려고 해요</strong><p>지금 잡으면 팁 상자의 도토리를 안전하게 지킬 수 있어요.</p></div></div><button type="button" class="special-trade-button" data-special-action="catch">도둑 잡기</button>`;
+  } else if (actor.type === "fairy") {
+    dom.specialVisitorMessage.textContent = "바람을 불러 손님들의 재료 선물을 늘려주는 요정이에요!";
+    dom.specialVisitorContent.innerHTML = `<div class="special-visitor-explanation is-fairy"><span aria-hidden="true">🍃</span><div><strong>1분간 재료 드랍 확률 2배</strong><p>모든 손님의 재료 드랍 확률이 15%에서 30%로 올라가요.</p></div></div><button type="button" class="special-trade-button" data-special-action="fairy">도움 받기</button>`;
+  } else if (actor.type === "merchant") {
+    dom.specialVisitorMessage.textContent = "무작위 재료를 판매하는 여행 상인이에요. 오늘의 상품을 골라보세요!";
+    dom.specialVisitorContent.innerHTML = actor.offers.map((offer) => `<article class="merchant-offer"><span>${offer.emoji}</span><div><strong>${offer.name} ×${offer.quantity}</strong><small>${offer.sold ? "판매 완료" : `보유 ${ingredientAmount(offer.ingredientId)}개 · 개당 ${formatNumber(offer.unitPrice)}`}</small></div><button type="button" data-special-action="buy" data-offer-id="${offer.id}" ${offer.sold || state.resources.acorns < offer.price ? "disabled" : ""}>🌰 ${formatNumber(offer.price)}</button></article>`).join("");
+  } else if (actor.type === "trader") {
+    const trade = actor.trade;
+    const canTrade = ingredientAmount(trade.requestIngredientId) >= trade.requestCount && !trade.completed;
+    dom.specialVisitorMessage.textContent = "재료 2개를 다른 재료 1개로 바꿔주는 교환상이에요!";
+    dom.specialVisitorContent.innerHTML = `<div class="special-trade-card"><div class="special-trade-item"><span>${trade.requestEmoji}</span><strong>${trade.requestName} ×${trade.requestCount}</strong><small>보유 ${ingredientAmount(trade.requestIngredientId)}개</small></div><div class="special-trade-arrow">→</div><div class="special-trade-item"><span>${trade.rewardEmoji}</span><strong>${trade.rewardName} ×${trade.rewardCount}</strong><small>${trade.isFuture ? "희귀 제안" : "교환 재료"}</small></div></div>${trade.isFuture ? `<p class="special-trade-rare">아직 평소에는 얻을 수 없는 재료예요!</p>` : ""}<button type="button" class="special-trade-button" data-special-action="trade" ${canTrade ? "" : "disabled"}>교환하기</button>`;
+  }
+}
+
+function openSpecialVisitorPanel(actor) {
+  if (!actor || !SPECIAL_VISITOR_TYPES[actor.type]) return;
+  closeMenu();
+  closeSpecialPromotionPanel();
+  toggleDebugPanel(false);
+  dom.installPanel.hidden = true;
+  dom.toast.hidden = true;
+  toastTimer = 0;
+  actor.state = "interacting";
+  actor.timer = 0;
+  dom.specialVisitorPanel.dataset.actorId = actor.id;
+  renderSpecialVisitorPanel(actor);
+  dom.specialVisitorPanel.hidden = false;
+  saveState();
+}
+
+function buySpecialVisitorOffer(offerId) {
+  const actor = specialVisitorActorFromPanel();
+  const offer = actor?.offers?.find((item) => item.id === Number(offerId));
+  if (!offer || offer.sold) return false;
+  if (state.resources.acorns < offer.price) return showToast("도토리가 부족해요.");
+  if (ingredientStorageStatus().remaining < offer.quantity) return showToast("재료 보관함이 부족해요.");
+  state.resources.acorns -= offer.price;
+  state.crafting.ingredients[offer.ingredientId] = ingredientAmount(offer.ingredientId) + offer.quantity;
+  offer.sold = true;
+  state.metrics.merchantPurchases += 1;
+  showToast(`${offer.emoji} ${offer.name} ×${offer.quantity} 구매!`);
+  saveState();
+  updateHud();
+  renderSpecialVisitorPanel(actor);
+  return true;
+}
+
+function acceptSpecialVisitorTrade() {
+  const actor = specialVisitorActorFromPanel();
+  const trade = actor?.trade;
+  if (!trade || trade.completed || ingredientAmount(trade.requestIngredientId) < trade.requestCount) return false;
+  const remaining = ingredientAmount(trade.requestIngredientId) - trade.requestCount;
+  if (remaining > 0) state.crafting.ingredients[trade.requestIngredientId] = remaining;
+  else delete state.crafting.ingredients[trade.requestIngredientId];
+  state.crafting.ingredients[trade.rewardIngredientId] = ingredientAmount(trade.rewardIngredientId) + trade.rewardCount;
+  trade.completed = true;
+  state.metrics.trades += 1;
+  if (trade.isFuture) state.metrics.futureTrades += 1;
+  showToast(`${trade.rewardEmoji} ${trade.rewardName} ×${trade.rewardCount} 교환 완료!`, 3);
+  closeSpecialVisitorPanel(false);
+  finishSpecialVisitor(actor, "escaping");
+  updateHud();
+  return true;
+}
+
+function catchSpecialVisitorFromPanel() {
+  const actor = specialVisitorActorFromPanel();
+  if (!actor || actor.type !== "thief") return false;
+  closeSpecialVisitorPanel(false);
+  catchSpecial(actor);
+  updateHud();
+  return true;
+}
+
+function acceptWindFairyBlessing() {
+  const actor = specialVisitorActorFromPanel();
+  if (!actor || actor.type !== "fairy") return false;
+  state.specialVisitor.dropBoostRemaining = Math.max(state.specialVisitor.dropBoostRemaining, WIND_FAIRY_DURATION);
+  state.metrics.fairyBuffs += 1;
+  closeSpecialVisitorPanel(false);
+  finishSpecialVisitor(actor, "escaping");
+  showToast("재료 드랍 확률이 1분간 2배가 되었어요!", 3);
+  updateHud();
+  return true;
+}
+
+function interactSpecialVisitor(actor) {
+  if (!actor || ["escaping", "caught", "gone"].includes(actor.state)) return;
+  if (actor.type !== "thief" && actor.state !== "waiting") return;
+  openSpecialVisitorPanel(actor);
+}
+
 function updateSpecialCustomers(dt) {
+  if (state.specialVisitor.dropBoostRemaining > 0) {
+    state.specialVisitor.dropBoostRemaining = Math.max(0, state.specialVisitor.dropBoostRemaining - dt);
+  }
+  if (coreReady() && state.clock >= state.specialVisitor.nextAt && !state.specialActors.length) spawnSpecialVisitor();
   for (const actor of state.specialActors) {
     actor.timer += dt;
     if (actor.state === "approaching" && moveTowards(actor, actor.targetX, actor.targetY, 90, dt)) {
-      if (actor.specialId === 1) {
+      actor.timer = 0;
+      if (actor.type === "thief") {
         actor.stolen = Math.floor(state.tipbox * Number(tables.customerSetting.ThiefTipBoxAmount || .5));
         state.tipbox -= actor.stolen;
+        actor.state = "escaping";
+        actor.targetX = 28;
+        actor.targetY = 470;
+      } else {
+        actor.state = "waiting";
       }
+    } else if (actor.state === "waiting" && actor.timer >= SPECIAL_VISITOR_WAIT_DURATION) {
       actor.state = "escaping";
       actor.targetX = 28;
       actor.targetY = 470;
@@ -1414,6 +1686,8 @@ function updateSpecialCustomers(dt) {
       actor.state = "gone";
     }
   }
+  const goneIds = new Set(state.specialActors.filter((actor) => actor.state === "gone").map((actor) => actor.id));
+  if (goneIds.has(dom.specialVisitorPanel.dataset.actorId)) closeSpecialVisitorPanel(false);
   state.specialActors = state.specialActors.filter((actor) => actor.state !== "gone");
 }
 
@@ -1770,7 +2044,7 @@ function grantGuestIngredient(guest) {
   if (!items.length) return;
   guest.itemGranted = true;
   state.metrics.ingredientDropAttempts += 1;
-  if (random() >= GUEST_INGREDIENT_DROP_CHANCE) {
+  if (random() >= currentIngredientDropChance()) {
     state.metrics.ingredientDropMisses += 1;
     saveState();
     return;
@@ -1804,6 +2078,11 @@ function grantGuestIngredient(guest) {
   state.metrics.giftItems += dropCount;
   showToast(`${customerName}이 ${selectedItem.emoji} ${selectedItem.name}${dropCount > 1 ? ` ×${dropCount}` : ""}을 떨어뜨렸어요!`);
   saveState();
+}
+
+function currentIngredientDropChance() {
+  const multiplier = state.specialVisitor?.dropBoostRemaining > 0 ? 2 : 1;
+  return Math.min(1, GUEST_INGREDIENT_DROP_CHANCE * multiplier);
 }
 
 function collectIngredientDrop(drop) {
@@ -2195,13 +2474,16 @@ function drawGuest(guest) {
 function drawSpecialCustomers() {
   for (const actor of state.specialActors) {
     drawShadow(actor.x, actor.y + 26, 20, 6);
-    const icon = actor.specialId === 2 ? "assets/ui/chick/icon_chick_rich.png" : "assets/ui/chick/icon_chick_007.png";
-    drawImage(icon, actor.x, actor.y, 68, 68);
-    if (actor.specialId === 1 && actor.state !== "caught") {
-      ctx.fillStyle = "#e63e32";
-      ctx.font = "900 22px sans-serif";
+    const meta = SPECIAL_VISITOR_TYPES[actor.type] || SPECIAL_VISITOR_TYPES.thief;
+    drawImage(meta.icon, actor.x, actor.y, 68, 68);
+    const canInteract = actor.type === "thief"
+      ? !["caught", "escaping", "gone"].includes(actor.state)
+      : ["waiting", "interacting"].includes(actor.state);
+    if (canInteract) {
+      ctx.fillStyle = actor.type === "thief" ? "#e63e32" : "#654277";
+      ctx.font = "900 20px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("!", actor.x, actor.y - 42);
+      ctx.fillText(meta.marker, actor.x, actor.y - 42);
     }
   }
 }
@@ -2312,6 +2594,9 @@ function updateHud() {
   ensureDailyReset();
   dom.acorns.textContent = formatNumber(state.resources.acorns);
   dom.gems.textContent = formatNumber(state.resources.gems);
+  const dropBoostActive = Number(state.specialVisitor?.dropBoostRemaining || 0) > 0;
+  dom.dropBoostBadge.hidden = !dropBoostActive;
+  if (dropBoostActive) dom.dropBoostTime.textContent = formatPromotionTimer(state.specialVisitor.dropBoostRemaining);
   dom.promoButton.hidden = false;
   dom.promoButton.disabled = !coreReady();
   const specialPromotionUnlocked = isSpecialPromotionUnlocked();
@@ -2359,11 +2644,11 @@ function insideBox(point, box, padding = 0) {
 }
 
 function handleCanvasTap(event) {
-  if (!dom.installPanel.hidden) return;
+  if (!dom.installPanel.hidden || !dom.specialVisitorPanel.hidden) return;
   const point = pointerPosition(event);
 
   const special = state.specialActors.find((actor) => Math.hypot(point.x - actor.x, point.y - actor.y) <= 48);
-  if (special) return catchSpecial(special);
+  if (special) return interactSpecialVisitor(special);
 
   const ingredientDrop = state.ingredientDrops.find((item) => Math.hypot(point.x - item.x, point.y - item.y) <= 38);
   if (ingredientDrop) return collectIngredientDrop(ingredientDrop);
@@ -2954,6 +3239,7 @@ function resetGame() {
   guestToastTimer = 0;
   dom.guestToast.hidden = true;
   dom.specialPromoPanel.hidden = true;
+  closeSpecialVisitorPanel(false);
   toggleDebugPanel(false);
   dismissRecipeReveal();
   state = createInitialState();
@@ -3010,6 +3296,16 @@ function debugAddResource() {
   updateHud();
   render();
   showToast(`${DEBUG_RESOURCE_NAMES[resourceKey]} ${formatNumber(amount)} 추가!`, 2.5);
+}
+
+function debugSpawnSpecialVisitor() {
+  closeSpecialVisitorPanel(false);
+  state.specialActors = [];
+  const type = dom.debugSpecialType.value;
+  if (spawnSpecialVisitor(type)) {
+    toggleDebugPanel(false);
+    render();
+  }
 }
 
 function frame(now) {
@@ -3268,6 +3564,8 @@ function renderGameToText() {
         unlocked: isIngredientDropUnlocked(),
         unlockFacility: "냉장고",
         overallChance: GUEST_INGREDIENT_DROP_CHANCE,
+        currentChance: currentIngredientDropChance(),
+        activeMultiplier: state.specialVisitor.dropBoostRemaining > 0 ? 2 : 1,
         ingredientTypesOnSuccess: 1,
         slotChances: { ...INGREDIENT_SLOT_WEIGHTS },
         grades: GUEST_GRADES.map((grade) => ({
@@ -3293,7 +3591,39 @@ function renderGameToText() {
         return [customerId, { visits: entry.count, gradeId: grade.id, gradeName: grade.name, nextAt: next?.minVisits || null }];
       })),
     },
-    specialCustomers: state.specialActors.map((actor) => ({ id: actor.specialId, state: actor.state, x: Math.round(actor.x), y: Math.round(actor.y), stolen: actor.stolen })),
+    specialVisitor: {
+      interval: SPECIAL_VISITOR_INTERVAL,
+      nextIn: Number(Math.max(0, state.specialVisitor.nextAt - state.clock).toFixed(2)),
+      lastType: state.specialVisitor.lastType,
+      dropBoostRemaining: Number(state.specialVisitor.dropBoostRemaining.toFixed(2)),
+      dropMultiplier: state.specialVisitor.dropBoostRemaining > 0 ? 2 : 1,
+      futureTradeChance: FUTURE_TRADE_CHANCE,
+      panelVisible: !dom.specialVisitorPanel.hidden,
+      panelActorId: dom.specialVisitorPanel.dataset.actorId || null,
+      panelTitle: dom.specialVisitorPanel.hidden ? null : dom.specialVisitorTitle.textContent,
+      panelMessage: dom.specialVisitorPanel.hidden ? null : dom.specialVisitorMessage.textContent,
+      merchantPricing: {
+        theme1Base: MERCHANT_THEME_BASE_PRICES[0],
+        theme2Base: MERCHANT_THEME_BASE_PRICES[1],
+        theme3Base: MERCHANT_THEME_BASE_PRICES[2],
+        laterThemeMultiplier: MERCHANT_LATE_THEME_MULTIPLIER,
+        withinThemeStep: MERCHANT_STAGE_PRICE_STEP,
+      },
+    },
+    specialCustomers: state.specialActors.map((actor) => ({
+      id: actor.id,
+      type: actor.type,
+      name: SPECIAL_VISITOR_TYPES[actor.type]?.name || "특수 손님",
+      state: actor.state,
+      canInteract: actor.type === "thief"
+        ? !["caught", "escaping", "gone"].includes(actor.state)
+        : actor.state === "waiting",
+      x: Math.round(actor.x),
+      y: Math.round(actor.y),
+      stolen: actor.stolen,
+      offers: actor.offers || null,
+      trade: actor.trade || null,
+    })),
     selectedInstallId: state.ui.selectedInstallId,
   });
 }
@@ -3341,11 +3671,21 @@ dom.debugToggleButton.addEventListener("click", () => toggleDebugPanel());
 dom.debugCloseButton.addEventListener("click", () => toggleDebugPanel(false));
 dom.debugInstallAllButton.addEventListener("click", debugInstallAllFacilities);
 dom.debugAddResourceButton.addEventListener("click", debugAddResource);
+dom.debugSpawnSpecialButton.addEventListener("click", debugSpawnSpecialVisitor);
 dom.debugResourceAmount.addEventListener("keydown", (event) => {
   if (event.key === "Enter") debugAddResource();
 });
 dom.installClose.addEventListener("click", closeInstallPanel);
 dom.installConfirm.addEventListener("click", confirmInstall);
+dom.specialVisitorClose.addEventListener("click", () => closeSpecialVisitorPanel(true));
+dom.specialVisitorContent.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-special-action]");
+  if (!button || button.disabled) return;
+  if (button.dataset.specialAction === "buy") buySpecialVisitorOffer(Number(button.dataset.offerId));
+  if (button.dataset.specialAction === "trade") acceptSpecialVisitorTrade();
+  if (button.dataset.specialAction === "catch") catchSpecialVisitorFromPanel();
+  if (button.dataset.specialAction === "fairy") acceptWindFairyBlessing();
+});
 dom.menuClose.addEventListener("click", closeMenu);
 dom.chefDialogue.addEventListener("click", advanceTutorialDialogue);
 dom.navButtons.forEach((button) => button.addEventListener("click", () => openMenu(button.dataset.screen)));

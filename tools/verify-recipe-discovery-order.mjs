@@ -32,6 +32,8 @@ try {
   await page.evaluate(({ bread, tomato }) => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const cuttingBoard = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, cuttingBoard.id])];
     saved.crafting.ingredients = { [bread.id]: 1, [tomato.id]: 1 };
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));

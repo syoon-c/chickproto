@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-  <link rel="stylesheet" href="styles.css?v=20260806-debug-panel" />
+  <link rel="stylesheet" href="styles.css?v=20260806-special-visitor-popup" />
   </head>
   <body>
     <main class="app-shell">
@@ -35,6 +35,8 @@
           </div>
         </header>
 
+        <div id="drop-boost-badge" class="drop-boost-badge" hidden><span>🍃</span><strong>드랍 2배</strong><b id="drop-boost-time">1:00</b></div>
+
         <section id="debug-panel" class="debug-panel" hidden aria-label="테스트용 디버그 도구">
           <header><div><small>TEST ONLY</small><strong>디버그 도구</strong></div><button id="debug-close-btn" type="button" aria-label="닫기">×</button></header>
           <button id="debug-install-all-btn" class="debug-install-all" type="button">초기 설비 전체 설치</button>
@@ -50,6 +52,10 @@
               <input id="debug-resource-amount" type="number" min="1" step="1" value="1000" inputmode="numeric" aria-label="추가할 수량" />
             </div>
             <button id="debug-add-resource-btn" type="button">추가하기</button>
+          </div>
+          <div class="debug-special-tool">
+            <label for="debug-special-type">특수 손님 테스트</label>
+            <div><select id="debug-special-type"><option value="thief">도둑</option><option value="merchant">재료 상인</option><option value="fairy">바람의 요정</option><option value="trader">교환상</option></select><button id="debug-spawn-special-btn" type="button">등장</button></div>
           </div>
         </section>
 
@@ -86,6 +92,12 @@
           <div id="special-promotion-detail" class="special-promotion-detail" hidden></div>
         </section>
 
+        <section id="special-visitor-panel" class="special-visitor-panel" hidden aria-label="특수 손님 안내">
+          <header><div class="special-visitor-heading"><img id="special-visitor-icon" src="assets/ui/chick/icon_chick_rich.png" alt=""/><div><small>특수 손님</small><strong id="special-visitor-title">재료 상인</strong></div></div><button id="special-visitor-close" type="button" aria-label="닫기">×</button></header>
+          <p id="special-visitor-message"></p>
+          <div id="special-visitor-content" class="special-visitor-content"></div>
+        </section>
+
         <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
         <div id="guest-toast" class="new-guest-alert" role="status" aria-live="polite" hidden></div>
         </div>
@@ -111,8 +123,8 @@
     </main>
 
     <script src="data/runtime-tables.js?v=20260729-restaurant-only"></script>
-  <script src="src/game-config.js?v=20260804-special-ingredient-150"></script>
+  <script src="src/game-config.js?v=20260806-recipe-price-progression"></script>
     <script src="src/data-loader.js?v=20260729-restaurant-only"></script>
-  <script src="game.js?v=20260806-hide-idea-hud"></script>
+  <script src="game.js?v=20260806-special-visitor-balance"></script>
   </body>
 </html>

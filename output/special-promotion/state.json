@@ -472,7 +472,12 @@
     "giftItems": 0,
     "recipesCrafted": 1,
     "recipeResearchAttempts": 1,
-    "failedRecipeResearches": 0
+    "failedRecipeResearches": 0,
+    "specialVisitors": 0,
+    "merchantPurchases": 0,
+    "fairyBuffs": 0,
+    "trades": 0,
+    "futureTrades": 0
   },
   "currentScreen": "restaurant",
   "recipes": {
@@ -1788,10 +1793,10 @@
     },
     "prices": {
       "1": 40,
-      "2": 43,
-      "10001": 38,
-      "10003": 42,
-      "10004": 70
+      "2": 52,
+      "10001": 48,
+      "10003": 355,
+      "10004": 140
     }
   },
   "ingredientStorage": {
@@ -2217,6 +2222,8 @@
       "unlocked": false,
       "unlockFacility": "냉장고",
       "overallChance": 0.15,
+      "currentChance": 0.15,
+      "activeMultiplier": 1,
       "ingredientTypesOnSuccess": 1,
       "slotChances": {
         "primary": 0.5,
@@ -2269,6 +2276,25 @@
         "gradeName": "최고의 단골",
         "nextAt": null
       }
+    }
+  },
+  "specialVisitor": {
+    "interval": 120,
+    "nextIn": 27.28,
+    "lastType": null,
+    "dropBoostRemaining": 0,
+    "dropMultiplier": 1,
+    "futureTradeChance": 0.15,
+    "panelVisible": false,
+    "panelActorId": null,
+    "panelTitle": null,
+    "panelMessage": null,
+    "merchantPricing": {
+      "theme1Base": 120,
+      "theme2Base": 300,
+      "theme3Base": 1200,
+      "laterThemeMultiplier": 2,
+      "withinThemeStep": 0.08
     }
   },
   "specialCustomers": [],
