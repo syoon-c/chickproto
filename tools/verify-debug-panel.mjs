@@ -47,6 +47,17 @@ try {
     await page.locator("#debug-resource-amount").fill(String(amount));
     await page.locator("#debug-add-resource-btn").click();
   }
+
+  const debugIngredientId = await page.evaluate(() => window.CHICK_CONFIG.GAME_INGREDIENTS.truffle.id);
+  const ingredientBefore = current.progression.ingredients[String(debugIngredientId)] || 0;
+  await page.locator("#debug-ingredient-type").selectOption(String(debugIngredientId));
+  await page.locator("#debug-ingredient-amount").fill("27");
+  await page.locator("#debug-add-ingredient-btn").click();
+  current = await gameState();
+  if (current.progression.ingredients[String(debugIngredientId)] !== ingredientBefore + 27
+    || current.ingredientStorage.capacity < current.ingredientStorage.totalItems) {
+    throw new Error(`Debug ingredient addition failed: ${JSON.stringify({ ingredientId: debugIngredientId, before: ingredientBefore, after: current.progression.ingredients[String(debugIngredientId)], storage: current.ingredientStorage })}`);
+  }
   current = await gameState();
   for (const [resource, amount] of additions) {
     if (current.resources[resource] !== before[resource] + amount) {
@@ -67,14 +78,15 @@ try {
   await page.reload({ waitUntil: "load" });
   const reloaded = await gameState();
   if (reloaded.debug.installedFacilities !== reloaded.debug.totalInstallFacilities
-    || additions.some(([resource, amount]) => reloaded.resources[resource] !== before[resource] + amount)) {
+    || additions.some(([resource, amount]) => reloaded.resources[resource] !== before[resource] + amount)
+    || reloaded.progression.ingredients[String(debugIngredientId)] !== ingredientBefore + 27) {
     throw new Error(`Debug changes did not persist after reload: ${JSON.stringify({ before, after: current.resources, reloaded: reloaded.resources, debug: reloaded.debug, errors })}`);
   }
 
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(reloaded, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`DEBUG_PANEL_OK install=${reloaded.debug.installedFacilities}/${reloaded.debug.totalInstallFacilities} acorns=+12345 ideas=+321 gems=+17 stickers=+9 persisted=yes`);
+  console.log(`DEBUG_PANEL_OK install=${reloaded.debug.installedFacilities}/${reloaded.debug.totalInstallFacilities} acorns=+12345 ideas=+321 gems=+17 stickers=+9 ingredient=truffle+27 persisted=yes`);
 } finally {
   await browser.close();
 }

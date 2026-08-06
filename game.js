@@ -50,6 +50,9 @@ const dom = {
   debugResourceType: document.querySelector("#debug-resource-type"),
   debugResourceAmount: document.querySelector("#debug-resource-amount"),
   debugAddResourceButton: document.querySelector("#debug-add-resource-btn"),
+  debugIngredientType: document.querySelector("#debug-ingredient-type"),
+  debugIngredientAmount: document.querySelector("#debug-ingredient-amount"),
+  debugAddIngredientButton: document.querySelector("#debug-add-ingredient-btn"),
   debugSpecialType: document.querySelector("#debug-special-type"),
   debugSpawnSpecialButton: document.querySelector("#debug-spawn-special-btn"),
   dropBoostBadge: document.querySelector("#drop-boost-badge"),
@@ -60,6 +63,14 @@ const dom = {
   specialVisitorMessage: document.querySelector("#special-visitor-message"),
   specialVisitorContent: document.querySelector("#special-visitor-content"),
   specialVisitorClose: document.querySelector("#special-visitor-close"),
+  areaPrevButton: document.querySelector("#area-prev-btn"),
+  areaNextButton: document.querySelector("#area-next-btn"),
+  contestButton: document.querySelector("#contest-button"),
+  bottomControls: document.querySelector("#bottom-controls"),
+  offlineRewardPanel: document.querySelector("#offline-reward-panel"),
+  offlineRewardTime: document.querySelector("#offline-reward-time"),
+  offlineRewardAmount: document.querySelector("#offline-reward-amount"),
+  offlineRewardClaim: document.querySelector("#offline-reward-claim"),
   installPanel: document.querySelector("#install-panel"),
   installClose: document.querySelector("#install-close-btn"),
   installIcon: document.querySelector("#install-icon"),
@@ -127,6 +138,35 @@ const COOKING_PRICE_PER_SECOND = 20;
 const COOKING_TIME_MIN_SECONDS = 4;
 const COOKING_TIME_MAX_SECONDS = 24;
 const COOKING_TIME_STEP_SECONDS = 0.5;
+const BUFFET_RECIPE_REQUIREMENT = 8;
+const BUFFET_MAX_STAND_COUNT = 8;
+const BUFFET_STAND_UNLOCK_REQUIREMENTS = Object.freeze([8, 8, 8, 8, 12, 16, 20, 24]);
+const BUFFET_TICK_SECONDS = 60;
+const BUFFET_RECIPE_YIELD_RATE = 0.10;
+const BUFFET_RECIPE_COLLECTION_BONUS = 0.01;
+const BUFFET_OFFLINE_CAP_SECONDS = 2 * 60 * 60;
+const BUFFET_VISIT_CHANCE = Object.freeze({ normal: 0.50, satisfied: 0.80 });
+const BUFFET_PURCHASE_CHANCE = Object.freeze({ normal: 0.25, satisfied: 0.55 });
+const BUFFET_PURCHASE_RATE = 0.25;
+const BUFFET_CASHBOX_POSITION = Object.freeze({ x: 240, y: 715, w: 104, h: 86 });
+const CONTEST_RECIPE_REQUIREMENT = 6;
+const CONTEST_EXTRA_ENTRY_GEM_COST = 10;
+const CONTEST_JUDGING_DURATION = 2.8;
+const CONTEST_JUDGE_PREFERENCES = Object.freeze({
+  fresh: { name: "새싹 심사위원", icon: "🥬", hint: "싱그러운 채소가 좋아요", ingredientKeys: ["leaf", "lettuce", "tomato", "mixedVeg", "carrot", "cabbage", "cucumber", "broccoli", "avocado"] },
+  rich: { name: "고소미 심사위원", icon: "🧀", hint: "고소하고 부드러운 맛!", ingredientKeys: ["cheese", "egg", "butter", "milk", "cream", "seed", "tofu", "corn"] },
+  hearty: { name: "든든이 심사위원", icon: "🍚", hint: "배부른 주재료가 최고예요", ingredientKeys: ["bread", "potato", "rice", "flour", "noodles", "tortilla", "pasta", "acorn"] },
+  savory: { name: "감칠맛 심사위원", icon: "🥩", hint: "진한 고기와 해산물 취향", ingredientKeys: ["meat", "beef", "pork", "lamb", "fish", "sausage", "ham", "broth", "soy"] },
+  aroma: { name: "향긋이 심사위원", icon: "🌿", hint: "향신 재료를 찾아요", ingredientKeys: ["garlic", "onion", "pepper", "curry", "chili", "parsley", "basil", "rosemary", "truffle"] },
+  sweet: { name: "달콤이 심사위원", icon: "🍓", hint: "달콤한 과일이 좋아요", ingredientKeys: ["fruit", "berry", "sugar", "jam", "cherry", "banana", "strawberry", "apple", "mulberry"] },
+  tangy: { name: "새콤이 심사위원", icon: "🍅", hint: "새콤하고 톡 쏘는 맛!", ingredientKeys: ["tomato", "pickle", "ketchup", "vinegar", "olive", "soda"] },
+});
+const CONTEST_TIERS = Object.freeze([
+  { id: 1, name: "동네 새싹 요리대회", shortName: "새싹 대회", recipeRequirement: 6, previousTierId: null, firstPlaceScore: 62, prizes: [800, 400, 200], judges: ["fresh", "hearty", "rich"] },
+  { id: 2, name: "숲속 요리축제", shortName: "숲속 축제", recipeRequirement: 12, previousTierId: 1, firstPlaceScore: 66, prizes: [5000, 2500, 1200], judges: ["savory", "fresh", "aroma"] },
+  { id: 3, name: "왕국 미식대회", shortName: "왕국 대회", recipeRequirement: 20, previousTierId: 2, firstPlaceScore: 70, prizes: [25000, 12000, 6000], judges: ["rich", "savory", "tangy"] },
+  { id: 4, name: "별빛 그랑프리", shortName: "그랑프리", recipeRequirement: 32, previousTierId: 3, firstPlaceScore: 74, prizes: [120000, 60000, 30000], judges: ["sweet", "aroma", "rich"] },
+]);
 const SPECIAL_VISITOR_TYPES = Object.freeze({
   thief: { name: "도둑 병아리", icon: "assets/ui/chick/icon_chick_007.png", marker: "!" },
   merchant: { name: "재료 상인", icon: "assets/ui/chick/icon_chick_rich.png", marker: "₩" },
@@ -140,6 +180,8 @@ const TUTORIAL_DIALOGUES = Object.freeze({
   "fridge-next": "다음은 냉장고예요. 설치하면 손님들이 재료를 떨어뜨릴 거예요!",
   "drops-unlocked": "냉장고 완성! 이제 손님에게서 재료를 얻을 수 있어요.",
   "special-promotion-unlocked": "레시피 5개 발견! 이제 특별 홍보로 원하는 재료의 손님을 초대할 수 있어요.",
+  "contest-unlocked": "레시피가 6개나 됐어요! 심사위원 취향에 맞춰 요리 대회에 출품해 볼까요?",
+  "buffet-unlocked": "요리가 8개나 됐어요! 손님들이 여러 요리를 구경할 수 있는 야외 뷔페를 열어 볼까요?",
 });
 
 function scrollableAncestors(target) {
@@ -232,7 +274,7 @@ function initialAcorns() {
 
 function createInitialState() {
   return {
-    version: 14,
+    version: 16,
     clock: 0,
     rng: 20260714,
     resources: {
@@ -265,6 +307,27 @@ function createInitialState() {
     specialActors: [],
     specialLastSpawn: {},
     specialVisitor: { nextAt: SPECIAL_VISITOR_INTERVAL, sequence: 1, dropBoostRemaining: 0, lastType: null, lastUpdatedAt: Date.now() },
+    buffet: {
+      stands: Array(BUFFET_MAX_STAND_COUNT).fill(null),
+      cashbox: 0,
+      passiveElapsed: 0,
+      offlinePending: 0,
+      offlineSeconds: 0,
+      lastUpdatedAt: Date.now(),
+      visitorSequence: 1,
+      visitors: [],
+    },
+    contest: {
+      dayKey: localDateKey(),
+      entriesToday: 0,
+      selectedTierId: 1,
+      selectedRecipeId: 1,
+      selectedIngredientId: GAME_INGREDIENTS.leaf.id,
+      firstPlaceTierIds: [],
+      judging: null,
+      result: null,
+      history: [],
+    },
     missions: {
       dayKey: new Date().toISOString().slice(0, 10),
       dailyProgress: { 1001: 1 },
@@ -284,7 +347,7 @@ function createInitialState() {
     ingredientDrops: [],
     dropSequence: 1,
     tipbox: 0,
-    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, giftBundles: 0, giftItems: 0, recipesCrafted: 0, recipeResearchAttempts: 0, failedRecipeResearches: 0, specialVisitors: 0, merchantPurchases: 0, fairyBuffs: 0, trades: 0, futureTrades: 0 },
+    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, giftBundles: 0, giftItems: 0, recipesCrafted: 0, recipeResearchAttempts: 0, failedRecipeResearches: 0, specialVisitors: 0, merchantPurchases: 0, fairyBuffs: 0, trades: 0, futureTrades: 0, buffetVisitors: 0, buffetPurchases: 0, buffetRevenue: 0, buffetClaims: 0, buffetOfflineRevenue: 0, contestEntries: 0, contestFirstPlaces: 0, contestPrizeMoney: 0 },
     ui: {
       selectedInstallId: null,
       screen: "restaurant",
@@ -292,6 +355,8 @@ function createInitialState() {
       themeId: 1,
       collectionCustomerId: 3,
       lastResearch: null,
+      area: "restaurant",
+      buffetStandIndex: 0,
     },
     tutorial: { activeId: "welcome", seen: [] },
   };
@@ -302,7 +367,7 @@ function loadState() {
     const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!parsed) return null;
     const defaults = createInitialState();
-    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].includes(parsed.version)) return null;
+    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].includes(parsed.version)) return null;
     const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
       typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
     const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
@@ -337,6 +402,9 @@ function loadState() {
     } = parsed.ui || {};
     const metrics = Object.fromEntries(Object.keys(defaults.metrics)
       .map((key) => [key, Number(parsed.metrics?.[key] ?? defaults.metrics[key])]));
+    const savedTutorial = parsed.tutorial
+      ? { activeId: parsed.tutorial.activeId || null, seen: [...new Set(parsed.tutorial.seen || [])] }
+      : { activeId: null, seen: ["welcome"] };
     const savedIngredients = { ...(parsed.crafting?.ingredients || {}) };
     const shouldGrantStarterIngredients = parsed.crafting?.starterIngredientsGranted !== true
       && Object.keys(ownedRecipes).length <= 1;
@@ -393,10 +461,27 @@ function loadState() {
         : 0;
       return { ...task, duration, elapsed: previousProgress * duration };
     });
+    const savedBuffet = { ...defaults.buffet, ...parsed.buffet };
+    const buffetStands = (Array.isArray(savedBuffet.stands) ? savedBuffet.stands : [])
+      .slice(0, BUFFET_MAX_STAND_COUNT)
+      .map((recipeId) => recipeId && getRecipe(Number(recipeId)) && ownedRecipes[recipeId] ? Number(recipeId) : null);
+    while (buffetStands.length < BUFFET_MAX_STAND_COUNT) buffetStands.push(null);
+    const buffetUnlockedInSave = Object.keys(ownedRecipes).filter((id) => getRecipe(Number(id))).length >= BUFFET_RECIPE_REQUIREMENT
+      && savedTutorial.seen.includes("buffet-unlocked");
+    const buffetRealElapsed = buffetUnlockedInSave
+      ? Math.min(BUFFET_OFFLINE_CAP_SECONDS, Math.max(0, (Date.now() - Number(savedBuffet.lastUpdatedAt || Date.now())) / 1000))
+      : 0;
+    const buffetTotalElapsed = Math.max(0, Number(savedBuffet.passiveElapsed || 0)) + buffetRealElapsed;
+    const buffetOfflineTicks = Math.floor(buffetTotalElapsed / BUFFET_TICK_SECONDS);
+    const buffetOfflineEarned = buffetOfflineTicks * buffetYieldFromSnapshot(buffetStands, ownedRecipes);
+    const savedContest = { ...defaults.contest, ...parsed.contest };
+    const contestTierIds = new Set(CONTEST_TIERS.map((tier) => tier.id));
+    const contestRecipeIds = new Set(Object.keys(ownedRecipes).map(Number));
+    const contestIngredientIds = new Set(Object.keys(normalizedIngredients).map(Number));
     return {
       ...defaults,
       ...restaurantSave,
-      version: 14,
+      version: 16,
       resources: { ...defaults.resources, ...parsed.resources },
       ownedRecipes,
       collections: { ...defaults.collections, ...parsed.collections },
@@ -413,11 +498,34 @@ function loadState() {
         lastUpdatedAt: Date.now(),
       },
       cooking: migratedCooking,
+      buffet: {
+        ...savedBuffet,
+        stands: buffetStands,
+        cashbox: Math.max(0, Math.floor(Number(savedBuffet.cashbox || 0))),
+        passiveElapsed: buffetTotalElapsed % BUFFET_TICK_SECONDS,
+        offlinePending: Math.max(0, Math.floor(Number(savedBuffet.offlinePending || 0))) + buffetOfflineEarned,
+        offlineSeconds: Math.max(0, Number(savedBuffet.offlineSeconds || 0)) + buffetOfflineTicks * BUFFET_TICK_SECONDS,
+        lastUpdatedAt: Date.now(),
+        visitorSequence: Math.max(1, Math.floor(Number(savedBuffet.visitorSequence || 1))),
+        visitors: Array.isArray(savedBuffet.visitors) ? savedBuffet.visitors : [],
+      },
+      contest: {
+        ...savedContest,
+        dayKey: typeof savedContest.dayKey === "string" ? savedContest.dayKey : defaults.contest.dayKey,
+        entriesToday: Math.max(0, Math.floor(Number(savedContest.entriesToday || 0))),
+        selectedTierId: contestTierIds.has(Number(savedContest.selectedTierId)) ? Number(savedContest.selectedTierId) : 1,
+        selectedRecipeId: contestRecipeIds.has(Number(savedContest.selectedRecipeId)) ? Number(savedContest.selectedRecipeId) : Number(Object.keys(ownedRecipes)[0] || 1),
+        selectedIngredientId: contestIngredientIds.has(Number(savedContest.selectedIngredientId)) ? Number(savedContest.selectedIngredientId) : Number(Object.keys(normalizedIngredients)[0] || GAME_INGREDIENTS.leaf.id),
+        firstPlaceTierIds: [...new Set((savedContest.firstPlaceTierIds || []).map(Number).filter((id) => contestTierIds.has(id)))],
+        judging: savedContest.judging && contestTierIds.has(Number(savedContest.judging.tierId))
+          ? { ...savedContest.judging, elapsed: Math.max(0, Number(savedContest.judging.elapsed || 0)), duration: CONTEST_JUDGING_DURATION }
+          : null,
+        result: savedContest.result || null,
+        history: Array.isArray(savedContest.history) ? savedContest.history.slice(0, 12) : [],
+      },
       specialVisitor: savedSpecialVisitor,
-      ui: { ...defaults.ui, ...savedUi, screen: "restaurant", tab: "craft" },
-      tutorial: parsed.tutorial
-        ? { activeId: parsed.tutorial.activeId || null, seen: [...new Set(parsed.tutorial.seen || [])] }
-        : { activeId: null, seen: ["welcome"] },
+      ui: { ...defaults.ui, ...savedUi, screen: "restaurant", tab: "craft", area: buffetUnlockedInSave && savedUi.area === "buffet" ? "buffet" : "restaurant" },
+      tutorial: savedTutorial,
       staff: parsed.staff || {},
       performance: { ...defaults.performance, ...parsed.performance },
       themes: {
@@ -466,6 +574,7 @@ function saveState() {
   try {
     if (state?.specialPromotion) state.specialPromotion.lastUpdatedAt = Date.now();
     if (state?.specialVisitor) state.specialVisitor.lastUpdatedAt = Date.now();
+    if (state?.buffet) state.buffet.lastUpdatedAt = Date.now();
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   } catch { /* storage is optional */ }
 }
@@ -501,6 +610,11 @@ function recipeData(id) {
   return state.ownedRecipes[Number(id)] || state.ownedRecipes[String(id)] || null;
 }
 
+function localDateKey(date = new Date()) {
+  const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return localTime.toISOString().slice(0, 10);
+}
+
 function recipeLevelPrice(recipe, owned) {
   return Number(recipe?.foodPrice || 0)
     * (1 + Math.max(0, Number(owned?.level || 1) - 1) * RECIPE_LEVEL_PRICE_BONUS);
@@ -533,6 +647,72 @@ function restaurantMealPrice(recipeId, mood = "normal") {
       * satisfactionPriceMultiplier(mood)
       * performancePriceMultiplier()
   ));
+}
+
+function buffetPopularityMultiplierForCount(recipeCount) {
+  return 1 + Math.max(0, Number(recipeCount || 0) - BUFFET_RECIPE_REQUIREMENT) * BUFFET_RECIPE_COLLECTION_BONUS;
+}
+
+function buffetStandCapacityForCount(recipeCount) {
+  return BUFFET_STAND_UNLOCK_REQUIREMENTS.filter((requirement) => Number(recipeCount || 0) >= requirement).length;
+}
+
+function buffetStandCapacity() {
+  return buffetStandCapacityForCount(unlockedRecipeCount());
+}
+
+function nextBuffetStandRequirement(recipeCount = unlockedRecipeCount()) {
+  return BUFFET_STAND_UNLOCK_REQUIREMENTS.find((requirement, index) => index >= buffetStandCapacityForCount(recipeCount)) || null;
+}
+
+function buffetStandPositions(capacity = buffetStandCapacity()) {
+  const count = Math.max(0, Math.min(BUFFET_MAX_STAND_COUNT, Number(capacity) || 0));
+  let rowCounts;
+  let rowYs;
+  let width;
+  let height;
+  if (count <= 4) {
+    rowCounts = [Math.min(2, count), Math.max(0, count - 2)];
+    rowYs = [335, 505];
+    width = 124;
+    height = 94;
+  } else if (count <= 6) {
+    rowCounts = [3, count - 3];
+    rowYs = [315, 485];
+    width = 104;
+    height = 80;
+  } else {
+    rowCounts = [3, 3, count - 6];
+    rowYs = [275, 425, 575];
+    width = 96;
+    height = 72;
+  }
+  const xsForCount = (rowCount) => rowCount === 1 ? [240] : rowCount === 2 ? [145, 335] : [92, 240, 388];
+  return rowCounts.flatMap((rowCount, rowIndex) => xsForCount(rowCount).map((x) => ({
+    x,
+    y: rowYs[rowIndex],
+    w: width,
+    h: height,
+  })));
+}
+
+function buffetRecipeYield(recipeId, ownedRecipes = state?.ownedRecipes || {}) {
+  const recipe = getRecipe(recipeId);
+  const owned = ownedRecipes[Number(recipeId)] || ownedRecipes[String(recipeId)];
+  if (!recipe || !owned) return 0;
+  return Math.max(1, Math.round(recipeLevelPrice(recipe, owned) * BUFFET_RECIPE_YIELD_RATE));
+}
+
+function buffetYieldFromSnapshot(stands, ownedRecipes) {
+  const recipeCount = Object.keys(ownedRecipes || {}).filter((id) => getRecipe(Number(id))).length;
+  const capacity = buffetStandCapacityForCount(recipeCount);
+  const standYield = (stands || []).slice(0, capacity)
+    .reduce((sum, recipeId) => sum + buffetRecipeYield(recipeId, ownedRecipes), 0);
+  return Math.max(0, Math.round(standYield * buffetPopularityMultiplierForCount(recipeCount)));
+}
+
+function buffetPerMinute() {
+  return buffetYieldFromSnapshot(state.buffet.stands, state.ownedRecipes);
 }
 
 function progressionForCustomer(customerId) {
@@ -956,12 +1136,42 @@ function isSpecialPromotionUnlocked() {
     && state.tutorial?.seen?.includes("special-promotion-unlocked");
 }
 
+function isBuffetUnlocked() {
+  return unlockedRecipeCount() >= BUFFET_RECIPE_REQUIREMENT
+    && state.tutorial?.seen?.includes("buffet-unlocked");
+}
+
+function isContestUnlocked() {
+  return unlockedRecipeCount() >= CONTEST_RECIPE_REQUIREMENT
+    && state.tutorial?.seen?.includes("contest-unlocked");
+}
+
 function ensureSpecialPromotionTutorial() {
   if (unlockedRecipeCount() < SPECIAL_PROMOTION_RECIPE_REQUIREMENT
     || state.tutorial?.seen?.includes("special-promotion-unlocked")
     || state.tutorial?.activeId) return false;
   state.tutorial.activeId = "special-promotion-unlocked";
   return true;
+}
+
+function ensureBuffetTutorial() {
+  if (unlockedRecipeCount() < BUFFET_RECIPE_REQUIREMENT
+    || state.tutorial?.seen?.includes("buffet-unlocked")
+    || state.tutorial?.activeId) return false;
+  state.tutorial.activeId = "buffet-unlocked";
+  return true;
+}
+
+function ensureContestTutorial() {
+  if (unlockedRecipeCount() < CONTEST_RECIPE_REQUIREMENT
+    || state.tutorial?.seen?.includes("contest-unlocked")
+    || state.tutorial?.activeId) return false;
+  state.tutorial.activeId = "contest-unlocked";
+  return true;
+}
+
+function ensureProgressionTutorial() {
+  return ensureSpecialPromotionTutorial() || ensureContestTutorial() || ensureBuffetTutorial();
 }
 
 function showTutorialDialogue(dialogueId) {
@@ -980,7 +1190,7 @@ function advanceTutorialDialogue() {
   state.tutorial.activeId = dialogueId === "recipe-unlocked" && !isIngredientDropUnlocked()
     ? "fridge-next"
     : null;
-  ensureSpecialPromotionTutorial();
+  ensureProgressionTutorial();
   saveState();
   updateTutorialDialogue();
   updateHud();
@@ -989,7 +1199,8 @@ function advanceTutorialDialogue() {
 function updateTutorialDialogue() {
   const dialogueId = state?.tutorial?.activeId;
   const text = TUTORIAL_DIALOGUES[dialogueId];
-  dom.chefDialogue.hidden = !text || !dom.menuScreen.hidden || !dom.installPanel.hidden || !dom.specialPromoPanel.hidden;
+  dom.chefDialogue.hidden = !text || !dom.menuScreen.hidden || !dom.installPanel.hidden
+    || !dom.specialPromoPanel.hidden || !dom.offlineRewardPanel.hidden;
   dom.chefDialogueText.textContent = text || "";
 }
 
@@ -1112,19 +1323,21 @@ function renderRecipeReveal() {
       <div class="recipe-reveal-dish"><span class="recipe-reveal-glow"></span><img src="${isWeird ? WEIRD_DISH_ICON : routeRecipeIcon(recipeId)}" alt="" /></div>
       <h3>${isWeird ? "괴식" : routeRecipeName(recipeId)}</h3>
       <p>${isWeird ? "사용한 재료는 사라졌어요" : recipeReveal.automatic ? "자동 연구가 새 조합을 찾았어요" : "보울 속 재료가 새로운 요리가 됐어요"}</p>
+      ${recipeReveal.buffetStandUnlocked ? `<strong class="recipe-reveal-buffet">🍽️ 뷔페 진열대 +${recipeReveal.buffetStandUnlocked} · 총 ${recipeReveal.buffetStandCapacity}칸</strong>` : ""}
       <button type="button" data-action="dismiss-recipe-reveal">${isWeird ? "치우기" : "짜잔!"}</button>
     </section>`;
   dom.recipeReveal.hidden = false;
 }
 
 function dismissRecipeReveal() {
-  const shouldSurfaceSpecialPromotionTutorial = state?.tutorial?.activeId === "special-promotion-unlocked"
-    && !state.tutorial?.seen?.includes("special-promotion-unlocked");
+  const pendingProgressionDialogue = state?.tutorial?.activeId;
+  const shouldSurfaceProgressionTutorial = ["special-promotion-unlocked", "contest-unlocked", "buffet-unlocked"].includes(pendingProgressionDialogue)
+    && !state.tutorial?.seen?.includes(pendingProgressionDialogue);
   recipeReveal = null;
   if (recipeRevealTimer) window.clearTimeout(recipeRevealTimer);
   recipeRevealTimer = 0;
   renderRecipeReveal();
-  if (shouldSurfaceSpecialPromotionTutorial && !dom.menuScreen.hidden) {
+  if (shouldSurfaceProgressionTutorial && !dom.menuScreen.hidden) {
     state.ui.screen = "restaurant";
     dom.menuScreen.hidden = true;
     setActiveNav("");
@@ -1818,6 +2031,7 @@ function craftIngredientCost(route) {
 function completeRecipeCraft(recipeId, automatic = false) {
   const route = progressionForRecipe(recipeId);
   if (!route) return false;
+  const previousBuffetCapacity = buffetStandCapacity();
   const existing = recipeData(route.recipeId);
   const recipe = getRecipe(route.recipeId);
   const previousLevel = Number(existing?.level || 0);
@@ -1835,7 +2049,12 @@ function completeRecipeCraft(recipeId, automatic = false) {
     startRecipeUpgradeReveal(route.recipeId, automatic, previousLevel, level, previousPrice, newPrice);
   } else {
     startRecipeReveal(route.recipeId, automatic);
-    ensureSpecialPromotionTutorial();
+    const currentBuffetCapacity = buffetStandCapacity();
+    if (previousBuffetCapacity > 0 && currentBuffetCapacity > previousBuffetCapacity) {
+      recipeReveal.buffetStandUnlocked = currentBuffetCapacity - previousBuffetCapacity;
+      recipeReveal.buffetStandCapacity = currentBuffetCapacity;
+    }
+    ensureProgressionTutorial();
   }
   saveState();
   updateHud();
@@ -2169,6 +2388,10 @@ function resolveMeal(guest, forcedSatisfied = false) {
   }
 
   guest.mood = mood;
+  const buffetVisitChance = Number(BUFFET_VISIT_CHANCE[mood] || 0);
+  guest.buffetQueued = isBuffetUnlocked()
+    && state.buffet.stands.some(Boolean)
+    && random() < buffetVisitChance;
   guest.state = "leaving";
   guest.targetX = 240;
   guest.targetY = 900;
@@ -2197,6 +2420,71 @@ function calmGuest(guest) {
   resolveMeal(guest, true);
 }
 
+function spawnBuffetVisitor(guest) {
+  const standPositions = buffetStandPositions();
+  const displayed = state.buffet.stands.slice(0, buffetStandCapacity())
+    .map((recipeId, standIndex) => ({ recipeId: Number(recipeId), standIndex }))
+    .filter((item) => item.recipeId && getRecipe(item.recipeId));
+  if (!isBuffetUnlocked() || !displayed.length) return false;
+  const choice = displayed[Math.floor(random() * displayed.length)];
+  const position = standPositions[choice.standIndex];
+  const mood = guest.mood === "satisfied" ? "satisfied" : "normal";
+  const willBuy = random() < Number(BUFFET_PURCHASE_CHANCE[mood] || 0);
+  const recipe = getRecipe(choice.recipeId);
+  const owned = recipeData(choice.recipeId) || { level: 1 };
+  const purchaseAmount = Math.max(1, Math.round(recipeLevelPrice(recipe, owned) * BUFFET_PURCHASE_RATE));
+  state.buffet.visitors.push({
+    id: `buffet-${state.buffet.visitorSequence++}`,
+    customerId: guest.customerId,
+    commonId: guest.commonId,
+    customerName: guest.customerName,
+    mood,
+    state: "arriving",
+    x: 28,
+    y: 760,
+    targetX: position.x,
+    targetY: position.y + 125,
+    recipeId: choice.recipeId,
+    standIndex: choice.standIndex,
+    willBuy,
+    purchaseAmount,
+    paid: false,
+    stateTime: 0,
+    bob: Number(guest.bob || 0),
+  });
+  state.metrics.buffetVisitors += 1;
+  return true;
+}
+
+function updateBuffetVisitors(dt) {
+  for (const visitor of state.buffet.visitors) {
+    visitor.bob += dt;
+    visitor.stateTime += dt;
+    if (visitor.state === "arriving") {
+      if (moveTowards(visitor, visitor.targetX, visitor.targetY, 155, dt)) {
+        visitor.state = "browsing";
+        visitor.stateTime = 0;
+      }
+    } else if (visitor.state === "browsing" && visitor.stateTime >= 3) {
+      if (visitor.willBuy && !visitor.paid) {
+        visitor.paid = true;
+        state.buffet.cashbox += visitor.purchaseAmount;
+        state.metrics.buffetPurchases += 1;
+      }
+      visitor.state = "leaving";
+      visitor.stateTime = 0;
+      visitor.targetX = 485;
+      visitor.targetY = 760;
+      saveState();
+    } else if (visitor.state === "leaving") {
+      moveTowards(visitor, visitor.targetX, visitor.targetY, 170, dt);
+    }
+  }
+  const before = state.buffet.visitors.length;
+  state.buffet.visitors = state.buffet.visitors.filter((visitor) => !(visitor.state === "leaving" && visitor.x >= 480));
+  if (state.buffet.visitors.length !== before) saveState();
+}
+
 function collectPayment(payment) {
   state.resources.acorns += payment.amount;
   state.metrics.collected += payment.amount;
@@ -2213,6 +2501,68 @@ function collectTipbox() {
   dispatchAchievement(7);
   saveState();
   updateHud();
+}
+
+function collectBuffetCashbox() {
+  const amount = Math.max(0, Math.floor(Number(state.buffet.cashbox || 0)));
+  if (!amount) return false;
+  state.buffet.cashbox = 0;
+  state.resources.acorns += amount;
+  state.metrics.buffetRevenue += amount;
+  state.metrics.buffetClaims += 1;
+  showToast(`야외 뷔페 정산 +${formatNumber(amount)}`, 2.5);
+  saveState();
+  updateHud();
+  render();
+  return true;
+}
+
+function formatOfflineBuffetTime(seconds) {
+  const totalMinutes = Math.max(1, Math.floor(Number(seconds || 0) / 60));
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours ? `${hours}시간${minutes ? ` ${minutes}분` : ""}` : `${minutes}분`;
+}
+
+function showOfflineBuffetReward() {
+  const amount = Math.max(0, Math.floor(Number(state.buffet.offlinePending || 0)));
+  dom.offlineRewardPanel.hidden = amount <= 0;
+  if (amount <= 0) return false;
+  dom.offlineRewardAmount.textContent = formatNumber(amount);
+  dom.offlineRewardTime.textContent = `${formatOfflineBuffetTime(state.buffet.offlineSeconds)} 동안 모인 도토리`;
+  updateTutorialDialogue();
+  return true;
+}
+
+function claimOfflineBuffetReward() {
+  const amount = Math.max(0, Math.floor(Number(state.buffet.offlinePending || 0)));
+  if (!amount) {
+    dom.offlineRewardPanel.hidden = true;
+    return false;
+  }
+  state.buffet.offlinePending = 0;
+  state.buffet.offlineSeconds = 0;
+  state.resources.acorns += amount;
+  state.metrics.buffetRevenue += amount;
+  state.metrics.buffetOfflineRevenue += amount;
+  state.metrics.buffetClaims += 1;
+  dom.offlineRewardPanel.hidden = true;
+  saveState();
+  updateHud();
+  updateTutorialDialogue();
+  render();
+  return true;
+}
+
+function updateBuffetPassiveIncome(dt) {
+  if (!isBuffetUnlocked()) return;
+  state.buffet.passiveElapsed += Math.max(0, Number(dt) || 0);
+  const ticks = Math.floor(state.buffet.passiveElapsed / BUFFET_TICK_SECONDS);
+  if (ticks <= 0) return;
+  state.buffet.passiveElapsed %= BUFFET_TICK_SECONDS;
+  const earned = ticks * buffetPerMinute();
+  if (earned > 0) state.buffet.cashbox += earned;
+  saveState();
 }
 
 function updateGuests(dt) {
@@ -2253,6 +2603,8 @@ function updateGuests(dt) {
     }
   }
 
+  const departing = state.guests.filter((guest) => guest.state === "leaving" && guest.y >= 896);
+  departing.filter((guest) => guest.buffetQueued).forEach(spawnBuffetVisitor);
   const before = state.guests.length;
   state.guests = state.guests.filter((guest) => !(guest.state === "leaving" && guest.y >= 896));
   if (state.guests.length !== before) {
@@ -2289,8 +2641,11 @@ function update(dt) {
   }
   updateSpecialPromotion(dt);
   updateGuests(dt);
+  updateBuffetVisitors(dt);
   updateSpecialCustomers(dt);
   updateCooking(dt);
+  updateBuffetPassiveIncome(dt);
+  updateContestJudging(dt);
   updateRecipeResearch(dt);
   if (SYSTEM_ENABLED.staff) updateStaff(dt);
   updatePerformance(dt);
@@ -2586,6 +2941,144 @@ function drawTipboxValue() {
   ctx.fillText(formatNumber(state.tipbox), p.x + 11, p.y - 41);
 }
 
+function drawBuffetDecor() {
+  ctx.fillStyle = "rgba(255,244,190,.16)";
+  ctx.fillRect(0, 0, GAME_W, GAME_H);
+  ctx.strokeStyle = "#80502d";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(45, 180);
+  ctx.quadraticCurveTo(240, 225, 435, 180);
+  ctx.stroke();
+  [70, 125, 185, 245, 305, 365, 420].forEach((x, index) => {
+    const y = 190 + Math.sin(index * .8) * 15;
+    ctx.fillStyle = ["#f7c84e", "#ef7654", "#8fcf78"][index % 3];
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y - 5);
+    ctx.lineTo(x + 10, y - 5);
+    ctx.lineTo(x, y + 15);
+    ctx.closePath();
+    ctx.fill();
+  });
+  ctx.fillStyle = "rgba(255,249,225,.95)";
+  ctx.strokeStyle = "#76502e";
+  ctx.lineWidth = 3;
+  roundRect(145, 102, 190, 58, 18);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#70431f";
+  ctx.font = "1000 24px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("야외 뷔페", 240, 139);
+  ctx.fillStyle = "#a46a30";
+  ctx.font = "900 10px sans-serif";
+  const capacity = buffetStandCapacity();
+  const nextRequirement = nextBuffetStandRequirement();
+  ctx.fillText(`진열 ${capacity}/${BUFFET_MAX_STAND_COUNT}${nextRequirement ? ` · 다음 ${nextRequirement}개` : " · 최대 확장"}`, 240, 154);
+}
+
+function drawBuffetStand(position, index) {
+  const recipeId = state.buffet.stands[index];
+  const compact = position.w <= 104;
+  const plateSize = compact ? 50 : 62;
+  const plateY = position.y - position.h * .46;
+  const labelWidth = compact ? 102 : 122;
+  const labelTop = position.y + position.h * .45;
+  drawShadow(position.x, position.y + position.h * .38, position.w * .38, compact ? 7 : 9);
+  drawImage("assets/ui/facility/icon_facility_1_table_wood.png", position.x, position.y, position.w, position.h);
+  if (recipeId) {
+    drawImage(routeRecipeIcon(recipeId), position.x, plateY, plateSize, plateSize);
+    ctx.fillStyle = "rgba(255,250,233,.96)";
+    ctx.strokeStyle = "#7b502e";
+    ctx.lineWidth = 2;
+    roundRect(position.x - labelWidth / 2, labelTop, labelWidth, compact ? 37 : 42, 12);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#68401f";
+    ctx.font = `1000 ${compact ? 9 : 10}px sans-serif`;
+    ctx.textAlign = "center";
+    const name = routeRecipeName(recipeId);
+    const nameLimit = compact ? 7 : 9;
+    ctx.fillText(name.length > nameLimit ? `${name.slice(0, nameLimit)}…` : name, position.x, labelTop + 15);
+    ctx.fillStyle = "#bc6827";
+    ctx.font = `900 ${compact ? 8 : 9}px sans-serif`;
+    ctx.fillText(`+${formatNumber(buffetRecipeYield(recipeId))}/분`, position.x, labelTop + (compact ? 29 : 32));
+  } else {
+    ctx.fillStyle = "rgba(255,250,233,.95)";
+    ctx.strokeStyle = "#8a623d";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(position.x, plateY, compact ? 20 : 24, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#9b642d";
+    ctx.font = `1000 ${compact ? 24 : 28}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.fillText("+", position.x, plateY + (compact ? 8 : 10));
+    ctx.fillStyle = "rgba(255,250,233,.94)";
+    ctx.strokeStyle = "#8a623d";
+    roundRect(position.x - labelWidth / 2, labelTop, labelWidth, compact ? 30 : 34, 11);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#8a623d";
+    ctx.font = `900 ${compact ? 8 : 9}px sans-serif`;
+    ctx.fillText("레시피 놓기", position.x, labelTop + (compact ? 19 : 22));
+  }
+}
+
+function drawBuffetVisitor(visitor) {
+  const bob = Math.sin(visitor.bob * 4) * 2;
+  drawShadow(visitor.x, visitor.y + 25, 18, 5);
+  drawImage(guestIcon(visitor), visitor.x, visitor.y + bob, 61, 61);
+  if (visitor.state === "browsing") {
+    drawImage(routeRecipeIcon(visitor.recipeId), visitor.x, visitor.y - 42, 34, 34);
+  } else if (visitor.paid) {
+    ctx.fillStyle = "#f1b32f";
+    ctx.font = "1000 18px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("+🌰", visitor.x, visitor.y - 38);
+  }
+}
+
+function drawBuffetCashbox() {
+  const p = BUFFET_CASHBOX_POSITION;
+  drawShadow(p.x, p.y + p.h * .38, 44, 8);
+  drawImage("assets/ui/facility/icon_facility_1_countertop_wood.png", p.x, p.y, p.w, p.h);
+  ctx.fillStyle = "rgba(255,250,233,.96)";
+  ctx.strokeStyle = "#76502e";
+  ctx.lineWidth = 2;
+  roundRect(p.x - 72, p.y + 43, 144, 47, 15);
+  ctx.fill();
+  ctx.stroke();
+  drawImage("assets/ui/currency/icon_currency_001.png", p.x - 49, p.y + 65, 26, 26);
+  ctx.fillStyle = "#68401f";
+  ctx.font = "1000 15px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(formatNumber(state.buffet.cashbox), p.x - 31, p.y + 70);
+  ctx.fillStyle = "#9b6b3e";
+  ctx.font = "900 8px sans-serif";
+  ctx.textAlign = "right";
+  const remaining = Math.max(0, Math.ceil(BUFFET_TICK_SECONDS - state.buffet.passiveElapsed));
+  ctx.fillText(`+${formatNumber(buffetPerMinute())}/분 · ${remaining}초`, p.x + 62, p.y + 70);
+}
+
+function drawBuffetChef() {
+  const x = 420;
+  const y = 210;
+  const bob = Math.sin(state.clock * 3.4) * 2;
+  drawShadow(x, y + 25, 20, 6);
+  drawImage("assets/ui/chick/icon_chick_chef.png", x, y + bob, 66, 66);
+}
+
+function drawBuffetArea() {
+  drawBackground();
+  drawBuffetDecor();
+  buffetStandPositions().forEach(drawBuffetStand);
+  [...state.buffet.visitors].sort((a, b) => a.y - b.y).forEach(drawBuffetVisitor);
+  drawBuffetCashbox();
+  drawBuffetChef();
+}
+
 function drawWorldArea(area) {
   drawBackground();
 
@@ -2604,10 +3097,16 @@ function drawWorldArea(area) {
 function render() {
   if (!tables || !state) return;
   ctx.clearRect(0, 0, GAME_W, GAME_H);
-  drawWorldArea("restaurant");
+  if (state.ui.area === "buffet" && isBuffetUnlocked()) drawBuffetArea();
+  else drawWorldArea("restaurant");
 }
 
 function currentObjective() {
+  if (state.ui.area === "buffet") {
+    if (state.buffet.stands.slice(0, buffetStandCapacity()).some((recipeId) => !recipeId)) return "뷔페 진열대에 레시피 놓기";
+    if (state.buffet.cashbox > 0) return "뷔페 계산대 정산하기";
+    return "야외 뷔페 운영 중";
+  }
   const required = [10, 1, 2].map((type) => tables.installs.find((row) => row.facilityType === type));
   const missing = required.find((row) => row && !isInstalled(row.id));
   if (missing) return `${FACILITY_META[missing.facilityType].name} 설치하기`;
@@ -2628,17 +3127,25 @@ function currentObjective() {
 function updateHud() {
   if (!state) return;
   ensureDailyReset();
+  ensureContestDailyReset();
   dom.acorns.textContent = formatNumber(state.resources.acorns);
   dom.gems.textContent = formatNumber(state.resources.gems);
+  if (state.ui.area === "buffet" && !isBuffetUnlocked()) state.ui.area = "restaurant";
+  const buffetArea = state.ui.area === "buffet";
+  dom.areaPrevButton.hidden = !buffetArea;
+  dom.areaNextButton.hidden = buffetArea || !isBuffetUnlocked();
+  dom.contestButton.hidden = buffetArea || !isContestUnlocked();
+  dom.bottomControls.classList.toggle("is-buffet", buffetArea);
+  canvas.setAttribute("aria-label", buffetArea ? "야외 뷔페" : "레스토랑");
   const dropBoostActive = Number(state.specialVisitor?.dropBoostRemaining || 0) > 0;
   dom.dropBoostBadge.hidden = !dropBoostActive;
   if (dropBoostActive) dom.dropBoostTime.textContent = formatPromotionTimer(state.specialVisitor.dropBoostRemaining);
-  dom.promoButton.hidden = false;
+  dom.promoButton.hidden = buffetArea;
   dom.promoButton.disabled = !coreReady();
   const specialPromotionUnlocked = isSpecialPromotionUnlocked();
   const specialPromotionActive = state.specialPromotion.remaining > 0;
   const specialPromotionCoolingDown = !specialPromotionActive && state.specialPromotion.cooldown > 0;
-  dom.specialPromoButton.hidden = !specialPromotionUnlocked;
+  dom.specialPromoButton.hidden = buffetArea || !specialPromotionUnlocked;
   dom.specialPromoButton.disabled = !coreReady() || specialPromotionActive || specialPromotionCoolingDown;
   dom.specialPromoButton.classList.toggle("is-active", specialPromotionActive);
   dom.specialPromoButton.classList.toggle("is-cooldown", specialPromotionCoolingDown);
@@ -2679,9 +3186,17 @@ function insideBox(point, box, padding = 0) {
     && point.y >= box.y - box.h / 2 - padding && point.y <= box.y + box.h / 2 + padding;
 }
 
+function handleBuffetTap(point) {
+  const standIndex = buffetStandPositions().findIndex((position) => insideBox(point, position, 18));
+  if (standIndex >= 0) return openBuffetStandMenu(standIndex);
+  if (insideBox(point, BUFFET_CASHBOX_POSITION, 22)) return collectBuffetCashbox();
+  return false;
+}
+
 function handleCanvasTap(event) {
-  if (!dom.installPanel.hidden || !dom.specialVisitorPanel.hidden) return;
+  if (!dom.installPanel.hidden || !dom.specialVisitorPanel.hidden || !dom.offlineRewardPanel.hidden) return;
   const point = pointerPosition(event);
+  if (state.ui.area === "buffet") return handleBuffetTap(point);
 
   const special = state.specialActors.find((actor) => Math.hypot(point.x - actor.x, point.y - actor.y) <= 48);
   if (special) return interactSpecialVisitor(special);
@@ -2727,6 +3242,7 @@ function closeMenu() {
 
 function openMenu(screen, preferredTab = null) {
   if ((screen === "missions" && !SYSTEM_ENABLED.missions) || (screen === "staff" && !SYSTEM_ENABLED.staff)) return;
+  if (screen === "contest" && !isContestUnlocked()) return;
   if (screen === "recipe" && !isRecipeSystemUnlocked()) {
     showTutorialDialogue("recipe-locked");
     return;
@@ -2737,6 +3253,22 @@ function openMenu(screen, preferredTab = null) {
   setActiveNav(screen);
   updateTutorialDialogue();
   renderMenu();
+}
+
+function switchWorldArea(area) {
+  if (area === "buffet" && !isBuffetUnlocked()) return false;
+  const nextArea = area === "buffet" ? "buffet" : "restaurant";
+  if (state.ui.area === nextArea) return true;
+  state.ui.area = nextArea;
+  closeSpecialVisitorPanel(false);
+  closeSpecialPromotionPanel();
+  toggleDebugPanel(false);
+  dom.installPanel.hidden = true;
+  closeMenu();
+  updateHud();
+  render();
+  saveState();
+  return true;
 }
 
 function renderTabs(items) {
@@ -2833,6 +3365,287 @@ function recipeCard(recipe) {
     <small class="grade">${grade} · ${locked ? "미획득" : `Lv.${owned.level}/${recipe.maxLevel}`}</small>
     <small>${locked ? "보유 재료 조합으로 발견할 수 있어요" : `현재 가격 ${formatNumber(currentPrice)} · 조리 ${formatCookingDuration(recipeCookingDuration(recipe, owned.level))}`}</small>
     ${locked ? "" : `<small>Lv.UP당 가격 +${Math.round(RECIPE_LEVEL_PRICE_BONUS * 100)}% · 조리 시간 단축</small>`}</div>${action}</article>`;
+}
+
+function openBuffetStandMenu(index) {
+  if (!isBuffetUnlocked() || index < 0 || index >= buffetStandCapacity()) return false;
+  state.ui.buffetStandIndex = index;
+  state.ui.screen = "buffet";
+  dom.menuScreen.hidden = false;
+  setActiveNav("");
+  updateTutorialDialogue();
+  renderMenu();
+  return true;
+}
+
+function placeBuffetRecipe(recipeId) {
+  const index = Math.max(0, Math.min(buffetStandCapacity() - 1, Number(state.ui.buffetStandIndex || 0)));
+  if (!recipeData(recipeId) || state.buffet.stands.some((placedId, placedIndex) => placedIndex !== index && Number(placedId) === Number(recipeId))) return false;
+  state.buffet.stands[index] = Number(recipeId);
+  showToast(`${routeRecipeName(recipeId)} 뷔페 진열 완료!`, 2.4);
+  closeMenu();
+  updateHud();
+  render();
+  return true;
+}
+
+function clearBuffetStand() {
+  const index = Math.max(0, Math.min(buffetStandCapacity() - 1, Number(state.ui.buffetStandIndex || 0)));
+  if (!state.buffet.stands[index]) return false;
+  state.buffet.stands[index] = null;
+  closeMenu();
+  updateHud();
+  render();
+  return true;
+}
+
+function renderBuffetStandMenu() {
+  const capacity = buffetStandCapacity();
+  const index = Math.max(0, Math.min(capacity - 1, Number(state.ui.buffetStandIndex || 0)));
+  const currentRecipeId = state.buffet.stands[index];
+  const popularityBonus = Math.round((buffetPopularityMultiplierForCount(unlockedRecipeCount()) - 1) * 100);
+  const nextRequirement = nextBuffetStandRequirement();
+  dom.menuKicker.textContent = "야외 뷔페";
+  dom.menuTitle.textContent = `진열대 ${index + 1}`;
+  dom.menuTabs.innerHTML = "";
+  const recipeCards = discoveryOrderedRecipeRoutes().filter((route) => recipeData(route.recipeId)).map((route) => {
+    const usedIndex = state.buffet.stands.findIndex((recipeId) => Number(recipeId) === Number(route.recipeId));
+    const selectedHere = usedIndex === index;
+    const usedElsewhere = usedIndex >= 0 && usedIndex !== index;
+    const owned = recipeData(route.recipeId);
+    const recipe = getRecipe(route.recipeId);
+    return `<article class="buffet-recipe-card"><img src="${routeRecipeIcon(route.recipeId)}" alt="" /><div><strong>${routeRecipeName(route.recipeId)}</strong><small>Lv.${owned.level} · 현재 가격 ${formatNumber(Math.round(recipeLevelPrice(recipe, owned)))}</small><small>뷔페 +${formatNumber(buffetRecipeYield(route.recipeId))}/분</small></div><button type="button" data-action="buffet-place" data-id="${route.recipeId}" ${selectedHere || usedElsewhere ? "disabled" : ""}>${selectedHere ? "진열 중" : usedElsewhere ? "다른 칸" : "진열"}</button></article>`;
+  }).join("");
+  dom.menuContent.innerHTML = `<section class="buffet-menu-summary"><span>🍽️</span><div><strong>총 +${formatNumber(buffetPerMinute())}/분 · 진열 ${capacity}/${BUFFET_MAX_STAND_COUNT}</strong><small>${nextRequirement ? `레시피 ${nextRequirement}개에 다음 진열대` : "모든 진열대 확장 완료"} · 수집 보너스 +${popularityBonus}%</small></div></section>
+    ${currentRecipeId ? `<button type="button" class="buffet-clear-button" data-action="buffet-clear">현재 진열 비우기</button>` : ""}
+    ${recipeCards}`;
+}
+
+function contestTier(tierId) {
+  return CONTEST_TIERS.find((tier) => tier.id === Number(tierId)) || CONTEST_TIERS[0];
+}
+
+function contestJudgePreference(key) {
+  const preference = CONTEST_JUDGE_PREFERENCES[key];
+  return {
+    ...preference,
+    key,
+    ingredientIds: (preference?.ingredientKeys || []).map((ingredientKey) => GAME_INGREDIENTS[ingredientKey]?.id).filter(Boolean),
+  };
+}
+
+function contestTierUnlocked(tier) {
+  return unlockedRecipeCount() >= Number(tier.recipeRequirement)
+    && (!tier.previousTierId || state.contest.firstPlaceTierIds.includes(tier.previousTierId));
+}
+
+function contestTierRequirementText(tier) {
+  if (unlockedRecipeCount() < tier.recipeRequirement) return `레시피 ${tier.recipeRequirement}개 필요`;
+  if (tier.previousTierId && !state.contest.firstPlaceTierIds.includes(tier.previousTierId)) {
+    return `${contestTier(tier.previousTierId).shortName} 1등 필요`;
+  }
+  return "참가 가능";
+}
+
+function contestEntryCost() {
+  return Number(state.contest.entriesToday || 0) > 0 ? CONTEST_EXTRA_ENTRY_GEM_COST : 0;
+}
+
+function ensureContestDailyReset() {
+  const dayKey = localDateKey();
+  if (state.contest.dayKey === dayKey) return false;
+  state.contest.dayKey = dayKey;
+  state.contest.entriesToday = 0;
+  state.contest.judging = null;
+  state.contest.result = null;
+  saveState();
+  return true;
+}
+
+function contestRecipeOptions() {
+  return discoveryOrderedRecipeRoutes().filter((route) => recipeData(route.recipeId));
+}
+
+function contestIngredientOptions() {
+  return storedIngredientIds().map(ingredientData).filter(Boolean);
+}
+
+function normalizeContestSelection() {
+  const unlockedTiers = CONTEST_TIERS.filter(contestTierUnlocked);
+  if (!unlockedTiers.some((tier) => tier.id === Number(state.contest.selectedTierId))) {
+    state.contest.selectedTierId = unlockedTiers.at(-1)?.id || 1;
+  }
+  const recipes = contestRecipeOptions();
+  if (!recipes.some((route) => route.recipeId === Number(state.contest.selectedRecipeId))) {
+    state.contest.selectedRecipeId = recipes[0]?.recipeId || null;
+  }
+  const ingredients = contestIngredientOptions();
+  if (!ingredients.some((ingredient) => ingredient.id === Number(state.contest.selectedIngredientId))) {
+    state.contest.selectedIngredientId = ingredients[0]?.id || null;
+  }
+}
+
+function startContestEntry() {
+  ensureContestDailyReset();
+  normalizeContestSelection();
+  const tier = contestTier(state.contest.selectedTierId);
+  const recipeId = Number(state.contest.selectedRecipeId);
+  const ingredientId = Number(state.contest.selectedIngredientId);
+  const cost = contestEntryCost();
+  if (!contestTierUnlocked(tier) || !recipeData(recipeId) || ingredientAmount(ingredientId) <= 0 || state.contest.judging) return false;
+  if (cost > 0 && state.resources.gems < cost) {
+    showToast(`추가 참가에는 보석 ${cost}개가 필요해요.`);
+    return false;
+  }
+  if (cost > 0) state.resources.gems -= cost;
+  state.crafting.ingredients[ingredientId] = ingredientAmount(ingredientId) - 1;
+  state.contest.entriesToday += 1;
+  state.contest.result = null;
+  state.contest.judging = {
+    tierId: tier.id,
+    recipeId,
+    ingredientId,
+    elapsed: 0,
+    duration: CONTEST_JUDGING_DURATION,
+  };
+  state.metrics.contestEntries += 1;
+  saveState();
+  updateHud();
+  renderMenu();
+  return true;
+}
+
+function finishContestJudging() {
+  const judging = state.contest.judging;
+  if (!judging) return false;
+  const tier = contestTier(judging.tierId);
+  const route = progressionForRecipe(judging.recipeId);
+  const recipe = getRecipe(judging.recipeId);
+  const owned = recipeData(judging.recipeId) || { level: 1 };
+  const recipeIngredientIds = new Set((route?.ingredientRequirements || []).map((ingredient) => Number(ingredient.id)));
+  const judgeResults = tier.judges.map((key) => {
+    const preference = contestJudgePreference(key);
+    const recipeMatch = preference.ingredientIds.some((ingredientId) => recipeIngredientIds.has(ingredientId));
+    const extraMatch = preference.ingredientIds.includes(Number(judging.ingredientId));
+    return {
+      key,
+      name: preference.name,
+      icon: preference.icon,
+      recipeMatch,
+      extraMatch,
+      points: (recipeMatch ? 8 : 0) + (extraMatch ? 14 : 0),
+      reaction: extraMatch ? "추가 재료가 완벽해요!" : recipeMatch ? "제 취향이 들어있어요" : "무난한 맛이에요",
+    };
+  });
+  const tasteScore = judgeResults.reduce((sum, judge) => sum + judge.points, 0);
+  const levelBonus = Math.min(10, Math.max(0, Number(owned.level || 1) - 1) * 2);
+  const prestigeBonus = Math.min(8, Math.floor(recipeLevelPrice(recipe, owned) / 70));
+  const luckBonus = Math.floor(random() * 9);
+  const score = Math.min(100, 35 + tasteScore + levelBonus + prestigeBonus + luckBonus);
+  const rank = score >= tier.firstPlaceScore ? 1 : score >= tier.firstPlaceScore - 14 ? 2 : 3;
+  const prize = Number(tier.prizes[rank - 1] || 0);
+  state.resources.acorns += prize;
+  if (rank === 1 && !state.contest.firstPlaceTierIds.includes(tier.id)) {
+    state.contest.firstPlaceTierIds.push(tier.id);
+    state.contest.firstPlaceTierIds.sort((a, b) => a - b);
+    state.metrics.contestFirstPlaces += 1;
+  }
+  state.metrics.contestPrizeMoney += prize;
+  state.contest.result = {
+    tierId: tier.id,
+    tierName: tier.name,
+    recipeId: judging.recipeId,
+    recipeName: routeRecipeName(judging.recipeId),
+    ingredientId: judging.ingredientId,
+    ingredientName: ingredientData(judging.ingredientId)?.ingredientName || "추가 재료",
+    score,
+    rank,
+    prize,
+    tasteScore,
+    levelBonus,
+    prestigeBonus,
+    luckBonus,
+    judges: judgeResults,
+  };
+  state.contest.history.unshift({ ...state.contest.result, dayKey: state.contest.dayKey });
+  state.contest.history = state.contest.history.slice(0, 12);
+  state.contest.judging = null;
+  saveState();
+  updateHud();
+  if (!dom.menuScreen.hidden && state.ui.screen === "contest") renderMenu();
+  return true;
+}
+
+function updateContestJudging(dt) {
+  if (!state.contest.judging) return;
+  state.contest.judging.elapsed += Math.max(0, Number(dt) || 0);
+  if (state.contest.judging.elapsed >= state.contest.judging.duration) finishContestJudging();
+}
+
+function renderContestMenu() {
+  ensureContestDailyReset();
+  normalizeContestSelection();
+  dom.menuKicker.textContent = "요리사 도전";
+  dom.menuTitle.textContent = "요리 대회";
+  dom.menuTabs.innerHTML = "";
+  if (state.contest.result) {
+    const result = state.contest.result;
+    const nextTier = CONTEST_TIERS.find((tier) => tier.previousTierId === result.tierId);
+    const nextUnlocked = nextTier && contestTierUnlocked(nextTier);
+    dom.menuContent.innerHTML = `<section class="contest-result rank-${result.rank}">
+      <span class="contest-result-kicker">${result.tierName}</span>
+      <div class="contest-rank"><b>${result.rank}</b><span>등</span></div>
+      <img src="${routeRecipeIcon(result.recipeId)}" alt="" />
+      <h3>${result.recipeName} + ${ingredientData(result.ingredientId)?.emoji || "✦"} ${result.ingredientName}</h3>
+      <strong>${result.score}점</strong>
+      <div class="contest-result-prize"><img src="assets/ui/currency/icon_currency_001.png" alt="" /><b>+${formatNumber(result.prize)}</b></div>
+      <div class="contest-judge-results">${result.judges.map((judge) => `<article class="${judge.extraMatch ? "is-perfect" : judge.recipeMatch ? "is-good" : ""}"><span>${judge.icon}</span><strong>${judge.name}</strong><small>${judge.reaction}</small><b>+${judge.points}</b></article>`).join("")}</div>
+      ${result.rank === 1 && nextTier ? `<p>${nextUnlocked ? `${nextTier.name} 참가 자격 획득!` : `다음 목표 · 레시피 ${nextTier.recipeRequirement}개`}</p>` : ""}
+      <button type="button" class="contest-result-close" data-action="contest-result-close">대회 목록으로</button>
+    </section>`;
+    return;
+  }
+  if (state.contest.judging) {
+    const judging = state.contest.judging;
+    const tier = contestTier(judging.tierId);
+    dom.menuContent.innerHTML = `<section class="contest-judging">
+      <span>심사 중</span><h3>${tier.name}</h3>
+      <div class="contest-entry-dish"><img src="${routeRecipeIcon(judging.recipeId)}" alt="" /><b>+</b><i>${ingredientData(judging.ingredientId)?.emoji || "✦"}</i></div>
+      <div class="contest-judging-panel">${tier.judges.map((key, index) => { const judge = contestJudgePreference(key); return `<article style="--judge-delay:${index * .18}s"><span>${judge.icon}</span><strong>${judge.name}</strong><i>•••</i></article>`; }).join("")}</div>
+      <div class="contest-judging-bar"><i></i></div><p>심사위원들이 맛을 평가하고 있어요</p>
+    </section>`;
+    return;
+  }
+
+  const tier = contestTier(state.contest.selectedTierId);
+  const recipes = contestRecipeOptions();
+  const ingredients = contestIngredientOptions();
+  const selectedRecipe = Number(state.contest.selectedRecipeId);
+  const selectedIngredient = Number(state.contest.selectedIngredientId);
+  const entryCost = contestEntryCost();
+  const canSubmit = contestTierUnlocked(tier) && selectedRecipe && selectedIngredient
+    && ingredientAmount(selectedIngredient) > 0 && (entryCost === 0 || state.resources.gems >= entryCost);
+  const tierButtons = CONTEST_TIERS.map((item) => {
+    const unlocked = contestTierUnlocked(item);
+    const won = state.contest.firstPlaceTierIds.includes(item.id);
+    return `<button type="button" class="contest-tier-button ${item.id === tier.id ? "is-active" : ""} ${unlocked ? "" : "is-locked"}" data-action="contest-tier" data-id="${item.id}" ${unlocked ? "" : "disabled"}><span>${won ? "🏆" : unlocked ? "🍽️" : "🔒"}</span><strong>${item.shortName}</strong><small>${won ? "1등 완료" : contestTierRequirementText(item)}</small></button>`;
+  }).join("");
+  const judgeCards = tier.judges.map((key) => {
+    const judge = contestJudgePreference(key);
+    return `<article class="contest-judge-card"><span>${judge.icon}</span><strong>${judge.name}</strong><small>${judge.hint}</small></article>`;
+  }).join("");
+  const recipeCards = recipes.map((route) => {
+    const owned = recipeData(route.recipeId);
+    return `<button type="button" class="contest-choice-card ${selectedRecipe === route.recipeId ? "is-selected" : ""}" data-action="contest-recipe" data-id="${route.recipeId}"><img src="${routeRecipeIcon(route.recipeId)}" alt="" /><strong>${routeRecipeName(route.recipeId)}</strong><small>Lv.${owned.level}</small></button>`;
+  }).join("");
+  const ingredientCards = ingredients.map((ingredient) => `<button type="button" class="contest-ingredient-card ${selectedIngredient === ingredient.id ? "is-selected" : ""}" data-action="contest-ingredient" data-id="${ingredient.id}"><span>${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><small>×${ingredientAmount(ingredient.id)}</small></button>`).join("");
+  dom.menuContent.innerHTML = `<section class="contest-daily-status"><span>${entryCost === 0 ? "오늘의 무료 참가 가능" : `오늘 ${state.contest.entriesToday}회 참가`}</span><strong>${entryCost === 0 ? "무료" : `추가 참가 💎 ${entryCost}`}</strong></section>
+    <div class="contest-tier-list">${tierButtons}</div>
+    <section class="contest-tier-summary"><div><span>현재 대회</span><strong>${tier.name}</strong><small>1등 기준 ${tier.firstPlaceScore}점 · 상금 ${formatNumber(tier.prizes[0])}</small></div><b>${state.contest.firstPlaceTierIds.includes(tier.id) ? "🏆" : ""}</b></section>
+    <h3 class="contest-section-title">심사위원 취향</h3><div class="contest-judge-list">${judgeCards}</div>
+    <h3 class="contest-section-title">출품할 레시피</h3><div class="contest-choice-list">${recipeCards}</div>
+    <h3 class="contest-section-title">추가 재료 1개 <small>출품 시 소비</small></h3><div class="contest-ingredient-list">${ingredientCards || `<p class="contest-empty">보유한 재료가 없어요.</p>`}</div>
+    <button type="button" class="contest-submit" data-action="contest-submit" ${canSubmit ? "" : "disabled"}>${entryCost === 0 ? "무료로 출품하기" : `보석 ${entryCost}개로 다시 출품`}</button>`;
 }
 
 function expandedCraftIngredientIds(route) {
@@ -3246,6 +4059,8 @@ function renderThemeManagement() {
 
 function renderMenu() {
   if (state.ui.screen === "recipe") renderRecipeMenu();
+  else if (state.ui.screen === "buffet") renderBuffetStandMenu();
+  else if (state.ui.screen === "contest") renderContestMenu();
   else if (state.ui.screen === "missions") renderMissionMenu();
   else if (state.ui.screen === "collection") renderCollectionMenu();
   else if (state.ui.screen === "staff") {
@@ -3275,6 +4090,7 @@ function resetGame() {
   toastTimer = 0;
   guestToastTimer = 0;
   dom.guestToast.hidden = true;
+  dom.offlineRewardPanel.hidden = true;
   dom.specialPromoPanel.hidden = true;
   closeSpecialVisitorPanel(false);
   toggleDebugPanel(false);
@@ -3335,6 +4151,34 @@ function debugAddResource() {
   showToast(`${DEBUG_RESOURCE_NAMES[resourceKey]} ${formatNumber(amount)} 추가!`, 2.5);
 }
 
+function populateDebugIngredients() {
+  dom.debugIngredientType.innerHTML = Object.values(GAME_INGREDIENTS)
+    .sort((a, b) => a.id - b.id)
+    .map((ingredient) => `<option value="${ingredient.id}">${ingredient.emoji} ${ingredient.name}</option>`)
+    .join("");
+}
+
+function debugAddIngredient() {
+  const ingredientId = Number(dom.debugIngredientType.value);
+  const ingredient = ingredientData(ingredientId);
+  const requested = Math.floor(Number(dom.debugIngredientAmount.value));
+  if (!ingredient || !Number.isFinite(requested) || requested <= 0) {
+    showToast("추가할 재료와 수량을 확인해 주세요.");
+    dom.debugIngredientAmount.focus();
+    return false;
+  }
+  const amount = Math.min(requested, Number.MAX_SAFE_INTEGER - ingredientAmount(ingredientId));
+  if (amount <= 0) return false;
+  const nextTotal = ingredientStorageStatus().totalItems + amount;
+  state.crafting.storageCapacity = Math.max(Number(state.crafting.storageCapacity || 0), nextTotal);
+  state.crafting.ingredients[ingredientId] = ingredientAmount(ingredientId) + amount;
+  saveState();
+  updateHud();
+  if (!dom.menuScreen.hidden && state.ui.screen === "recipe") renderMenu();
+  showToast(`${ingredient.emoji} ${ingredient.ingredientName} ${formatNumber(amount)}개 추가!`, 2.5);
+  return true;
+}
+
 function debugSpawnSpecialVisitor() {
   closeSpecialVisitorPanel(false);
   state.specialActors = [];
@@ -3362,8 +4206,8 @@ function renderGameToText() {
   }));
   return JSON.stringify({
     coordinateSystem: "canvas 480x900; origin top-left; x right; y down",
-    mode: "restaurant",
-    menuContext: "restaurant",
+    mode: state.ui.area,
+    menuContext: state.ui.area,
     visibleRecipeType: "restaurant",
     visibleThemeType: "restaurant",
     objective: currentObjective(),
@@ -3373,6 +4217,7 @@ function renderGameToText() {
       installedFacilities: state.installed.length,
       totalInstallFacilities: tables.installs.length,
       supportedResources: Object.keys(DEBUG_RESOURCE_NAMES),
+      supportedIngredients: Object.values(GAME_INGREDIENTS).map((ingredient) => ({ id: ingredient.id, name: ingredient.name })),
     },
     installedFacilityIds: state.installed,
     installCandidates: candidates,
@@ -3419,6 +4264,85 @@ function renderGameToText() {
       panelVisible: !dom.specialPromoPanel.hidden,
       filterRule: "unlocked-guests-and-currently-unlocked-reward-slots-only",
     },
+    buffet: {
+      unlocked: isBuffetUnlocked(),
+      recipeRequirement: BUFFET_RECIPE_REQUIREMENT,
+      area: state.ui.area,
+      standCount: buffetStandCapacity(),
+      maxStandCount: BUFFET_MAX_STAND_COUNT,
+      standUnlockRequirements: [...BUFFET_STAND_UNLOCK_REQUIREMENTS],
+      nextStandRecipeRequirement: nextBuffetStandRequirement(),
+      stands: state.buffet.stands.slice(0, buffetStandCapacity()).map((recipeId, standIndex) => {
+        const position = buffetStandPositions()[standIndex];
+        return {
+          standIndex,
+          recipeId: recipeId ? Number(recipeId) : null,
+          recipeName: recipeId ? routeRecipeName(recipeId) : null,
+          yieldPerMinute: recipeId ? buffetRecipeYield(recipeId) : 0,
+          x: position.x,
+          y: position.y,
+        };
+      }),
+      perMinute: buffetPerMinute(),
+      collectionBonusPercent: Math.round((buffetPopularityMultiplierForCount(unlockedRecipeCount()) - 1) * 100),
+      nextIncomeIn: Number(Math.max(0, BUFFET_TICK_SECONDS - state.buffet.passiveElapsed).toFixed(2)),
+      cashbox: Math.max(0, Math.floor(Number(state.buffet.cashbox || 0))),
+      offlineCapSeconds: BUFFET_OFFLINE_CAP_SECONDS,
+      offlinePending: Math.max(0, Math.floor(Number(state.buffet.offlinePending || 0))),
+      offlinePanelVisible: !dom.offlineRewardPanel.hidden,
+      visitorRule: {
+        visitChance: { ...BUFFET_VISIT_CHANCE },
+        purchaseChance: { ...BUFFET_PURCHASE_CHANCE },
+        purchaseRate: BUFFET_PURCHASE_RATE,
+      },
+      visitors: state.buffet.visitors.map((visitor) => ({
+        id: visitor.id,
+        customerId: visitor.customerId,
+        customerName: visitor.customerName,
+        state: visitor.state,
+        recipeId: visitor.recipeId,
+        recipeName: routeRecipeName(visitor.recipeId),
+        willBuy: Boolean(visitor.willBuy),
+        paid: Boolean(visitor.paid),
+        purchaseAmount: Number(visitor.purchaseAmount || 0),
+        x: Math.round(visitor.x),
+        y: Math.round(visitor.y),
+      })),
+    },
+    contest: {
+      unlocked: isContestUnlocked(),
+      recipeRequirement: CONTEST_RECIPE_REQUIREMENT,
+      freeEntriesPerDay: 1,
+      extraEntryGemCost: CONTEST_EXTRA_ENTRY_GEM_COST,
+      dayKey: state.contest.dayKey,
+      entriesToday: state.contest.entriesToday,
+      nextEntryCost: contestEntryCost(),
+      firstPlaceTierIds: [...state.contest.firstPlaceTierIds],
+      selectedTierId: state.contest.selectedTierId,
+      selectedRecipeId: state.contest.selectedRecipeId,
+      selectedIngredientId: state.contest.selectedIngredientId,
+      tiers: CONTEST_TIERS.map((tier) => ({
+        id: tier.id,
+        name: tier.name,
+        recipeRequirement: tier.recipeRequirement,
+        previousTierId: tier.previousTierId,
+        unlocked: contestTierUnlocked(tier),
+        requirementText: contestTierRequirementText(tier),
+        firstPlaceScore: tier.firstPlaceScore,
+        prizes: [...tier.prizes],
+        judges: tier.judges.map((key) => {
+          const judge = contestJudgePreference(key);
+          return { key, name: judge.name, hint: judge.hint };
+        }),
+      })),
+      judging: state.contest.judging ? {
+        ...state.contest.judging,
+        progress: Number(Math.min(1, state.contest.judging.elapsed / state.contest.judging.duration).toFixed(3)),
+      } : null,
+      result: state.contest.result,
+      availableRecipeIds: contestRecipeOptions().map((route) => route.recipeId),
+      availableIngredients: contestIngredientOptions().map((ingredient) => ({ id: ingredient.id, name: ingredient.ingredientName, count: ingredientAmount(ingredient.id) })),
+    },
     guests: state.guests.map((guest) => ({
       id: guest.id,
       customerId: guest.customerId,
@@ -3436,6 +4360,7 @@ function renderGameToText() {
         ? Number(Math.max(0, GUEST_MEAL_DURATION_SECONDS - guest.stateTime).toFixed(1))
         : null,
       mood: guest.mood,
+      buffetQueued: Boolean(guest.buffetQueued),
       dropIngredient: guest.ingredientId || progressionForCustomer(guest.customerId)?.ingredientId || null,
       guestGrade: guestGradeForVisits(guest.visitNumber || state.collections.customers[guest.customerId]?.count || 1).name,
       visits: Number(guest.visitNumber || state.collections.customers[guest.customerId]?.count || 1),
@@ -3502,6 +4427,8 @@ function renderGameToText() {
         previousPrice: recipeReveal.previousPrice,
         newPrice: recipeReveal.newPrice,
         priceIncrease: recipeReveal.priceIncrease,
+        buffetStandUnlocked: Number(recipeReveal.buffetStandUnlocked || 0),
+        buffetStandCapacity: Number(recipeReveal.buffetStandCapacity || 0),
       } : null,
       hintRule: {
         sameRecipeSizeOnly: true,
@@ -3686,13 +4613,15 @@ async function init() {
   try {
     tables = await loadTables();
     state = loadState() || createInitialState();
-    if (ensureSpecialPromotionTutorial()) saveState();
+    populateDebugIngredients();
+    if (ensureProgressionTutorial()) saveState();
     state.ui.screen = "restaurant";
     dom.menuScreen.hidden = true;
     setActiveNav("");
     updateHud();
     updateTutorialDialogue();
     render();
+    showOfflineBuffetReward();
     requestAnimationFrame(frame);
   } catch (error) {
     console.error(error);
@@ -3701,6 +4630,10 @@ async function init() {
 }
 
 canvas.addEventListener("pointerdown", handleCanvasTap);
+dom.areaPrevButton.addEventListener("click", () => switchWorldArea("restaurant"));
+dom.areaNextButton.addEventListener("click", () => switchWorldArea("buffet"));
+dom.contestButton.addEventListener("click", () => openMenu("contest"));
+dom.offlineRewardClaim.addEventListener("click", claimOfflineBuffetReward);
 dom.promoButton.addEventListener("click", promote);
 dom.specialPromoButton.addEventListener("click", openSpecialPromotionPanel);
 dom.specialPromoClose.addEventListener("click", closeSpecialPromotionPanel);
@@ -3725,9 +4658,13 @@ dom.debugToggleButton.addEventListener("click", () => toggleDebugPanel());
 dom.debugCloseButton.addEventListener("click", () => toggleDebugPanel(false));
 dom.debugInstallAllButton.addEventListener("click", debugInstallAllFacilities);
 dom.debugAddResourceButton.addEventListener("click", debugAddResource);
+dom.debugAddIngredientButton.addEventListener("click", debugAddIngredient);
 dom.debugSpawnSpecialButton.addEventListener("click", debugSpawnSpecialVisitor);
 dom.debugResourceAmount.addEventListener("keydown", (event) => {
   if (event.key === "Enter") debugAddResource();
+});
+dom.debugIngredientAmount.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") debugAddIngredient();
 });
 dom.installClose.addEventListener("click", closeInstallPanel);
 dom.installConfirm.addEventListener("click", confirmInstall);
@@ -3782,6 +4719,13 @@ dom.menuContent.addEventListener("click", (event) => {
   if (button.dataset.action === "expand-bowl-capacity") expandBowlCapacity();
   if (button.dataset.action === "theme-filter") { state.ui.themeFacilityType = id; renderMenu(); }
   if (button.dataset.action === "select-customer") { state.ui.collectionCustomerId = id; saveState(); renderMenu(); }
+  if (button.dataset.action === "buffet-place") placeBuffetRecipe(id);
+  if (button.dataset.action === "buffet-clear") clearBuffetStand();
+  if (button.dataset.action === "contest-tier") { state.contest.selectedTierId = id; state.contest.result = null; saveState(); renderMenu(); }
+  if (button.dataset.action === "contest-recipe") { state.contest.selectedRecipeId = id; saveState(); renderMenu(); }
+  if (button.dataset.action === "contest-ingredient") { state.contest.selectedIngredientId = id; saveState(); renderMenu(); }
+  if (button.dataset.action === "contest-submit") startContestEntry();
+  if (button.dataset.action === "contest-result-close") { state.contest.result = null; saveState(); renderMenu(); }
 });
 dom.recipeReveal.addEventListener("click", (event) => {
   if (event.target === dom.recipeReveal || event.target.closest('[data-action="dismiss-recipe-reveal"]')) dismissRecipeReveal();

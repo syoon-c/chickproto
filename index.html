@@ -6,13 +6,22 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-  <link rel="stylesheet" href="styles.css?v=20260806-special-visitor-popup" />
+  <link rel="stylesheet" href="styles.css?v=20260806-cooking-contest" />
   </head>
   <body>
     <main class="app-shell">
       <section class="game-frame" aria-label="식당아리 게임 화면">
         <div class="world-area">
           <canvas id="game-canvas" width="480" height="900" aria-label="레스토랑"></canvas>
+
+          <div class="world-controls-layer" aria-label="지역 이동">
+            <button id="area-prev-btn" class="area-arrow area-arrow-left" type="button" hidden aria-label="레스토랑으로 이동"><span>‹</span><small>식당</small></button>
+            <button id="area-next-btn" class="area-arrow area-arrow-right" type="button" hidden aria-label="야외 뷔페로 이동"><span>›</span><small>뷔페</small></button>
+          </div>
+          <button id="contest-button" class="contest-button" type="button" hidden aria-label="요리 대회 열기">
+            <img src="assets/ui/mission/icon_mainmission_001.png" alt="" />
+            <span><strong>요리 대회</strong><small>하루 1회 무료</small></span>
+          </button>
 
           <button id="chef-dialogue" class="chef-dialogue" type="button" hidden aria-live="polite">
             <span>요리사 병아리</span>
@@ -52,6 +61,14 @@
               <input id="debug-resource-amount" type="number" min="1" step="1" value="1000" inputmode="numeric" aria-label="추가할 수량" />
             </div>
             <button id="debug-add-resource-btn" type="button">추가하기</button>
+          </div>
+          <div class="debug-ingredient-tool">
+            <label for="debug-ingredient-type">재료 획득</label>
+            <div>
+              <select id="debug-ingredient-type" aria-label="추가할 재료"></select>
+              <input id="debug-ingredient-amount" type="number" min="1" step="1" value="10" inputmode="numeric" aria-label="추가할 재료 수량" />
+            </div>
+            <button id="debug-add-ingredient-btn" type="button">재료 추가하기</button>
           </div>
           <div class="debug-special-tool">
             <label for="debug-special-type">특수 손님 테스트</label>
@@ -98,11 +115,20 @@
           <div id="special-visitor-content" class="special-visitor-content"></div>
         </section>
 
+        <section id="offline-reward-panel" class="offline-reward-panel" hidden aria-label="야외 뷔페 오프라인 정산">
+          <span class="offline-reward-kicker">다시 오셨군요!</span>
+          <img src="assets/ui/facility/icon_facility_1_table_wood.png" alt="" />
+          <strong>야외 뷔페 정산</strong>
+          <p id="offline-reward-time">자리를 비운 동안</p>
+          <div><img src="assets/ui/currency/icon_currency_001.png" alt="" /><b id="offline-reward-amount">0</b></div>
+          <button id="offline-reward-claim" type="button">도토리 받기</button>
+        </section>
+
         <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
         <div id="guest-toast" class="new-guest-alert" role="status" aria-live="polite" hidden></div>
         </div>
 
-        <div class="bottom-controls">
+        <div id="bottom-controls" class="bottom-controls">
           <nav class="bottom-nav" aria-label="주요 메뉴">
             <button class="nav-button" type="button" data-screen="theme"><span><img src="assets/ui/common/icon_mainmenu_theme.png" alt="" /></span><strong id="theme-nav-label">테마</strong></button>
             <button class="nav-button" type="button" data-screen="recipe"><span><img src="assets/ui/common/icon_mainmenu_recipe.png" alt="" /></span><strong id="recipe-nav-label">레시피</strong><i id="recipe-dot" hidden></i></button>
@@ -125,6 +151,6 @@
     <script src="data/runtime-tables.js?v=20260729-restaurant-only"></script>
   <script src="src/game-config.js?v=20260806-recipe-price-progression"></script>
     <script src="src/data-loader.js?v=20260729-restaurant-only"></script>
-  <script src="game.js?v=20260806-cooking-price-balance"></script>
+    <script src="game.js?v=20260806-cooking-contest"></script>
   </body>
 </html>
