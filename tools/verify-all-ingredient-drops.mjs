@@ -11,10 +11,10 @@ const out = path.join(root, "output", "all-ingredient-drops");
 fs.mkdirSync(out, { recursive: true });
 
 const routes = [
-  { themeId: 1, customerId: 3, ingredientId: 30001, emoji: "🥬", name: "lettuce" },
+  { themeId: 1, customerId: 3, ingredientId: 30039, emoji: "🍃", name: "leaf" },
   { themeId: 1, customerId: 10013, ingredientId: 30003, emoji: "🍞", name: "bread" },
-  { themeId: 6, customerId: 4, ingredientId: 30007, emoji: "🥔", name: "potato" },
-  { themeId: 8, customerId: 5, ingredientId: 30002, emoji: "🍅", name: "tomato" },
+  { themeId: 6, customerId: 10061, ingredientId: 30048, emoji: "🥩", name: "beef" },
+  { themeId: 8, customerId: 10081, ingredientId: 30027, emoji: "🧄", name: "garlic" },
 ];
 
 const browser = await chromium.launch({ headless: true });
@@ -80,9 +80,10 @@ try {
     }, route);
     await page.reload({ waitUntil: "load" });
     await page.evaluate(() => window.advanceTime(34));
-    const drop = (await state()).ingredientDrops.find((item) => item.ingredientId === route.ingredientId) || null;
+    const resolvedState = await state();
+    const drop = resolvedState.ingredientDrops.find((item) => item.ingredientId === route.ingredientId) || null;
     if (!drop || drop.ingredientId !== route.ingredientId || drop.emoji !== route.emoji) {
-      throw new Error(`Wrong ${route.name} field drop: ${JSON.stringify(drop)}`);
+      throw new Error(`Wrong ${route.name} field drop: ${JSON.stringify({ drop, available: resolvedState.ingredientDrops.slice(0, 8), metrics: resolvedState.metrics })}`);
     }
     await page.screenshot({ path: path.join(out, `${route.themeId}-${route.name}.png`), fullPage: true });
     await clickCanvas(drop.x, drop.y);

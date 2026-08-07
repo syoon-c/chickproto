@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5c864" />
     <title>식당아리</title>
     <link rel="icon" href="assets/ui/chick/icon_chick_001.png" />
-  <link rel="stylesheet" href="styles.css?v=20260806-restaurant-knowhow" />
+  <link rel="stylesheet" href="styles.css?v=20260807-tipbox-knowhow" />
   </head>
   <body>
     <main class="app-shell">
@@ -124,6 +124,16 @@
           <button id="offline-reward-claim" type="button">도토리 받기</button>
         </section>
 
+        <section id="tipbox-panel" class="tipbox-panel" hidden aria-label="팁박스 정산">
+          <header><div><small>손님들의 마음</small><strong>팁박스</strong></div><button id="tipbox-close" type="button" aria-label="닫기">×</button></header>
+          <img src="assets/ui/facility/icon_facility_1_tipbox_wood.png" alt="" />
+          <div class="tipbox-amount"><img src="assets/ui/currency/icon_currency_001.png" alt="" /><strong id="tipbox-amount">0</strong><span>/ <b id="tipbox-capacity">500</b></span></div>
+          <div class="tipbox-gauge"><i id="tipbox-gauge-fill"></i></div>
+          <p>실망하지 않은 손님은 식사 금액의 10%를 팁으로 남겨요.</p>
+          <button id="tipbox-collect" class="tipbox-collect" type="button">팁 회수하기</button>
+          <button id="tipbox-expand" class="tipbox-expand" type="button"><img src="assets/ui/currency/icon_currency_002.png" alt="" /><span>10</span><strong>용량 +500</strong></button>
+        </section>
+
         <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
         <div id="guest-toast" class="new-guest-alert" role="status" aria-live="polite" hidden></div>
         </div>
@@ -152,6 +162,6 @@
     <script src="data/runtime-tables.js?v=20260729-restaurant-only"></script>
   <script src="src/game-config.js?v=20260806-recipe-price-progression"></script>
     <script src="src/data-loader.js?v=20260729-restaurant-only"></script>
-    <script src="game.js?v=20260806-restaurant-knowhow"></script>
+    <script src="game.js?v=20260807-tipbox-knowhow"></script>
   </body>
 </html>

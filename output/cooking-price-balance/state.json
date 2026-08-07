@@ -397,18 +397,26 @@
     "name": "식당 노하우",
     "xp": 0,
     "xpPerPoint": 100,
+    "xpCurve": {
+      "base": 100,
+      "growthPerEarnedPoint": 25,
+      "earnedPoints": 0
+    },
     "points": 0,
     "totalXp": 0,
     "xpRewards": {
       "recipeResearchSuccessOrFailure": 20,
-      "guestMealCooking": 5
+      "guestMealCooking": 1
     },
-    "selectedSkillId": "auto_collect",
+    "selectedSkillId": "auto_collect_1",
     "graphPresentation": "connected-mind-map",
     "effects": {
       "ingredientDropChance": 0.15,
       "cookingSpeedReduction": 0,
       "researchSpeedReduction": 0,
+      "storageBonus": 0,
+      "merchantDiscount": 0,
+      "buffetIncomeMultiplier": 1,
       "buffetOfflineCapSeconds": 7200,
       "contestPrizeMultiplier": 1
     },
@@ -427,14 +435,133 @@
         "prerequisitesMet": true,
         "prerequisites": [],
         "effect": "요리하며 식당 운영 경험을 쌓아요",
-        "x": 306,
-        "y": 270
+        "x": 240,
+        "y": 52
       },
       {
-        "id": "auto_collect",
+        "id": "auto_collect_1",
+        "name": "바닥 살피기",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": true,
+        "prerequisites": [
+          {
+            "id": "restaurant_basics",
+            "level": 1
+          }
+        ],
+        "effect": "8초마다 재료와 도토리 자동 회수",
+        "x": 80,
+        "y": 170
+      },
+      {
+        "id": "auto_collect_2",
+        "name": "정리 동선",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_collect_1",
+            "level": 1
+          }
+        ],
+        "effect": "자동 회수 간격 4초",
+        "x": 80,
+        "y": 285
+      },
+      {
+        "id": "auto_collect_3",
         "name": "척척 회수",
         "level": 0,
-        "maxLevel": 3,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_collect_2",
+            "level": 1
+          }
+        ],
+        "effect": "자동 회수 간격 2초",
+        "x": 80,
+        "y": 400
+      },
+      {
+        "id": "auto_order_1",
+        "name": "주문 메모",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_collect_3",
+            "level": 1
+          }
+        ],
+        "effect": "5초 기다린 주문을 자동 접수",
+        "x": 80,
+        "y": 515
+      },
+      {
+        "id": "auto_order_2",
+        "name": "주문 감각",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_order_1",
+            "level": 1
+          }
+        ],
+        "effect": "자동 주문 대기 2초",
+        "x": 80,
+        "y": 630
+      },
+      {
+        "id": "auto_promotion_1",
+        "name": "동네 입소문",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_order_2",
+            "level": 1
+          }
+        ],
+        "effect": "45초마다 자동 홍보",
+        "x": 80,
+        "y": 745
+      },
+      {
+        "id": "auto_promotion_2",
+        "name": "소문난 식당",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_promotion_1",
+            "level": 1
+          }
+        ],
+        "effect": "자동 홍보 간격 25초",
+        "x": 80,
+        "y": 860
+      },
+      {
+        "id": "drop_bonus_1",
+        "name": "반가운 인사",
+        "level": 0,
+        "maxLevel": 1,
         "cost": 1,
         "prerequisitesMet": true,
         "prerequisites": [
@@ -443,128 +570,315 @@
             "level": 1
           }
         ],
-        "effect": "필드의 재료와 도토리를 자동 회수",
-        "x": 105,
-        "y": 260
+        "effect": "재료 드랍 확률 +2%p",
+        "x": 240,
+        "y": 170
       },
       {
-        "id": "auto_order",
-        "name": "주문 척척",
+        "id": "drop_bonus_2",
+        "name": "익숙한 얼굴",
         "level": 0,
-        "maxLevel": 3,
+        "maxLevel": 1,
         "cost": 1,
         "prerequisitesMet": false,
         "prerequisites": [
           {
-            "id": "auto_collect",
+            "id": "drop_bonus_1",
             "level": 1
           }
         ],
-        "effect": "기다리는 손님의 주문을 자동 접수",
-        "x": 80,
-        "y": 420
+        "effect": "재료 드랍 확률 +2%p",
+        "x": 240,
+        "y": 285
       },
       {
-        "id": "auto_promotion",
-        "name": "입소문",
-        "level": 0,
-        "maxLevel": 2,
-        "cost": 2,
-        "prerequisitesMet": false,
-        "prerequisites": [
-          {
-            "id": "auto_order",
-            "level": 2
-          }
-        ],
-        "effect": "쉬지 않고 손님을 자동으로 홍보",
-        "x": 205,
-        "y": 555
-      },
-      {
-        "id": "drop_bonus",
+        "id": "drop_bonus_3",
         "name": "단골의 선물",
         "level": 0,
-        "maxLevel": 3,
-        "cost": 1,
-        "prerequisitesMet": true,
-        "prerequisites": [
-          {
-            "id": "restaurant_basics",
-            "level": 1
-          }
-        ],
-        "effect": "재료 드랍 확률 +0%p",
-        "x": 295,
-        "y": 85
-      },
-      {
-        "id": "cooking_speed",
-        "name": "손에 익은 요리",
-        "level": 0,
-        "maxLevel": 3,
-        "cost": 1,
-        "prerequisitesMet": true,
-        "prerequisites": [
-          {
-            "id": "restaurant_basics",
-            "level": 1
-          }
-        ],
-        "effect": "손님 음식 조리 시간 -0%",
-        "x": 505,
-        "y": 255
-      },
-      {
-        "id": "research_speed",
-        "name": "빠른 실험",
-        "level": 0,
-        "maxLevel": 2,
+        "maxLevel": 1,
         "cost": 2,
         "prerequisitesMet": false,
         "prerequisites": [
           {
-            "id": "cooking_speed",
+            "id": "drop_bonus_2",
             "level": 1
           }
         ],
-        "effect": "레시피 연구 시간 -0%",
-        "x": 585,
-        "y": 85
+        "effect": "재료 드랍 확률 +3%p",
+        "x": 240,
+        "y": 400
       },
       {
-        "id": "offline_bonus",
+        "id": "storage_bonus_1",
+        "name": "알뜰한 정리",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "drop_bonus_3",
+            "level": 1
+          }
+        ],
+        "effect": "재료 보관함 +5칸",
+        "x": 240,
+        "y": 515
+      },
+      {
+        "id": "storage_bonus_2",
+        "name": "넉넉한 보관",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "storage_bonus_1",
+            "level": 1
+          }
+        ],
+        "effect": "재료 보관함 +5칸",
+        "x": 240,
+        "y": 630
+      },
+      {
+        "id": "merchant_discount_1",
+        "name": "상인과 안면",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "storage_bonus_2",
+            "level": 1
+          }
+        ],
+        "effect": "재료 상인 가격 -10%",
+        "x": 240,
+        "y": 745
+      },
+      {
+        "id": "merchant_discount_2",
+        "name": "흥정 요령",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "merchant_discount_1",
+            "level": 1
+          }
+        ],
+        "effect": "재료 상인 가격 추가 -10%",
+        "x": 240,
+        "y": 860
+      },
+      {
+        "id": "cooking_speed_1",
+        "name": "손풀기",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": true,
+        "prerequisites": [
+          {
+            "id": "restaurant_basics",
+            "level": 1
+          }
+        ],
+        "effect": "손님 음식 조리 시간 -3%",
+        "x": 400,
+        "y": 170
+      },
+      {
+        "id": "cooking_speed_2",
+        "name": "빠른 손놀림",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed_1",
+            "level": 1
+          }
+        ],
+        "effect": "손님 음식 조리 시간 추가 -4%",
+        "x": 400,
+        "y": 285
+      },
+      {
+        "id": "cooking_speed_3",
+        "name": "숙련된 요리",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed_2",
+            "level": 1
+          }
+        ],
+        "effect": "손님 음식 조리 시간 추가 -5%",
+        "x": 400,
+        "y": 400
+      },
+      {
+        "id": "research_speed_1",
+        "name": "연구 노트",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "cooking_speed_3",
+            "level": 1
+          }
+        ],
+        "effect": "레시피 연구 시간 -10%",
+        "x": 400,
+        "y": 515
+      },
+      {
+        "id": "research_speed_2",
+        "name": "실험 정리",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "research_speed_1",
+            "level": 1
+          }
+        ],
+        "effect": "레시피 연구 시간 추가 -10%",
+        "x": 400,
+        "y": 630
+      },
+      {
+        "id": "research_speed_3",
+        "name": "요리 직감",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "research_speed_2",
+            "level": 1
+          }
+        ],
+        "effect": "레시피 연구 시간 추가 -10%",
+        "x": 400,
+        "y": 745
+      },
+      {
+        "id": "offline_bonus_1",
+        "name": "밤샘 준비",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "research_speed_3",
+            "level": 1
+          }
+        ],
+        "effect": "뷔페 오프라인 보상 상한 +1시간",
+        "x": 400,
+        "y": 860
+      },
+      {
+        "id": "offline_bonus_2",
         "name": "든든한 준비",
         "level": 0,
-        "maxLevel": 2,
+        "maxLevel": 1,
         "cost": 2,
         "prerequisitesMet": false,
         "prerequisites": [
           {
-            "id": "cooking_speed",
+            "id": "offline_bonus_1",
             "level": 1
           }
         ],
-        "effect": "뷔페 오프라인 보상 상한 +0시간",
-        "x": 500,
-        "y": 425
+        "effect": "뷔페 오프라인 보상 상한 +1시간",
+        "x": 400,
+        "y": 975
       },
       {
-        "id": "contest_prize",
-        "name": "승부 요령",
+        "id": "contest_prize_1",
+        "name": "대회 경험",
         "level": 0,
-        "maxLevel": 3,
+        "maxLevel": 1,
         "cost": 2,
         "prerequisitesMet": false,
         "prerequisites": [
           {
-            "id": "cooking_speed",
-            "level": 2
+            "id": "offline_bonus_2",
+            "level": 1
           }
         ],
-        "effect": "요리 대회 상금 +0%",
-        "x": 585,
-        "y": 565
+        "effect": "요리 대회 상금 +10%",
+        "x": 400,
+        "y": 1090
+      },
+      {
+        "id": "contest_prize_2",
+        "name": "승부 요령",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "contest_prize_1",
+            "level": 1
+          }
+        ],
+        "effect": "요리 대회 상금 추가 +10%",
+        "x": 400,
+        "y": 1205
+      },
+      {
+        "id": "buffet_income_1",
+        "name": "진열 감각",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "contest_prize_2",
+            "level": 1
+          }
+        ],
+        "effect": "야외 뷔페 분당 수익 +10%",
+        "x": 400,
+        "y": 1320
+      },
+      {
+        "id": "buffet_income_2",
+        "name": "인기 진열",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "buffet_income_1",
+            "level": 1
+          }
+        ],
+        "effect": "야외 뷔페 분당 수익 추가 +10%",
+        "x": 400,
+        "y": 1435
       }
     ]
   },
@@ -665,7 +979,7 @@
     "recipeRequirement": 6,
     "freeEntriesPerDay": 1,
     "extraEntryGemCost": 10,
-    "dayKey": "2026-08-06",
+    "dayKey": "2026-08-07",
     "entriesToday": 0,
     "nextEntryCost": 0,
     "firstPlaceTierIds": [],
@@ -2250,6 +2564,8 @@
     "totalItems": 2,
     "totalLimit": 20,
     "capacity": 20,
+    "baseCapacity": 20,
+    "knowhowBonus": 0,
     "remaining": 18,
     "expansionAmount": 5,
     "expansionGemCost": 10,
@@ -2668,7 +2984,7 @@
   },
   "specialVisitor": {
     "interval": 120,
-    "nextIn": 119.77,
+    "nextIn": 119.75,
     "lastType": null,
     "dropBoostRemaining": 0,
     "dropMultiplier": 1,

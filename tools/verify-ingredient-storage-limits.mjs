@@ -69,7 +69,7 @@ try {
 
   let current = await state();
   if (JSON.stringify(current.ingredientStorage) !== JSON.stringify({
-    usedSlots: 2, slotLimit: 20, totalItems: 2, totalLimit: 20, capacity: 20, remaining: 18,
+    usedSlots: 2, slotLimit: 20, totalItems: 2, totalLimit: 20, capacity: 20, baseCapacity: 20, knowhowBonus: 0, remaining: 18,
     expansionAmount: 5, expansionGemCost: 10, ingredientTypes: 2,
   })) throw new Error(`Initial storage state mismatch: ${JSON.stringify(current.ingredientStorage)}`);
 

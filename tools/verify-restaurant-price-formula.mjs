@@ -81,6 +81,19 @@ try {
   }
   await page.locator(".game-frame").screenshot({ path: path.join(out, "01-multiplied-happy-payment.png") });
 
+  await configureSale("normal", "eating");
+  before = await readState();
+  const expectedNormal = Math.round(44
+    * before.recipes.salePriceMultipliers.restaurantPriceUp
+    * before.recipes.salePriceMultipliers.satisfactionNormal
+    * before.recipes.salePriceMultipliers.performanceBuff);
+  await page.evaluate(() => window.advanceTime(7100));
+  after = await readState();
+  if (after.payments[0]?.amount !== expectedNormal || after.tipbox !== Math.round(expectedNormal * .1)
+    || after.tipRule?.eligibleGuests !== "all-except-disappointed") {
+    throw new Error(`Normal guest did not always leave a final-price tip: ${JSON.stringify({ payments: after.payments, tipbox: after.tipbox, expectedNormal })}`);
+  }
+
   await configureSale("disappointed", "disappointed");
   before = await readState();
   const expectedDisappointed = Math.round(44
@@ -89,7 +102,7 @@ try {
     * before.recipes.salePriceMultipliers.performanceBuff);
   await page.evaluate(() => window.advanceTime(6100));
   after = await readState();
-  if (after.payments[0]?.amount !== expectedDisappointed) {
+  if (after.payments[0]?.amount !== expectedDisappointed || after.tipbox !== 0) {
     throw new Error(`Disappointed payment formula mismatch: ${JSON.stringify({ payments: after.payments, expectedDisappointed })}`);
   }
 

@@ -71,6 +71,13 @@ const dom = {
   offlineRewardTime: document.querySelector("#offline-reward-time"),
   offlineRewardAmount: document.querySelector("#offline-reward-amount"),
   offlineRewardClaim: document.querySelector("#offline-reward-claim"),
+  tipboxPanel: document.querySelector("#tipbox-panel"),
+  tipboxClose: document.querySelector("#tipbox-close"),
+  tipboxAmount: document.querySelector("#tipbox-amount"),
+  tipboxCapacity: document.querySelector("#tipbox-capacity"),
+  tipboxGaugeFill: document.querySelector("#tipbox-gauge-fill"),
+  tipboxCollect: document.querySelector("#tipbox-collect"),
+  tipboxExpand: document.querySelector("#tipbox-expand"),
   installPanel: document.querySelector("#install-panel"),
   installClose: document.querySelector("#install-close-btn"),
   installIcon: document.querySelector("#install-icon"),
@@ -112,7 +119,7 @@ let recipeReveal = null;
 let recipeRevealTimer = 0;
 let recipeResearch = null;
 let specialPromotionDetailIngredientId = null;
-let knowhowMapScroll = { left: 0, top: 0 };
+let knowhowMapScroll = { left: 30, top: 0 };
 const RECIPE_RESEARCH_DURATION = 2.4;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
 const STARTER_INGREDIENTS = Object.freeze({
@@ -153,19 +160,55 @@ const BUFFET_CASHBOX_POSITION = Object.freeze({ x: 240, y: 715, w: 104, h: 86 })
 const CONTEST_RECIPE_REQUIREMENT = 6;
 const CONTEST_EXTRA_ENTRY_GEM_COST = 10;
 const CONTEST_JUDGING_DURATION = 2.8;
-const KNOWHOW_XP_PER_POINT = 100;
+const TIPBOX_INITIAL_CAPACITY = 500;
+const TIPBOX_EXPANSION_AMOUNT = 500;
+const TIPBOX_EXPANSION_GEM_COST = 10;
+const KNOWHOW_XP_BASE = 100;
+const KNOWHOW_XP_GROWTH = 25;
 const KNOWHOW_RESEARCH_XP = 20;
-const KNOWHOW_SERVICE_XP = 5;
+const KNOWHOW_SERVICE_XP = 1;
 const KNOWHOW_SKILLS = Object.freeze([
-  { id: "restaurant_basics", name: "식당 노하우", icon: "📒", maxLevel: 1, costs: [], x: 306, y: 270, prerequisites: [], effect: () => "요리하며 식당 운영 경험을 쌓아요" },
-  { id: "auto_collect", name: "척척 회수", icon: "🧺", maxLevel: 3, costs: [1, 1, 2], x: 105, y: 260, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: (level) => level ? `${[0, 5, 3, 1][level]}초마다 재료와 도토리 자동 회수` : "필드의 재료와 도토리를 자동 회수" },
-  { id: "auto_order", name: "주문 척척", icon: "📝", maxLevel: 3, costs: [1, 1, 2], x: 80, y: 420, prerequisites: [{ id: "auto_collect", level: 1 }], effect: (level) => level ? `손님 대기 ${[0, 4, 2.5, 1][level]}초 후 자동 주문` : "기다리는 손님의 주문을 자동 접수" },
-  { id: "auto_promotion", name: "입소문", icon: "📣", maxLevel: 2, costs: [2, 3], x: 205, y: 555, prerequisites: [{ id: "auto_order", level: 2 }], effect: (level) => level ? `${[0, 30, 15][level]}초마다 자동 홍보` : "쉬지 않고 손님을 자동으로 홍보" },
-  { id: "drop_bonus", name: "단골의 선물", icon: "🍃", maxLevel: 3, costs: [1, 2, 2], x: 295, y: 85, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: (level) => `재료 드랍 확률 +${level * 3}%p` },
-  { id: "cooking_speed", name: "손에 익은 요리", icon: "⏱️", maxLevel: 3, costs: [1, 2, 2], x: 505, y: 255, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: (level) => `손님 음식 조리 시간 -${level * 5}%` },
-  { id: "research_speed", name: "빠른 실험", icon: "🥣", maxLevel: 2, costs: [2, 2], x: 585, y: 85, prerequisites: [{ id: "cooking_speed", level: 1 }], effect: (level) => `레시피 연구 시간 -${level * 15}%` },
-  { id: "offline_bonus", name: "든든한 준비", icon: "🌙", maxLevel: 2, costs: [2, 2], x: 500, y: 425, prerequisites: [{ id: "cooking_speed", level: 1 }], effect: (level) => `뷔페 오프라인 보상 상한 +${level}시간` },
-  { id: "contest_prize", name: "승부 요령", icon: "🏆", maxLevel: 3, costs: [2, 2, 3], x: 585, y: 565, prerequisites: [{ id: "cooking_speed", level: 2 }], effect: (level) => `요리 대회 상금 +${level * 10}%` },
+  { id: "restaurant_basics", name: "식당 노하우", icon: "📒", maxLevel: 1, costs: [], x: 240, y: 52, prerequisites: [], effect: () => "요리하며 식당 운영 경험을 쌓아요" },
+
+  { id: "auto_collect_1", name: "도토리 정산", icon: "🪙", maxLevel: 1, costs: [1], x: 80, y: 170, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: () => "30초마다 테이블 도토리 1개 자동 회수" },
+  { id: "auto_collect_2", name: "재료 정리", icon: "🧺", maxLevel: 1, costs: [1], x: 80, y: 285, prerequisites: [{ id: "auto_collect_1", level: 1 }], effect: () => "30초마다 필드 재료 1개 자동 획득" },
+  { id: "auto_collect_3", name: "뷔페 정산", icon: "🍽️", maxLevel: 1, costs: [2], x: 80, y: 400, prerequisites: [{ id: "auto_collect_2", level: 1 }], effect: () => "60초마다 뷔페 계산대 자동 정산" },
+  { id: "auto_order_1", name: "주문 메모", icon: "📝", maxLevel: 1, costs: [1], x: 80, y: 515, prerequisites: [{ id: "auto_collect_3", level: 1 }], effect: () => "5초 기다린 주문을 자동 접수" },
+  { id: "auto_order_2", name: "주문 감각", icon: "🙋", maxLevel: 1, costs: [2], x: 80, y: 630, prerequisites: [{ id: "auto_order_1", level: 1 }], effect: () => "자동 주문 대기 2초" },
+  { id: "auto_calm_1", name: "기분 살피기", icon: "💬", maxLevel: 1, costs: [1], x: 80, y: 745, prerequisites: [{ id: "auto_order_2", level: 1 }], effect: () => "실망한 손님을 5초 후 자동으로 달래기" },
+  { id: "auto_calm_2", name: "빠른 위로", icon: "💗", maxLevel: 1, costs: [2], x: 80, y: 860, prerequisites: [{ id: "auto_calm_1", level: 1 }], effect: () => "자동 달래기 대기 2초" },
+  { id: "auto_promotion_1", name: "꾸준한 홍보", icon: "📣", maxLevel: 1, costs: [2], x: 80, y: 975, prerequisites: [{ id: "auto_calm_2", level: 1 }], effect: () => "30초마다 손님 1명 자동 홍보" },
+
+  { id: "drop_bonus_1", name: "반가운 인사", icon: "🐣", maxLevel: 1, costs: [1], x: 240, y: 170, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: () => "재료 드랍 확률 +2%p" },
+  { id: "drop_bonus_2", name: "익숙한 얼굴", icon: "🤝", maxLevel: 1, costs: [1], x: 240, y: 285, prerequisites: [{ id: "drop_bonus_1", level: 1 }], effect: () => "재료 드랍 확률 +2%p" },
+  { id: "drop_bonus_3", name: "단골의 선물", icon: "🍃", maxLevel: 1, costs: [2], x: 240, y: 400, prerequisites: [{ id: "drop_bonus_2", level: 1 }], effect: () => "재료 드랍 확률 +3%p" },
+  { id: "double_drop_1", name: "한 줌 더 I", icon: "➕", maxLevel: 1, costs: [1], x: 240, y: 515, prerequisites: [{ id: "drop_bonus_3", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_2", name: "한 줌 더 II", icon: "➕", maxLevel: 1, costs: [1], x: 240, y: 630, prerequisites: [{ id: "double_drop_1", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_3", name: "한 줌 더 III", icon: "➕", maxLevel: 1, costs: [1], x: 240, y: 745, prerequisites: [{ id: "double_drop_2", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_4", name: "한 줌 더 IV", icon: "➕", maxLevel: 1, costs: [1], x: 240, y: 860, prerequisites: [{ id: "double_drop_3", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_5", name: "한 줌 더 V", icon: "✚", maxLevel: 1, costs: [1], x: 240, y: 975, prerequisites: [{ id: "double_drop_4", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_6", name: "두 손 가득 I", icon: "✚", maxLevel: 1, costs: [1], x: 240, y: 1090, prerequisites: [{ id: "double_drop_5", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_7", name: "두 손 가득 II", icon: "✚", maxLevel: 1, costs: [1], x: 240, y: 1205, prerequisites: [{ id: "double_drop_6", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_8", name: "두 손 가득 III", icon: "✚", maxLevel: 1, costs: [1], x: 240, y: 1320, prerequisites: [{ id: "double_drop_7", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_9", name: "두 손 가득 IV", icon: "✚", maxLevel: 1, costs: [1], x: 240, y: 1435, prerequisites: [{ id: "double_drop_8", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "double_drop_10", name: "풍성한 선물", icon: "🎁", maxLevel: 1, costs: [2], x: 240, y: 1550, prerequisites: [{ id: "double_drop_9", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
+  { id: "storage_bonus_1", name: "알뜰한 정리", icon: "🧊", maxLevel: 1, costs: [1], x: 240, y: 1665, prerequisites: [{ id: "double_drop_10", level: 1 }], effect: () => "재료 보관함 +5칸" },
+  { id: "storage_bonus_2", name: "넉넉한 보관", icon: "📦", maxLevel: 1, costs: [2], x: 240, y: 1780, prerequisites: [{ id: "storage_bonus_1", level: 1 }], effect: () => "재료 보관함 +5칸" },
+  { id: "merchant_discount_1", name: "상인과 안면", icon: "💬", maxLevel: 1, costs: [2], x: 240, y: 1895, prerequisites: [{ id: "storage_bonus_2", level: 1 }], effect: () => "재료 상인 가격 -10%" },
+  { id: "merchant_discount_2", name: "흥정 요령", icon: "🪙", maxLevel: 1, costs: [2], x: 240, y: 2010, prerequisites: [{ id: "merchant_discount_1", level: 1 }], effect: () => "재료 상인 가격 추가 -10%" },
+
+  { id: "cooking_speed_1", name: "손풀기", icon: "🥄", maxLevel: 1, costs: [1], x: 400, y: 170, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: () => "손님 음식 조리 시간 -3%" },
+  { id: "cooking_speed_2", name: "빠른 손놀림", icon: "⏱️", maxLevel: 1, costs: [1], x: 400, y: 285, prerequisites: [{ id: "cooking_speed_1", level: 1 }], effect: () => "손님 음식 조리 시간 추가 -4%" },
+  { id: "cooking_speed_3", name: "숙련된 요리", icon: "🍳", maxLevel: 1, costs: [2], x: 400, y: 400, prerequisites: [{ id: "cooking_speed_2", level: 1 }], effect: () => "손님 음식 조리 시간 추가 -5%" },
+  { id: "research_speed_1", name: "연구 노트", icon: "📖", maxLevel: 1, costs: [1], x: 400, y: 515, prerequisites: [{ id: "cooking_speed_3", level: 1 }], effect: () => "레시피 연구 시간 -10%" },
+  { id: "research_speed_2", name: "실험 정리", icon: "🥣", maxLevel: 1, costs: [1], x: 400, y: 630, prerequisites: [{ id: "research_speed_1", level: 1 }], effect: () => "레시피 연구 시간 추가 -10%" },
+  { id: "research_speed_3", name: "요리 직감", icon: "💡", maxLevel: 1, costs: [2], x: 400, y: 745, prerequisites: [{ id: "research_speed_2", level: 1 }], effect: () => "레시피 연구 시간 추가 -10%" },
+  { id: "offline_bonus_1", name: "밤샘 준비", icon: "🌙", maxLevel: 1, costs: [2], x: 400, y: 860, prerequisites: [{ id: "research_speed_3", level: 1 }], effect: () => "뷔페 오프라인 보상 상한 +1시간" },
+  { id: "offline_bonus_2", name: "든든한 준비", icon: "🛌", maxLevel: 1, costs: [2], x: 400, y: 975, prerequisites: [{ id: "offline_bonus_1", level: 1 }], effect: () => "뷔페 오프라인 보상 상한 +1시간" },
+  { id: "contest_prize_1", name: "대회 경험", icon: "🎖️", maxLevel: 1, costs: [2], x: 400, y: 1090, prerequisites: [{ id: "offline_bonus_2", level: 1 }], effect: () => "요리 대회 상금 +10%" },
+  { id: "contest_prize_2", name: "승부 요령", icon: "🏆", maxLevel: 1, costs: [2], x: 400, y: 1205, prerequisites: [{ id: "contest_prize_1", level: 1 }], effect: () => "요리 대회 상금 추가 +10%" },
+  { id: "buffet_income_1", name: "진열 감각", icon: "🍽️", maxLevel: 1, costs: [2], x: 400, y: 1320, prerequisites: [{ id: "contest_prize_2", level: 1 }], effect: () => "야외 뷔페 분당 수익 +10%" },
+  { id: "buffet_income_2", name: "인기 진열", icon: "🥂", maxLevel: 1, costs: [2], x: 400, y: 1435, prerequisites: [{ id: "buffet_income_1", level: 1 }], effect: () => "야외 뷔페 분당 수익 추가 +10%" },
 ]);
 const CONTEST_JUDGE_PREFERENCES = Object.freeze({
   fresh: { name: "새싹 심사위원", icon: "🥬", hint: "싱그러운 채소가 좋아요", ingredientKeys: ["leaf", "lettuce", "tomato", "mixedVeg", "carrot", "cabbage", "cucumber", "broccoli", "avocado"] },
@@ -289,7 +332,7 @@ function initialAcorns() {
 
 function createInitialState() {
   return {
-    version: 17,
+    version: 19,
     clock: 0,
     rng: 20260714,
     resources: {
@@ -346,10 +389,11 @@ function createInitialState() {
     knowhow: {
       xp: 0,
       points: 0,
+      earnedPoints: 0,
       totalXp: 0,
-      selectedSkillId: "auto_collect",
+      selectedSkillId: "auto_collect_1",
       skills: { restaurant_basics: 1 },
-      automation: { collectElapsed: 0, orderElapsed: 0, promotionElapsed: 0 },
+      automation: { paymentElapsed: 0, ingredientElapsed: 0, buffetElapsed: 0, orderElapsed: 0, calmElapsed: 0, promotionElapsed: 0 },
     },
     missions: {
       dayKey: new Date().toISOString().slice(0, 10),
@@ -370,7 +414,8 @@ function createInitialState() {
     ingredientDrops: [],
     dropSequence: 1,
     tipbox: 0,
-    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, giftBundles: 0, giftItems: 0, recipesCrafted: 0, recipeResearchAttempts: 0, failedRecipeResearches: 0, specialVisitors: 0, merchantPurchases: 0, fairyBuffs: 0, trades: 0, futureTrades: 0, buffetVisitors: 0, buffetPurchases: 0, buffetRevenue: 0, buffetClaims: 0, buffetOfflineRevenue: 0, contestEntries: 0, contestFirstPlaces: 0, contestPrizeMoney: 0, knowhowXpEarned: 0, knowhowPointsEarned: 0, knowhowUpgrades: 0, autoCollected: 0, autoOrders: 0, autoPromotions: 0 },
+    tipboxCapacity: TIPBOX_INITIAL_CAPACITY,
+    metrics: { visitors: 0, orders: 0, served: 0, collected: 0, angryLeaves: 0, ingredientDropAttempts: 0, ingredientDropMisses: 0, ingredientsFound: 0, giftBundles: 0, giftItems: 0, bonusIngredientDrops: 0, recipesCrafted: 0, recipeResearchAttempts: 0, failedRecipeResearches: 0, specialVisitors: 0, merchantPurchases: 0, fairyBuffs: 0, trades: 0, futureTrades: 0, buffetVisitors: 0, buffetPurchases: 0, buffetRevenue: 0, buffetClaims: 0, buffetOfflineRevenue: 0, contestEntries: 0, contestFirstPlaces: 0, contestPrizeMoney: 0, knowhowXpEarned: 0, knowhowPointsEarned: 0, knowhowUpgrades: 0, autoCollected: 0, autoPayments: 0, autoIngredients: 0, autoBuffetClaims: 0, autoOrders: 0, autoCalms: 0, autoPromotions: 0, tipboxExpansions: 0 },
     ui: {
       selectedInstallId: null,
       screen: "restaurant",
@@ -390,7 +435,7 @@ function loadState() {
     const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!parsed) return null;
     const defaults = createInitialState();
-    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].includes(parsed.version)) return null;
+    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].includes(parsed.version)) return null;
     const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
       typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
     const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
@@ -470,7 +515,7 @@ function loadState() {
     savedSpecialVisitor.sequence = Math.max(1, Math.floor(Number(savedSpecialVisitor.sequence || 1)));
     savedSpecialVisitor.lastUpdatedAt = Date.now();
     const savedPromotion = { ...defaults.promotion, ...parsed.promotion };
-    const savedKnowhow = normalizeKnowhow(parsed.knowhow, defaults.knowhow);
+    const savedKnowhow = normalizeKnowhow(parsed.knowhow, defaults.knowhow, parsed.metrics);
     const savedQueueTargets = Array.isArray(parsed.promotion?.queueTargets)
       ? parsed.promotion.queueTargets.map((id) => Number(id) || null)
       : [];
@@ -497,7 +542,7 @@ function loadState() {
       : 0;
     const buffetTotalElapsed = Math.max(0, Number(savedBuffet.passiveElapsed || 0)) + buffetRealElapsed;
     const buffetOfflineTicks = Math.floor(buffetTotalElapsed / BUFFET_TICK_SECONDS);
-    const buffetOfflineEarned = buffetOfflineTicks * buffetYieldFromSnapshot(buffetStands, ownedRecipes);
+    const buffetOfflineEarned = buffetOfflineTicks * buffetYieldFromSnapshot(buffetStands, ownedRecipes, savedKnowhow);
     const savedContest = { ...defaults.contest, ...parsed.contest };
     const contestTierIds = new Set(CONTEST_TIERS.map((tier) => tier.id));
     const contestRecipeIds = new Set(Object.keys(ownedRecipes).map(Number));
@@ -505,8 +550,10 @@ function loadState() {
     return {
       ...defaults,
       ...restaurantSave,
-      version: 17,
+      version: 19,
       resources: { ...defaults.resources, ...parsed.resources },
+      tipbox: Math.max(0, Math.floor(Number(parsed.tipbox || 0))),
+      tipboxCapacity: Math.max(TIPBOX_INITIAL_CAPACITY, Math.floor(Number(parsed.tipboxCapacity || 0)), Math.ceil(Math.max(0, Number(parsed.tipbox || 0)) / TIPBOX_EXPANSION_AMOUNT) * TIPBOX_EXPANSION_AMOUNT),
       ownedRecipes,
       collections: { ...defaults.collections, ...parsed.collections },
       missions: { ...defaults.missions, ...parsed.missions },
@@ -581,7 +628,7 @@ function loadState() {
         state: actor.state === "interacting" ? "waiting" : actor.state,
         timer: actor.state === "interacting" ? 0 : Number(actor.timer || 0),
         offers: Array.isArray(actor.offers) ? actor.offers.map((offer) => {
-          const unitPrice = merchantIngredientUnitPrice(offer.ingredientId);
+          const unitPrice = merchantIngredientUnitPrice(offer.ingredientId, savedKnowhow);
           return { ...offer, unitPrice, price: unitPrice * Math.max(1, Number(offer.quantity || 1)) };
         }) : actor.offers,
       })),
@@ -648,7 +695,7 @@ function knowhowSkillLevel(id, source = state?.knowhow) {
   return Math.max(0, Math.floor(Number(source?.skills?.[id] || 0)));
 }
 
-function normalizeKnowhow(saved, fallback) {
+function normalizeKnowhow(saved, fallback, savedMetrics = {}) {
   const source = { ...fallback, ...(saved || {}) };
   const validIds = new Set(KNOWHOW_SKILLS.map((skill) => skill.id));
   const skills = { restaurant_basics: 1 };
@@ -656,19 +703,123 @@ function normalizeKnowhow(saved, fallback) {
     const skill = knowhowSkill(id);
     if (validIds.has(id)) skills[id] = Math.max(0, Math.min(skill.maxLevel, Math.floor(Number(level || 0))));
   });
+  const legacyChains = {
+    auto_collect: ["auto_collect_1", "auto_collect_2", "auto_collect_3"],
+    auto_order: ["auto_order_1", "auto_order_2"],
+    auto_promotion: ["auto_promotion_1"],
+    drop_bonus: ["drop_bonus_1", "drop_bonus_2", "drop_bonus_3"],
+    cooking_speed: ["cooking_speed_1", "cooking_speed_2", "cooking_speed_3"],
+    research_speed: ["research_speed_1", "research_speed_2", "research_speed_3"],
+    offline_bonus: ["offline_bonus_1", "offline_bonus_2"],
+    contest_prize: ["contest_prize_1", "contest_prize_2"],
+  };
+  Object.entries(legacyChains).forEach(([legacyId, chain]) => {
+    const legacyLevel = Math.max(0, Math.floor(Number(source.skills?.[legacyId] || 0)));
+    chain.slice(0, legacyLevel).forEach((id) => { skills[id] = 1; });
+  });
+  const unlockLegacyPrerequisites = (ids) => ids.forEach((id) => { skills[id] = 1; });
+  if (Number(source.skills?.auto_order || 0) > 0) unlockLegacyPrerequisites(["auto_collect_1", "auto_collect_2", "auto_collect_3"]);
+  if (Number(source.skills?.auto_promotion || 0) > 0) unlockLegacyPrerequisites(["auto_collect_1", "auto_collect_2", "auto_collect_3", "auto_order_1", "auto_order_2", "auto_calm_1", "auto_calm_2"]);
+  if (Number(source.skills?.research_speed || 0) > 0) unlockLegacyPrerequisites(["cooking_speed_1", "cooking_speed_2", "cooking_speed_3"]);
+  if (Number(source.skills?.offline_bonus || 0) > 0) unlockLegacyPrerequisites(["cooking_speed_1", "cooking_speed_2", "cooking_speed_3", "research_speed_1", "research_speed_2", "research_speed_3"]);
+  if (Number(source.skills?.contest_prize || 0) > 0) unlockLegacyPrerequisites(["cooking_speed_1", "cooking_speed_2", "cooking_speed_3", "research_speed_1", "research_speed_2", "research_speed_3", "offline_bonus_1", "offline_bonus_2"]);
   skills.restaurant_basics = 1;
+  let earnedPoints = Math.max(0, Math.floor(Number(source.earnedPoints ?? savedMetrics.knowhowPointsEarned ?? 0)));
+  let points = Math.max(0, Math.floor(Number(source.points || 0)));
+  let xp = Math.max(0, Math.floor(Number(source.xp || 0)));
+  while (xp >= KNOWHOW_XP_BASE + earnedPoints * KNOWHOW_XP_GROWTH) {
+    xp -= KNOWHOW_XP_BASE + earnedPoints * KNOWHOW_XP_GROWTH;
+    earnedPoints += 1;
+    points += 1;
+  }
   return {
-    xp: Math.max(0, Math.min(KNOWHOW_XP_PER_POINT - 1, Math.floor(Number(source.xp || 0)))),
-    points: Math.max(0, Math.floor(Number(source.points || 0))),
+    xp,
+    points,
+    earnedPoints,
     totalXp: Math.max(0, Math.floor(Number(source.totalXp || 0))),
-    selectedSkillId: validIds.has(source.selectedSkillId) ? source.selectedSkillId : "auto_collect",
+    selectedSkillId: validIds.has(source.selectedSkillId) ? source.selectedSkillId : "auto_collect_1",
     skills,
     automation: {
-      collectElapsed: Math.max(0, Number(source.automation?.collectElapsed || 0)),
+      paymentElapsed: Math.max(0, Number(source.automation?.paymentElapsed ?? source.automation?.collectElapsed ?? 0)),
+      ingredientElapsed: Math.max(0, Number(source.automation?.ingredientElapsed ?? source.automation?.collectElapsed ?? 0)),
+      buffetElapsed: Math.max(0, Number(source.automation?.buffetElapsed || 0)),
       orderElapsed: Math.max(0, Number(source.automation?.orderElapsed || 0)),
+      calmElapsed: Math.max(0, Number(source.automation?.calmElapsed || 0)),
       promotionElapsed: Math.max(0, Number(source.automation?.promotionElapsed || 0)),
     },
   };
+}
+
+function knowhowXpRequirement(source = state?.knowhow) {
+  return KNOWHOW_XP_BASE + Math.max(0, Number(source?.earnedPoints || 0)) * KNOWHOW_XP_GROWTH;
+}
+
+function knowhowOwned(id, source = state?.knowhow) {
+  return knowhowSkillLevel(id, source) > 0;
+}
+
+function knowhowAutoPaymentInterval(source = state?.knowhow) {
+  return knowhowOwned("auto_collect_1", source) ? 30 : null;
+}
+
+function knowhowAutoIngredientInterval(source = state?.knowhow) {
+  return knowhowOwned("auto_collect_2", source) ? 30 : null;
+}
+
+function knowhowAutoBuffetInterval(source = state?.knowhow) {
+  return knowhowOwned("auto_collect_3", source) ? 60 : null;
+}
+
+function knowhowAutoOrderDelay(source = state?.knowhow) {
+  if (knowhowOwned("auto_order_2", source)) return 2;
+  if (knowhowOwned("auto_order_1", source)) return 5;
+  return null;
+}
+
+function knowhowAutoPromotionInterval(source = state?.knowhow) {
+  return knowhowOwned("auto_promotion_1", source) ? 30 : null;
+}
+
+function knowhowAutoCalmDelay(source = state?.knowhow) {
+  if (knowhowOwned("auto_calm_2", source)) return 2;
+  if (knowhowOwned("auto_calm_1", source)) return 5;
+  return null;
+}
+
+function knowhowDropBonus(source = state?.knowhow) {
+  return (knowhowOwned("drop_bonus_1", source) ? .02 : 0)
+    + (knowhowOwned("drop_bonus_2", source) ? .02 : 0)
+    + (knowhowOwned("drop_bonus_3", source) ? .03 : 0);
+}
+
+function knowhowBonusIngredientChance(source = state?.knowhow) {
+  const count = Array.from({ length: 10 }, (_, index) => `double_drop_${index + 1}`)
+    .filter((id) => knowhowOwned(id, source)).length;
+  return count * .005;
+}
+
+function knowhowStorageBonus(source = state?.knowhow) {
+  return (knowhowOwned("storage_bonus_1", source) ? 5 : 0) + (knowhowOwned("storage_bonus_2", source) ? 5 : 0);
+}
+
+function knowhowMerchantDiscount(source = state?.knowhow) {
+  return (knowhowOwned("merchant_discount_1", source) ? .1 : 0) + (knowhowOwned("merchant_discount_2", source) ? .1 : 0);
+}
+
+function knowhowCookingReduction(source = state?.knowhow) {
+  return (knowhowOwned("cooking_speed_1", source) ? .03 : 0)
+    + (knowhowOwned("cooking_speed_2", source) ? .04 : 0)
+    + (knowhowOwned("cooking_speed_3", source) ? .05 : 0);
+}
+
+function knowhowResearchReduction(source = state?.knowhow) {
+  return ["research_speed_1", "research_speed_2", "research_speed_3"]
+    .reduce((sum, id) => sum + (knowhowOwned(id, source) ? .1 : 0), 0);
+}
+
+function knowhowBuffetIncomeMultiplier(source = state?.knowhow) {
+  return 1 + ["buffet_income_1", "buffet_income_2"]
+    .reduce((sum, id) => sum + (knowhowOwned(id, source) ? .1 : 0), 0);
 }
 
 function knowhowPrerequisitesMet(skill) {
@@ -677,7 +828,7 @@ function knowhowPrerequisitesMet(skill) {
 
 function knowhowPrerequisiteText(skill) {
   if (!skill.prerequisites.length) return "기본 노하우";
-  return skill.prerequisites.map((requirement) => `${knowhowSkill(requirement.id).name} Lv.${requirement.level}`).join(" · ");
+  return skill.prerequisites.map((requirement) => knowhowSkill(requirement.id).name).join(" · ");
 }
 
 function knowhowUpgradeCost(skill) {
@@ -691,9 +842,10 @@ function grantKnowhowXp(amount) {
   state.knowhow.totalXp += gained;
   state.metrics.knowhowXpEarned += gained;
   let pointsGained = 0;
-  while (state.knowhow.xp >= KNOWHOW_XP_PER_POINT) {
-    state.knowhow.xp -= KNOWHOW_XP_PER_POINT;
+  while (state.knowhow.xp >= knowhowXpRequirement()) {
+    state.knowhow.xp -= knowhowXpRequirement();
     state.knowhow.points += 1;
+    state.knowhow.earnedPoints += 1;
     pointsGained += 1;
   }
   if (pointsGained) {
@@ -713,7 +865,7 @@ function upgradeKnowhowSkill(id) {
   state.knowhow.skills[skill.id] = current + 1;
   state.knowhow.selectedSkillId = skill.id;
   state.metrics.knowhowUpgrades += 1;
-  showToast(`${skill.icon} ${skill.name} Lv.${current + 1}`, 2.8);
+  showToast(`${skill.icon} ${skill.name} 습득!`, 2.8);
   saveState();
   updateHud();
   renderMenu();
@@ -721,11 +873,13 @@ function upgradeKnowhowSkill(id) {
 }
 
 function buffetOfflineCapSeconds(source = state?.knowhow) {
-  return BUFFET_OFFLINE_CAP_SECONDS + knowhowSkillLevel("offline_bonus", source) * 60 * 60;
+  const bonusHours = ["offline_bonus_1", "offline_bonus_2"].filter((id) => knowhowOwned(id, source)).length;
+  return BUFFET_OFFLINE_CAP_SECONDS + bonusHours * 60 * 60;
 }
 
 function contestPrizeMultiplier(source = state?.knowhow) {
-  return 1 + knowhowSkillLevel("contest_prize", source) * .1;
+  const bonusLevels = ["contest_prize_1", "contest_prize_2"].filter((id) => knowhowOwned(id, source)).length;
+  return 1 + bonusLevels * .1;
 }
 
 function recipeLevelPrice(recipe, owned) {
@@ -816,12 +970,12 @@ function buffetRecipeYield(recipeId, ownedRecipes = state?.ownedRecipes || {}) {
   return Math.max(1, Math.round(recipeLevelPrice(recipe, owned) * BUFFET_RECIPE_YIELD_RATE));
 }
 
-function buffetYieldFromSnapshot(stands, ownedRecipes) {
+function buffetYieldFromSnapshot(stands, ownedRecipes, knowhow = state?.knowhow) {
   const recipeCount = Object.keys(ownedRecipes || {}).filter((id) => getRecipe(Number(id))).length;
   const capacity = buffetStandCapacityForCount(recipeCount);
   const standYield = (stands || []).slice(0, capacity)
     .reduce((sum, recipeId) => sum + buffetRecipeYield(recipeId, ownedRecipes), 0);
-  return Math.max(0, Math.round(standYield * buffetPopularityMultiplierForCount(recipeCount)));
+  return Math.max(0, Math.round(standYield * buffetPopularityMultiplierForCount(recipeCount) * knowhowBuffetIncomeMultiplier(knowhow)));
 }
 
 function buffetPerMinute() {
@@ -911,13 +1065,17 @@ function storedIngredientIds() {
 function ingredientStorageStatus() {
   const ids = storedIngredientIds();
   const totalItems = ids.reduce((sum, id) => sum + ingredientAmount(id), 0);
-  const capacity = Math.max(INGREDIENT_STORAGE_INITIAL_CAPACITY, Number(state.crafting.storageCapacity || 0));
+  const baseCapacity = Math.max(INGREDIENT_STORAGE_INITIAL_CAPACITY, Number(state.crafting.storageCapacity || 0));
+  const skillBonus = knowhowStorageBonus();
+  const capacity = baseCapacity + skillBonus;
   return {
     usedSlots: totalItems,
     slotLimit: capacity,
     totalItems,
     totalLimit: capacity,
     capacity,
+    baseCapacity,
+    knowhowBonus: skillBonus,
     remaining: Math.max(0, capacity - totalItems),
     expansionAmount: INGREDIENT_STORAGE_EXPANSION_AMOUNT,
     expansionGemCost: INGREDIENT_STORAGE_EXPANSION_GEM_COST,
@@ -1358,7 +1516,7 @@ function recipeCookingDuration(recipe, level = 1, knowhow = state?.knowhow) {
     3: Number(tables.recipeSetting.MenuCoolDownSpecial || 0),
   };
   const levelReduction = Math.max(0, Number(level || 1) - 1) * (reductions[recipe?.recipeGrade] || 0);
-  const knowhowReduction = knowhowSkillLevel("cooking_speed", knowhow) * .05;
+  const knowhowReduction = knowhowCookingReduction(knowhow);
   return Math.max(Number(tables.recipeSetting.CookTimeLimit || 2), baseRecipeCookingDuration(recipe) * Math.max(0, 1 - levelReduction) * (1 - knowhowReduction));
 }
 
@@ -1818,14 +1976,15 @@ function futureSpecialVisitorIngredients() {
   return [...future.values()];
 }
 
-function merchantIngredientUnitPrice(ingredientId) {
+function merchantIngredientUnitPrice(ingredientId, knowhow = state?.knowhow) {
   const rawStage = ingredientDiscoveryStage(ingredientId);
   const stage = Number.isFinite(rawStage) ? Math.max(0, rawStage) : 0;
   const themeIndex = Math.floor(stage / 9);
   const withinThemeStage = stage % 9;
   const basePrice = MERCHANT_THEME_BASE_PRICES[themeIndex]
     ?? MERCHANT_THEME_BASE_PRICES[2] * MERCHANT_LATE_THEME_MULTIPLIER ** (themeIndex - 2);
-  return Math.max(10, Math.round(basePrice * (1 + withinThemeStage * MERCHANT_STAGE_PRICE_STEP) / 10) * 10);
+  const originalPrice = Math.max(10, Math.round(basePrice * (1 + withinThemeStage * MERCHANT_STAGE_PRICE_STEP) / 10) * 10);
+  return Math.max(10, Math.round(originalPrice * (1 - knowhowMerchantDiscount(knowhow)) / 10) * 10);
 }
 
 function buildMerchantOffers() {
@@ -1909,7 +2068,7 @@ function finishSpecialVisitor(actor, stateName = "caught") {
 
 function catchSpecial(actor) {
   if (!actor || actor.type !== "thief" || actor.state === "caught") return;
-  if (actor.stolen > 0) state.tipbox += actor.stolen;
+  if (actor.stolen > 0) state.tipbox = Math.min(state.tipboxCapacity, state.tipbox + actor.stolen);
   finishSpecialVisitor(actor, "caught");
   showToast("도둑을 잡고 팁을 지켰어요!");
 }
@@ -2204,7 +2363,7 @@ function startRecipeResearch(recipeId, automatic, ingredientIds) {
     automatic: Boolean(automatic),
     ingredientIds: consumedIngredients,
     elapsed: 0,
-    duration: RECIPE_RESEARCH_DURATION * (1 - knowhowSkillLevel("research_speed") * .15),
+    duration: RECIPE_RESEARCH_DURATION * (1 - knowhowResearchReduction()),
   };
   saveState();
   updateHud();
@@ -2427,7 +2586,9 @@ function grantGuestIngredient(guest) {
     itemRoll -= Number(item.weight || 0);
     if (itemRoll <= 0) { selectedItem = item; break; }
   }
-  const dropCount = Math.max(1, Number(selectedItem.count || 1));
+  const bonusIngredient = knowhowBonusIngredientChance() > 0 && random() < knowhowBonusIngredientChance();
+  const dropCount = Math.max(1, Number(selectedItem.count || 1)) + (bonusIngredient ? 1 : 0);
+  if (bonusIngredient) state.metrics.bonusIngredientDrops += 1;
   const droppedItems = [{ ...selectedItem, count: dropCount }];
   const table = tables.installs.find((row) => row.id === guest.tableId);
   const seat = table ? seatPositions(table).find((item) => item.id === guest.seatId) : null;
@@ -2453,7 +2614,7 @@ function grantGuestIngredient(guest) {
 
 function currentIngredientDropChance() {
   const multiplier = state.specialVisitor?.dropBoostRemaining > 0 ? 2 : 1;
-  const baseChance = GUEST_INGREDIENT_DROP_CHANCE + knowhowSkillLevel("drop_bonus") * .03;
+  const baseChance = GUEST_INGREDIENT_DROP_CHANCE + knowhowDropBonus();
   return Math.min(1, baseChance * multiplier);
 }
 
@@ -2500,8 +2661,8 @@ function resolveMeal(guest, forcedSatisfied = false) {
   grantGuestIngredient(guest);
 
   const hasTipbox = installedRows(3).length > 0;
-  if (hasTipbox && (mood === "satisfied" || random() < Number(common.tipProbability || 0))) {
-    state.tipbox += Math.max(1, Math.round(mealPrice * .1));
+  if (hasTipbox && mood !== "disappointed") {
+    state.tipbox = Math.min(state.tipboxCapacity, state.tipbox + Math.max(1, Math.round(mealPrice * .1)));
   }
 
   guest.mood = mood;
@@ -2611,13 +2772,52 @@ function collectPayment(payment) {
 }
 
 function collectTipbox() {
-  if (state.tipbox <= 0) return;
+  if (state.tipbox <= 0) return false;
   const amount = state.tipbox;
   state.tipbox = 0;
   state.resources.acorns += amount;
   dispatchAchievement(7);
+  showToast(`팁 회수 +${formatNumber(amount)}`, 2.5);
   saveState();
   updateHud();
+  updateTipboxPanel();
+  render();
+  return true;
+}
+
+function updateTipboxPanel() {
+  if (!dom.tipboxPanel || dom.tipboxPanel.hidden) return;
+  const capacity = Math.max(TIPBOX_INITIAL_CAPACITY, Number(state.tipboxCapacity || TIPBOX_INITIAL_CAPACITY));
+  dom.tipboxAmount.textContent = formatNumber(state.tipbox);
+  dom.tipboxCapacity.textContent = formatNumber(capacity);
+  dom.tipboxGaugeFill.style.width = `${Math.min(100, state.tipbox / capacity * 100)}%`;
+  dom.tipboxCollect.disabled = state.tipbox <= 0;
+  dom.tipboxCollect.textContent = state.tipbox > 0 ? `팁 ${formatNumber(state.tipbox)} 회수하기` : "모인 팁이 없어요";
+  dom.tipboxExpand.disabled = state.resources.gems < TIPBOX_EXPANSION_GEM_COST;
+}
+
+function openTipboxPanel() {
+  dom.tipboxPanel.hidden = false;
+  updateTipboxPanel();
+}
+
+function closeTipboxPanel() {
+  dom.tipboxPanel.hidden = true;
+}
+
+function expandTipboxCapacity() {
+  if (state.resources.gems < TIPBOX_EXPANSION_GEM_COST) {
+    showToast(`보석 ${TIPBOX_EXPANSION_GEM_COST}개가 필요해요.`);
+    return false;
+  }
+  state.resources.gems -= TIPBOX_EXPANSION_GEM_COST;
+  state.tipboxCapacity = Math.max(TIPBOX_INITIAL_CAPACITY, Number(state.tipboxCapacity || 0)) + TIPBOX_EXPANSION_AMOUNT;
+  state.metrics.tipboxExpansions += 1;
+  showToast(`팁박스 용량 ${formatNumber(state.tipboxCapacity)}으로 확장!`, 2.6);
+  saveState();
+  updateHud();
+  updateTipboxPanel();
+  return true;
 }
 
 function collectBuffetCashbox() {
@@ -2744,35 +2944,47 @@ function updateCooking(dt) {
 
 function updateKnowhowAutomation(dt) {
   const automation = state.knowhow.automation;
-  const collectLevel = knowhowSkillLevel("auto_collect");
-  if (collectLevel > 0) {
-    const interval = [0, 5, 3, 1][collectLevel];
-    automation.collectElapsed = Math.min(interval, automation.collectElapsed + dt);
-    if (automation.collectElapsed >= interval) {
-      let collected = false;
-      const drop = state.ingredientDrops[0];
-      if (drop) {
-        const before = state.ingredientDrops.length;
-        collectIngredientDrop(drop);
-        collected = state.ingredientDrops.length < before;
-      } else if (state.payments[0]) {
-        collectPayment(state.payments[0]);
-        collected = true;
-      } else if (state.tipbox > 0) {
-        collectTipbox();
-        collected = true;
-      }
-      if (collected) {
-        automation.collectElapsed = 0;
+  const paymentInterval = knowhowAutoPaymentInterval();
+  if (paymentInterval) {
+    automation.paymentElapsed = Math.min(paymentInterval, automation.paymentElapsed + dt);
+    if (automation.paymentElapsed >= paymentInterval && state.payments[0]) {
+      collectPayment(state.payments[0]);
+      automation.paymentElapsed = 0;
+      state.metrics.autoCollected += 1;
+      state.metrics.autoPayments += 1;
+      saveState();
+    }
+  }
+
+  const ingredientInterval = knowhowAutoIngredientInterval();
+  if (ingredientInterval) {
+    automation.ingredientElapsed = Math.min(ingredientInterval, automation.ingredientElapsed + dt);
+    if (automation.ingredientElapsed >= ingredientInterval && state.ingredientDrops[0]) {
+      const before = state.ingredientDrops.length;
+      collectIngredientDrop(state.ingredientDrops[0]);
+      if (state.ingredientDrops.length < before) {
+        automation.ingredientElapsed = 0;
         state.metrics.autoCollected += 1;
+        state.metrics.autoIngredients += 1;
         saveState();
       }
     }
   }
 
-  const orderLevel = knowhowSkillLevel("auto_order");
-  if (orderLevel > 0) {
-    const delay = [0, 4, 2.5, 1][orderLevel];
+  const buffetInterval = knowhowAutoBuffetInterval();
+  if (buffetInterval) {
+    automation.buffetElapsed = Math.min(buffetInterval, automation.buffetElapsed + dt);
+    if (automation.buffetElapsed >= buffetInterval && state.buffet.cashbox > 0) {
+      collectBuffetCashbox();
+      automation.buffetElapsed = 0;
+      state.metrics.autoBuffetClaims += 1;
+      saveState();
+    }
+  }
+
+  const orderDelay = knowhowAutoOrderDelay();
+  if (orderDelay) {
+    const delay = orderDelay;
     automation.orderElapsed = Math.min(delay, automation.orderElapsed + dt);
     const waiting = state.guests.find((guest) => guest.state === "awaiting_order" && guest.stateTime >= delay);
     if (waiting && automation.orderElapsed >= delay) {
@@ -2782,9 +2994,21 @@ function updateKnowhowAutomation(dt) {
     }
   }
 
-  const promotionLevel = knowhowSkillLevel("auto_promotion");
-  if (promotionLevel > 0 && coreReady()) {
-    const interval = [0, 30, 15][promotionLevel];
+  const calmDelay = knowhowAutoCalmDelay();
+  if (calmDelay) {
+    automation.calmElapsed = Math.min(calmDelay, automation.calmElapsed + dt);
+    const disappointed = state.guests.find((guest) => guest.state === "disappointed" && guest.stateTime >= calmDelay);
+    if (disappointed && automation.calmElapsed >= calmDelay) {
+      state.metrics.autoCalms += 1;
+      calmGuest(disappointed);
+      automation.calmElapsed = 0;
+      saveState();
+    }
+  }
+
+  const promotionInterval = knowhowAutoPromotionInterval();
+  if (promotionInterval && coreReady()) {
+    const interval = promotionInterval;
     automation.promotionElapsed += dt;
     if (automation.promotionElapsed >= interval) {
       automation.promotionElapsed %= interval;
@@ -2850,8 +3074,8 @@ function expandIngredientStorage() {
     return false;
   }
   state.resources.gems -= INGREDIENT_STORAGE_EXPANSION_GEM_COST;
-  state.crafting.storageCapacity = storage.capacity + INGREDIENT_STORAGE_EXPANSION_AMOUNT;
-  showToast(`재료 보관함 ${state.crafting.storageCapacity}칸으로 확장!`);
+  state.crafting.storageCapacity = storage.baseCapacity + INGREDIENT_STORAGE_EXPANSION_AMOUNT;
+  showToast(`재료 보관함 ${ingredientStorageStatus().capacity}칸으로 확장!`);
   saveState();
   updateHud();
   renderMenu();
@@ -3340,6 +3564,7 @@ function updateHud() {
   dom.collectionDot.hidden = !Object.values(state.collections).some((dict) => Object.values(dict).some((entry) => entry.isNew));
   dom.recipeNavLabel.textContent = "레시피";
   dom.themeNavLabel.textContent = "테마";
+  updateTipboxPanel();
   updateTutorialDialogue();
 }
 
@@ -3364,7 +3589,7 @@ function handleBuffetTap(point) {
 }
 
 function handleCanvasTap(event) {
-  if (!dom.installPanel.hidden || !dom.specialVisitorPanel.hidden || !dom.offlineRewardPanel.hidden) return;
+  if (!dom.installPanel.hidden || !dom.specialVisitorPanel.hidden || !dom.offlineRewardPanel.hidden || !dom.tipboxPanel.hidden) return;
   const point = pointerPosition(event);
   if (state.ui.area === "buffet") return handleBuffetTap(point);
 
@@ -3378,7 +3603,7 @@ function handleCanvasTap(event) {
   if (payment) return collectPayment(payment);
 
   const tipbox = installedRows(3)[0];
-  if (tipbox && state.tipbox > 0 && insideBox(point, facilityPlacement(tipbox), 16)) return collectTipbox();
+  if (tipbox && insideBox(point, facilityPlacement(tipbox), 16)) return openTipboxPanel();
 
   const unhappy = state.guests.find((guest) => guest.state === "disappointed" && Math.hypot(point.x - guest.x, point.y - (guest.y - 40)) <= 58);
   if (unhappy) return calmGuest(unhappy);
@@ -3432,6 +3657,7 @@ function switchWorldArea(area) {
   state.ui.area = nextArea;
   closeSpecialVisitorPanel(false);
   closeSpecialPromotionPanel();
+  closeTipboxPanel();
   toggleDebugPanel(false);
   dom.installPanel.hidden = true;
   closeMenu();
@@ -4241,14 +4467,15 @@ function renderKnowhowMenu() {
   const connections = KNOWHOW_SKILLS.flatMap((skill) => skill.prerequisites.map((requirement) => {
     const from = knowhowSkill(requirement.id);
     const active = knowhowSkillLevel(requirement.id) >= requirement.level;
-    return `<line x1="${from.x}" y1="${from.y}" x2="${skill.x}" y2="${skill.y}" class="${active ? "is-active" : ""}" />`;
+    const middleY = Math.round(from.y + (skill.y - from.y) * .48);
+    return `<path d="M ${from.x} ${from.y} V ${middleY} H ${skill.x} V ${skill.y}" class="${active ? "is-active" : ""}" />`;
   })).join("");
   const nodes = KNOWHOW_SKILLS.map((skill) => {
     const level = knowhowSkillLevel(skill.id);
     const available = knowhowPrerequisitesMet(skill);
     const maxed = level >= skill.maxLevel;
     const status = level > 0 ? maxed ? "is-maxed" : "is-owned" : available ? "is-available" : "is-locked";
-    return `<button type="button" class="knowhow-node ${status} ${selected.id === skill.id ? "is-selected" : ""}" style="--node-x:${skill.x}px;--node-y:${skill.y}px" data-action="knowhow-select" data-skill-id="${skill.id}"><span>${skill.icon}</span><strong>${skill.name}</strong><small>${skill.id === "restaurant_basics" ? "ROOT" : `Lv.${level}/${skill.maxLevel}`}</small></button>`;
+    return `<button type="button" class="knowhow-node ${status} ${selected.id === skill.id ? "is-selected" : ""}" style="--node-x:${skill.x}px;--node-y:${skill.y}px" data-action="knowhow-select" data-skill-id="${skill.id}"><span>${skill.icon}</span><strong>${skill.name}</strong><small>${skill.id === "restaurant_basics" ? "ROOT" : level ? "습득" : `${skill.costs[0]}P`}</small></button>`;
   }).join("");
   let actionLabel = `포인트 ${selectedCost}개 사용`;
   let actionDisabled = false;
@@ -4259,17 +4486,20 @@ function renderKnowhowMenu() {
   dom.menuKicker.textContent = "요리할수록 쌓이는 경험";
   dom.menuTitle.textContent = "식당 노하우";
   dom.menuTabs.innerHTML = "";
+  const xpRequirement = knowhowXpRequirement();
+  const xpPercent = Math.min(100, state.knowhow.xp / xpRequirement * 100);
   dom.menuContent.innerHTML = `<section class="knowhow-progress-card">
       <img src="assets/ui/chick/icon_chick_chef.png" alt="" />
-      <div><span>보유 노하우</span><strong>${state.knowhow.points} ${pointWord}</strong><div class="knowhow-xp-bar"><i style="width:${state.knowhow.xp}%"></i></div><small>경험치 ${state.knowhow.xp}/${KNOWHOW_XP_PER_POINT} · 연구 +${KNOWHOW_RESEARCH_XP} · 손님 음식 +${KNOWHOW_SERVICE_XP}</small></div>
+      <div><span>보유 노하우</span><strong>${state.knowhow.points} ${pointWord}</strong><div class="knowhow-xp-bar"><i style="width:${xpPercent}%"></i></div><small>경험치 ${state.knowhow.xp}/${xpRequirement} · 다음 포인트는 +${KNOWHOW_XP_GROWTH} 필요</small><small>연구 +${KNOWHOW_RESEARCH_XP} · 손님 음식 +${KNOWHOW_SERVICE_XP}</small></div>
     </section>
     <p class="knowhow-guide">노하우를 눌러 효과를 확인하세요. 화면은 드래그로 움직일 수 있어요.</p>
     <div class="knowhow-map-viewport"><div class="knowhow-map">
-      <svg viewBox="0 0 680 650" aria-hidden="true">${connections}</svg>${nodes}
+      <svg viewBox="0 0 480 2070" aria-hidden="true">${connections}</svg>
+      <span class="knowhow-branch-label" style="--label-x:80px">자동 운영</span><span class="knowhow-branch-label" style="--label-x:240px">재료 수급</span><span class="knowhow-branch-label" style="--label-x:400px">요리 성장</span>${nodes}
     </div></div>
     <section class="knowhow-detail ${selectedAvailable ? "" : "is-locked"}">
-      <span class="knowhow-detail-icon">${selected.icon}</span><div class="knowhow-detail-copy"><small>${selected.id === "restaurant_basics" ? "모든 노하우의 시작" : knowhowPrerequisiteText(selected)}</small><h3>${selected.name} <b>Lv.${selectedLevel}/${selected.maxLevel}</b></h3>
-      <p>${selected.effect(selectedLevel)}</p>${!selectedMaxed && selected.id !== "restaurant_basics" ? `<em>다음 단계 · ${selected.effect(selectedLevel + 1)}</em>` : ""}</div>
+      <span class="knowhow-detail-icon">${selected.icon}</span><div class="knowhow-detail-copy"><small>${selected.id === "restaurant_basics" ? "모든 노하우의 시작" : `${knowhowPrerequisiteText(selected)} 다음`}</small><h3>${selected.name} <b>${selectedMaxed ? "습득 완료" : "미습득"}</b></h3>
+      <p>${selected.effect()}</p>${!selectedMaxed && selected.id !== "restaurant_basics" ? `<em>포인트를 사용하면 이 효과가 영구 적용돼요.</em>` : ""}</div>
       <button type="button" data-action="knowhow-upgrade" data-skill-id="${selected.id}" ${actionDisabled ? "disabled" : ""}>${actionLabel}</button>
     </section>`;
   const nextViewport = dom.menuContent.querySelector(".knowhow-map-viewport");
@@ -4315,6 +4545,7 @@ function resetGame() {
   dom.guestToast.hidden = true;
   dom.offlineRewardPanel.hidden = true;
   dom.specialPromoPanel.hidden = true;
+  closeTipboxPanel();
   closeSpecialVisitorPanel(false);
   toggleDebugPanel(false);
   dismissRecipeReveal();
@@ -4469,7 +4700,8 @@ function renderGameToText() {
     knowhow: {
       name: "식당 노하우",
       xp: state.knowhow.xp,
-      xpPerPoint: KNOWHOW_XP_PER_POINT,
+      xpPerPoint: knowhowXpRequirement(),
+      xpCurve: { base: KNOWHOW_XP_BASE, growthPerEarnedPoint: KNOWHOW_XP_GROWTH, earnedPoints: state.knowhow.earnedPoints },
       points: state.knowhow.points,
       totalXp: state.knowhow.totalXp,
       xpRewards: { recipeResearchSuccessOrFailure: KNOWHOW_RESEARCH_XP, guestMealCooking: KNOWHOW_SERVICE_XP },
@@ -4477,15 +4709,23 @@ function renderGameToText() {
       graphPresentation: "connected-mind-map",
       effects: {
         ingredientDropChance: currentIngredientDropChance(),
-        cookingSpeedReduction: knowhowSkillLevel("cooking_speed") * .05,
-        researchSpeedReduction: knowhowSkillLevel("research_speed") * .15,
+        bonusIngredientChance: knowhowBonusIngredientChance(),
+        cookingSpeedReduction: knowhowCookingReduction(),
+        researchSpeedReduction: knowhowResearchReduction(),
+        storageBonus: knowhowStorageBonus(),
+        merchantDiscount: knowhowMerchantDiscount(),
+        buffetIncomeMultiplier: knowhowBuffetIncomeMultiplier(),
         buffetOfflineCapSeconds: buffetOfflineCapSeconds(),
         contestPrizeMultiplier: contestPrizeMultiplier(),
       },
       automation: {
-        collectInterval: [null, 5, 3, 1][knowhowSkillLevel("auto_collect")] ?? null,
-        orderDelay: [null, 4, 2.5, 1][knowhowSkillLevel("auto_order")] ?? null,
-        promotionInterval: [null, 30, 15][knowhowSkillLevel("auto_promotion")] ?? null,
+        paymentInterval: knowhowAutoPaymentInterval(),
+        ingredientInterval: knowhowAutoIngredientInterval(),
+        buffetInterval: knowhowAutoBuffetInterval(),
+        orderDelay: knowhowAutoOrderDelay(),
+        calmDelay: knowhowAutoCalmDelay(),
+        promotionInterval: knowhowAutoPromotionInterval(),
+        tipboxExcluded: true,
       },
       nodes: KNOWHOW_SKILLS.map((skill) => ({
         id: skill.id,
@@ -4653,7 +4893,16 @@ function renderGameToText() {
       y: Math.round(drop.y),
     })),
     tipbox: state.tipbox,
-    tipRule: { basis: "final-meal-price", rate: .1 },
+    tipboxSystem: {
+      amount: state.tipbox,
+      capacity: state.tipboxCapacity,
+      initialCapacity: TIPBOX_INITIAL_CAPACITY,
+      expansionAmount: TIPBOX_EXPANSION_AMOUNT,
+      expansionGemCost: TIPBOX_EXPANSION_GEM_COST,
+      panelVisible: !dom.tipboxPanel.hidden,
+      autoCollectExcluded: true,
+    },
+    tipRule: { basis: "final-meal-price", rate: .1, eligibleGuests: "all-except-disappointed", cappedByTipboxCapacity: true },
     metrics: state.metrics,
     currentScreen: state.ui.screen,
     recipes: {
@@ -4745,7 +4994,7 @@ function renderGameToText() {
         minimumSeconds: COOKING_TIME_MIN_SECONDS,
         maximumSeconds: COOKING_TIME_MAX_SECONDS,
         stepSeconds: COOKING_TIME_STEP_SECONDS,
-        knowhowReduction: knowhowSkillLevel("cooking_speed") * .05,
+        knowhowReduction: knowhowCookingReduction(),
       },
       recipeLevelPriceBonus: RECIPE_LEVEL_PRICE_BONUS,
       craftable: RECIPE_PROGRESSION.filter((route) => canCraftRecipe(route.recipeId)).map((route) => route.recipeId),
@@ -4806,10 +5055,11 @@ function renderGameToText() {
       ingredientDropRule: {
         unlocked: isIngredientDropUnlocked(),
         unlockFacility: "냉장고",
-        overallChance: GUEST_INGREDIENT_DROP_CHANCE + knowhowSkillLevel("drop_bonus") * .03,
+        overallChance: GUEST_INGREDIENT_DROP_CHANCE + knowhowDropBonus(),
         currentChance: currentIngredientDropChance(),
         activeMultiplier: state.specialVisitor.dropBoostRemaining > 0 ? 2 : 1,
-        knowhowBonusPercentagePoints: knowhowSkillLevel("drop_bonus") * 3,
+        knowhowBonusPercentagePoints: Math.round(knowhowDropBonus() * 100),
+        bonusIngredientChance: knowhowBonusIngredientChance(),
         ingredientTypesOnSuccess: 1,
         slotChances: { ...INGREDIENT_SLOT_WEIGHTS },
         grades: GUEST_GRADES.map((grade) => ({
@@ -4897,6 +5147,9 @@ dom.areaPrevButton.addEventListener("click", () => switchWorldArea("restaurant")
 dom.areaNextButton.addEventListener("click", () => switchWorldArea("buffet"));
 dom.contestButton.addEventListener("click", () => openMenu("contest"));
 dom.offlineRewardClaim.addEventListener("click", claimOfflineBuffetReward);
+dom.tipboxClose.addEventListener("click", closeTipboxPanel);
+dom.tipboxCollect.addEventListener("click", collectTipbox);
+dom.tipboxExpand.addEventListener("click", expandTipboxCapacity);
 dom.promoButton.addEventListener("click", promote);
 dom.specialPromoButton.addEventListener("click", openSpecialPromotionPanel);
 dom.specialPromoClose.addEventListener("click", closeSpecialPromotionPanel);
