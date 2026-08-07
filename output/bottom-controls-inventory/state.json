@@ -445,7 +445,7 @@
       },
       {
         "id": "auto_collect_1",
-        "name": "도토리 정산",
+        "name": "도토리 정산 I",
         "level": 0,
         "maxLevel": 1,
         "cost": 1,
@@ -461,8 +461,8 @@
         "y": 170
       },
       {
-        "id": "auto_collect_2",
-        "name": "재료 정리",
+        "id": "auto_payment_2",
+        "name": "도토리 정산 II",
         "level": 0,
         "maxLevel": 1,
         "cost": 1,
@@ -473,16 +473,50 @@
             "level": 1
           }
         ],
-        "effect": "30초마다 필드 재료 1개 자동 획득",
+        "effect": "자동 도토리 정산 20초",
         "x": 80,
         "y": 285
       },
       {
-        "id": "auto_collect_3",
-        "name": "뷔페 정산",
+        "id": "auto_payment_3",
+        "name": "도토리 정산 III",
         "level": 0,
         "maxLevel": 1,
         "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_payment_2",
+            "level": 1
+          }
+        ],
+        "effect": "자동 도토리 정산 10초",
+        "x": 80,
+        "y": 400
+      },
+      {
+        "id": "auto_collect_2",
+        "name": "재료 정리 I",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_payment_3",
+            "level": 1
+          }
+        ],
+        "effect": "30초마다 필드 재료 1개 자동 획득",
+        "x": 80,
+        "y": 515
+      },
+      {
+        "id": "auto_ingredient_2",
+        "name": "재료 정리 II",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
         "prerequisitesMet": false,
         "prerequisites": [
           {
@@ -490,13 +524,47 @@
             "level": 1
           }
         ],
-        "effect": "60초마다 뷔페 계산대 자동 정산",
+        "effect": "자동 재료 획득 20초",
         "x": 80,
-        "y": 400
+        "y": 630
       },
       {
-        "id": "auto_order_1",
-        "name": "주문 메모",
+        "id": "auto_ingredient_3",
+        "name": "재료 정리 III",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_ingredient_2",
+            "level": 1
+          }
+        ],
+        "effect": "자동 재료 획득 10초",
+        "x": 80,
+        "y": 745
+      },
+      {
+        "id": "auto_collect_3",
+        "name": "뷔페 정산 I",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_ingredient_3",
+            "level": 1
+          }
+        ],
+        "effect": "60초마다 뷔페 계산대 자동 정산",
+        "x": 80,
+        "y": 860
+      },
+      {
+        "id": "auto_buffet_2",
+        "name": "뷔페 정산 II",
         "level": 0,
         "maxLevel": 1,
         "cost": 1,
@@ -507,9 +575,43 @@
             "level": 1
           }
         ],
+        "effect": "자동 뷔페 정산 40초",
+        "x": 80,
+        "y": 975
+      },
+      {
+        "id": "auto_buffet_3",
+        "name": "뷔페 정산 III",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_buffet_2",
+            "level": 1
+          }
+        ],
+        "effect": "자동 뷔페 정산 20초",
+        "x": 80,
+        "y": 1090
+      },
+      {
+        "id": "auto_order_1",
+        "name": "주문 메모",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 1,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_buffet_3",
+            "level": 1
+          }
+        ],
         "effect": "5초 기다린 주문을 자동 접수",
         "x": 80,
-        "y": 515
+        "y": 1205
       },
       {
         "id": "auto_order_2",
@@ -526,7 +628,24 @@
         ],
         "effect": "자동 주문 대기 2초",
         "x": 80,
-        "y": 630
+        "y": 1320
+      },
+      {
+        "id": "auto_order_3",
+        "name": "즉석 주문",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_order_2",
+            "level": 1
+          }
+        ],
+        "effect": "자동 주문 대기 1초",
+        "x": 80,
+        "y": 1435
       },
       {
         "id": "auto_calm_1",
@@ -537,13 +656,13 @@
         "prerequisitesMet": false,
         "prerequisites": [
           {
-            "id": "auto_order_2",
+            "id": "auto_order_3",
             "level": 1
           }
         ],
         "effect": "실망한 손님을 5초 후 자동으로 달래기",
         "x": 80,
-        "y": 745
+        "y": 1550
       },
       {
         "id": "auto_calm_2",
@@ -560,11 +679,11 @@
         ],
         "effect": "자동 달래기 대기 2초",
         "x": 80,
-        "y": 860
+        "y": 1665
       },
       {
-        "id": "auto_promotion_1",
-        "name": "꾸준한 홍보",
+        "id": "auto_calm_3",
+        "name": "마음 읽기",
         "level": 0,
         "maxLevel": 1,
         "cost": 2,
@@ -575,9 +694,60 @@
             "level": 1
           }
         ],
+        "effect": "자동 달래기 대기 1초",
+        "x": 80,
+        "y": 1780
+      },
+      {
+        "id": "auto_promotion_1",
+        "name": "꾸준한 홍보 I",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_calm_3",
+            "level": 1
+          }
+        ],
         "effect": "30초마다 손님 1명 자동 홍보",
         "x": 80,
-        "y": 975
+        "y": 1895
+      },
+      {
+        "id": "auto_promotion_2",
+        "name": "꾸준한 홍보 II",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 2,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_promotion_1",
+            "level": 1
+          }
+        ],
+        "effect": "자동 홍보 20초",
+        "x": 80,
+        "y": 2010
+      },
+      {
+        "id": "auto_promotion_3",
+        "name": "소문난 식당",
+        "level": 0,
+        "maxLevel": 1,
+        "cost": 3,
+        "prerequisitesMet": false,
+        "prerequisites": [
+          {
+            "id": "auto_promotion_2",
+            "level": 1
+          }
+        ],
+        "effect": "자동 홍보 10초",
+        "x": 80,
+        "y": 2125
       },
       {
         "id": "drop_bonus_1",
@@ -1315,7 +1485,8 @@
     "expansionAmount": 500,
     "expansionGemCost": 10,
     "panelVisible": false,
-    "autoCollectExcluded": true
+    "autoCollectExcluded": true,
+    "fieldBadge": null
   },
   "tipRule": {
     "basis": "final-meal-price",
@@ -3043,7 +3214,7 @@
   },
   "specialVisitor": {
     "interval": 120,
-    "nextIn": 119.33,
+    "nextIn": 119.31,
     "lastType": null,
     "dropBoostRemaining": 0,
     "dropMultiplier": 1,

@@ -170,14 +170,24 @@ const KNOWHOW_SERVICE_XP = 1;
 const KNOWHOW_SKILLS = Object.freeze([
   { id: "restaurant_basics", name: "식당 노하우", icon: "📒", maxLevel: 1, costs: [], x: 240, y: 52, prerequisites: [], effect: () => "요리하며 식당 운영 경험을 쌓아요" },
 
-  { id: "auto_collect_1", name: "도토리 정산", icon: "🪙", maxLevel: 1, costs: [1], x: 80, y: 170, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: () => "30초마다 테이블 도토리 1개 자동 회수" },
-  { id: "auto_collect_2", name: "재료 정리", icon: "🧺", maxLevel: 1, costs: [1], x: 80, y: 285, prerequisites: [{ id: "auto_collect_1", level: 1 }], effect: () => "30초마다 필드 재료 1개 자동 획득" },
-  { id: "auto_collect_3", name: "뷔페 정산", icon: "🍽️", maxLevel: 1, costs: [2], x: 80, y: 400, prerequisites: [{ id: "auto_collect_2", level: 1 }], effect: () => "60초마다 뷔페 계산대 자동 정산" },
-  { id: "auto_order_1", name: "주문 메모", icon: "📝", maxLevel: 1, costs: [1], x: 80, y: 515, prerequisites: [{ id: "auto_collect_3", level: 1 }], effect: () => "5초 기다린 주문을 자동 접수" },
-  { id: "auto_order_2", name: "주문 감각", icon: "🙋", maxLevel: 1, costs: [2], x: 80, y: 630, prerequisites: [{ id: "auto_order_1", level: 1 }], effect: () => "자동 주문 대기 2초" },
-  { id: "auto_calm_1", name: "기분 살피기", icon: "💬", maxLevel: 1, costs: [1], x: 80, y: 745, prerequisites: [{ id: "auto_order_2", level: 1 }], effect: () => "실망한 손님을 5초 후 자동으로 달래기" },
-  { id: "auto_calm_2", name: "빠른 위로", icon: "💗", maxLevel: 1, costs: [2], x: 80, y: 860, prerequisites: [{ id: "auto_calm_1", level: 1 }], effect: () => "자동 달래기 대기 2초" },
-  { id: "auto_promotion_1", name: "꾸준한 홍보", icon: "📣", maxLevel: 1, costs: [2], x: 80, y: 975, prerequisites: [{ id: "auto_calm_2", level: 1 }], effect: () => "30초마다 손님 1명 자동 홍보" },
+  { id: "auto_collect_1", name: "도토리 정산 I", icon: "🪙", maxLevel: 1, costs: [1], x: 80, y: 170, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: () => "30초마다 테이블 도토리 1개 자동 회수" },
+  { id: "auto_payment_2", name: "도토리 정산 II", icon: "🪙", maxLevel: 1, costs: [1], x: 80, y: 285, prerequisites: [{ id: "auto_collect_1", level: 1 }], effect: () => "자동 도토리 정산 20초" },
+  { id: "auto_payment_3", name: "도토리 정산 III", icon: "💰", maxLevel: 1, costs: [2], x: 80, y: 400, prerequisites: [{ id: "auto_payment_2", level: 1 }], effect: () => "자동 도토리 정산 10초" },
+  { id: "auto_collect_2", name: "재료 정리 I", icon: "🧺", maxLevel: 1, costs: [1], x: 80, y: 515, prerequisites: [{ id: "auto_payment_3", level: 1 }], effect: () => "30초마다 필드 재료 1개 자동 획득" },
+  { id: "auto_ingredient_2", name: "재료 정리 II", icon: "🧺", maxLevel: 1, costs: [1], x: 80, y: 630, prerequisites: [{ id: "auto_collect_2", level: 1 }], effect: () => "자동 재료 획득 20초" },
+  { id: "auto_ingredient_3", name: "재료 정리 III", icon: "✨", maxLevel: 1, costs: [2], x: 80, y: 745, prerequisites: [{ id: "auto_ingredient_2", level: 1 }], effect: () => "자동 재료 획득 10초" },
+  { id: "auto_collect_3", name: "뷔페 정산 I", icon: "🍽️", maxLevel: 1, costs: [2], x: 80, y: 860, prerequisites: [{ id: "auto_ingredient_3", level: 1 }], effect: () => "60초마다 뷔페 계산대 자동 정산" },
+  { id: "auto_buffet_2", name: "뷔페 정산 II", icon: "🍽️", maxLevel: 1, costs: [1], x: 80, y: 975, prerequisites: [{ id: "auto_collect_3", level: 1 }], effect: () => "자동 뷔페 정산 40초" },
+  { id: "auto_buffet_3", name: "뷔페 정산 III", icon: "🥂", maxLevel: 1, costs: [2], x: 80, y: 1090, prerequisites: [{ id: "auto_buffet_2", level: 1 }], effect: () => "자동 뷔페 정산 20초" },
+  { id: "auto_order_1", name: "주문 메모", icon: "📝", maxLevel: 1, costs: [1], x: 80, y: 1205, prerequisites: [{ id: "auto_buffet_3", level: 1 }], effect: () => "5초 기다린 주문을 자동 접수" },
+  { id: "auto_order_2", name: "주문 감각", icon: "🙋", maxLevel: 1, costs: [2], x: 80, y: 1320, prerequisites: [{ id: "auto_order_1", level: 1 }], effect: () => "자동 주문 대기 2초" },
+  { id: "auto_order_3", name: "즉석 주문", icon: "⚡", maxLevel: 1, costs: [2], x: 80, y: 1435, prerequisites: [{ id: "auto_order_2", level: 1 }], effect: () => "자동 주문 대기 1초" },
+  { id: "auto_calm_1", name: "기분 살피기", icon: "💬", maxLevel: 1, costs: [1], x: 80, y: 1550, prerequisites: [{ id: "auto_order_3", level: 1 }], effect: () => "실망한 손님을 5초 후 자동으로 달래기" },
+  { id: "auto_calm_2", name: "빠른 위로", icon: "💗", maxLevel: 1, costs: [2], x: 80, y: 1665, prerequisites: [{ id: "auto_calm_1", level: 1 }], effect: () => "자동 달래기 대기 2초" },
+  { id: "auto_calm_3", name: "마음 읽기", icon: "💞", maxLevel: 1, costs: [2], x: 80, y: 1780, prerequisites: [{ id: "auto_calm_2", level: 1 }], effect: () => "자동 달래기 대기 1초" },
+  { id: "auto_promotion_1", name: "꾸준한 홍보 I", icon: "📣", maxLevel: 1, costs: [2], x: 80, y: 1895, prerequisites: [{ id: "auto_calm_3", level: 1 }], effect: () => "30초마다 손님 1명 자동 홍보" },
+  { id: "auto_promotion_2", name: "꾸준한 홍보 II", icon: "📣", maxLevel: 1, costs: [2], x: 80, y: 2010, prerequisites: [{ id: "auto_promotion_1", level: 1 }], effect: () => "자동 홍보 20초" },
+  { id: "auto_promotion_3", name: "소문난 식당", icon: "📢", maxLevel: 1, costs: [3], x: 80, y: 2125, prerequisites: [{ id: "auto_promotion_2", level: 1 }], effect: () => "자동 홍보 10초" },
 
   { id: "drop_bonus_1", name: "반가운 인사", icon: "🐣", maxLevel: 1, costs: [1], x: 240, y: 170, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: () => "재료 드랍 확률 +2%p" },
   { id: "drop_bonus_2", name: "익숙한 얼굴", icon: "🤝", maxLevel: 1, costs: [1], x: 240, y: 285, prerequisites: [{ id: "drop_bonus_1", level: 1 }], effect: () => "재료 드랍 확률 +2%p" },
@@ -332,7 +342,7 @@ function initialAcorns() {
 
 function createInitialState() {
   return {
-    version: 19,
+    version: 20,
     clock: 0,
     rng: 20260714,
     resources: {
@@ -435,7 +445,7 @@ function loadState() {
     const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!parsed) return null;
     const defaults = createInitialState();
-    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19].includes(parsed.version)) return null;
+    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].includes(parsed.version)) return null;
     const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
       typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
     const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
@@ -550,7 +560,7 @@ function loadState() {
     return {
       ...defaults,
       ...restaurantSave,
-      version: 19,
+      version: 20,
       resources: { ...defaults.resources, ...parsed.resources },
       tipbox: Math.max(0, Math.floor(Number(parsed.tipbox || 0))),
       tipboxCapacity: Math.max(TIPBOX_INITIAL_CAPACITY, Math.floor(Number(parsed.tipboxCapacity || 0)), Math.ceil(Math.max(0, Number(parsed.tipbox || 0)) / TIPBOX_EXPANSION_AMOUNT) * TIPBOX_EXPANSION_AMOUNT),
@@ -759,28 +769,38 @@ function knowhowOwned(id, source = state?.knowhow) {
 }
 
 function knowhowAutoPaymentInterval(source = state?.knowhow) {
+  if (knowhowOwned("auto_payment_3", source)) return 10;
+  if (knowhowOwned("auto_payment_2", source)) return 20;
   return knowhowOwned("auto_collect_1", source) ? 30 : null;
 }
 
 function knowhowAutoIngredientInterval(source = state?.knowhow) {
+  if (knowhowOwned("auto_ingredient_3", source)) return 10;
+  if (knowhowOwned("auto_ingredient_2", source)) return 20;
   return knowhowOwned("auto_collect_2", source) ? 30 : null;
 }
 
 function knowhowAutoBuffetInterval(source = state?.knowhow) {
+  if (knowhowOwned("auto_buffet_3", source)) return 20;
+  if (knowhowOwned("auto_buffet_2", source)) return 40;
   return knowhowOwned("auto_collect_3", source) ? 60 : null;
 }
 
 function knowhowAutoOrderDelay(source = state?.knowhow) {
+  if (knowhowOwned("auto_order_3", source)) return 1;
   if (knowhowOwned("auto_order_2", source)) return 2;
   if (knowhowOwned("auto_order_1", source)) return 5;
   return null;
 }
 
 function knowhowAutoPromotionInterval(source = state?.knowhow) {
+  if (knowhowOwned("auto_promotion_3", source)) return 10;
+  if (knowhowOwned("auto_promotion_2", source)) return 20;
   return knowhowOwned("auto_promotion_1", source) ? 30 : null;
 }
 
 function knowhowAutoCalmDelay(source = state?.knowhow) {
+  if (knowhowOwned("auto_calm_3", source)) return 1;
   if (knowhowOwned("auto_calm_2", source)) return 2;
   if (knowhowOwned("auto_calm_1", source)) return 5;
   return null;
@@ -3321,18 +3341,25 @@ function drawIngredientDrops() {
   });
 }
 
-function drawTipboxValue() {
-  if (!installedRows(3).length || state.tipbox <= 0) return;
+function tipboxValueLayout() {
+  if (!installedRows(3).length) return null;
   const tipbox = installedRows(3)[0];
   const p = facilityPlacement(tipbox);
+  return { x: p.x - 52, y: p.y - 59, w: 104, h: 28 };
+}
+
+function drawTipboxValue() {
+  if (state.tipbox <= 0) return;
+  const badge = tipboxValueLayout();
+  if (!badge) return;
   ctx.fillStyle = "rgba(57,39,20,.88)";
-  roundRect(p.x - 37, p.y - 59, 74, 28, 14);
+  roundRect(badge.x, badge.y, badge.w, badge.h, 14);
   ctx.fill();
-  drawImage("assets/ui/currency/icon_currency_001.png", p.x - 23, p.y - 45, 23, 23);
+  drawImage("assets/ui/currency/icon_currency_001.png", badge.x + 14, badge.y + 14, 23, 23);
   ctx.fillStyle = "white";
-  ctx.font = "900 12px sans-serif";
+  ctx.font = "900 11px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(formatNumber(state.tipbox), p.x + 11, p.y - 41);
+  ctx.fillText(`${formatNumber(state.tipbox)} / ${formatNumber(state.tipboxCapacity)}`, badge.x + 66, badge.y + 18);
 }
 
 function drawBuffetDecor() {
@@ -4494,7 +4521,7 @@ function renderKnowhowMenu() {
     </section>
     <p class="knowhow-guide">노하우를 눌러 효과를 확인하세요. 화면은 드래그로 움직일 수 있어요.</p>
     <div class="knowhow-map-viewport"><div class="knowhow-map">
-      <svg viewBox="0 0 480 2070" aria-hidden="true">${connections}</svg>
+      <svg viewBox="0 0 480 2200" aria-hidden="true">${connections}</svg>
       <span class="knowhow-branch-label" style="--label-x:80px">자동 운영</span><span class="knowhow-branch-label" style="--label-x:240px">재료 수급</span><span class="knowhow-branch-label" style="--label-x:400px">요리 성장</span>${nodes}
     </div></div>
     <section class="knowhow-detail ${selectedAvailable ? "" : "is-locked"}">
@@ -4901,6 +4928,11 @@ function renderGameToText() {
       expansionGemCost: TIPBOX_EXPANSION_GEM_COST,
       panelVisible: !dom.tipboxPanel.hidden,
       autoCollectExcluded: true,
+      fieldBadge: tipboxValueLayout() ? {
+        ...tipboxValueLayout(),
+        text: `${formatNumber(state.tipbox)} / ${formatNumber(state.tipboxCapacity)}`,
+        placement: "attached-above-tipbox",
+      } : null,
     },
     tipRule: { basis: "final-meal-price", rate: .1, eligibleGuests: "all-except-disappointed", cappedByTipboxCapacity: true },
     metrics: state.metrics,

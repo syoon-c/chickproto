@@ -109,7 +109,7 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .world-area-indicator strong { font-size: 11px; font-weight: 900; }
 .area-arrow {
   position: absolute;
-  top: 45%;
+  top: 72%;
   width: 36px;
   height: 36px;
   min-height: 0;
@@ -423,8 +423,8 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .knowhow-xp-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#77c659,#42a94f); transition: width .25s ease; }
 .knowhow-guide { margin: 8px 3px; color: #806044; font-size: 11px; font-weight: 800; text-align: center; }
 .knowhow-map-viewport { height: 500px; overflow: auto; border: 2px solid rgba(108,76,46,.38); border-radius: 20px; background-color: #f9f1d7; background-image: linear-gradient(rgba(145,111,69,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(145,111,69,.06) 1px,transparent 1px),radial-gradient(rgba(135,100,58,.16) 1.2px,transparent 1.2px); background-size: 36px 36px,36px 36px,18px 18px; box-shadow: inset 0 3px 10px rgba(91,64,38,.1); cursor: grab; overscroll-behavior: contain; }
-.knowhow-map { position: relative; width: 480px; height: 2070px; }
-.knowhow-map svg { position: absolute; inset: 0; width: 480px; height: 2070px; pointer-events: none; }
+.knowhow-map { position: relative; width: 480px; height: 2200px; }
+.knowhow-map svg { position: absolute; inset: 0; width: 480px; height: 2200px; pointer-events: none; }
 .knowhow-branch-label { position: absolute; left: calc(var(--label-x) - 38px); top: 101px; width: 76px; padding: 3px 5px; border-radius: 99px; background: rgba(114,79,42,.78); color: #fff8df; font-size: 9px; font-weight: 1000; text-align: center; }
 .knowhow-map path { fill: none; stroke: #c8b28e; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
 .knowhow-map path.is-active { stroke: #e2a536; filter: drop-shadow(0 2px 0 rgba(115,75,28,.16)); }
