@@ -28,7 +28,7 @@ try {
   await page.locator('[data-action="theme-select"][data-id="6"]').click();
   await page.waitForTimeout(200);
   const lockedThemeText = await page.locator("#menu-content").innerText();
-  const previewLabels = await page.locator(".theme-chick-marker").evaluateAll((items) => items.map((item) => item.getAttribute("aria-label") || ""));
+  const previewLabels = await page.locator(".theme-step-node.is-chick").evaluateAll((items) => items.map((item) => item.getAttribute("aria-label") || ""));
   const previewNames = previewLabels.map((label) => label.split(" · ")[0].trim());
   if (previewNames.length !== 3 || previewNames.some((name) => !name || name.includes("?"))) {
     throw new Error(`Locked theme must preview three chick names: ${JSON.stringify(previewNames)}`);
@@ -59,7 +59,7 @@ try {
   await page.locator('[data-action="theme-select"][data-id="6"]').click();
   await page.waitForTimeout(200);
   const themeText = await page.locator("#menu-content").innerText();
-  const unlockedLabels = await page.locator(".theme-chick-marker").evaluateAll((items) => items.map((item) => item.getAttribute("aria-label") || ""));
+  const unlockedLabels = await page.locator(".theme-step-node.is-chick").evaluateAll((items) => items.map((item) => item.getAttribute("aria-label") || ""));
   if (!unlockedLabels.some((label) => label.includes("파츠 4종 보유"))
     || !unlockedLabels.some((label) => label.includes("파츠 8종 보유"))
     || !unlockedLabels.some((label) => label.includes("파츠 11종 보유"))

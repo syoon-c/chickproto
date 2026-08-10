@@ -54,33 +54,33 @@ try {
   if (wood.total !== 11 || wood.requirements.map((item) => item.purchaseCount).join(",") !== "4,8,11") {
     throw new Error(`Standard purchase requirements are incorrect: ${JSON.stringify(wood)}`);
   }
-  const markers = page.locator(".theme-chick-marker");
-  const markerLabels = await markers.evaluateAll((items) => items.map((item) => item.getAttribute("aria-label")));
-  if (markerLabels.length !== 3 || !markerLabels.some((label) => label.includes("파츠 4종 보유"))
-    || !markerLabels.some((label) => label.includes("파츠 8종 보유"))
-    || !markerLabels.some((label) => label.includes("파츠 11종 보유"))
-    || markerLabels.some((label) => label.includes("%"))) {
-    throw new Error(`Compact chick markers are missing exact part requirements: ${JSON.stringify(markerLabels)}`);
+  const nodes = page.locator(".theme-step-node");
+  const chickNodes = page.locator(".theme-step-node.is-chick");
+  const chickLabels = await chickNodes.evaluateAll((items) => items.map((item) => item.getAttribute("aria-label")));
+  if (await nodes.count() !== 11 || chickLabels.length !== 3
+    || !chickLabels.some((label) => label.includes("파츠 4종 보유"))
+    || !chickLabels.some((label) => label.includes("파츠 8종 보유"))
+    || !chickLabels.some((label) => label.includes("파츠 11종 보유"))
+    || chickLabels.some((label) => label.includes("%"))
+    || (await page.locator(".theme-track-count").innerText()).replace(/\s+/g, " ").trim() !== "0 / 11") {
+    throw new Error(`Step track is missing exact chick milestones: ${JSON.stringify(chickLabels)}`);
   }
-  if (!(await page.locator(".theme-set-panel > header").innerText()).includes("파츠 0 / 11종")) {
-    throw new Error("Theme header does not show owned theme-part types.");
-  }
+  if (await page.locator(".theme-chick-progress-card").count()) throw new Error("The previous chick cards must be removed.");
   if (state.progression.themeChickMilestoneRule !== "stone-installed-facility-types;other-owned-theme-part-types") {
     throw new Error(`Theme chick milestone unit is ambiguous: ${state.progression.themeChickMilestoneRule}`);
   }
-  const chickIcons = page.locator(".theme-chick-marker > img");
+  const chickIcons = page.locator(".theme-step-node.is-chick > img");
   if (await chickIcons.count() !== 3) throw new Error("Each chick purchase milestone must show its icon.");
   const invalidIcons = await chickIcons.evaluateAll((images) => images.filter((image) => !image.complete
     || image.naturalWidth <= 0
     || image.getBoundingClientRect().width < 26).length);
   if (invalidIcons) throw new Error(`${invalidIcons} chick milestone icons failed to render clearly.`);
-  const initialMarkerStyles = await markers.evaluateAll((items) => items.map((item) => ({
+  const initialMarkerStyles = await chickNodes.evaluateAll((items) => items.map((item) => ({
     unlocked: item.classList.contains("is-unlocked"),
-    filter: getComputedStyle(item.querySelector("img")).filter,
-    opacity: Number(getComputedStyle(item.querySelector("img")).opacity),
+    borderColor: getComputedStyle(item).borderColor,
   })));
-  if (initialMarkerStyles.some((item) => item.unlocked || item.filter === "none" || item.opacity >= 1)) {
-    throw new Error(`Locked Wood chicks must be gray: ${JSON.stringify(initialMarkerStyles)}`);
+  if (initialMarkerStyles.some((item) => item.unlocked) || await page.locator(".theme-step-node.is-reached").count()) {
+    throw new Error(`No Wood milestone may be reached at 0 parts: ${JSON.stringify(initialMarkerStyles)}`);
   }
   if (state.themeManagement.parts.some((part) => [12, 13].includes(part.facilityType))) {
     throw new Error(`Tree/background data remained in theme management: ${JSON.stringify(state.themeManagement.parts)}`);
@@ -91,13 +91,17 @@ try {
   for (const partId of partIds.slice(0, 3)) await buyPart(partId);
   state = await gameState();
   if (state.progression.themeChickProgress[2].unlocked.length !== 0) throw new Error("A Wood chick unlocked before 4 purchases.");
+  await page.locator("#menu-content").evaluate((element) => { element.scrollTop = 0; });
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "01b-three-of-eleven-step-track.png") });
 
   await buyPart(partIds[3]);
   state = await gameState();
   if (state.progression.themeChickProgress[2].opened !== 4 || state.progression.themeChickProgress[2].unlocked.length !== 1) {
     throw new Error(`First Wood chick did not unlock at 4 purchases: ${JSON.stringify(state.progression.themeChickProgress[2])}`);
   }
-  if (await page.locator(".theme-chick-marker.is-unlocked").count() !== 1) throw new Error("The first chick icon did not gain color at 4 parts.");
+  if (await page.locator(".theme-step-node.is-chick.is-unlocked").count() !== 1
+    || await page.locator(".theme-step-node.is-reached").count() !== 3
+    || !(await page.locator(".theme-step-node.is-chick.is-unlocked").getAttribute("aria-label")).includes("4종")) throw new Error("The first chick milestone did not update at 4 parts.");
   await page.locator(".game-frame").screenshot({ path: path.join(out, "02-first-chick-at-4-purchases.png") });
 
   for (const partId of partIds.slice(4, 8)) await buyPart(partId);
@@ -105,7 +109,9 @@ try {
   if (state.progression.themeChickProgress[2].opened !== 8 || state.progression.themeChickProgress[2].unlocked.length !== 2) {
     throw new Error(`Second Wood chick did not unlock at 8 purchases: ${JSON.stringify(state.progression.themeChickProgress[2])}`);
   }
-  if (await page.locator(".theme-chick-marker.is-unlocked").count() !== 2) throw new Error("The second chick icon did not gain color at 8 parts.");
+  if (await page.locator(".theme-step-node.is-chick.is-unlocked").count() !== 2
+    || await page.locator(".theme-step-node.is-reached").count() !== 6
+    || (await page.locator(".theme-track-count").innerText()).replace(/\s+/g, " ").trim() !== "8 / 11") throw new Error("The second chick milestone did not update at 8 parts.");
   await page.locator(".game-frame").screenshot({ path: path.join(out, "02b-two-chicks-at-8-purchases.png") });
 
   for (const partId of partIds.slice(8)) await buyPart(partId);
@@ -113,10 +119,12 @@ try {
   if (state.progression.themeChickProgress[2].opened !== 11 || state.progression.themeChickProgress[2].unlocked.length !== 3) {
     throw new Error(`Third Wood chick did not unlock at 11 purchases: ${JSON.stringify(state.progression.themeChickProgress[2])}`);
   }
-  if (await page.locator(".theme-chick-marker.is-unlocked").count() !== 3) throw new Error("All chick icons did not gain color at 11 parts.");
+  if (await page.locator(".theme-step-node.is-chick.is-unlocked").count() !== 3
+    || await page.locator(".theme-step-node.is-reached").count() !== 8
+    || (await page.locator(".theme-track-count").innerText()).replace(/\s+/g, " ").trim() !== "11 / 11") throw new Error("All chick milestones did not update at 11 parts.");
   await page.locator(".game-frame").screenshot({ path: path.join(out, "03-all-chicks-at-11-purchases.png") });
   if (errors.length) throw new Error(`Console errors: ${errors.join(" | ")}`);
-  console.log("THEME_CHICK_PART_TYPES_OK stone=0/8/11 standard=4/8/11 unit=part-type compact-icons=3");
+  console.log("THEME_CHICK_PART_TYPES_OK stone=base/8/11 standard=4/8/11 steps=11 chick-nodes=3");
 } finally {
   await browser.close();
 }

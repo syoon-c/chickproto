@@ -1,50 +1,48 @@
-# Theme Completion Effect Design QA
+# Theme Step Track Design QA
 
-- Source visual truth: `C:/Users/SOYOON~1/AppData/Local/Temp/codex-clipboard-983c6b08-ff58-4d6f-a681-725710c58a59.png`
-- Browser-rendered implementation: `output/theme-completion-bonus/01-locked-20-percent-effect.png`
-- Active-state implementation: `output/theme-completion-bonus/02-active-20-percent-effect.png`
-- Combined comparison evidence: `output/theme-completion-bonus/reference-vs-implementation.png`
+- Source visual truth: `C:/Users/SOYOON~1/AppData/Local/Temp/codex-clipboard-7bc61311-efe5-4fe6-be20-e15bf095f0d9.png`
+- Browser-rendered implementation: `output/theme-chick-purchase-counts/01b-three-of-eleven-step-track.png`
+- Combined comparison evidence: `output/theme-step-track/reference-vs-implementation.png`
+- Official web-game client evidence: `output/theme-step-track/official-client/shot-0.png`, `state-0.json`
 - Viewport: 480 × 1000 CSS px, device scale factor 1
-- Source dimensions: 296 × 41 px
-- Implementation dimensions: 480 × 1000 px; focused effect region 246 × 39 px normalized to 480 × 70 px
-- State: Stone theme incomplete for the reference comparison; the completion bonus is locked
+- Source dimensions: 2048 × 433 px
+- Implementation dimensions: 480 × 1000 px; focused track region 415 × 87 px normalized to 480 × 101 px
+- State: Wood theme, 3 of 11 parts owned
 
 ## Full-view comparison evidence
 
-- The effect row sits directly below the chick milestone gauge and above the theme-part grid.
-- The added row remains within the existing half-height theme sheet and does not cover the restaurant or bottom navigation.
-- Locked and completed screenshots confirm both visual states at the same viewport.
+- The 11-step track fits within the half-height theme sheet without horizontal scrolling.
+- The restaurant remains visible above the sheet and the theme-part grid remains usable below it.
+- The total-purchase effect remains directly below the track.
 
 ## Focused comparison evidence
 
-- The source and implementation are shown together in `output/theme-completion-bonus/reference-vs-implementation.png`.
-- Both use a light pill for `전체 구매 효과`, a small lock icon, and one muted `메뉴 가격 +20% 상승` label.
-- The implementation uses the project's existing lock/check assets and theme-panel colors.
+- The source and implementation are shown together in `output/theme-step-track/reference-vs-implementation.png`.
+- Both use a single dark horizontal rail, lime completed segment, circular numbered steps, three enlarged chick portrait milestones, and a top-right `3 / 11` counter.
+- The source sample places portraits at 3/7/11; the implementation intentionally uses the game's real conditions 4/8/11. Stone uses its always-available chick at step 1 and the remaining milestones at 8/11.
 
 ## Required fidelity surfaces
 
-- Typography: compact bold Korean UI text remains readable without wrapping.
-- Spacing and layout rhythm: pill, icon, and effect copy share a single centered line with compact gaps.
-- Colors and tokens: the locked state is muted gray; the completed state changes to the existing green success color.
-- Image quality and asset fidelity: `assets/ui/common/icon_lock.png` and `icon_check.png` are used directly.
-- Copy and content: the requested `전체 구매 효과 · 메뉴 가격 +20% 상승` text is preserved exactly.
+- Typography: large bold current count and compact high-contrast step numerals match the reference hierarchy.
+- Spacing and layout rhythm: eleven evenly distributed nodes and larger portrait rings remain legible at 480 px without overlap.
+- Colors and tokens: completed steps use lime; future steps and rail use dark brown; cream background follows the existing theme panel.
+- Image quality and asset fidelity: all portrait nodes use the project's real guest assets; no substitute character art is used.
+- Copy and content: only the `현재 / 전체` counter is visible in the track; names and exact unlock conditions remain in accessible labels and tooltips.
 
-## Interaction and functional verification
+## Interaction and regression checks
 
-- Incomplete Stone theme: lock icon and muted effect label.
-- Stone facilities 11/11 installed: check icon and active green effect label.
-- Wood parts 11/11 owned: the same active effect state.
-- One completed theme adds exactly 0.2 to `restaurantPriceUp`; two completed themes add 0.4 in total, in addition to individual part income.
-- Restaurant meal-price formula, theme chick milestones, half-sheet layout, theme detail interactions, official web-game client, and console-error checks passed.
+- At 0/11 no regular-theme milestones are active.
+- At 4/11, 8/11, and 11/11 the corresponding portrait rings turn lime and the rail advances to the correct node.
+- Future chick portraits remain visible in color with a dark border, matching the reference preview behavior.
+- Theme/codex separation, completion bonus, half-sheet layout, individual installation, theme detail interactions, official client state capture, and console-error checks passed.
 
 ## Findings
 
 - No actionable P0, P1, or P2 differences remain.
-- P3: the prototype uses slightly heavier text than the source because that weight is the established small-label style across the game UI.
+- P3: milestone locations differ from the reference sample because the prototype's confirmed progression values are 4/8/11 rather than 3/7/11.
 
 ## Comparison history
 
-1. Initial implementation visually matched the compact row but the final-part detail preview did not include the impending +20% completion bonus.
-2. Updated the preview calculation so purchasing the last part shows both its individual income and the completion bonus. Post-fix functional and visual checks passed.
+1. First visual comparison confirmed the selected structure, colors, density, portrait treatment, and 3/11 state. No P0/P1/P2 fixes were required.
 
 final result: passed

@@ -170,7 +170,7 @@ try {
       await page.locator('[data-action="theme-select"][data-id="6"]').click();
       await page.waitForFunction(() => [...document.images].every((image) => image.complete));
       await page.waitForTimeout(250);
-      await page.screenshot({ path: path.join(out, `${partCount}-parts.png`), fullPage: true });
+      await page.screenshot({ path: path.join(out, `step-track-${partCount}-parts.png`), fullPage: true });
     }
   }
 

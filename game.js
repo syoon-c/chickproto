@@ -4452,21 +4452,27 @@ function renderPerformanceManagement() {
     ${tables.performances.map((row) => `<article class="feature-card ${state.collections.performers[row.id] ? "" : "is-locked"}"><img class="feature-icon" src="assets/ui/performance/icon_performance_${String(row.id).padStart(3, "0")}.png" alt="" /><div class="feature-copy"><strong>${state.collections.performers[row.id] ? `공연팀 ${row.id}` : "???"}</strong><small>가격 +${Math.round(row.abilityValue * 100)}% · ${row.performanceTime}초</small><small>${row.price ? `공연료 도토리 ${row.price}` : "무료 공연"}</small></div></article>`).join("")}`;
 }
 
-function themeChickProgressGauge(progress, milestones, progressUnit, requirementVerb) {
-  const percent = Math.max(0, Math.min(100, Number(progress.ratio || 0) * 100));
-  return `<div class="theme-progress-gauge theme-chick-gauge" aria-label="테마 진척도 ${progress.opened}/${progress.total}종">
-    <div class="progress-track"><span style="width:${percent}%"></span></div>
-    <div class="theme-chick-markers">${milestones.map((chick) => {
+function themeChickProgressTrack(progress, milestones, progressUnit, requirementVerb) {
+  const total = Math.max(1, Number(progress.total || 0));
+  const current = Math.max(0, Math.min(total, Number(progress.opened || 0)));
+  const milestoneByStep = new Map(milestones.map((chick) => [
+    Number(chick.purchaseRequirement || 0) === 0 ? 1 : Number(chick.purchaseRequirement), chick,
+  ]));
+  const nodePosition = (step) => 5 + ((step - 1) / Math.max(1, total - 1)) * 90;
+  const fillPercent = current <= 0 ? 0 : nodePosition(current);
+  return `<div class="theme-chick-progress-track" aria-label="${progressUnit} ${current}/${total}종">
+    <div class="theme-track-count"><strong>${current}</strong><span>/ ${total}</span></div>
+    <div class="theme-step-rail" aria-hidden="true"><i style="width:${fillPercent}%"></i></div>
+    <ol class="theme-step-nodes">${Array.from({ length: total }, (_, index) => {
+    const step = index + 1;
+    const chick = milestoneByStep.get(step);
+    const reached = current >= step;
+    if (!chick) return `<li class="theme-step-node ${reached ? "is-reached" : "is-future"}" style="left:${nodePosition(step)}%" aria-label="${progressUnit} ${step}종">${step}</li>`;
     const requirement = Number(chick.purchaseRequirement || 0);
-    const threshold = progress.total ? requirement / progress.total : 0;
-    const markerPercent = Math.max(0, Math.min(100, threshold * 100));
-    const markerShift = threshold <= 0 ? "0%" : threshold >= 1 ? "-100%" : "-50%";
-    const unlocked = progress.opened >= requirement;
+    const unlocked = current >= requirement;
     const condition = requirement ? `${progressUnit} ${requirement}종 ${requirementVerb}` : "기본 등장";
-    return `<span class="theme-chick-marker ${unlocked ? "is-unlocked" : "is-locked"}" style="left:${markerPercent}%;--theme-marker-shift:${markerShift}" title="${chick.customerName} · ${condition}" aria-label="${chick.customerName} · ${condition} · ${unlocked ? "등장" : "미등장"}">
-      <i aria-hidden="true"></i><img src="${guestIcon({ customerId: chick.customerId, commonId: chick.commonId })}" alt=""/>
-    </span>`;
-  }).join("")}</div>
+    return `<li class="theme-step-node is-chick ${unlocked ? "is-unlocked" : "is-locked"}" style="left:${nodePosition(step)}%" title="${chick.customerName} · ${condition}" aria-label="${chick.customerName} · ${condition} · ${unlocked ? "등장" : "미등장"}"><img src="${guestIcon({ customerId: chick.customerId, commonId: chick.commonId })}" alt=""/></li>`;
+  }).join("")}</ol>
   </div>`;
 }
 
@@ -4539,8 +4545,8 @@ function renderThemeManagement() {
     return `<button type="button" data-action="theme-select" data-id="${themeId}" class="${themeId === selectedTheme ? "is-active" : ""}" aria-label="${THEME_NAMES[themeId] || `테마 ${themeId}`}" title="${THEME_NAMES[themeId] || `테마 ${themeId}`}"><img src="${themeFacilityIcon(representative)}" alt=""/></button>`;
     }).join("")}</div>
     <section class="theme-set-panel">
-      <header><strong>${themeDisplayName}</strong><span>${progressUnit} ${progress.opened} / ${progress.total}종</span></header>
-      ${themeChickProgressGauge(progress, milestones, progressUnit, requirementVerb)}
+      <header><strong>${themeDisplayName}</strong></header>
+      ${themeChickProgressTrack(progress, milestones, progressUnit, requirementVerb)}
       <div class="theme-completion-effect ${completionAchieved ? "is-complete" : "is-locked"}" aria-label="전체 구매 효과 메뉴 가격 20% 상승 ${completionAchieved ? "적용 중" : "잠김"}">
         <span>전체 구매 효과</span><img src="assets/ui/common/${completionAchieved ? "icon_check.png" : "icon_lock.png"}" alt=""/><strong>메뉴 가격 +20% 상승</strong>
       </div>

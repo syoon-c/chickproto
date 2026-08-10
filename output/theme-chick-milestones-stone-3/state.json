@@ -2040,7 +2040,7 @@
     "autoResearchWhenNoRecipe": "random-ingredients-up-to-bowl-capacity-then-weird-dish",
     "salePriceFormula": "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
     "salePriceMultipliers": {
-      "restaurantPriceUp": 5.3999999999999995,
+      "restaurantPriceUp": 5.8,
       "satisfactionNormal": 1,
       "satisfactionHappy": 1.5,
       "performanceBuff": 1
@@ -4189,7 +4189,7 @@
   },
   "specialVisitor": {
     "interval": 120,
-    "nextIn": 114.06,
+    "nextIn": 114.03,
     "lastType": null,
     "dropBoostRemaining": 0,
     "dropMultiplier": 1,

@@ -444,15 +444,17 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .theme-guest-preview { display: flex; align-items: center; gap: 8px; margin: 9px 10px 2px; padding: 7px 9px; border-radius: 11px; background: rgba(255,250,239,.7); }
 .theme-guest-preview span { flex: 0 0 auto; padding: 3px 7px; border-radius: 99px; background: #d8c5a9; color: #76573b; font-size: 9px; font-weight: 1000; }
 .theme-guest-preview strong { min-width: 0; overflow: hidden; color: #694a31; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.theme-set-panel > .theme-progress-gauge { width: auto; margin: 0 18px 1px; padding-bottom: 35px; }
-.theme-set-panel .theme-progress-gauge .progress-track { height: 7px; margin-top: 8px; border: 1px solid #65472f; background: #ecf1ed; }
-.theme-set-panel .theme-progress-gauge .progress-track span { background: linear-gradient(90deg,#ecd66a,#b9d75a); }
-.theme-chick-markers { position: absolute; inset: 7px 0 auto; height: 34px; pointer-events: none; }
-.theme-chick-marker { position: absolute; top: 0; width: 30px; height: 34px; transform: translateX(var(--theme-marker-shift)); }
-.theme-chick-marker i { position: absolute; top: 0; left: 50%; width: 1px; height: 9px; background: #65472f; transform: translateX(-50%); }
-.theme-chick-marker img { position: absolute; top: 10px; left: 50%; width: 27px; height: 27px; object-fit: contain; transform: translateX(-50%); transition: filter .2s ease, opacity .2s ease, transform .2s ease; }
-.theme-chick-marker.is-unlocked img { opacity: 1; filter: drop-shadow(0 2px 1px rgba(80,52,29,.2)); }
-.theme-chick-marker.is-locked img { opacity: .48; filter: grayscale(1) saturate(0) contrast(.85); }
+.theme-chick-progress-track { position: relative; height: 75px; margin: 2px 7px 1px; padding-top: 18px; }
+.theme-track-count { position: absolute; top: 2px; right: 7px; display: flex; align-items: baseline; gap: 3px; color: #6a4a31; font-size: 11px; font-weight: 1000; }
+.theme-track-count strong { color: #2f1f13; font-size: 16px; }
+.theme-step-rail { position: absolute; top: 47px; left: 8px; right: 8px; height: 7px; overflow: hidden; border-radius: 99px; background: #4a2f0c; }
+.theme-step-rail i { display: block; height: 100%; border-radius: inherit; background: #b9d30a; transition: width .24s ease; }
+.theme-step-nodes { position: absolute; inset: 27px 0 auto; height: 43px; margin: 0; padding: 0; list-style: none; }
+.theme-step-node { position: absolute; top: 8px; z-index: 1; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%; background: #4a2f0c; color: #fffdf4; font-size: 12px; font-weight: 1000; line-height: 1; transform: translateX(-50%); }
+.theme-step-node.is-reached { background: #b9d30a; color: #fff; }
+.theme-step-node.is-chick { top: 0; width: 43px; height: 43px; overflow: hidden; border: 4px solid #4a2f0c; background: #fffdf4; }
+.theme-step-node.is-chick.is-unlocked { border-color: #b9d30a; }
+.theme-step-node.is-chick img { width: 36px; height: 36px; object-fit: contain; filter: drop-shadow(0 1px 1px rgba(58,37,15,.18)); }
 .theme-completion-effect { min-height: 24px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 14px 4px; color: #8b8074; font-size: 10px; font-weight: 900; white-space: nowrap; }
 .theme-completion-effect > span { padding: 4px 9px; border-radius: 99px; background: rgba(255,250,239,.82); color: #4f4033; }
 .theme-completion-effect > img { width: 12px; height: 12px; object-fit: contain; opacity: .55; filter: grayscale(1); }
@@ -506,8 +508,6 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .menu-screen.is-theme-sheet .theme-guest-preview { gap: 6px; margin: 5px 7px 1px; padding: 5px 7px; border-radius: 9px; }
 .menu-screen.is-theme-sheet .theme-guest-preview span { padding: 2px 6px; font-size: 9px; }
 .menu-screen.is-theme-sheet .theme-guest-preview strong { font-size: 10px; }
-.menu-screen.is-theme-sheet .theme-set-panel > .theme-progress-gauge { margin: 0 18px; padding-bottom: 35px; }
-.menu-screen.is-theme-sheet .theme-set-panel .theme-progress-gauge .progress-track { height: 7px; margin-top: 7px; }
 .menu-screen.is-theme-sheet .theme-part-grid { gap: 6px; padding: 7px 8px 10px; }
 .menu-screen.is-theme-sheet .theme-part-card { min-height: 73px; gap: 1px; padding: 3px 3px 5px; border-radius: 11px; }
 .menu-screen.is-theme-sheet .theme-part-card .theme-part-art { width: 43px; height: 43px; }
@@ -571,12 +571,6 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .knowhow-detail-copy em { display: block; margin-top: 5px; color: #388149; font-size: 10px; font-style: normal; font-weight: 1000; }
 .knowhow-detail > button { grid-column: 1 / -1; min-height: 40px; border: 0; border-radius: 13px; background: linear-gradient(#ffd86b,#eca52e); color: #573518; box-shadow: 0 4px 0 #a76925; font-size: 12px; font-weight: 1000; cursor: pointer; }
 .knowhow-detail > button:disabled { background: #d8cdb7; color: #827663; box-shadow: 0 3px 0 #a89c87; cursor: default; }
-.theme-progress-gauge { position: relative; width: 100%; padding-bottom: 15px; }
-.theme-progress-gauge .progress-track { margin-top: 8px; }
-.theme-chick-chip em { margin-top: 2px; color: #a15d22; font-size: 8px; font-style: normal; font-weight: 800; line-height: 1.2; }
-.theme-chick-chip.is-locked { filter: grayscale(.7); opacity: .78; }
-.theme-chick-chip.is-unlocked { border-color: #da8e27; background: #fff4bd; box-shadow: 0 2px 0 rgba(128,75,22,.12); }
-.theme-chick-chip.is-unlocked .theme-chick-mystery { background: #ffe076; }
 .cake-reward-milestones { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; margin: 0 0 11px; }
 .cake-reward-chip { min-width: 0; min-height: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 8px 4px; border: 2px solid rgba(133,88,43,.3); border-radius: 14px; background: rgba(255,255,255,.72); text-align: center; }
 .cake-reward-chip > span { font-size: 27px; line-height: 1; text-align: center; }
