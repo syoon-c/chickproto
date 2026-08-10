@@ -72,7 +72,7 @@ try {
   await page.locator('[data-screen="theme"]').click();
   await page.locator('[data-action="theme-select"][data-id="3"]').click();
   const menuText = await page.locator("#menu-screen").innerText();
-  if (!menuText.includes("초록 줄무늬 테마") || !menuText.includes("13a 구매")) {
+  if (!menuText.includes("초록 줄무늬 식당") || !menuText.includes("13a")) {
     throw new Error(`Green stripe prices are not visible in the theme UI: ${menuText}`);
   }
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "01-green-stripe-10x-prices.png") });

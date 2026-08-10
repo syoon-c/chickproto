@@ -48,7 +48,10 @@ const THEME_SLUGS = {
   12: "retrooffice", 13: "alchemical", 14: "bathhouse", 15: "astrology",
 };
 
-const THEME_CHICK_THRESHOLDS = [0.3, 0.7, 1];
+const THEME_CHICK_PURCHASE_REQUIREMENTS = Object.freeze({
+  stone: [0, 8, 11],
+  standard: [4, 8, 11],
+});
 
 const GUEST_GRADES = [
   { id: 1, name: "첫 방문", minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
@@ -240,7 +243,7 @@ const THEME_CHICK_PROFILES = {
 
 const CORE_PROGRESSION = Object.keys(THEME_NAMES).flatMap((themeIdText) => {
   const themeId = Number(themeIdText);
-  return THEME_CHICK_THRESHOLDS.map((threshold, slot) => {
+  return [0, 1, 2].map((slot) => {
     const globalIndex = (themeId - 1) * 3 + slot;
     const catalogRecipe = GAME_RECIPE_CATALOG[globalIndex];
     const profile = THEME_CHICK_PROFILES[themeId][slot];
@@ -252,7 +255,9 @@ const CORE_PROGRESSION = Object.keys(THEME_NAMES).flatMap((themeIdText) => {
     return {
       themeId,
       slot,
-      threshold,
+      purchaseRequirement: Number((themeId === 1
+        ? THEME_CHICK_PURCHASE_REQUIREMENTS.stone
+        : THEME_CHICK_PURCHASE_REQUIREMENTS.standard)[slot]),
       customerId: isBase ? 3 : 10000 + themeId * 10 + slot + 1,
       customerName: profile[1],
       commonId: profile[0],
@@ -389,8 +394,6 @@ const FACILITY_META = {
   9: { key: "kitchenware", name: "조리도구함", description: "주방 공간을 채우는 장식 설비예요.", icon: "assets/ui/facility/icon_facility_1_kitchenware_stone.png" },
   10: { key: "lighting", name: "조명", description: "주방의 분위기를 밝혀 주는 장식 설비예요.", icon: "assets/ui/facility/icon_facility_1_lighting_stone.png" },
   11: { key: "fence", name: "울타리", description: "레스토랑의 외곽 공간을 구분하는 설비예요.", icon: "assets/ui/facility/icon_facility_1_fence_stone.png" },
-  12: { key: "tree", name: "나무", description: "식당 외곽을 꾸미는 테마 장식이에요.", icon: "assets/ui/facility/icon_facility_1_tree_stone.png" },
-  13: { key: "base", name: "바닥", description: "식당 전체의 바닥 테마예요.", icon: "assets/ui/facility/icon_facility_1_base_stone.png" },
   14: { key: "mailbox", name: "우체통", description: "확인하지 않은 우편을 알려 주는 설비예요.", icon: "assets/ui/facility/icon_facility_1_mailbox_none.png" },
 };
 
@@ -446,7 +449,7 @@ window.CHICK_CONFIG = {
   EARLY_RECIPE_CATALOG,
   GAME_RECIPE_CATALOG,
   GAME_INGREDIENTS,
-  THEME_CHICK_THRESHOLDS,
+  THEME_CHICK_PURCHASE_REQUIREMENTS,
   GUEST_GRADES,
   GUEST_INGREDIENT_DROP_CHANCE,
   INGREDIENT_SLOT_WEIGHTS,

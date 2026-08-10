@@ -28,12 +28,16 @@ try {
   await page.locator('[data-action="theme-select"][data-id="6"]').click();
   await page.waitForTimeout(200);
   const lockedThemeText = await page.locator("#menu-content").innerText();
-  const previewNames = await page.locator(".theme-chick-chip b").allTextContents();
+  const previewLabels = await page.locator(".theme-chick-marker").evaluateAll((items) => items.map((item) => item.getAttribute("aria-label") || ""));
+  const previewNames = previewLabels.map((label) => label.split(" · ")[0].trim());
   if (previewNames.length !== 3 || previewNames.some((name) => !name || name.includes("?"))) {
     throw new Error(`Locked theme must preview three chick names: ${JSON.stringify(previewNames)}`);
   }
-  if (!lockedThemeText.includes("잠김") || !lockedThemeText.includes("30%") || !lockedThemeText.includes("70%") || !lockedThemeText.includes("100%")) {
-    throw new Error(`Locked theme is missing progress milestones: ${lockedThemeText}`);
+  if (!previewLabels.some((label) => label.includes("파츠 4종 보유"))
+    || !previewLabels.some((label) => label.includes("파츠 8종 보유"))
+    || !previewLabels.some((label) => label.includes("파츠 11종 보유"))
+    || previewLabels.some((label) => label.includes("%"))) {
+    throw new Error(`Locked theme is missing compact progress milestones: ${JSON.stringify(previewLabels)}`);
   }
   await page.screenshot({ path: path.join(out, "00-theme-locked-preview.png"), fullPage: true });
 
@@ -55,12 +59,16 @@ try {
   await page.locator('[data-action="theme-select"][data-id="6"]').click();
   await page.waitForTimeout(200);
   const themeText = await page.locator("#menu-content").innerText();
-  if (!themeText.includes("진척도") || !themeText.includes("30%") || !themeText.includes("70%") || !themeText.includes("100%")) {
-    throw new Error(`Theme page is missing purchase progress: ${themeText}`);
+  const unlockedLabels = await page.locator(".theme-chick-marker").evaluateAll((items) => items.map((item) => item.getAttribute("aria-label") || ""));
+  if (!unlockedLabels.some((label) => label.includes("파츠 4종 보유"))
+    || !unlockedLabels.some((label) => label.includes("파츠 8종 보유"))
+    || !unlockedLabels.some((label) => label.includes("파츠 11종 보유"))
+    || unlockedLabels.some((label) => label.includes("%"))) {
+    throw new Error(`Theme page is missing compact purchase progress: ${JSON.stringify(unlockedLabels)}`);
   }
   for (const route of campingRoutes) {
-    if (!themeText.includes(route.customerName)) {
-      throw new Error(`Theme page is missing chick preview name for ${route.customerName}: ${themeText}`);
+    if (!unlockedLabels.some((label) => label.includes(route.customerName))) {
+      throw new Error(`Theme page is missing chick preview for ${route.customerName}: ${JSON.stringify(unlockedLabels)}`);
     }
     const codexOnlyDetails = [
       route.recipeName,

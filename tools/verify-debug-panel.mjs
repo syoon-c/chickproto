@@ -72,12 +72,12 @@ try {
   await page.locator("#debug-install-all-btn").click();
   current = await gameState();
   if (current.debug.installedFacilities !== current.debug.totalInstallFacilities
-    || current.installCandidates.length !== 0
+    || current.installationSystem.stoneParts.some((part) => !part.owned)
     || !current.recipes.systemUnlocked
     || !current.progression.ingredientDropRule.unlocked) {
     throw new Error(`Install-all did not finish initial setup: ${JSON.stringify(current.debug)}`);
   }
-  await page.screenshot({ path: path.join(out, "02-resources-and-install-all.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "03-resources-and-stone-theme.png"), fullPage: true });
 
   await page.reload({ waitUntil: "load" });
   const reloaded = await gameState();

@@ -14,7 +14,7 @@ const {
   CORE_PROGRESSION,
   RECIPE_PROGRESSION,
   GAME_INGREDIENTS,
-  THEME_CHICK_THRESHOLDS,
+  THEME_CHICK_PURCHASE_REQUIREMENTS,
   GUEST_GRADES,
   GUEST_INGREDIENT_DROP_CHANCE,
   INGREDIENT_SLOT_WEIGHTS,
@@ -120,6 +120,7 @@ let recipeRevealTimer = 0;
 let recipeResearch = null;
 let specialPromotionDetailIngredientId = null;
 let knowhowMapScroll = { left: 30, top: 0 };
+let themeMenuScrollTop = 0;
 const RECIPE_RESEARCH_DURATION = 2.4;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
 const STARTER_INGREDIENTS = Object.freeze({
@@ -242,11 +243,11 @@ const SPECIAL_VISITOR_TYPES = Object.freeze({
   trader: { name: "재료 교환상", icon: "assets/ui/chick/icon_chick_015.png", marker: "↔" },
 });
 const TUTORIAL_DIALOGUES = Object.freeze({
-  welcome: "작은 식당부터 차근차근 준비해 볼까요?",
+  welcome: "빈 식당에 설비를 하나씩 설치해 볼까요?",
   "recipe-locked": "도마 테이블을 설치하면 레시피 연구를 시작할 수 있어요!",
-  "recipe-unlocked": "도마 테이블 완성! 이제 새로운 레시피를 연구해 봐요.",
+  "recipe-unlocked": "도마 테이블 설치 완료! 이제 새로운 레시피를 연구해 봐요.",
   "fridge-next": "다음은 냉장고예요. 설치하면 손님들이 재료를 떨어뜨릴 거예요!",
-  "drops-unlocked": "냉장고 완성! 이제 손님에게서 재료를 얻을 수 있어요.",
+  "drops-unlocked": "냉장고 설치 완료! 이제 손님에게서 재료를 얻을 수 있어요.",
   "special-promotion-unlocked": "레시피 5개 발견! 이제 특별 홍보로 원하는 재료의 손님을 초대할 수 있어요.",
   "contest-unlocked": "레시피가 6개나 됐어요! 심사위원 취향에 맞춰 요리 대회에 출품해 볼까요?",
   "buffet-unlocked": "요리가 8개나 됐어요! 손님들이 여러 요리를 구경할 수 있는 야외 뷔페를 열어 볼까요?",
@@ -342,7 +343,7 @@ function initialAcorns() {
 
 function createInitialState() {
   return {
-    version: 20,
+    version: 22,
     clock: 0,
     rng: 20260714,
     resources: {
@@ -359,8 +360,10 @@ function createInitialState() {
     staffDayKey: new Date().toISOString().slice(0, 10),
     performance: { cooldown: Number(tables.general.PerformanceCoolTime || 5), activeId: 0, remaining: 0 },
     themes: {
-      opened: tables.restaurantThemes.filter((row) => row.facilityTheme === 1).map((row) => row.id),
-      activeByFacility: Object.fromEntries(tables.restaurantThemes.filter((row) => row.facilityTheme === 1).map((row) => [row.facilityType, row.id])),
+      opened: tables.restaurantThemes.filter((row) => Number(row.facilityTheme) === 1).map((row) => row.id),
+      activeByFacility: Object.fromEntries(tables.restaurantThemes
+        .filter((row) => Number(row.facilityTheme) === 1)
+        .map((row) => [row.facilityType, row.id])),
       unlockedThemeIds: [1],
     },
     crafting: {
@@ -431,6 +434,7 @@ function createInitialState() {
       screen: "restaurant",
       tab: "craft",
       themeId: 1,
+      themePartId: null,
       collectionCustomerId: 3,
       lastResearch: null,
       area: "restaurant",
@@ -445,22 +449,25 @@ function loadState() {
     const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!parsed) return null;
     const defaults = createInitialState();
-    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].includes(parsed.version)) return null;
+    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22].includes(parsed.version)) return null;
     const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
       typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
     const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
-    const openedThemes = (parsed.themes?.opened || defaults.themes.opened)
-      .filter((id) => availableThemePartIds.has(Number(id)));
+    const openedThemes = [...new Set([
+      ...defaults.themes.opened,
+      ...(parsed.themes?.opened || []),
+    ])].filter((id) => availableThemePartIds.has(Number(id)));
     const activeByFacility = Object.fromEntries(Object.entries({
       ...defaults.themes.activeByFacility,
       ...parsed.themes?.activeByFacility,
     }).map(([facilityType, partId]) => [facilityType,
       availableThemePartIds.has(Number(partId)) ? partId : defaults.themes.activeByFacility[facilityType]])
       .filter(([, partId]) => partId != null));
-    const unlockedThemeIds = (parsed.themes?.unlockedThemeIds || [...new Set(openedThemes.map((id) =>
-      tables.restaurantThemes.find((row) => row.id === Number(id))?.facilityTheme).filter(Boolean))])
-      .map(Number)
+    const savedUnlockedThemeIds = parsed.themes?.unlockedThemeIds || [...new Set(openedThemes.map((id) =>
+      tables.restaurantThemes.find((row) => row.id === Number(id))?.facilityTheme).filter(Boolean))];
+    const unlockedThemeIds = [...new Set([1, ...savedUnlockedThemeIds.map(Number)])]
       .filter((themeId) => Object.hasOwn(THEME_NAMES, themeId));
+    const migratedInstalled = [...new Set((parsed.installed || []).map(Number))];
     const {
       cafeThemes: _cafeThemes,
       cafeArea: _cafeArea,
@@ -560,7 +567,8 @@ function loadState() {
     return {
       ...defaults,
       ...restaurantSave,
-      version: 20,
+      version: 22,
+      installed: [...new Set(migratedInstalled)].sort((a, b) => a - b),
       resources: { ...defaults.resources, ...parsed.resources },
       tipbox: Math.max(0, Math.floor(Number(parsed.tipbox || 0))),
       tipboxCapacity: Math.max(TIPBOX_INITIAL_CAPACITY, Math.floor(Number(parsed.tipboxCapacity || 0)), Math.ceil(Math.max(0, Number(parsed.tipbox || 0)) / TIPBOX_EXPANSION_AMOUNT) * TIPBOX_EXPANSION_AMOUNT),
@@ -606,7 +614,7 @@ function loadState() {
       },
       knowhow: savedKnowhow,
       specialVisitor: savedSpecialVisitor,
-      ui: { ...defaults.ui, ...savedUi, screen: "restaurant", tab: "craft", area: buffetUnlockedInSave && savedUi.area === "buffet" ? "buffet" : "restaurant" },
+      ui: { ...defaults.ui, ...savedUi, selectedInstallId: null, screen: "restaurant", tab: "craft", area: buffetUnlockedInSave && savedUi.area === "buffet" ? "buffet" : "restaurant" },
       tutorial: savedTutorial,
       staff: parsed.staff || {},
       performance: { ...defaults.performance, ...parsed.performance },
@@ -1020,34 +1028,33 @@ function isThemeUnlocked(themeId) {
 }
 
 function themeChickProgress(themeId) {
+  const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === Number(themeId)
+    && Number(row.purchaseType) === 1);
   if (Number(themeId) === 1) {
-    const stoneFacilityTypes = new Set(tables.restaurantThemes
-      .filter((row) => Number(row.facilityTheme) === 1)
-      .map((row) => Number(row.facilityType)));
-    const requiredInstalls = tables.installs.filter((row) => stoneFacilityTypes.has(Number(row.facilityType)));
-    const opened = requiredInstalls.filter((row) => isInstalled(row.id)).length;
+    const relevantTypes = new Set(rows.map((row) => Number(row.facilityType)));
+    const installedTypes = new Set(installedRows()
+      .map((row) => Number(row.facilityType))
+      .filter((facilityType) => relevantTypes.has(facilityType)));
     return {
-      opened,
-      total: requiredInstalls.length,
-      ratio: requiredInstalls.length ? opened / requiredInstalls.length : 0,
+      opened: installedTypes.size,
+      total: relevantTypes.size,
+      ratio: relevantTypes.size ? installedTypes.size / relevantTypes.size : 0,
+      basis: "installed-facility-types",
     };
   }
-  const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === Number(themeId));
   const opened = rows.filter((row) => state.themes.opened.includes(row.id)).length;
   return {
     opened,
     total: rows.length,
     ratio: rows.length ? opened / rows.length : 0,
+    basis: "owned-theme-part-types",
   };
 }
 
 function unlockedThemeChicks(themeId) {
   const milestones = themeChickMilestones(themeId);
-  const { ratio } = themeChickProgress(themeId);
-  if (Number(themeId) === 1) {
-    return milestones.filter((milestone) => milestone.slot === 0 || ratio + Number.EPSILON >= milestone.threshold);
-  }
-  return milestones.filter((milestone) => ratio + Number.EPSILON >= milestone.threshold);
+  const { opened } = themeChickProgress(themeId);
+  return milestones.filter((milestone) => opened >= Number(milestone.purchaseRequirement || 0));
 }
 
 function allUnlockedThemeChicks() {
@@ -1348,6 +1355,10 @@ function isThemeFacilityAvailable(facilityType) {
   return installRows.length === 0 || installRows.some((row) => isInstalled(row.id));
 }
 
+function isThemePartAvailable(row) {
+  return isThemeFacilityAvailable(row?.facilityType);
+}
+
 function checkAndGrantAllCollect(themeId) {
   const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === Number(themeId));
   const currencyRows = rows.filter((row) => row.purchaseType === 1);
@@ -1360,7 +1371,7 @@ function checkAndGrantAllCollect(themeId) {
 function buyTheme(themeId) {
   const row = tables.restaurantThemes.find((item) => item.id === themeId);
   if (!row || state.themes.opened.includes(themeId)) return;
-  if (!isThemeFacilityAvailable(row.facilityType) || row.purchaseType === 2) return;
+  if (!isThemePartAvailable(row) || row.purchaseType === 2) return;
   const key = RESOURCE_BY_ITEM[row.itemId];
   if (!key || state.resources[key] < row.facilityPrice) return;
   const chicksBefore = unlockedThemeChicks(row.facilityTheme).length;
@@ -1373,12 +1384,11 @@ function buyTheme(themeId) {
   }
   dispatchAchievement(11, 1, 0, themeId);
   dispatchAchievement(10);
-  const themeRows = tables.restaurantThemes.filter((item) => item.facilityTheme === row.facilityTheme);
-  const openedCount = themeRows.filter((item) => state.themes.opened.includes(item.id)).length;
+  const purchaseProgress = themeChickProgress(row.facilityTheme);
   const newlyUnlocked = unlockedThemeChicks(row.facilityTheme).slice(chicksBefore);
   showToast(newlyUnlocked.length
-    ? `${THEME_NAMES[row.facilityTheme]} 진행! ${newlyUnlocked.map((chick) => chick.customerName).join(", ")} 등장.`
-    : `${FACILITY_META[row.facilityType]?.name || "설비"} 파츠 구매·적용 · ${openedCount}/${themeRows.length}`, 3);
+    ? `${THEME_NAMES[row.facilityTheme]} 파츠 ${purchaseProgress.opened}종 보유! ${newlyUnlocked.map((chick) => chick.customerName).join(", ")} 등장.`
+    : `${FACILITY_META[row.facilityType]?.name || "설비"} 파츠 구매·적용 · ${purchaseProgress.opened}/${purchaseProgress.total}종`, 3);
   saveState(); updateHud(); renderMenu();
   render();
 }
@@ -1673,6 +1683,8 @@ function closeInstallPanel() {
 }
 
 function openInstallPanel(row) {
+  if (!row || isInstalled(row.id)) return;
+  if (!dom.menuScreen.hidden) closeMenu();
   const meta = FACILITY_META[row.facilityType] || FACILITY_META[1];
   state.ui.selectedInstallId = row.id;
   dom.installIcon.src = meta.icon;
@@ -1682,27 +1694,31 @@ function openInstallPanel(row) {
   dom.installConfirm.disabled = state.resources.acorns < row.facilityPrice;
   dom.installPanel.hidden = false;
   updateTutorialDialogue();
+  render();
 }
 
 function confirmInstall() {
-  const row = tables.installs.find((item) => item.id === state.ui.selectedInstallId);
+  const row = tables.installs.find((item) => item.id === Number(state.ui.selectedInstallId));
   if (!row || isInstalled(row.id)) return closeInstallPanel();
   if (state.resources.acorns < row.facilityPrice) {
     showToast("도토리가 부족해요.");
     return;
   }
-  state.resources.acorns -= row.facilityPrice;
+  const chicksBefore = unlockedThemeChicks(1).length;
+  state.resources.acorns -= Number(row.facilityPrice);
   state.installed.push(row.id);
   state.installed.sort((a, b) => a - b);
   dispatchAchievement(12, 1, 0, row.id);
-  if (row.facilityType === 8) state.tutorial.activeId = "recipe-unlocked";
-  if (row.facilityType === 6) state.tutorial.activeId = "drops-unlocked";
+  if (Number(row.facilityType) === 8) state.tutorial.activeId = "recipe-unlocked";
+  if (Number(row.facilityType) === 6) state.tutorial.activeId = "drops-unlocked";
+  const newlyUnlocked = unlockedThemeChicks(1).slice(chicksBefore);
   closeInstallPanel();
   const meta = FACILITY_META[row.facilityType] || FACILITY_META[1];
-  if ([6, 8].includes(Number(row.facilityType))) {
-    dom.toast.hidden = true;
-    toastTimer = 0;
-  } else showToast(`${meta.name} 설치 완료!`);
+  if (newlyUnlocked.length) {
+    showToast(`설비 설치 진척! ${newlyUnlocked.map((chick) => chick.customerName).join(", ")} 등장.`, 3);
+  } else if (![6, 8].includes(Number(row.facilityType))) {
+    showToast(`${row.facilityGroup > 1 ? `${meta.name} ${row.facilityGroup}` : meta.name} 설치 완료!`);
+  }
   saveState();
   updateHud();
 }
@@ -1806,8 +1822,8 @@ function closeSpecialPromotionPanel() {
 
 function openSpecialPromotionPanel() {
   if (!isSpecialPromotionUnlocked() || state.specialPromotion.remaining > 0 || state.specialPromotion.cooldown > 0) return;
+  if (!dom.installPanel.hidden) closeInstallPanel();
   closeMenu();
-  dom.installPanel.hidden = true;
   dom.specialPromoPanel.hidden = false;
   dom.specialPromoSearch.value = "";
   closeSpecialPromotionDetail();
@@ -2127,10 +2143,10 @@ function renderSpecialVisitorPanel(actor) {
 
 function openSpecialVisitorPanel(actor) {
   if (!actor || !SPECIAL_VISITOR_TYPES[actor.type]) return;
+  if (!dom.installPanel.hidden) closeInstallPanel();
   closeMenu();
   closeSpecialPromotionPanel();
   toggleDebugPanel(false);
-  dom.installPanel.hidden = true;
   dom.toast.hidden = true;
   toastTimer = 0;
   actor.state = "interacting";
@@ -3645,7 +3661,8 @@ function handleCanvasTap(event) {
   if (fridge && insideBox(point, facilityPlacement(fridge), 14)) return openMenu("recipe", "ingredients");
 
   const candidate = installCandidates().find((row) => insideBox(point, facilityPlacement(row), 8));
-  if (candidate) openInstallPanel(candidate);
+  if (candidate) return openInstallPanel(candidate);
+
   render();
 }
 
@@ -3655,8 +3672,10 @@ function setActiveNav(screen) {
 
 function closeMenu() {
   dismissRecipeReveal();
+  state.ui.themePartId = null;
   state.ui.screen = "restaurant";
   dom.menuScreen.hidden = true;
+  dom.menuScreen.classList.remove("is-theme-sheet");
   setActiveNav("");
   saveState();
   updateTutorialDialogue();
@@ -3669,8 +3688,11 @@ function openMenu(screen, preferredTab = null) {
     showTutorialDialogue("recipe-locked");
     return;
   }
+  if (!dom.installPanel.hidden) closeInstallPanel();
+  if (state.ui.screen !== screen || dom.menuScreen.hidden) state.ui.themePartId = null;
   state.ui.screen = screen;
   state.ui.tab = preferredTab || (screen === "recipe" ? "craft" : screen === "missions" ? "main" : screen === "collection" ? "customers" : screen);
+  dom.menuScreen.classList.toggle("is-theme-sheet", screen === "theme");
   dom.menuScreen.hidden = false;
   setActiveNav(screen);
   updateTutorialDialogue();
@@ -3682,11 +3704,11 @@ function switchWorldArea(area) {
   const nextArea = area === "buffet" ? "buffet" : "restaurant";
   if (state.ui.area === nextArea) return true;
   state.ui.area = nextArea;
+  if (!dom.installPanel.hidden) closeInstallPanel();
   closeSpecialVisitorPanel(false);
   closeSpecialPromotionPanel();
   closeTipboxPanel();
   toggleDebugPanel(false);
-  dom.installPanel.hidden = true;
   closeMenu();
   updateHud();
   render();
@@ -4315,10 +4337,11 @@ function renderCollectionMenu() {
     rewardIngredients: chick.rewardIngredients,
     recipeName: chick.recipeName,
     themeName: THEME_NAMES[chick.themeId] || `테마 ${chick.themeId}`,
-    unlockLabel: chick.themeId === 1 && chick.slot === 0 ? "기본 병아리"
-      : chick.themeId === 1 && chick.slot === 1 ? `돌 테마 설비 ${Math.round(chick.threshold * 100)}%`
-        : chick.themeId === 1 ? "돌 테마 설비 100%"
-        : `테마 파츠 ${Math.round(chick.threshold * 100)}%`,
+    unlockLabel: Number(chick.purchaseRequirement || 0) === 0
+      ? "기본 병아리"
+      : Number(chick.themeId) === 1
+        ? `돌 테마 설비 ${chick.purchaseRequirement}종 설치`
+        : `${THEME_NAMES[chick.themeId] || "테마"} 파츠 ${chick.purchaseRequirement}종 보유`,
     available: allUnlockedThemeChicks().some((unlocked) => unlocked.customerId === chick.customerId),
   }));
   if (category === "specialCustomers") rows = tables.specialCustomers.map((item) => ({ id: item.id, name: item.specialCustomerType === 1 ? "도둑" : "투자자", icon: "assets/ui/chick/icon_chick_007.png" }));
@@ -4415,17 +4438,66 @@ function renderPerformanceManagement() {
   const current = activePerformance();
   const stageReady = installedRows(5).length > 0;
   dom.menuContent.innerHTML = `<section class="research-box"><h3>${current ? `공연팀 ${current.id} 공연 중` : "공연 무대"}</h3>
-    <p>${!stageReady ? "무대 시설을 먼저 설치해 주세요." : current ? `식당 가격 +${Math.round(current.abilityValue * 100)}% · ${Math.ceil(state.performance.remaining)}초 남음` : `다음 공연까지 ${Math.ceil(state.performance.cooldown)}초`}</p>
+    <p>${!stageReady ? "무대를 먼저 설치해 주세요." : current ? `식당 가격 +${Math.round(current.abilityValue * 100)}% · ${Math.ceil(state.performance.remaining)}초 남음` : `다음 공연까지 ${Math.ceil(state.performance.cooldown)}초`}</p>
     <button class="research-button" data-action="start-performance" ${stageReady && !current && state.performance.cooldown <= 0 ? "" : "disabled"}>공연 시작</button></section>
     ${tables.performances.map((row) => `<article class="feature-card ${state.collections.performers[row.id] ? "" : "is-locked"}"><img class="feature-icon" src="assets/ui/performance/icon_performance_${String(row.id).padStart(3, "0")}.png" alt="" /><div class="feature-copy"><strong>${state.collections.performers[row.id] ? `공연팀 ${row.id}` : "???"}</strong><small>가격 +${Math.round(row.abilityValue * 100)}% · ${row.performanceTime}초</small><small>${row.price ? `공연료 도토리 ${row.price}` : "무료 공연"}</small></div></article>`).join("")}`;
 }
 
-function themeProgressGauge(ratio, milestones) {
-  const percent = Math.max(0, Math.min(100, Number(ratio || 0) * 100));
-  return `<div class="theme-progress-gauge" aria-label="구매 진척도 ${Math.round(percent)}%">
+function themeChickProgressGauge(progress, milestones, progressUnit, requirementVerb) {
+  const percent = Math.max(0, Math.min(100, Number(progress.ratio || 0) * 100));
+  return `<div class="theme-progress-gauge theme-chick-gauge" aria-label="테마 진척도 ${progress.opened}/${progress.total}종">
     <div class="progress-track"><span style="width:${percent}%"></span></div>
-    <div class="theme-progress-markers">${milestones.map((milestone) =>
-      `<span style="left:${Math.max(0, Math.min(100, milestone.threshold * 100))}%;transform:${milestone.threshold <= 0 ? "translateX(0)" : milestone.threshold >= 1 ? "translateX(-100%)" : "translateX(-50%)"}">${milestone.label}</span>`).join("")}</div>
+    <div class="theme-chick-markers">${milestones.map((chick) => {
+    const requirement = Number(chick.purchaseRequirement || 0);
+    const threshold = progress.total ? requirement / progress.total : 0;
+    const markerPercent = Math.max(0, Math.min(100, threshold * 100));
+    const markerShift = threshold <= 0 ? "0%" : threshold >= 1 ? "-100%" : "-50%";
+    const unlocked = progress.opened >= requirement;
+    const condition = requirement ? `${progressUnit} ${requirement}종 ${requirementVerb}` : "기본 등장";
+    return `<span class="theme-chick-marker ${unlocked ? "is-unlocked" : "is-locked"}" style="left:${markerPercent}%;--theme-marker-shift:${markerShift}" title="${chick.customerName} · ${condition}" aria-label="${chick.customerName} · ${condition} · ${unlocked ? "등장" : "미등장"}">
+      <i aria-hidden="true"></i><img src="${guestIcon({ customerId: chick.customerId, commonId: chick.commonId })}" alt=""/>
+    </span>`;
+  }).join("")}</div>
+  </div>`;
+}
+
+function themePartDetailMarkup(row) {
+  if (!row) return "";
+  const opened = state.themes.opened.includes(row.id);
+  const active = state.themes.activeByFacility[row.facilityType] === row.id;
+  const available = isThemePartAvailable(row);
+  const collectible = row.purchaseType === 2;
+  const canBuy = available && !collectible && state.resources.acorns >= row.facilityPrice;
+  const facilityName = FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`;
+  const currentRevenue = Math.round((restaurantPriceUpMultiplier() - 1) * 100);
+  const afterRevenue = currentRevenue + (opened ? 0 : Math.round(Number(row.abilityValue || 0) * 100));
+  let action = "buy-theme";
+  let actionLabel = "구매하고 적용";
+  let disabled = !canBuy;
+  if (opened && active) {
+    action = "apply-theme";
+    actionLabel = "현재 적용 중";
+    disabled = true;
+  } else if (opened && available) {
+    action = "apply-theme";
+    actionLabel = "이 파츠 적용";
+    disabled = false;
+  } else if (!available) actionLabel = "해당 설비 설치 후 이용";
+  else if (collectible && !opened) actionLabel = "테마 전체 수집 보상";
+  const status = active ? "적용 중" : opened ? "보유 중" : collectible ? "수집 보상" : "미보유";
+  return `<div class="theme-part-modal" role="presentation">
+    <button type="button" class="theme-part-backdrop" data-action="theme-part-close" aria-label="파츠 상세 닫기"></button>
+    <section class="theme-part-dialog" role="dialog" aria-modal="true" aria-label="${facilityName} 파츠 상세">
+      <button type="button" class="theme-part-dialog-close" data-action="theme-part-close">닫기</button>
+      <small>${THEME_NAMES[row.facilityTheme] || `테마 ${row.facilityTheme}`}</small>
+      <img src="${themeFacilityIcon(row)}" alt=""/>
+      <h3>${facilityName}</h3>
+      <span class="theme-part-detail-status ${active ? "is-active" : opened ? "is-owned" : ""}">${status}</span>
+      <div class="theme-part-income"><span>보유 수익 효과</span><strong>+${Math.round(Number(row.abilityValue || 0) * 100)}%</strong><small>구매 즉시 레스토랑 수익에 영구 누적</small></div>
+      <div class="theme-part-revenue-preview"><span>현재 누적 수익 <b>+${currentRevenue}%</b></span>${opened ? "" : `<span>구매 후 <b>+${afterRevenue}%</b></span>`}</div>
+      <div class="theme-part-price"><span>가격</span>${collectible ? `<strong>전체 수집 보상</strong>` : `<strong><img src="assets/ui/currency/icon_currency_001.png" alt=""/>${formatNumber(row.facilityPrice)}</strong>`}</div>
+      <button type="button" class="theme-part-primary" data-action="${action}" data-id="${row.id}" ${disabled ? "disabled" : ""}>${actionLabel}</button>
+    </section>
   </div>`;
 }
 
@@ -4434,49 +4506,44 @@ function renderThemeManagement() {
   const selectedTheme = themeIds.includes(Number(state.ui.themeId)) ? Number(state.ui.themeId) : themeIds[0];
   state.ui.themeId = selectedTheme;
   const rows = tables.restaurantThemes.filter((row) => row.facilityTheme === selectedTheme);
-  const openedCount = rows.filter((row) => state.themes.opened.includes(row.id)).length;
   const applicableCount = rows.filter((row) => state.themes.opened.includes(row.id)
     && isThemeFacilityAvailable(row.facilityType)
     && state.themes.activeByFacility[row.facilityType] !== row.id).length;
   const milestones = themeChickMilestones(selectedTheme);
-  const unlockedChicks = unlockedThemeChicks(selectedTheme);
   const progress = themeChickProgress(selectedTheme);
-  const milestoneCards = milestones.map((chick) => {
-    const requiredCount = Math.ceil(progress.total * chick.threshold);
-    const unlocked = unlockedChicks.some((item) => item.customerId === chick.customerId);
-    const milestoneLabel = selectedTheme === 1 && chick.slot === 0 ? "기본" : `${Math.round(chick.threshold * 100)}%`;
-    return `<div class="theme-chick-chip ${unlocked ? "is-unlocked" : "is-locked"}"><span class="theme-chick-mystery" aria-hidden="true">🐣</span><div><b>${chick.customerName}</b><small>${milestoneLabel} · ${unlocked ? "등장" : "잠김"}</small><em>${unlocked ? "등장 완료" : `${progress.opened}/${requiredCount}`}</em></div></div>`;
-  }).join("");
-  const gaugeMilestones = selectedTheme === 1
-    ? milestones.map((chick) => ({ threshold: chick.slot === 0 ? 0 : chick.threshold, label: chick.slot === 0 ? "기본" : `${Math.round(chick.threshold * 100)}%` }))
-    : milestones.map((chick) => ({ threshold: chick.threshold, label: `${Math.round(chick.threshold * 100)}%` }));
-  const gauge = themeProgressGauge(progress.ratio, gaugeMilestones);
+  const progressUnit = selectedTheme === 1 ? "설비" : "파츠";
+  const requirementVerb = selectedTheme === 1 ? "설치" : "보유";
+  const selectedPart = rows.find((row) => row.id === Number(state.ui.themePartId)) || null;
+  const themeDisplayName = `${String(THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`).replace(/\s*테마$/, "")} 식당`;
 
-  dom.menuContent.innerHTML = `<div class="theme-tabs" aria-label="테마 선택">${themeIds.map((themeId) => {
+  dom.menuContent.innerHTML = `<div class="theme-management">
+    <div class="theme-tabs" aria-label="테마 선택">${themeIds.map((themeId) => {
     const representative = tables.restaurantThemes.find((row) => row.facilityTheme === themeId && row.facilityType === 1)
       || tables.restaurantThemes.find((row) => row.facilityTheme === themeId);
-    return `<button type="button" data-action="theme-select" data-id="${themeId}" class="${themeId === selectedTheme ? "is-active" : ""}"><img src="${themeFacilityIcon(representative)}" alt=""/><span>${THEME_NAMES[themeId] || `테마 ${themeId}`}</span></button>`;
-  }).join("")}</div>
-    <section class="theme-summary"><div><strong>${THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`}</strong><span>진척도 ${progress.opened}/${progress.total}</span>${gauge}</div><button class="card-action" data-action="apply-theme-all" data-id="${selectedTheme}" ${applicableCount ? "" : "disabled"}>전체 적용</button></section>
-    <div class="theme-chick-milestones">${milestoneCards}</div>
-    ${rows.map((row) => {
+    return `<button type="button" data-action="theme-select" data-id="${themeId}" class="${themeId === selectedTheme ? "is-active" : ""}" aria-label="${THEME_NAMES[themeId] || `테마 ${themeId}`}" title="${THEME_NAMES[themeId] || `테마 ${themeId}`}"><img src="${themeFacilityIcon(representative)}" alt=""/></button>`;
+    }).join("")}</div>
+    <section class="theme-set-panel">
+      <header><strong>${themeDisplayName}</strong><span>${progressUnit} ${progress.opened} / ${progress.total}종</span></header>
+      ${themeChickProgressGauge(progress, milestones, progressUnit, requirementVerb)}
+      <div class="theme-part-grid">${rows.map((row) => {
     const opened = state.themes.opened.includes(row.id);
     const active = state.themes.activeByFacility[row.facilityType] === row.id;
-    const available = isThemeFacilityAvailable(row.facilityType);
+    const available = isThemePartAvailable(row);
     const collectible = row.purchaseType === 2;
-    const canBuy = available && !collectible && state.resources.acorns >= row.facilityPrice;
-    let label = `${formatNumber(row.facilityPrice)} 구매`;
-    let action = "buy-theme";
-    let disabled = !canBuy;
-    if (!available) label = "설비 필요";
-    else if (collectible && !opened) label = "전체 수집 보상";
-    if (opened) { action = "apply-theme"; label = active ? "적용 중" : "적용"; disabled = active; }
-    return `<article class="feature-card ${available ? "" : "is-locked"}"><img class="feature-icon" src="${themeFacilityIcon(row)}" alt=""/><div class="feature-copy"><strong>${FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`}</strong><small>${THEME_NAMES[selectedTheme]} · 수익 +${Math.round(row.abilityValue * 100)}%</small></div><button class="card-action" data-action="${action}" data-id="${row.id}" ${disabled ? "disabled" : ""}>${label}</button></article>`;
-  }).join("")}`;
+    const statusClass = active ? "is-active" : opened ? "is-owned" : "is-priced";
+    const status = active ? "적용 중" : opened ? "보유 중" : collectible ? "수집 보상" : `<img src="assets/ui/currency/icon_currency_001.png" alt=""/>${formatNumber(row.facilityPrice)}`;
+    const facilityName = FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`;
+    return `<button type="button" class="theme-part-card ${statusClass} ${available || opened ? "" : "is-unavailable"}" data-action="theme-part-detail" data-id="${row.id}" aria-label="${facilityName} · ${active ? "적용 중" : opened ? "보유 중" : `가격 ${formatNumber(row.facilityPrice)}`}"><img class="theme-part-art" src="${themeFacilityIcon(row)}" alt=""/><span>${status}</span></button>`;
+  }).join("")}</div>
+    </section>
+    <footer class="theme-apply-footer"><button type="button" data-action="apply-theme-all" data-id="${selectedTheme}" ${applicableCount ? "" : "disabled"}>보유 파츠 전체 적용</button></footer>
+  </div>${themePartDetailMarkup(selectedPart)}`;
   requestAnimationFrame(() => {
     const tabs = dom.menuContent.querySelector(".theme-tabs");
     const selected = tabs?.querySelector(`[data-id="${selectedTheme}"]`);
     if (tabs && selected) tabs.scrollLeft = Math.max(0, selected.offsetLeft - (tabs.clientWidth - selected.clientWidth) / 2);
+    dom.menuContent.scrollTop = themeMenuScrollTop;
+    if (selectedPart) dom.menuContent.querySelector(".theme-part-dialog-close")?.focus({ preventScroll: true });
   });
 }
 
@@ -4537,6 +4604,7 @@ function renderKnowhowMenu() {
 }
 
 function renderMenu() {
+  dom.menuContent.classList.toggle("is-theme-content", state.ui.screen === "theme");
   if (state.ui.screen === "recipe") renderRecipeMenu();
   else if (state.ui.screen === "buffet") renderBuffetStandMenu();
   else if (state.ui.screen === "contest") renderContestMenu();
@@ -4570,6 +4638,7 @@ function resetGame() {
   toastTimer = 0;
   guestToastTimer = 0;
   dom.guestToast.hidden = true;
+  dom.installPanel.hidden = true;
   dom.offlineRewardPanel.hidden = true;
   dom.specialPromoPanel.hidden = true;
   closeTipboxPanel();
@@ -4577,7 +4646,6 @@ function resetGame() {
   toggleDebugPanel(false);
   dismissRecipeReveal();
   state = createInitialState();
-  dom.installPanel.hidden = true;
   closeMenu();
   showToast("새 식당을 시작합니다.");
   saveState();
@@ -4598,7 +4666,10 @@ function toggleDebugPanel(force) {
   dom.debugPanel.hidden = !shouldOpen;
   dom.debugToggleButton.classList.toggle("is-open", shouldOpen);
   dom.debugToggleButton.setAttribute("aria-expanded", String(shouldOpen));
-  if (shouldOpen) closeSpecialPromotionPanel();
+  if (shouldOpen) {
+    closeSpecialPromotionPanel();
+    if (!dom.installPanel.hidden) closeInstallPanel();
+  }
 }
 
 function debugInstallAllFacilities() {
@@ -4606,6 +4677,7 @@ function debugInstallAllFacilities() {
   const added = tables.installs.filter((row) => !before.has(row.id));
   state.installed = [...new Set([...state.installed, ...tables.installs.map((row) => row.id)])].sort((a, b) => a - b);
   dom.installPanel.hidden = true;
+  state.ui.selectedInstallId = null;
   saveState();
   updateHud();
   render();
@@ -4682,12 +4754,21 @@ function frame(now) {
 }
 
 function renderGameToText() {
-  const candidates = installCandidates().map((row) => ({
-    id: row.id,
-    name: FACILITY_META[row.facilityType]?.name,
-    cost: row.facilityPrice,
-    ...facilityPlacement(row),
-  }));
+  const inspectedThemeId = Number(state.ui.themeId || 1);
+  const inspectedThemeRows = tables.restaurantThemes.filter((row) => row.facilityTheme === inspectedThemeId);
+  const candidates = installCandidates().map((row) => {
+    const position = facilityPlacement(row);
+    return {
+      id: row.id,
+      facilityType: row.facilityType,
+      facilityGroup: row.facilityGroup,
+      name: FACILITY_META[row.facilityType]?.name,
+      cost: row.facilityPrice,
+      x: position.x,
+      y: position.y,
+      position,
+    };
+  });
   return JSON.stringify({
     coordinateSystem: "canvas 480x900; origin top-left; x right; y down",
     mode: state.ui.area,
@@ -4698,13 +4779,28 @@ function renderGameToText() {
     resources: state.resources,
     debug: {
       panelVisible: !dom.debugPanel.hidden,
-      installedFacilities: state.installed.length,
+      installedFacilities: tables.installs.filter((row) => isInstalled(row.id)).length,
       totalInstallFacilities: tables.installs.length,
       supportedResources: Object.keys(DEBUG_RESOURCE_NAMES),
       supportedIngredients: Object.values(GAME_INGREDIENTS).map((ingredient) => ({ id: ingredient.id, name: ingredient.name })),
     },
     installedFacilityIds: state.installed,
     installCandidates: candidates,
+    installationSystem: {
+      mode: "individual-field-installation",
+      separateInstallPanel: true,
+      selectedInstallId: Number(state.ui.selectedInstallId) || null,
+      candidates,
+      stoneParts: tables.restaurantThemes.filter((row) => Number(row.facilityTheme) === 1).map((row) => ({
+        id: row.id,
+        facilityType: row.facilityType,
+        name: FACILITY_META[row.facilityType]?.name,
+        cost: row.facilityPrice,
+        owned: state.themes.opened.includes(row.id),
+        installedIds: tables.installs.filter((item) => Number(item.facilityType) === Number(row.facilityType))
+          .map((item) => item.id).filter((id) => isInstalled(id)),
+      })),
+    },
     tutorial: {
       activeId: state.tutorial?.activeId || null,
       text: TUTORIAL_DIALOGUES[state.tutorial?.activeId] || null,
@@ -4937,6 +5033,26 @@ function renderGameToText() {
     tipRule: { basis: "final-meal-price", rate: .1, eligibleGuests: "all-except-disappointed", cappedByTipboxCapacity: true },
     metrics: state.metrics,
     currentScreen: state.ui.screen,
+    themeManagement: state.ui.screen === "theme" ? {
+      selectedThemeId: inspectedThemeId,
+      selectedPartId: Number(state.ui.themePartId) || null,
+      presentation: "bottom-half-sheet",
+      sheetStartPercent: 52,
+      restaurantVisibleAbove: true,
+      defaultCardContent: "price-or-owned-or-active-only",
+      incomeVisibility: state.ui.themePartId ? "detail-popup" : "hidden",
+      openedCount: inspectedThemeRows.filter((row) => state.themes.opened.includes(row.id)).length,
+      totalCount: inspectedThemeRows.length,
+      parts: inspectedThemeRows.map((row) => ({
+        id: row.id,
+        facilityType: row.facilityType,
+        status: state.themes.activeByFacility[row.facilityType] === row.id
+          ? "active"
+          : state.themes.opened.includes(row.id) ? "owned" : "priced",
+        price: row.facilityPrice,
+        incomePercent: Math.round(Number(row.abilityValue || 0) * 100),
+      })),
+    } : null,
     recipes: {
       systemUnlocked: isRecipeSystemUnlocked(),
       unlockFacility: "도마 테이블",
@@ -5071,7 +5187,8 @@ function renderGameToText() {
         recipeName: chick.recipeName,
         recipeIngredients: chick.ingredientRequirements.map((ingredient) => ({ ingredientId: ingredient.id, name: ingredient.name })),
       })),
-      themeChickThresholds: THEME_CHICK_THRESHOLDS,
+      themeChickMilestoneRule: "stone-installed-facility-types;other-owned-theme-part-types",
+      themeChickPurchaseRequirements: THEME_CHICK_PURCHASE_REQUIREMENTS,
       themePartPrices: Object.fromEntries(Object.keys(THEME_NAMES).map((themeId) => {
         const prices = tables.restaurantThemes
           .filter((row) => Number(row.facilityTheme) === Number(themeId) && Number(row.purchaseType) !== 2)
@@ -5081,7 +5198,16 @@ function renderGameToText() {
       guestGrades: GUEST_GRADES,
       themeChickProgress: Object.fromEntries(Object.keys(THEME_NAMES).map((themeId) => {
         const progress = themeChickProgress(Number(themeId));
-        return [themeId, { ...progress, unlocked: unlockedThemeChicks(Number(themeId)).map((chick) => chick.customerId) }];
+        return [themeId, {
+          ...progress,
+          requirements: themeChickMilestones(Number(themeId)).map((chick) => ({
+            customerId: chick.customerId,
+            customerName: chick.customerName,
+            purchaseCount: chick.purchaseRequirement,
+            ownedTypeCount: chick.purchaseRequirement,
+          })),
+          unlocked: unlockedThemeChicks(Number(themeId)).map((chick) => chick.customerId),
+        }];
       })),
       ingredientDropChances: Object.fromEntries(CORE_PROGRESSION.map((route) => [route.ingredientId, GUEST_INGREDIENT_DROP_CHANCE])),
       ingredientDropRule: {
@@ -5150,7 +5276,6 @@ function renderGameToText() {
       offers: actor.offers || null,
       trade: actor.trade || null,
     })),
-    selectedInstallId: state.ui.selectedInstallId,
   });
 }
 
@@ -5262,11 +5387,24 @@ dom.menuContent.addEventListener("click", (event) => {
   if (button.dataset.action === "attach-sticker") attachStaffSticker(id);
   if (button.dataset.action === "level-staff") levelUpStaff(id);
   if (button.dataset.action === "start-performance") startPerformance();
+  if (button.dataset.action === "theme-part-detail") {
+    themeMenuScrollTop = dom.menuContent.scrollTop;
+    state.ui.themePartId = id;
+    renderMenu();
+  }
+  if (button.dataset.action === "theme-part-close") {
+    const partId = Number(state.ui.themePartId);
+    state.ui.themePartId = null;
+    renderMenu();
+    requestAnimationFrame(() => dom.menuContent.querySelector(`[data-action="theme-part-detail"][data-id="${partId}"]`)?.focus({ preventScroll: true }));
+  }
   if (button.dataset.action === "buy-theme") buyTheme(id);
   if (button.dataset.action === "apply-theme") applyTheme(id);
   if (button.dataset.action === "apply-theme-all") applyThemeAll(id);
   if (button.dataset.action === "theme-select") {
     state.ui.themeId = id;
+    state.ui.themePartId = null;
+    themeMenuScrollTop = 0;
     renderMenu();
   }
   if (button.dataset.action === "expand-ingredient-storage") expandIngredientStorage();
@@ -5285,6 +5423,13 @@ dom.recipeReveal.addEventListener("click", (event) => {
   if (event.target === dom.recipeReveal || event.target.closest('[data-action="dismiss-recipe-reveal"]')) dismissRecipeReveal();
 });
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.ui.screen === "theme" && state.ui.themePartId) {
+    const partId = Number(state.ui.themePartId);
+    state.ui.themePartId = null;
+    renderMenu();
+    requestAnimationFrame(() => dom.menuContent.querySelector(`[data-action="theme-part-detail"][data-id="${partId}"]`)?.focus({ preventScroll: true }));
+    return;
+  }
   if (event.key.toLowerCase() === "f") {
     if (document.fullscreenElement) document.exitFullscreen();
     else document.querySelector(".game-frame").requestFullscreen();

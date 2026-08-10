@@ -13,14 +13,27 @@
         : rows,
     ]));
 
+    const excludedThemeFacilityTypes = new Set([12, 13]);
     const rewardGroups = new Map();
     raw.RewardGroup.forEach((row) => {
       if (!rewardGroups.has(row.rewardId)) rewardGroups.set(row.rewardId, []);
       rewardGroups.get(row.rewardId).push(row);
     });
     const woodThemePrices = new Map(raw.ThemeFacility
-      .filter((row) => row.areaType === 1 && Number(row.facilityTheme) === 2 && Number(row.purchaseType) !== 2)
+      .filter((row) => row.areaType === 1
+        && Number(row.facilityTheme) === 2
+        && Number(row.purchaseType) !== 2
+        && !excludedThemeFacilityTypes.has(Number(row.facilityType)))
       .map((row) => [Number(row.facilityType), Math.max(1, Math.ceil(Number(row.facilityPrice) / 2))]));
+    const installs = raw.InstallFacility
+      .filter((row) => row.areaType === 1)
+      .map((row) => ({ ...row, facilityPrice: Math.max(1, Math.ceil(Number(row.facilityPrice) / 2)) }))
+      .sort((a, b) => a.sequence - b.sequence || a.id - b.id);
+    const stoneThemePrices = new Map();
+    installs.forEach((row) => {
+      const facilityType = Number(row.facilityType);
+      if (!stoneThemePrices.has(facilityType)) stoneThemePrices.set(facilityType, Number(row.facilityPrice));
+    });
 
     const availableMissionActions = new Set([1, 2, 3, 4, 6, 7, 10, 11, 12, 13, 14]);
     const recipes = raw.Recipe.map((row) => ({
@@ -50,20 +63,21 @@
       performances: raw.Performance,
       specialCustomers: raw.SpecialCustomer.filter((row) => row.areaType === 1),
       restaurantThemes: raw.ThemeFacility
-        .filter((row) => row.areaType === 1 && Number(row.facilityTheme) <= 15)
+        .filter((row) => row.areaType === 1
+          && Number(row.facilityTheme) <= 15
+          && !excludedThemeFacilityTypes.has(Number(row.facilityType)))
         .map((row) => ({
           ...row,
           facilityPrice: Number(row.purchaseType) === 2
             ? 0
-            : window.CHICK_CONFIG.restaurantThemePartPrice(
-              row.facilityTheme,
-              woodThemePrices.get(Number(row.facilityType)),
-            ),
+            : Number(row.facilityTheme) === 1
+              ? Number(stoneThemePrices.get(Number(row.facilityType)) || 10)
+              : window.CHICK_CONFIG.restaurantThemePartPrice(
+                row.facilityTheme,
+                woodThemePrices.get(Number(row.facilityType)),
+              ),
         })),
-      installs: raw.InstallFacility
-        .filter((row) => row.areaType === 1)
-        .map((row) => ({ ...row, facilityPrice: Math.max(1, Math.ceil(Number(row.facilityPrice) / 2)) }))
-        .sort((a, b) => a.sequence - b.sequence || a.id - b.id),
+      installs,
     });
   }
 

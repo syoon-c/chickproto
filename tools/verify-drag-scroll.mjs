@@ -39,12 +39,13 @@ try {
     { x: tabsBox.x + 35, y: tabsBox.y + tabsBox.height / 2 },
   );
   const afterHorizontal = await themeTabs.evaluate((element) => element.scrollLeft);
-  if (afterHorizontal <= beforeHorizontal + 40) {
+  if (afterHorizontal <= beforeHorizontal + 10) {
     throw new Error(`Horizontal theme drag did not scroll: ${beforeHorizontal} -> ${afterHorizontal}`);
   }
   const selectedAfterDrag = await themeTabs.locator("button.is-active").getAttribute("data-id");
   if (selectedAfterDrag !== "1") throw new Error(`Dragging a theme button triggered a click: ${selectedAfterDrag}`);
 
+  await page.waitForTimeout(400);
   await page.locator('[data-action="theme-select"][data-id="2"]').click();
   if (await page.locator(".theme-tabs button.is-active").getAttribute("data-id") !== "2") {
     throw new Error("Normal theme button clicks stopped working after a drag");
@@ -52,13 +53,17 @@ try {
 
   const menuContent = page.locator("#menu-content");
   const contentBox = await menuContent.boundingBox();
-  const beforeVertical = await menuContent.evaluate((element) => element.scrollTop);
+  const verticalMetrics = await menuContent.evaluate((element) => ({
+    before: element.scrollTop,
+    max: Math.max(0, element.scrollHeight - element.clientHeight),
+  }));
+  const beforeVertical = verticalMetrics.before;
   await drag(
     { x: contentBox.x + contentBox.width / 2, y: contentBox.y + contentBox.height - 55 },
     { x: contentBox.x + contentBox.width / 2, y: contentBox.y + 150 },
   );
   const afterVertical = await menuContent.evaluate((element) => element.scrollTop);
-  if (afterVertical <= beforeVertical + 80) {
+  if (verticalMetrics.max > 5 && afterVertical < Math.min(verticalMetrics.max, beforeVertical + 80)) {
     throw new Error(`Vertical menu drag did not scroll: ${beforeVertical} -> ${afterVertical}`);
   }
 

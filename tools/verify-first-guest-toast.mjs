@@ -61,7 +61,8 @@ try {
 
   await page.locator('[data-screen="theme"]').click();
   await page.locator('[data-action="theme-select"][data-id="2"]').click();
-  await page.locator('[data-action="buy-theme"]:not(:disabled)').first().click();
+  await page.locator('.theme-part-card.is-priced:not(.is-unavailable):has(> span > img)').first().click();
+  await page.locator('[data-action="buy-theme"]:not(:disabled)').click();
   current = await gameState();
   if (!current.newGuestAlert.visible || !current.newGuestAlert.text.includes("기본 병아리")
     || !current.toast.visible || current.toast.variant !== "default" || !current.toast.text) {

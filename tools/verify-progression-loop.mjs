@@ -50,6 +50,7 @@ try {
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: "load" });
   for (const name of ["조명", "테이블", "조리기구"]) {
+    if (await page.locator("#chef-dialogue").isVisible()) await page.locator("#chef-dialogue").click();
     const candidate = (await state()).installCandidates.find((item) => item.name === name);
     await clickCanvas(candidate.x, candidate.y);
     await page.locator("#install-confirm-btn").click();
@@ -70,6 +71,7 @@ try {
 
   await page.locator('[data-screen="theme"]').click();
   await page.locator('[data-action="theme-select"][data-id="6"]').click();
+  await page.locator('[data-action="theme-part-detail"][data-id="6001"]').click();
   await page.locator('[data-action="buy-theme"][data-id="6001"]').click();
   let current = await state();
   if (current.progression.unlockedThemes.includes(6) || current.progression.unlockedCustomers.includes(4)) {
@@ -81,6 +83,7 @@ try {
   if (current.resources.acorns !== 0) throw new Error("Camping theme part did not deduct its temporary price");
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(out, "01-theme-unlocks-chick.png"), fullPage: true });
+  await page.locator('[data-action="theme-part-close"]').last().click();
   await page.locator("#menu-close-btn").click();
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(out, "01b-single-part-world.png"), fullPage: true });
@@ -99,12 +102,16 @@ try {
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="theme"]').click();
   await page.locator('[data-action="theme-select"][data-id="6"]').click();
-  while (await page.locator('[data-action="buy-theme"]').count()) {
-    await page.locator('[data-action="buy-theme"]').first().click();
+  while (await page.locator('.theme-part-card.is-priced:has(> span > img)').count()) {
+    await page.locator('.theme-part-card.is-priced:has(> span > img)').first().click();
+    await page.locator('[data-action="buy-theme"]:not(:disabled)').click();
+    await page.locator('[data-action="theme-part-close"]').last().click();
   }
   current = await state();
   const campingChicks = current.progression.themeChickProgress[6].unlocked;
-  if (!current.progression.unlockedThemes.includes(6) || !current.progression.unlockedCustomers.includes(4) || campingChicks.length !== 3) {
+  if (!current.progression.unlockedThemes.includes(6)
+    || campingChicks.length !== 3
+    || campingChicks.some((customerId) => !current.progression.unlockedCustomers.includes(customerId))) {
     throw new Error(`Completing all camping facility parts did not unlock three chicks: ${JSON.stringify(campingChicks)}`);
   }
   await page.waitForTimeout(250);
@@ -141,6 +148,7 @@ try {
   await page.locator("#menu-close-btn").click();
   await page.locator('[data-screen="theme"]').click();
   await page.locator('[data-action="theme-select"][data-id="8"]').click();
+  await page.locator('[data-action="theme-part-detail"][data-id="8001"]').click();
   await page.locator('[data-action="buy-theme"][data-id="8001"]').click();
   await page.locator("#menu-close-btn").click();
   await page.evaluate(() => {

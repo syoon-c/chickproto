@@ -101,6 +101,7 @@ try {
   await page.locator("#menu-close-btn").click();
   await page.locator('[data-screen="theme"]').click();
   await page.locator('[data-action="theme-select"][data-id="6"]').click();
+  await page.locator('[data-action="theme-part-detail"][data-id="6001"]').click();
   await page.locator('[data-action="buy-theme"][data-id="6001"]').click();
   await page.screenshot({ path: path.join(out, "04-theme.png"), fullPage: true });
   const managed = await page.evaluate(() => JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")));

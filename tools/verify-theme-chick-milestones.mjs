@@ -56,7 +56,7 @@ try {
     const woodByType = new Map(loaded
       .filter((row) => Number(row.facilityTheme) === 2 && Number(row.purchaseType) !== 2)
       .map((row) => [Number(row.facilityType), Number(row.facilityPrice)]));
-    return loaded.filter((row) => Number(row.purchaseType) !== 2).map((row) => ({
+    return loaded.filter((row) => Number(row.purchaseType) !== 2 && Number(row.facilityTheme) > 1).map((row) => ({
       themeId: Number(row.facilityTheme),
       facilityType: Number(row.facilityType),
       expected: window.CHICK_CONFIG.restaurantThemePartPrice(row.facilityTheme, woodByType.get(Number(row.facilityType))),
@@ -70,6 +70,12 @@ try {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
     saved.crafting.ingredients[30039] = 3;
+    const cuttingBoardPart = window.CHICK_TABLE_SOURCE.ThemeFacility
+      .find((row) => row.areaType === 1 && row.facilityTheme === 1 && row.facilityType === 8);
+    const cuttingBoardInstall = window.CHICK_TABLE_SOURCE.InstallFacility
+      .find((row) => row.areaType === 1 && row.facilityType === 8);
+    saved.themes.opened = [...new Set([...saved.themes.opened, cuttingBoardPart.id])];
+    saved.installed = [...new Set([...saved.installed, cuttingBoardInstall.id])];
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
@@ -84,34 +90,37 @@ try {
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
-    const stoneTypes = new Set(window.CHICK_TABLE_SOURCE.ThemeFacility
-      .filter((row) => row.areaType === 1 && row.facilityTheme === 1)
-      .map((row) => row.facilityType));
+    const stoneRows = window.CHICK_TABLE_SOURCE.ThemeFacility
+      .filter((row) => row.areaType === 1 && row.facilityTheme === 1);
+    const openedStoneRows = stoneRows.filter((row) => ![12, 13].includes(Number(row.facilityType))).slice(0, 8);
+    const stoneTypes = new Set(openedStoneRows.map((row) => row.facilityType));
     const stoneInstalls = window.CHICK_TABLE_SOURCE.InstallFacility
       .filter((row) => row.areaType === 1 && stoneTypes.has(row.facilityType));
-    saved.installed = stoneInstalls.slice(0, Math.ceil(stoneInstalls.length * .7)).map((row) => row.id);
+    saved.themes.opened = openedStoneRows.map((row) => row.id);
+    saved.installed = stoneInstalls.map((row) => row.id);
     saved.resources.acorns = 100000;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
   current = await state();
   if (current.progression.themeChickProgress[1].unlocked.length !== 2) {
-    throw new Error("Installing 70% of Stone facilities must unlock the second chick");
+    throw new Error("Buying 8 Stone parts must unlock the second chick");
   }
   const stoneMiddleRoute = current.progression.unlockedChickRoutes.find((route) => route.customerId === 10012);
   if (stoneMiddleRoute?.customerName !== "공룡 병아리") {
-    throw new Error(`The Stone 70% chick must be the dinosaur chick: ${JSON.stringify(stoneMiddleRoute)}`);
+    throw new Error(`The Stone 8-part chick must be the dinosaur chick: ${JSON.stringify(stoneMiddleRoute)}`);
   }
   await page.locator('[data-screen="theme"]').click();
   await page.waitForTimeout(200);
-  await page.screenshot({ path: path.join(out, "00c-stone-three-chicks-70-percent.png"), fullPage: true });
+  await page.screenshot({ path: path.join(out, "00c-stone-second-chick-8-parts.png"), fullPage: true });
 
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
-    const stoneTypes = new Set(window.CHICK_TABLE_SOURCE.ThemeFacility
-      .filter((row) => row.areaType === 1 && row.facilityTheme === 1)
-      .map((row) => row.facilityType));
+    const stoneRows = window.CHICK_TABLE_SOURCE.ThemeFacility
+      .filter((row) => row.areaType === 1 && row.facilityTheme === 1);
+    const stoneTypes = new Set(stoneRows.map((row) => row.facilityType));
+    saved.themes.opened = stoneRows.map((row) => row.id);
     saved.installed = window.CHICK_TABLE_SOURCE.InstallFacility
       .filter((row) => row.areaType === 1 && stoneTypes.has(row.facilityType))
       .map((row) => row.id);
@@ -138,13 +147,13 @@ try {
   await page.screenshot({ path: path.join(out, "00d-stone-three-chicks-complete.png"), fullPage: true });
 
   const total = current.progression.themeChickProgress[6].total;
-  const required30 = Math.ceil(total * .3);
-  const required70 = Math.ceil(total * .7);
+  const requiredFirst = 4;
+  const requiredSecond = 8;
   const checks = [
-    [required30 - 1, 0],
-    [required30, 1],
-    [required70 - 1, 1],
-    [required70, 2],
+    [requiredFirst - 1, 0],
+    [requiredFirst, 1],
+    [requiredSecond - 1, 1],
+    [requiredSecond, 2],
     [total - 1, 2],
     [total, 3],
   ];
@@ -156,12 +165,12 @@ try {
     if (progress.opened !== partCount || progress.unlocked.length !== chickCount) {
       throw new Error(`Camping ${partCount}/${total} should unlock ${chickCount} chicks: ${JSON.stringify(progress)}`);
     }
-    if (partCount === required70 || partCount === total) {
+    if (partCount === requiredSecond || partCount === total) {
       await page.locator('[data-screen="theme"]').click();
       await page.locator('[data-action="theme-select"][data-id="6"]').click();
       await page.waitForFunction(() => [...document.images].every((image) => image.complete));
       await page.waitForTimeout(250);
-      await page.screenshot({ path: path.join(out, `${partCount === total ? "100" : "70"}-percent.png`), fullPage: true });
+      await page.screenshot({ path: path.join(out, `${partCount}-parts.png`), fullPage: true });
     }
   }
 
@@ -214,7 +223,7 @@ try {
   fs.writeFileSync(path.join(out, "state.json"), JSON.stringify(current, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`THEME_CHICK_MILESTONES_OK stone=1/2/3 campingTotal=${total} thresholds=${required30}/${required70}/${total}`);
+  console.log(`THEME_CHICK_MILESTONES_OK stone=0/8/11 campingTotal=${total} purchases=${requiredFirst}/${requiredSecond}/${total}`);
 } finally {
   await browser.close();
 }
