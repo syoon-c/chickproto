@@ -122,6 +122,7 @@ let specialPromotionDetailIngredientId = null;
 let knowhowMapScroll = { left: 30, top: 0 };
 let themeMenuScrollTop = 0;
 const RECIPE_RESEARCH_DURATION = 2.4;
+const THEME_COMPLETION_MENU_PRICE_BONUS = .2;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
 const STARTER_INGREDIENTS = Object.freeze({
   [GAME_INGREDIENTS.leaf.id]: 1,
@@ -915,12 +916,20 @@ function recipeLevelPrice(recipe, owned) {
     * (1 + Math.max(0, Number(owned?.level || 1) - 1) * RECIPE_LEVEL_PRICE_BONUS);
 }
 
+function completedThemeIds() {
+  return Object.keys(THEME_NAMES).map(Number).filter((themeId) => {
+    const progress = themeChickProgress(themeId);
+    return progress.total > 0 && progress.opened >= progress.total;
+  });
+}
+
 function restaurantPriceUpMultiplier() {
   const opened = new Set((state.themes.opened || []).map(Number));
-  const bonus = tables.restaurantThemes.reduce((sum, row) => (
+  const partBonus = tables.restaurantThemes.reduce((sum, row) => (
     opened.has(Number(row.id)) ? sum + Number(row.abilityValue || 0) : sum
   ), 0);
-  return 1 + Math.max(0, bonus);
+  const completionBonus = completedThemeIds().length * THEME_COMPLETION_MENU_PRICE_BONUS;
+  return 1 + Math.max(0, partBonus + completionBonus);
 }
 
 function satisfactionPriceMultiplier(mood) {
@@ -4470,7 +4479,13 @@ function themePartDetailMarkup(row) {
   const canBuy = available && !collectible && state.resources.acorns >= row.facilityPrice;
   const facilityName = FACILITY_META[row.facilityType]?.name || `설비 ${row.facilityType}`;
   const currentRevenue = Math.round((restaurantPriceUpMultiplier() - 1) * 100);
-  const afterRevenue = currentRevenue + (opened ? 0 : Math.round(Number(row.abilityValue || 0) * 100));
+  const purchaseRows = tables.restaurantThemes.filter((item) => Number(item.facilityTheme) === Number(row.facilityTheme)
+    && Number(item.purchaseType) === 1);
+  const completesTheme = !opened && purchaseRows.every((item) => Number(item.id) === Number(row.id)
+    || state.themes.opened.includes(item.id));
+  const afterRevenue = currentRevenue
+    + (opened ? 0 : Math.round(Number(row.abilityValue || 0) * 100))
+    + (completesTheme ? Math.round(THEME_COMPLETION_MENU_PRICE_BONUS * 100) : 0);
   let action = "buy-theme";
   let actionLabel = "구매하고 적용";
   let disabled = !canBuy;
@@ -4513,6 +4528,7 @@ function renderThemeManagement() {
   const progress = themeChickProgress(selectedTheme);
   const progressUnit = selectedTheme === 1 ? "설비" : "파츠";
   const requirementVerb = selectedTheme === 1 ? "설치" : "보유";
+  const completionAchieved = progress.total > 0 && progress.opened >= progress.total;
   const selectedPart = rows.find((row) => row.id === Number(state.ui.themePartId)) || null;
   const themeDisplayName = `${String(THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`).replace(/\s*테마$/, "")} 식당`;
 
@@ -4525,6 +4541,9 @@ function renderThemeManagement() {
     <section class="theme-set-panel">
       <header><strong>${themeDisplayName}</strong><span>${progressUnit} ${progress.opened} / ${progress.total}종</span></header>
       ${themeChickProgressGauge(progress, milestones, progressUnit, requirementVerb)}
+      <div class="theme-completion-effect ${completionAchieved ? "is-complete" : "is-locked"}" aria-label="전체 구매 효과 메뉴 가격 20% 상승 ${completionAchieved ? "적용 중" : "잠김"}">
+        <span>전체 구매 효과</span><img src="assets/ui/common/${completionAchieved ? "icon_check.png" : "icon_lock.png"}" alt=""/><strong>메뉴 가격 +20% 상승</strong>
+      </div>
       <div class="theme-part-grid">${rows.map((row) => {
     const opened = state.themes.opened.includes(row.id);
     const active = state.themes.activeByFacility[row.facilityType] === row.id;
@@ -4756,6 +4775,7 @@ function frame(now) {
 function renderGameToText() {
   const inspectedThemeId = Number(state.ui.themeId || 1);
   const inspectedThemeRows = tables.restaurantThemes.filter((row) => row.facilityTheme === inspectedThemeId);
+  const inspectedThemeProgress = themeChickProgress(inspectedThemeId);
   const candidates = installCandidates().map((row) => {
     const position = facilityPlacement(row);
     return {
@@ -5041,6 +5061,11 @@ function renderGameToText() {
       restaurantVisibleAbove: true,
       defaultCardContent: "price-or-owned-or-active-only",
       incomeVisibility: state.ui.themePartId ? "detail-popup" : "hidden",
+      completionEffect: {
+        menuPriceBonusPercent: Math.round(THEME_COMPLETION_MENU_PRICE_BONUS * 100),
+        achieved: inspectedThemeProgress.total > 0 && inspectedThemeProgress.opened >= inspectedThemeProgress.total,
+        completedThemeIds: completedThemeIds(),
+      },
       openedCount: inspectedThemeRows.filter((row) => state.themes.opened.includes(row.id)).length,
       totalCount: inspectedThemeRows.length,
       parts: inspectedThemeRows.map((row) => ({

@@ -4,7 +4,7 @@
   "menuContext": "restaurant",
   "visibleRecipeType": "restaurant",
   "visibleThemeType": "restaurant",
-  "objective": "조명 설치하기",
+  "objective": "홍보 게이지를 채워 손님 부르기",
   "resources": {
     "acorns": 150,
     "gems": 0,
@@ -13,7 +13,7 @@
   },
   "debug": {
     "panelVisible": false,
-    "installedFacilities": 2,
+    "installedFacilities": 11,
     "totalInstallFacilities": 19,
     "supportedResources": [
       "acorns",
@@ -337,38 +337,47 @@
     ]
   },
   "installedFacilityIds": [
+    1,
+    5,
+    9,
+    10,
     11,
-    14
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
   ],
   "installCandidates": [
     {
-      "id": 16,
-      "facilityType": 10,
-      "facilityGroup": 1,
-      "name": "조명",
-      "cost": 10,
-      "x": 400,
-      "y": 112,
+      "id": 2,
+      "facilityType": 1,
+      "facilityGroup": 2,
+      "name": "테이블",
+      "cost": 40,
+      "x": 135,
+      "y": 550,
       "position": {
-        "x": 400,
-        "y": 112,
-        "w": 68,
-        "h": 82
+        "x": 135,
+        "y": 550,
+        "w": 118,
+        "h": 94
       }
     },
     {
-      "id": 1,
-      "facilityType": 1,
-      "facilityGroup": 1,
-      "name": "테이블",
-      "cost": 15,
-      "x": 240,
-      "y": 430,
+      "id": 6,
+      "facilityType": 2,
+      "facilityGroup": 2,
+      "name": "조리기구",
+      "cost": 50,
+      "x": 215,
+      "y": 270,
       "position": {
-        "x": 240,
-        "y": 430,
-        "w": 118,
-        "h": 94
+        "x": 215,
+        "y": 270,
+        "w": 76,
+        "h": 76
       }
     }
   ],
@@ -378,33 +387,33 @@
     "selectedInstallId": null,
     "candidates": [
       {
-        "id": 16,
-        "facilityType": 10,
-        "facilityGroup": 1,
-        "name": "조명",
-        "cost": 10,
-        "x": 400,
-        "y": 112,
+        "id": 2,
+        "facilityType": 1,
+        "facilityGroup": 2,
+        "name": "테이블",
+        "cost": 40,
+        "x": 135,
+        "y": 550,
         "position": {
-          "x": 400,
-          "y": 112,
-          "w": 68,
-          "h": 82
+          "x": 135,
+          "y": 550,
+          "w": 118,
+          "h": 94
         }
       },
       {
-        "id": 1,
-        "facilityType": 1,
-        "facilityGroup": 1,
-        "name": "테이블",
-        "cost": 15,
-        "x": 240,
-        "y": 430,
+        "id": 6,
+        "facilityType": 2,
+        "facilityGroup": 2,
+        "name": "조리기구",
+        "cost": 50,
+        "x": 215,
+        "y": 270,
         "position": {
-          "x": 240,
-          "y": 430,
-          "w": 118,
-          "h": 94
+          "x": 215,
+          "y": 270,
+          "w": 76,
+          "h": 76
         }
       }
     ],
@@ -415,7 +424,9 @@
         "name": "테이블",
         "cost": 15,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          1
+        ]
       },
       {
         "id": 1002,
@@ -423,7 +434,9 @@
         "name": "조리기구",
         "cost": 25,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          5
+        ]
       },
       {
         "id": 1003,
@@ -431,7 +444,9 @@
         "name": "출입구",
         "cost": 500,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          9
+        ]
       },
       {
         "id": 1004,
@@ -439,7 +454,9 @@
         "name": "무대",
         "cost": 1000,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          10
+        ]
       },
       {
         "id": 1005,
@@ -457,7 +474,9 @@
         "name": "냉장고",
         "cost": 200,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          12
+        ]
       },
       {
         "id": 1007,
@@ -465,7 +484,9 @@
         "name": "싱크대",
         "cost": 170,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          13
+        ]
       },
       {
         "id": 1008,
@@ -483,7 +504,9 @@
         "name": "조리도구함",
         "cost": 1150,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          15
+        ]
       },
       {
         "id": 1010,
@@ -491,7 +514,9 @@
         "name": "조명",
         "cost": 10,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          16
+        ]
       },
       {
         "id": 1011,
@@ -499,7 +524,9 @@
         "name": "울타리",
         "cost": 400,
         "owned": true,
-        "installedIds": []
+        "installedIds": [
+          17
+        ]
       }
     ]
   },
@@ -1391,7 +1418,7 @@
     "totalClicks": 0,
     "queueTargets": [],
     "threshold": 1,
-    "enabled": false
+    "enabled": true
   },
   "specialPromotion": {
     "unlocked": false,
@@ -1412,6 +1439,56 @@
         ],
         "guestNames": [
           "기본 병아리"
+        ]
+      },
+      {
+        "ingredientId": 30005,
+        "name": "달걀",
+        "guestIds": [
+          10021
+        ],
+        "guestNames": [
+          "도토리 병아리"
+        ]
+      },
+      {
+        "ingredientId": 30055,
+        "name": "버섯",
+        "guestIds": [
+          10012
+        ],
+        "guestNames": [
+          "공룡 병아리"
+        ]
+      },
+      {
+        "ingredientId": 30003,
+        "name": "빵",
+        "guestIds": [
+          10013
+        ],
+        "guestNames": [
+          "알껍질 병아리"
+        ]
+      },
+      {
+        "ingredientId": 30009,
+        "name": "쌀",
+        "guestIds": [
+          10022
+        ],
+        "guestNames": [
+          "난쟁이 병아리"
+        ]
+      },
+      {
+        "ingredientId": 30002,
+        "name": "토마토",
+        "guestIds": [
+          10023
+        ],
+        "guestNames": [
+          "광부 병아리"
         ]
       }
     ],
@@ -1475,8 +1552,8 @@
         "name": "동네 새싹 요리대회",
         "recipeRequirement": 6,
         "previousTierId": null,
-        "unlocked": true,
-        "requirementText": "참가 가능",
+        "unlocked": false,
+        "requirementText": "레시피 6개 필요",
         "firstPlaceScore": 62,
         "prizes": [
           800,
@@ -1598,12 +1675,7 @@
     "judging": null,
     "result": null,
     "availableRecipeIds": [
-      1,
-      10001,
-      2,
-      20002,
-      20003,
-      20001
+      1
     ],
     "availableIngredients": [
       {
@@ -1618,53 +1690,10 @@
       }
     ]
   },
-  "guests": [
-    {
-      "id": "formula-disappointed",
-      "customerId": 3,
-      "customerName": "기본 병아리",
-      "icon": "assets/ui/chick/icon_chick_001.png",
-      "state": "leaving",
-      "x": 240,
-      "y": 448,
-      "recipeId": 1,
-      "recipeName": "샐러드",
-      "wait": 0,
-      "mealDuration": 7,
-      "mealElapsed": null,
-      "mealRemaining": null,
-      "mood": "disappointed",
-      "buffetQueued": false,
-      "dropIngredient": 30039,
-      "guestGrade": "첫 방문",
-      "visits": 1,
-      "rewardItems": [
-        {
-          "ingredientId": 30039,
-          "name": "나뭇잎"
-        },
-        {
-          "ingredientId": 30001,
-          "name": "양상추"
-        },
-        {
-          "ingredientId": 30002,
-          "name": "토마토"
-        }
-      ],
-      "themeId": 1,
-      "chickSlot": 0
-    }
-  ],
+  "guests": [],
   "ordersQueued": 0,
   "cooking": [],
-  "payments": [
-    {
-      "x": 240,
-      "y": 480,
-      "amount": 58
-    }
-  ],
+  "payments": [],
   "ingredientDrops": [],
   "tipbox": 0,
   "tipboxSystem": {
@@ -1693,7 +1722,7 @@
   "metrics": {
     "visitors": 0,
     "orders": 0,
-    "served": 3,
+    "served": 0,
     "collected": 0,
     "angryLeaves": 0,
     "ingredientDropAttempts": 0,
@@ -1730,12 +1759,109 @@
     "autoPromotions": 0,
     "tipboxExpansions": 0
   },
-  "currentScreen": "restaurant",
-  "themeManagement": null,
+  "currentScreen": "theme",
+  "themeManagement": {
+    "selectedThemeId": 2,
+    "selectedPartId": null,
+    "presentation": "bottom-half-sheet",
+    "sheetStartPercent": 52,
+    "restaurantVisibleAbove": true,
+    "defaultCardContent": "price-or-owned-or-active-only",
+    "incomeVisibility": "hidden",
+    "completionEffect": {
+      "menuPriceBonusPercent": 20,
+      "achieved": true,
+      "completedThemeIds": [
+        1,
+        2
+      ]
+    },
+    "openedCount": 11,
+    "totalCount": 11,
+    "parts": [
+      {
+        "id": 2001,
+        "facilityType": 1,
+        "status": "owned",
+        "price": 1300,
+        "incomePercent": 5
+      },
+      {
+        "id": 2002,
+        "facilityType": 2,
+        "status": "owned",
+        "price": 1400,
+        "incomePercent": 5
+      },
+      {
+        "id": 2003,
+        "facilityType": 4,
+        "status": "owned",
+        "price": 1800,
+        "incomePercent": 5
+      },
+      {
+        "id": 2004,
+        "facilityType": 5,
+        "status": "owned",
+        "price": 2000,
+        "incomePercent": 5
+      },
+      {
+        "id": 2005,
+        "facilityType": 3,
+        "status": "owned",
+        "price": 1750,
+        "incomePercent": 5
+      },
+      {
+        "id": 2006,
+        "facilityType": 6,
+        "status": "owned",
+        "price": 2250,
+        "incomePercent": 5
+      },
+      {
+        "id": 2007,
+        "facilityType": 7,
+        "status": "owned",
+        "price": 2250,
+        "incomePercent": 5
+      },
+      {
+        "id": 2008,
+        "facilityType": 8,
+        "status": "owned",
+        "price": 2250,
+        "incomePercent": 5
+      },
+      {
+        "id": 2009,
+        "facilityType": 9,
+        "status": "owned",
+        "price": 1450,
+        "incomePercent": 5
+      },
+      {
+        "id": 2010,
+        "facilityType": 10,
+        "status": "owned",
+        "price": 1600,
+        "incomePercent": 5
+      },
+      {
+        "id": 2011,
+        "facilityType": 11,
+        "status": "owned",
+        "price": 1800,
+        "incomePercent": 5
+      }
+    ]
+  },
   "recipes": {
     "systemUnlocked": true,
     "unlockFacility": "도마 테이블",
-    "owned": 6,
+    "owned": 1,
     "combinationCapacity": 2,
     "combinationCapacityGrowth": "gem-upgrade-only",
     "combinationCapacityInitial": 2,
@@ -1838,18 +1964,18 @@
         "count": 1
       }
     },
-    "mysteryRecipeCount": 58,
+    "mysteryRecipeCount": 63,
     "hintedRecipes": {},
-    "autoResearchUnlocked": true,
-    "autoResearchTarget": 20014,
+    "autoResearchUnlocked": false,
+    "autoResearchTarget": null,
     "autoResearchPriority": "new-first-lowest-level-then-highest-inventory-pressure",
     "autoResearchWhenNoRecipe": "random-ingredients-up-to-bowl-capacity-then-weird-dish",
     "salePriceFormula": "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
     "salePriceMultipliers": {
-      "restaurantPriceUp": 1.1,
+      "restaurantPriceUp": 1.95,
       "satisfactionNormal": 1,
       "satisfactionHappy": 1.5,
-      "performanceBuff": 1.2
+      "performanceBuff": 1
     },
     "cookingTimeRule": {
       "formula": "clamp(roundToHalfSecond(2+basePrice/20),4,24)*recipeLevelSpeedReduction*knowhowSpeedReduction",
@@ -3048,57 +3174,17 @@
       ]
     },
     "levels": {
-      "1": 2,
-      "2": 1,
-      "10001": 1,
-      "20001": 1,
-      "20002": 1,
-      "20003": 1
+      "1": 1
     },
     "prices": {
-      "1": 44,
-      "2": 52,
-      "10001": 48,
-      "20001": 60,
-      "20002": 54,
-      "20003": 56
+      "1": 40
     },
     "cookingTimes": {
       "1": {
         "basePrice": 40,
         "baseDuration": 4,
-        "level": 2,
-        "currentDuration": 3.8
-      },
-      "2": {
-        "basePrice": 52,
-        "baseDuration": 4.5,
         "level": 1,
-        "currentDuration": 4.5
-      },
-      "10001": {
-        "basePrice": 48,
-        "baseDuration": 4.5,
-        "level": 1,
-        "currentDuration": 4.5
-      },
-      "20001": {
-        "basePrice": 60,
-        "baseDuration": 5,
-        "level": 1,
-        "currentDuration": 5
-      },
-      "20002": {
-        "basePrice": 54,
-        "baseDuration": 4.5,
-        "level": 1,
-        "currentDuration": 4.5
-      },
-      "20003": {
-        "basePrice": 56,
-        "baseDuration": 5,
-        "level": 1,
-        "currentDuration": 5
+        "currentDuration": 4
       }
     }
   },
@@ -3117,7 +3203,8 @@
   },
   "progression": {
     "unlockedThemes": [
-      1
+      1,
+      2
     ],
     "activeThemeParts": {
       "1": 1001,
@@ -3133,7 +3220,12 @@
       "11": 1011
     },
     "unlockedCustomers": [
-      3
+      3,
+      10012,
+      10013,
+      10021,
+      10022,
+      10023
     ],
     "unlockedChickRoutes": [
       {
@@ -3166,6 +3258,199 @@
           {
             "ingredientId": 30039,
             "name": "나뭇잎"
+          }
+        ]
+      },
+      {
+        "themeId": 1,
+        "slot": 1,
+        "customerId": 10012,
+        "customerName": "공룡 병아리",
+        "ingredientId": 30055,
+        "ingredientName": "버섯",
+        "rewardItems": [
+          {
+            "slot": "primary",
+            "ingredientId": 30055,
+            "name": "버섯"
+          },
+          {
+            "slot": "secondary",
+            "ingredientId": 30011,
+            "name": "밀가루"
+          },
+          {
+            "slot": "special",
+            "ingredientId": 30008,
+            "name": "고기"
+          }
+        ],
+        "recipeId": 10001,
+        "recipeName": "버섯전",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30011,
+            "name": "밀가루"
+          },
+          {
+            "ingredientId": 30055,
+            "name": "버섯"
+          }
+        ]
+      },
+      {
+        "themeId": 1,
+        "slot": 2,
+        "customerId": 10013,
+        "customerName": "알껍질 병아리",
+        "ingredientId": 30003,
+        "ingredientName": "빵",
+        "rewardItems": [
+          {
+            "slot": "primary",
+            "ingredientId": 30003,
+            "name": "빵"
+          },
+          {
+            "slot": "secondary",
+            "ingredientId": 30005,
+            "name": "달걀"
+          },
+          {
+            "slot": "special",
+            "ingredientId": 30020,
+            "name": "버터"
+          }
+        ],
+        "recipeId": 2,
+        "recipeName": "샌드위치",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30003,
+            "name": "빵"
+          },
+          {
+            "ingredientId": 30039,
+            "name": "나뭇잎"
+          }
+        ]
+      },
+      {
+        "themeId": 2,
+        "slot": 0,
+        "customerId": 10021,
+        "customerName": "도토리 병아리",
+        "ingredientId": 30005,
+        "ingredientName": "달걀",
+        "rewardItems": [
+          {
+            "slot": "primary",
+            "ingredientId": 30005,
+            "name": "달걀"
+          },
+          {
+            "slot": "secondary",
+            "ingredientId": 30020,
+            "name": "버터"
+          },
+          {
+            "slot": "special",
+            "ingredientId": 30008,
+            "name": "고기"
+          }
+        ],
+        "recipeId": 10003,
+        "recipeName": "핫도그",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30003,
+            "name": "빵"
+          },
+          {
+            "ingredientId": 30006,
+            "name": "소시지"
+          },
+          {
+            "ingredientId": 30076,
+            "name": "케첩"
+          }
+        ]
+      },
+      {
+        "themeId": 2,
+        "slot": 1,
+        "customerId": 10022,
+        "customerName": "난쟁이 병아리",
+        "ingredientId": 30009,
+        "ingredientName": "쌀",
+        "rewardItems": [
+          {
+            "slot": "primary",
+            "ingredientId": 30009,
+            "name": "쌀"
+          },
+          {
+            "slot": "secondary",
+            "ingredientId": 30003,
+            "name": "빵"
+          },
+          {
+            "slot": "special",
+            "ingredientId": 30010,
+            "name": "식용유"
+          }
+        ],
+        "recipeId": 10004,
+        "recipeName": "수프",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30014,
+            "name": "육수"
+          },
+          {
+            "ingredientId": 30023,
+            "name": "모둠 채소"
+          }
+        ]
+      },
+      {
+        "themeId": 2,
+        "slot": 2,
+        "customerId": 10023,
+        "customerName": "광부 병아리",
+        "ingredientId": 30002,
+        "ingredientName": "토마토",
+        "rewardItems": [
+          {
+            "slot": "primary",
+            "ingredientId": 30002,
+            "name": "토마토"
+          },
+          {
+            "slot": "secondary",
+            "ingredientId": 30011,
+            "name": "밀가루"
+          },
+          {
+            "slot": "special",
+            "ingredientId": 30023,
+            "name": "모둠 채소"
+          }
+        ],
+        "recipeId": 10005,
+        "recipeName": "꼬치구이",
+        "recipeIngredients": [
+          {
+            "ingredientId": 30008,
+            "name": "고기"
+          },
+          {
+            "ingredientId": 30034,
+            "name": "양파"
+          },
+          {
+            "ingredientId": 30053,
+            "name": "파프리카"
           }
         ]
       }
@@ -3273,9 +3558,9 @@
     ],
     "themeChickProgress": {
       "1": {
-        "opened": 2,
+        "opened": 11,
         "total": 11,
-        "ratio": 0.18181818181818182,
+        "ratio": 1,
         "basis": "installed-facility-types",
         "requirements": [
           {
@@ -3298,13 +3583,15 @@
           }
         ],
         "unlocked": [
-          3
+          3,
+          10012,
+          10013
         ]
       },
       "2": {
-        "opened": 2,
+        "opened": 11,
         "total": 11,
-        "ratio": 0.18181818181818182,
+        "ratio": 1,
         "basis": "owned-theme-part-types",
         "requirements": [
           {
@@ -3326,7 +3613,11 @@
             "ownedTypeCount": 11
           }
         ],
-        "unlocked": []
+        "unlocked": [
+          10021,
+          10022,
+          10023
+        ]
       },
       "3": {
         "opened": 0,
@@ -3718,7 +4009,7 @@
       "30075": 0.15
     },
     "ingredientDropRule": {
-      "unlocked": false,
+      "unlocked": true,
       "unlockFacility": "냉장고",
       "overallChance": 0.15,
       "currentChance": 0.15,
@@ -3756,14 +4047,14 @@
       "30001": 1,
       "30039": 1
     },
-    "autoCraft": "new-first-then-lowest-level",
+    "autoCraft": "locked-until-5-recipes",
     "craftedRecipes": []
   },
   "activeSystems": {
     "missions": false,
     "staff": false
   },
-  "currentTab": "craft",
+  "currentTab": "theme",
   "collection": {
     "customers": 0,
     "specialCustomers": 0,
@@ -3772,7 +4063,7 @@
   },
   "specialVisitor": {
     "interval": 120,
-    "nextIn": 99.86,
+    "nextIn": 119.88,
     "lastType": null,
     "dropBoostRemaining": 0,
     "dropMultiplier": 1,

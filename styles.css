@@ -453,6 +453,12 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .theme-chick-marker img { position: absolute; top: 10px; left: 50%; width: 27px; height: 27px; object-fit: contain; transform: translateX(-50%); transition: filter .2s ease, opacity .2s ease, transform .2s ease; }
 .theme-chick-marker.is-unlocked img { opacity: 1; filter: drop-shadow(0 2px 1px rgba(80,52,29,.2)); }
 .theme-chick-marker.is-locked img { opacity: .48; filter: grayscale(1) saturate(0) contrast(.85); }
+.theme-completion-effect { min-height: 24px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0 14px 4px; color: #8b8074; font-size: 10px; font-weight: 900; white-space: nowrap; }
+.theme-completion-effect > span { padding: 4px 9px; border-radius: 99px; background: rgba(255,250,239,.82); color: #4f4033; }
+.theme-completion-effect > img { width: 12px; height: 12px; object-fit: contain; opacity: .55; filter: grayscale(1); }
+.theme-completion-effect > strong { color: inherit; font-size: 10px; }
+.theme-completion-effect.is-complete > img { opacity: 1; filter: none; }
+.theme-completion-effect.is-complete > strong { color: #54852f; }
 .theme-part-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 7px; padding: 8px 10px 12px; }
 .theme-part-card { min-width: 0; min-height: 91px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; padding: 4px 3px 7px; border: 2px solid #d1b18f; border-radius: 12px; background: #fff8ed; color: #76533a; box-shadow: 0 3px 0 rgba(122,79,44,.1); cursor: pointer; }
 .theme-part-card:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(122,79,44,.1); }
