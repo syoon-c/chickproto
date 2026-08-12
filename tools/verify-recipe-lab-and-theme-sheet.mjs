@@ -91,9 +91,11 @@ try {
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.locator('[data-screen="recipe"]').click();
+  await page.locator('[data-action="open-ingredient-picker"]').click();
   for (const requirement of routes.wood[0].ingredientRequirements) {
     await page.locator(`[data-action="select-ingredient"][data-id="${requirement.id}"]`).click();
   }
+  await page.locator('[data-action="close-ingredient-picker"]').last().click();
   current = await state();
   if (current.recipes.combinationCapacity !== 3 || current.recipes.selectedIngredients.length !== 3) {
     throw new Error("Manual ingredient selection did not fill the unlocked three slots");

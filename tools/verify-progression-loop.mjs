@@ -83,7 +83,7 @@ try {
   if (current.resources.acorns !== 0) throw new Error("Camping theme part did not deduct its temporary price");
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(out, "01-theme-unlocks-chick.png"), fullPage: true });
-  await page.locator('[data-action="theme-part-close"]').last().click();
+  if (await page.locator(".theme-part-modal").count()) throw new Error("Theme purchase popup remained open after purchase.");
   await page.locator("#menu-close-btn").click();
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(out, "01b-single-part-world.png"), fullPage: true });
@@ -105,7 +105,7 @@ try {
   while (await page.locator('.theme-part-card.is-priced:has(> span > img)').count()) {
     await page.locator('.theme-part-card.is-priced:has(> span > img)').first().click();
     await page.locator('[data-action="buy-theme"]:not(:disabled)').click();
-    await page.locator('[data-action="theme-part-close"]').last().click();
+    if (await page.locator(".theme-part-modal").count()) throw new Error("Theme purchase popup remained open in bulk purchasing.");
   }
   current = await state();
   const campingChicks = current.progression.themeChickProgress[6].unlocked;

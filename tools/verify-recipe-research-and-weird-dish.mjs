@@ -52,8 +52,10 @@ try {
   }, info);
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
+  await page.locator('[data-action="open-ingredient-picker"]').click();
   await page.locator(`[data-action="select-ingredient"][data-id="${info.bread.id}"]`).click();
   await page.locator(`[data-action="select-ingredient"][data-id="${info.rice.id}"]`).click();
+  await page.locator('[data-action="close-ingredient-picker"]').last().click();
   await page.locator('[data-action="discover-combination"]').click();
 
   let current = await gameState();

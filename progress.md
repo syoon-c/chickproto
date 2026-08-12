@@ -1826,3 +1826,71 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 병아리 카드 3개를 다시 제거하고 참고 이미지와 같은 `1~11` 단계형 트랙으로 변경했다.
 - 현재 보유/설치 수까지의 선과 숫자 노드는 연두색, 이후 단계는 짙은 갈색으로 표시하며 우측 위에 `현재 / 11`을 표시한다.
 - 일반 테마는 4·8·11단계, 돌 테마는 기본 병아리를 1단계 위치에 두고 8·11단계에 실제 병아리 아이콘을 배치한다. 미해금 아이콘도 색상은 유지하고 테두리만 갈색으로 구분한다.
+
+## 2026-08-12 싱크대 물 획득과 레시피 하단 패널
+
+- 설치된 싱크대를 직접 터치하면 20% 확률로 `물` 재료 1개를 보관함에 넣는다. 빠른 연타 수급을 막기 위해 시도 후 8초 재사용 대기를 적용했고, 보관함이 가득 차면 시도와 대기시간 모두 소비하지 않는다.
+- 설치된 도마 테이블을 터치하면 레시피의 `제작` 탭이 바로 열린다. 냉장고 터치 시 재료 보관함 탭이 열리는 기존 동작은 유지한다.
+- 레시피 화면을 전체 팝업에서 상단 식당이 38% 보이는 62% 높이 하단 패널로 변경했다. 제목·탭 간격은 읽을 수 있는 크기를 유지하면서 패널용으로 압축했다.
+- 저장 데이터에 싱크대 시도·획득 횟수와 다음 사용 가능 시점을 호환 방식으로 추가하고, `render_game_to_text`에 싱크대/도마 상호작용과 레시피 패널 규격을 노출했다.
+- 검증: `SINK_WATER_RECIPE_SHEET_OK chance=20% cooldown=8s start=0.38 height=0.62 water=1`, `FACILITY_TUTORIAL_UNLOCKS_OK`, `THEME_HALF_SHEET_OK`, `RECIPE_LAB_THEME_SHEET_OK` 통과. 공식 웹게임 클라이언트 실행과 콘솔 오류 없음도 확인했다. 화면 확인: `output/sink-water-and-recipe-sheet/01-countertop-recipe-sheet.png`.
+- TODO: 싱크대 물 획득 확률이나 재사용 대기 시간이 실제 플레이에서 답답하면 수치만 조정할 수 있다.
+
+## 2026-08-12 레시피 보울 영역 압축
+
+- 62% 높이 레시피 하단 패널 전용으로 도마와 보울의 세로 크기를 줄이고, 제목·보울 확장·재료 선택 영역의 여백도 함께 정리했다.
+- 패널을 처음 열었을 때 스크롤 위치 0에서 `보울 섞기`와 `자동 연구` 버튼이 모두 하단 내비게이션 위에 보이도록 맞췄다. 일반 전체 화면용 보울 스타일은 변경하지 않았다.
+- 검증: `SINK_WATER_RECIPE_SHEET_OK ... actions=visible`, `RECIPE_LAB_THEME_SHEET_OK` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/sink-water-and-recipe-sheet/01-countertop-recipe-sheet.png`.
+
+## 2026-08-12 보울 재료 선택 팝업과 요리 연구 명칭
+
+- 요리 연구 메인 패널에서 재료 목록을 제거하고 보울 자체를 진입 버튼으로 변경했다. 보울을 누르면 별도 `재료 넣기` 팝업이 열리며, 선택 재료·현재/최대 용량·보유 재료·남은 수량을 한 화면에서 확인한다.
+- 팝업 안에서 같은 재료를 여러 번 담거나 선택 재료를 눌러 뺄 수 있고, `담기 완료` 또는 배경/닫기 버튼으로 메인 연구 화면에 돌아온다. 선택할 때 팝업이 재등장하는 것처럼 흔들리지 않도록 반복 애니메이션도 제거했다.
+- 하단 내비게이션, 패널 제목, 탭, 튜토리얼, 발견/레벨업 연출, 대회·뷔페 조건 등 실제 노출 문구의 `레시피` 명칭을 `요리 연구`, `요리`, `발견한 요리`로 통일했다. 내부 코드와 데이터의 recipe 식별자는 호환성을 위해 유지한다.
+- 검증: `SINK_WATER_RECIPE_SHEET_OK ... picker=popup naming=요리연구`, `RECIPE_LAB_THEME_SHEET_OK`, `RECIPE_RESEARCH_WEIRD_DISH_OK`, `FACILITY_TUTORIAL_UNLOCKS_OK` 통과. 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/sink-water-and-recipe-sheet/02-bowl-ingredient-popup.png`.
+
+## 2026-08-12 테마 구매 팝업 닫기와 발견한 요리 수동 레벨업
+
+- 테마 파츠 구매 성공 시 파츠 상세 구매 팝업만 즉시 닫고, 테마 하단 패널과 현재 테마 탭·스크롤은 유지하도록 변경했다. 구매한 카드는 패널에서 바로 `적용 중` 상태로 갱신된다.
+- `발견한 요리` 카드에 고정 레벨업 재료와 `보유/필요` 수량을 추가했다. 모든 재료가 충분하면 `레벨업` 버튼이 활성화되고, 누르면 보울 재조합 없이 즉시 재료를 소비하여 1레벨 상승한다.
+- 수동 즉시 레벨업도 요리 연구 횟수와 노하우 경험치에 포함하며 기존의 간결한 레벨업·가격 상승 연출을 사용한다. 재료 부족 또는 최대 레벨에서는 버튼이 비활성화된다.
+- 검증: `MANUAL_DISH_UPGRADE_OK level=2 ingredients=2->0 price=40->44`, `THEME_UI_REDESIGN_OK ... purchased=2001`, `SINK_WATER_RECIPE_SHEET_OK`, `RECIPE_RESEARCH_WEIRD_DISH_OK`, `THEME_HALF_SHEET_OK` 통과. 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/manual-dish-upgrade/01-upgrade-ready.png`, `02-upgrade-complete.png`.
+
+## 2026-08-12 발견·레벨업 목록 통합
+
+- `발견한 요리` 탭과 별도 카드 렌더링을 제거하고 요리 연구 탭을 `연구 / 재료 보관함` 두 개로 축소했다.
+- 연구 화면 아래 `발견 가능한 요리` 목록을 단일 목록으로 사용한다. 미발견 요리는 기존의 비공개·힌트 카드로, 발견한 요리는 넓은 상세 카드로 표시된다.
+- 발견된 카드에 현재/최대 레벨, 가격, 다음 레벨 가격 상승률, 재료별 보유/필요 수량, 도감 보상, 즉시 레벨업 버튼을 모두 통합했다. 발견 카드만 한 줄 전체 너비를 사용해 조작 버튼과 수치 가독성을 확보했다.
+- 검증: `MANUAL_DISH_UPGRADE_OK mergedCatalog=yes tabs=2 level=2 ingredients=2->0 price=40->44`, `RECIPE_LAB_THEME_SHEET_OK`, `RECIPE_RESEARCH_WEIRD_DISH_OK`, `THEME_UI_REDESIGN_OK` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/manual-dish-upgrade/01-upgrade-ready.png`.
+
+## 2026-08-12 요리 목록 카드 규격 통일
+
+- 발견 카드는 전체 너비, 미발견 카드는 2열이던 혼합 구조를 제거하고 모든 카드를 단일 열 전체 너비로 통일했다.
+- 발견·힌트·완전 비공개 상태에 상관없이 카드 규격을 `426×112px`로 고정하고 아이콘 영역, 내부 여백, 제목 위치를 같은 기준선에 맞췄다.
+- 힌트가 많아도 카드 높이가 늘어나지 않도록 힌트 문구 영역을 제한하고, 발견 카드의 레벨업 버튼은 동일한 우측 열에 정렬했다.
+- 검증: `MANUAL_DISH_UPGRADE_OK mergedCatalog=yes cards=426x112`, `RECIPE_HINTS_OK catalog=64`, `RECIPE_LAB_THEME_SHEET_OK` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/manual-dish-upgrade/01b-uniform-discovered-hinted-mystery-cards.png`.
+
+## 2026-08-12 주문 말풍선 터치 우선순위
+
+- 필드 터치 판정에서 주문 대기 손님의 말풍선과 실망 말풍선을 팁박스 설비보다 먼저 검사하도록 순서를 변경했다.
+- 주문 말풍선과 팁박스 터치 영역이 겹쳐도 주문 접수가 먼저 실행되고 팁박스 팝업은 열리지 않는다. 말풍선이 없는 위치에서 팁박스를 누르는 기존 동작은 유지한다.
+- 검증: 팁박스 중심 좌표와 주문 말풍선을 의도적으로 겹친 상태에서 `ORDER_BUBBLE_PRIORITY_OK overlap=tipbox-center orders=0->1 tipboxPanel=closed`, 기존 `TIPBOX_SYSTEM_OK` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/order-bubble-priority/01-overlapping-order-bubble.png`, `02-order-taken-tipbox-closed.png`.
+
+## 2026-08-12 팁 회수 후 팝업 자동 닫기
+
+- 팁박스 팝업에서 실제 팁을 회수하면 도토리 반영과 저장 직후 팁박스 팝업이 자동으로 닫히도록 변경했다.
+- 팁박스 터치 진입, 보석 용량 확장, 손님 주문 말풍선 우선순위는 그대로 유지한다.
+- 검증: `TIPBOX_SYSTEM_OK popup=touch-only closeAfterClaim=yes`, `ORDER_BUBBLE_PRIORITY_OK ... tipboxPanel=closed` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인.
+
+## 2026-08-12 하단 패널 바깥 영역 터치 닫기
+
+- 테마와 요리 연구 하단 패널이 열린 상태에서 패널 바깥의 상단 식당 영역을 터치하면 닫기 버튼 없이 패널이 닫히도록 변경했다.
+- 바깥 터치는 패널 닫기에만 소비하므로, 같은 위치에 손님·설비·설치 후보가 있어도 뒤쪽 필드 상호작용이 함께 실행되지 않는다. 하단 내비게이션을 눌러 다른 메뉴로 전환하는 기존 흐름은 유지한다.
+- 검증: `BOTTOM_SHEET_OUTSIDE_DISMISS_OK theme=yes cookingResearch=yes fieldActionSuppressed=yes`, 기존 `THEME_HALF_SHEET_OK`, `SINK_WATER_RECIPE_SHEET_OK` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/bottom-sheet-outside-dismiss/`.
+
+## 2026-08-12 요리 레벨 제한 제거
+
+- 요리 데이터에 남아 있는 `maxLevel` 값과 무관하게 발견한 요리를 재료가 있는 동안 계속 레벨업할 수 있도록 수동·자동 연구 후보 판정의 상한 조건을 모두 제거했다.
+- 요리 카드에서 `Lv.현재/최대`와 `최대 레벨` 상태를 제거하고 `Lv.현재`만 표시한다. 재료가 충분하면 레벨과 관계없이 항상 `레벨업` 버튼이 활성화된다.
+- 과거 상한이었던 Lv.20 상태도 자동 연구 후보에 포함되고, 수동 레벨업으로 Lv.21 이상 성장하며 기존 가격 +10% 규칙과 연출을 그대로 사용한다.
+- 검증: `MANUAL_DISH_UPGRADE_OK unlimited=yes ... level=20->21 ingredients=2->0 price=116->120`, `RECIPE_RESEARCH_WEIRD_DISH_OK` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/manual-dish-upgrade/`.

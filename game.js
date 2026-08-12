@@ -123,6 +123,8 @@ let knowhowMapScroll = { left: 30, top: 0 };
 let themeMenuScrollTop = 0;
 const RECIPE_RESEARCH_DURATION = 2.4;
 const THEME_COMPLETION_MENU_PRICE_BONUS = .2;
+const SINK_WATER_DROP_CHANCE = .2;
+const SINK_WATER_COOLDOWN_SECONDS = 8;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
 const STARTER_INGREDIENTS = Object.freeze({
   [GAME_INGREDIENTS.leaf.id]: 1,
@@ -212,9 +214,9 @@ const KNOWHOW_SKILLS = Object.freeze([
   { id: "cooking_speed_1", name: "손풀기", icon: "🥄", maxLevel: 1, costs: [1], x: 400, y: 170, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: () => "손님 음식 조리 시간 -3%" },
   { id: "cooking_speed_2", name: "빠른 손놀림", icon: "⏱️", maxLevel: 1, costs: [1], x: 400, y: 285, prerequisites: [{ id: "cooking_speed_1", level: 1 }], effect: () => "손님 음식 조리 시간 추가 -4%" },
   { id: "cooking_speed_3", name: "숙련된 요리", icon: "🍳", maxLevel: 1, costs: [2], x: 400, y: 400, prerequisites: [{ id: "cooking_speed_2", level: 1 }], effect: () => "손님 음식 조리 시간 추가 -5%" },
-  { id: "research_speed_1", name: "연구 노트", icon: "📖", maxLevel: 1, costs: [1], x: 400, y: 515, prerequisites: [{ id: "cooking_speed_3", level: 1 }], effect: () => "레시피 연구 시간 -10%" },
-  { id: "research_speed_2", name: "실험 정리", icon: "🥣", maxLevel: 1, costs: [1], x: 400, y: 630, prerequisites: [{ id: "research_speed_1", level: 1 }], effect: () => "레시피 연구 시간 추가 -10%" },
-  { id: "research_speed_3", name: "요리 직감", icon: "💡", maxLevel: 1, costs: [2], x: 400, y: 745, prerequisites: [{ id: "research_speed_2", level: 1 }], effect: () => "레시피 연구 시간 추가 -10%" },
+  { id: "research_speed_1", name: "연구 노트", icon: "📖", maxLevel: 1, costs: [1], x: 400, y: 515, prerequisites: [{ id: "cooking_speed_3", level: 1 }], effect: () => "요리 연구 시간 -10%" },
+  { id: "research_speed_2", name: "실험 정리", icon: "🥣", maxLevel: 1, costs: [1], x: 400, y: 630, prerequisites: [{ id: "research_speed_1", level: 1 }], effect: () => "요리 연구 시간 추가 -10%" },
+  { id: "research_speed_3", name: "요리 직감", icon: "💡", maxLevel: 1, costs: [2], x: 400, y: 745, prerequisites: [{ id: "research_speed_2", level: 1 }], effect: () => "요리 연구 시간 추가 -10%" },
   { id: "offline_bonus_1", name: "밤샘 준비", icon: "🌙", maxLevel: 1, costs: [2], x: 400, y: 860, prerequisites: [{ id: "research_speed_3", level: 1 }], effect: () => "뷔페 오프라인 보상 상한 +1시간" },
   { id: "offline_bonus_2", name: "든든한 준비", icon: "🛌", maxLevel: 1, costs: [2], x: 400, y: 975, prerequisites: [{ id: "offline_bonus_1", level: 1 }], effect: () => "뷔페 오프라인 보상 상한 +1시간" },
   { id: "contest_prize_1", name: "대회 경험", icon: "🎖️", maxLevel: 1, costs: [2], x: 400, y: 1090, prerequisites: [{ id: "offline_bonus_2", level: 1 }], effect: () => "요리 대회 상금 +10%" },
@@ -245,12 +247,12 @@ const SPECIAL_VISITOR_TYPES = Object.freeze({
 });
 const TUTORIAL_DIALOGUES = Object.freeze({
   welcome: "빈 식당에 설비를 하나씩 설치해 볼까요?",
-  "recipe-locked": "도마 테이블을 설치하면 레시피 연구를 시작할 수 있어요!",
-  "recipe-unlocked": "도마 테이블 설치 완료! 이제 새로운 레시피를 연구해 봐요.",
+  "recipe-locked": "도마 테이블을 설치하면 요리 연구를 시작할 수 있어요!",
+  "recipe-unlocked": "도마 테이블 설치 완료! 이제 새로운 요리를 연구해 봐요.",
   "fridge-next": "다음은 냉장고예요. 설치하면 손님들이 재료를 떨어뜨릴 거예요!",
   "drops-unlocked": "냉장고 설치 완료! 이제 손님에게서 재료를 얻을 수 있어요.",
-  "special-promotion-unlocked": "레시피 5개 발견! 이제 특별 홍보로 원하는 재료의 손님을 초대할 수 있어요.",
-  "contest-unlocked": "레시피가 6개나 됐어요! 심사위원 취향에 맞춰 요리 대회에 출품해 볼까요?",
+  "special-promotion-unlocked": "요리 5개 발견! 이제 특별 홍보로 원하는 재료의 손님을 초대할 수 있어요.",
+  "contest-unlocked": "요리가 6개나 됐어요! 심사위원 취향에 맞춰 요리 대회에 출품해 볼까요?",
   "buffet-unlocked": "요리가 8개나 됐어요! 손님들이 여러 요리를 구경할 수 있는 야외 뷔페를 열어 볼까요?",
 });
 
@@ -376,6 +378,9 @@ function createInitialState() {
       storageCapacity: INGREDIENT_STORAGE_INITIAL_CAPACITY,
       bowlCapacity: BOWL_CAPACITY_INITIAL,
     },
+    facilityInteractions: {
+      sinkWater: { readyAt: 0, attempts: 0, collected: 0 },
+    },
     specialActors: [],
     specialLastSpawn: {},
     specialVisitor: { nextAt: SPECIAL_VISITOR_INTERVAL, sequence: 1, dropBoostRemaining: 0, lastType: null, lastUpdatedAt: Date.now() },
@@ -440,6 +445,7 @@ function createInitialState() {
       lastResearch: null,
       area: "restaurant",
       buffetStandIndex: 0,
+      recipeIngredientPickerOpen: false,
     },
     tutorial: { activeId: "welcome", seen: [] },
   };
@@ -639,6 +645,17 @@ function loadState() {
           .map(([recipeId, ingredientIds]) => [Number(recipeId), (Array.isArray(ingredientIds) ? ingredientIds : [])
             .map(Number).filter((ingredientId) => ingredientData(ingredientId))])
           .filter(([recipeId]) => progressionForRecipe(recipeId))),
+      },
+      facilityInteractions: {
+        ...defaults.facilityInteractions,
+        ...parsed.facilityInteractions,
+        sinkWater: {
+          ...defaults.facilityInteractions.sinkWater,
+          ...parsed.facilityInteractions?.sinkWater,
+          readyAt: Math.max(0, Number(parsed.facilityInteractions?.sinkWater?.readyAt || 0)),
+          attempts: Math.max(0, Math.floor(Number(parsed.facilityInteractions?.sinkWater?.attempts || 0))),
+          collected: Math.max(0, Math.floor(Number(parsed.facilityInteractions?.sinkWater?.collected || 0))),
+        },
       },
       specialActors: (parsed.specialActors || []).map((actor) => ({
         ...actor,
@@ -1387,6 +1404,7 @@ function buyTheme(themeId) {
   state.resources[key] -= row.facilityPrice;
   state.themes.opened.push(row.id);
   state.themes.activeByFacility[row.facilityType] = row.id;
+  state.ui.themePartId = null;
   checkAndGrantAllCollect(row.facilityTheme);
   if (isThemeUnlocked(row.facilityTheme) && !state.themes.unlockedThemeIds.includes(row.facilityTheme)) {
     state.themes.unlockedThemeIds.push(row.facilityTheme);
@@ -1611,8 +1629,8 @@ function renderRecipeReveal() {
   const isWeird = recipeReveal.result === "failure";
   dom.recipeReveal.classList.toggle("is-upgrade", isUpgrade);
   if (isUpgrade) {
-    dom.recipeReveal.innerHTML = `<section class="recipe-upgrade-card" role="dialog" aria-modal="true" aria-label="레시피 레벨업">
-      <span class="recipe-upgrade-kicker">레시피 레벨업</span>
+    dom.recipeReveal.innerHTML = `<section class="recipe-upgrade-card" role="dialog" aria-modal="true" aria-label="요리 레벨업">
+      <span class="recipe-upgrade-kicker">요리 레벨업</span>
       <div class="recipe-upgrade-icon"><img src="${routeRecipeIcon(recipeId)}" alt="" /><b aria-hidden="true">↑</b></div>
       <h3>${routeRecipeName(recipeId)}</h3>
       <div class="recipe-upgrade-level"><span>Lv.${recipeReveal.previousLevel}</span><i>→</i><strong>Lv.${recipeReveal.newLevel}</strong></div>
@@ -1629,8 +1647,8 @@ function renderRecipeReveal() {
   }
   dom.recipeReveal.innerHTML = `<div class="recipe-reveal-rays" aria-hidden="true"></div>
     <div class="recipe-reveal-sparkles" aria-hidden="true"><i>✦</i><i>✧</i><i>★</i><i>✦</i><i>✧</i><i>★</i></div>
-    <section class="recipe-reveal-card ${isWeird ? "is-weird" : ""}" role="dialog" aria-modal="true" aria-label="${isWeird ? "요리 연구 실패" : "새 레시피 발견"}">
-      <span class="recipe-reveal-kicker">${isWeird ? "연구 실패!" : "새 레시피 발견!"}</span>
+    <section class="recipe-reveal-card ${isWeird ? "is-weird" : ""}" role="dialog" aria-modal="true" aria-label="${isWeird ? "요리 연구 실패" : "새 요리 발견"}">
+      <span class="recipe-reveal-kicker">${isWeird ? "연구 실패!" : "새 요리 발견!"}</span>
       <div class="recipe-reveal-dish"><span class="recipe-reveal-glow"></span><img src="${isWeird ? WEIRD_DISH_ICON : routeRecipeIcon(recipeId)}" alt="" /></div>
       <h3>${isWeird ? "괴식" : routeRecipeName(recipeId)}</h3>
       <p>${isWeird ? "사용한 재료는 사라졌어요" : recipeReveal.automatic ? "자동 연구가 새 조합을 찾았어요" : "보울 속 재료가 새로운 요리가 됐어요"}</p>
@@ -2324,7 +2342,6 @@ function canCraftRecipe(recipeId) {
   return Boolean(isRecipeSystemUnlocked()
     && route
     && recipe
-    && (!owned || owned.level < Number(recipe.maxLevel || 20))
     && craftIngredientCost(route) <= recipeCombinationCapacity()
     && craftIngredientRequirements(route).every((requirement) => ingredientAmount(requirement.ingredientId) >= requirement.count));
 }
@@ -2553,7 +2570,7 @@ function recipeHintDiscoveryLabel(revealedHints) {
   if (revealedHints.length === 1) {
     return `${routeRecipeName(revealedHints[0].route.recipeId)} 힌트를`;
   }
-  return `${routeRecipeName(revealedHints[0].route.recipeId)} 외 ${revealedHints.length - 1}개 레시피 힌트를`;
+  return `${routeRecipeName(revealedHints[0].route.recipeId)} 외 ${revealedHints.length - 1}개 요리 힌트를`;
 }
 
 function revealMatchingRecipeHints(selectedIngredients = state.crafting.selected, announce = true) {
@@ -2825,7 +2842,7 @@ function collectTipbox() {
   showToast(`팁 회수 +${formatNumber(amount)}`, 2.5);
   saveState();
   updateHud();
-  updateTipboxPanel();
+  closeTipboxPanel();
   render();
   return true;
 }
@@ -3468,7 +3485,7 @@ function drawBuffetStand(position, index) {
     ctx.stroke();
     ctx.fillStyle = "#8a623d";
     ctx.font = `900 ${compact ? 8 : 9}px sans-serif`;
-    ctx.fillText("레시피 놓기", position.x, labelTop + (compact ? 19 : 22));
+    ctx.fillText("요리 놓기", position.x, labelTop + (compact ? 19 : 22));
   }
 }
 
@@ -3549,14 +3566,14 @@ function render() {
 
 function currentObjective() {
   if (state.ui.area === "buffet") {
-    if (state.buffet.stands.slice(0, buffetStandCapacity()).some((recipeId) => !recipeId)) return "뷔페 진열대에 레시피 놓기";
+    if (state.buffet.stands.slice(0, buffetStandCapacity()).some((recipeId) => !recipeId)) return "뷔페 진열대에 요리 놓기";
     if (state.buffet.cashbox > 0) return "뷔페 계산대 정산하기";
     return "야외 뷔페 운영 중";
   }
   const required = [10, 1, 2].map((type) => tables.installs.find((row) => row.facilityType === type));
   const missing = required.find((row) => row && !isInstalled(row.id));
   if (missing) return `${FACILITY_META[missing.facilityType].name} 설치하기`;
-  if (!isRecipeSystemUnlocked()) return "도마 테이블을 설치해 레시피 열기";
+  if (!isRecipeSystemUnlocked()) return "도마 테이블을 설치해 요리 연구 열기";
   if (!isIngredientDropUnlocked()) return "냉장고를 설치해 재료 드랍 열기";
   if (state.ingredientDrops.length) return "필드의 병아리 아이템을 눌러 수집하기";
   if (state.payments.length) return "테이블의 도토리를 눌러 회수하기";
@@ -3609,12 +3626,12 @@ function updateHud() {
   const recipeUnlocked = isRecipeSystemUnlocked();
   const recipeNav = dom.navButtons.find((button) => button.dataset.screen === "recipe");
   recipeNav?.classList.toggle("is-locked", !recipeUnlocked);
-  recipeNav?.setAttribute("aria-label", recipeUnlocked ? "레시피" : "레시피 · 도마 테이블 설치 후 해금");
-  recipeNav?.setAttribute("title", recipeUnlocked ? "레시피" : "도마 테이블 설치 후 해금");
+  recipeNav?.setAttribute("aria-label", recipeUnlocked ? "요리 연구" : "요리 연구 · 도마 테이블 설치 후 해금");
+  recipeNav?.setAttribute("title", recipeUnlocked ? "요리 연구" : "도마 테이블 설치 후 해금");
   dom.recipeDot.hidden = !recipeUnlocked || (!RECIPE_PROGRESSION.some((route) => canCraftRecipe(route.recipeId))
     && !Object.values(state.ownedRecipes).some((owned) => !owned.codexClaimed || owned.stack > 0));
   dom.collectionDot.hidden = !Object.values(state.collections).some((dict) => Object.values(dict).some((entry) => entry.isNew));
-  dom.recipeNavLabel.textContent = "레시피";
+  dom.recipeNavLabel.textContent = "요리 연구";
   dom.themeNavLabel.textContent = "테마";
   updateTipboxPanel();
   updateTutorialDialogue();
@@ -3633,6 +3650,36 @@ function insideBox(point, box, padding = 0) {
     && point.y >= box.y - box.h / 2 - padding && point.y <= box.y + box.h / 2 + padding;
 }
 
+function collectSinkWater() {
+  const interaction = state.facilityInteractions.sinkWater;
+  const remaining = Math.max(0, interaction.readyAt - state.clock);
+  if (remaining > 0) {
+    showToast(`💧 ${Math.ceil(remaining)}초 후에 다시 확인해 주세요.`);
+    return false;
+  }
+  if (ingredientStorageStatus().remaining < 1) {
+    showToast("재료 보관함이 가득 찼어요.");
+    return false;
+  }
+
+  interaction.readyAt = state.clock + SINK_WATER_COOLDOWN_SECONDS;
+  interaction.attempts += 1;
+  if (random() >= SINK_WATER_DROP_CHANCE) {
+    showToast("싱크대에 아직 물이 모이지 않았어요.");
+    saveState();
+    return false;
+  }
+
+  const water = GAME_INGREDIENTS.water;
+  state.crafting.ingredients[water.id] = ingredientAmount(water.id) + 1;
+  interaction.collected += 1;
+  showToast(`${water.emoji} ${water.name} ×1 획득!`, 3);
+  saveState();
+  updateHud();
+  render();
+  return true;
+}
+
 function handleBuffetTap(point) {
   const standIndex = buffetStandPositions().findIndex((position) => insideBox(point, position, 18));
   if (standIndex >= 0) return openBuffetStandMenu(standIndex);
@@ -3641,6 +3688,11 @@ function handleBuffetTap(point) {
 }
 
 function handleCanvasTap(event) {
+  if (!dom.menuScreen.hidden && (dom.menuScreen.classList.contains("is-theme-sheet") || dom.menuScreen.classList.contains("is-recipe-sheet"))) {
+    closeMenu();
+    render();
+    return;
+  }
   if (!dom.installPanel.hidden || !dom.specialVisitorPanel.hidden || !dom.offlineRewardPanel.hidden || !dom.tipboxPanel.hidden) return;
   const point = pointerPosition(event);
   if (state.ui.area === "buffet") return handleBuffetTap(point);
@@ -3654,20 +3706,26 @@ function handleCanvasTap(event) {
   const payment = state.payments.find((item) => Math.hypot(point.x - item.x, point.y - item.y) <= 42);
   if (payment) return collectPayment(payment);
 
-  const tipbox = installedRows(3)[0];
-  if (tipbox && insideBox(point, facilityPlacement(tipbox), 16)) return openTipboxPanel();
-
   const unhappy = state.guests.find((guest) => guest.state === "disappointed" && Math.hypot(point.x - guest.x, point.y - (guest.y - 40)) <= 58);
   if (unhappy) return calmGuest(unhappy);
 
   const waiting = state.guests.find((guest) => guest.state === "awaiting_order" && Math.hypot(point.x - guest.x, point.y - (guest.y - 40)) <= 66);
   if (waiting) return takeOrder(waiting);
 
+  const tipbox = installedRows(3)[0];
+  if (tipbox && insideBox(point, facilityPlacement(tipbox), 16)) return openTipboxPanel();
+
   const stage = installedRows(5)[0];
   if (stage && insideBox(point, facilityPlacement(stage), 16)) return openMenu("performance");
 
   const fridge = installedRows(6)[0];
   if (fridge && insideBox(point, facilityPlacement(fridge), 14)) return openMenu("recipe", "ingredients");
+
+  const countertop = installedRows(8)[0];
+  if (countertop && insideBox(point, facilityPlacement(countertop), 14)) return openMenu("recipe", "craft");
+
+  const sink = installedRows(7)[0];
+  if (sink && insideBox(point, facilityPlacement(sink), 14)) return collectSinkWater();
 
   const candidate = installCandidates().find((row) => insideBox(point, facilityPlacement(row), 8));
   if (candidate) return openInstallPanel(candidate);
@@ -3682,9 +3740,10 @@ function setActiveNav(screen) {
 function closeMenu() {
   dismissRecipeReveal();
   state.ui.themePartId = null;
+  state.ui.recipeIngredientPickerOpen = false;
   state.ui.screen = "restaurant";
   dom.menuScreen.hidden = true;
-  dom.menuScreen.classList.remove("is-theme-sheet");
+  dom.menuScreen.classList.remove("is-theme-sheet", "is-recipe-sheet");
   setActiveNav("");
   saveState();
   updateTutorialDialogue();
@@ -3700,8 +3759,10 @@ function openMenu(screen, preferredTab = null) {
   if (!dom.installPanel.hidden) closeInstallPanel();
   if (state.ui.screen !== screen || dom.menuScreen.hidden) state.ui.themePartId = null;
   state.ui.screen = screen;
+  state.ui.recipeIngredientPickerOpen = false;
   state.ui.tab = preferredTab || (screen === "recipe" ? "craft" : screen === "missions" ? "main" : screen === "collection" ? "customers" : screen);
   dom.menuScreen.classList.toggle("is-theme-sheet", screen === "theme");
+  dom.menuScreen.classList.toggle("is-recipe-sheet", screen === "recipe");
   dom.menuScreen.hidden = false;
   setActiveNav(screen);
   updateTutorialDialogue();
@@ -3740,8 +3801,7 @@ function researchRequirement() {
 function canResearch() {
   const hasTarget = tables.recipeResearch.some((entry) => {
     const recipe = getRecipe(entry.recipeId);
-    const owned = recipeData(entry.recipeId);
-    return recipe && (!owned || owned.level < recipe.maxLevel);
+    return Boolean(recipe);
   });
   return hasTarget && [8, 7, 6].every((type) => installedRows(type).length > 0)
     && state.resources.ideas >= Number(tables.recipeSetting.ResearchCost || 5);
@@ -3758,8 +3818,7 @@ function doResearch() {
   if (!recipeId) {
     const candidates = tables.recipeResearch.filter((row) => {
       const recipe = getRecipe(row.recipeId);
-      const owned = recipeData(row.recipeId);
-      return recipe && (!owned || owned.level < recipe.maxLevel);
+      return Boolean(recipe);
     });
     const total = candidates.reduce((sum, row) => sum + row.recipeWeight, 0);
     let roll = random() * total;
@@ -3777,7 +3836,7 @@ function doResearch() {
   state.totalResearchCount += 1;
   state.ui.lastResearch = { recipeId, isNew };
   dispatchAchievement(8);
-  showToast(`${isNew ? "새 레시피" : "중복 레시피"} · ${routeRecipeName(recipeId)} 획득!`, 3);
+  showToast(`${isNew ? "새 요리" : "중복 요리"} · ${routeRecipeName(recipeId)} 획득!`, 3);
   saveState();
   renderMenu();
 }
@@ -3785,13 +3844,31 @@ function doResearch() {
 function upgradeRecipe(recipeId) {
   const owned = recipeData(recipeId);
   const recipe = getRecipe(recipeId);
-  if (!owned || !recipe || owned.stack <= 0 || owned.level >= recipe.maxLevel) return;
+  if (!owned || !recipe || owned.stack <= 0) return;
   owned.stack -= 1;
   owned.level += 1;
   dispatchAchievement(9, 1, 103, recipeId);
   showToast(`${routeRecipeName(recipeId)} Lv.${owned.level} 강화 완료!`);
   saveState();
   renderMenu();
+}
+
+function canManualUpgradeRecipe(recipeId) {
+  const owned = recipeData(recipeId);
+  const recipe = getRecipe(recipeId);
+  const route = progressionForRecipe(recipeId);
+  return Boolean(owned && recipe && route && !recipeResearch
+    && craftIngredientRequirements(route).every((requirement) => ingredientAmount(requirement.ingredientId) >= requirement.count));
+}
+
+function manualUpgradeRecipe(recipeId) {
+  if (!canManualUpgradeRecipe(recipeId)) return false;
+  const ingredientIds = expandedCraftIngredientIds(progressionForRecipe(recipeId));
+  if (!consumeResearchIngredients(ingredientIds)) return false;
+  state.metrics.recipeResearchAttempts += 1;
+  grantKnowhowXp(KNOWHOW_RESEARCH_XP);
+  completeRecipeCraft(recipeId, false);
+  return true;
 }
 
 function claimCodexReward(recipeId) {
@@ -3804,21 +3881,6 @@ function claimCodexReward(recipeId) {
   saveState();
   updateHud();
   renderMenu();
-}
-
-function recipeCard(recipe) {
-  const owned = recipeData(recipe.id);
-  const locked = !owned;
-  const grade = ["", "평범", "멋진", "특별한"][recipe.recipeGrade] || "레시피";
-  let action = "";
-  if (owned && !owned.codexClaimed) action = `<button class="card-action" data-action="codex" data-id="${recipe.id}">도감 보상</button>`;
-  const currentPrice = owned ? Math.round(recipeLevelPrice(recipe, owned)) : Number(recipe.foodPrice);
-  return `<article class="feature-card ${locked ? "is-locked" : ""}">
-    <img class="feature-icon" src="${routeRecipeIcon(recipe.id)}" alt="" />
-    <div class="feature-copy"><strong>${locked ? "???" : routeRecipeName(recipe.id)}</strong>
-    <small class="grade">${grade} · ${locked ? "미획득" : `Lv.${owned.level}/${recipe.maxLevel}`}</small>
-    <small>${locked ? "보유 재료 조합으로 발견할 수 있어요" : `현재 가격 ${formatNumber(currentPrice)} · 조리 ${formatCookingDuration(recipeCookingDuration(recipe, owned.level))}`}</small>
-    ${locked ? "" : `<small>Lv.UP당 가격 +${Math.round(RECIPE_LEVEL_PRICE_BONUS * 100)}% · 조리 시간 단축</small>`}</div>${action}</article>`;
 }
 
 function openBuffetStandMenu(index) {
@@ -3870,7 +3932,7 @@ function renderBuffetStandMenu() {
     const recipe = getRecipe(route.recipeId);
     return `<article class="buffet-recipe-card"><img src="${routeRecipeIcon(route.recipeId)}" alt="" /><div><strong>${routeRecipeName(route.recipeId)}</strong><small>Lv.${owned.level} · 현재 가격 ${formatNumber(Math.round(recipeLevelPrice(recipe, owned)))}</small><small>뷔페 +${formatNumber(buffetRecipeYield(route.recipeId))}/분</small></div><button type="button" data-action="buffet-place" data-id="${route.recipeId}" ${selectedHere || usedElsewhere ? "disabled" : ""}>${selectedHere ? "진열 중" : usedElsewhere ? "다른 칸" : "진열"}</button></article>`;
   }).join("");
-  dom.menuContent.innerHTML = `<section class="buffet-menu-summary"><span>🍽️</span><div><strong>총 +${formatNumber(buffetPerMinute())}/분 · 진열 ${capacity}/${BUFFET_MAX_STAND_COUNT}</strong><small>${nextRequirement ? `레시피 ${nextRequirement}개에 다음 진열대` : "모든 진열대 확장 완료"} · 수집 보너스 +${popularityBonus}%</small></div></section>
+  dom.menuContent.innerHTML = `<section class="buffet-menu-summary"><span>🍽️</span><div><strong>총 +${formatNumber(buffetPerMinute())}/분 · 진열 ${capacity}/${BUFFET_MAX_STAND_COUNT}</strong><small>${nextRequirement ? `요리 ${nextRequirement}개에 다음 진열대` : "모든 진열대 확장 완료"} · 수집 보너스 +${popularityBonus}%</small></div></section>
     ${currentRecipeId ? `<button type="button" class="buffet-clear-button" data-action="buffet-clear">현재 진열 비우기</button>` : ""}
     ${recipeCards}`;
 }
@@ -3894,7 +3956,7 @@ function contestTierUnlocked(tier) {
 }
 
 function contestTierRequirementText(tier) {
-  if (unlockedRecipeCount() < tier.recipeRequirement) return `레시피 ${tier.recipeRequirement}개 필요`;
+  if (unlockedRecipeCount() < tier.recipeRequirement) return `요리 ${tier.recipeRequirement}개 필요`;
   if (tier.previousTierId && !state.contest.firstPlaceTierIds.includes(tier.previousTierId)) {
     return `${contestTier(tier.previousTierId).shortName} 1등 필요`;
   }
@@ -4054,7 +4116,7 @@ function renderContestMenu() {
       <strong>${result.score}점</strong>
       <div class="contest-result-prize"><img src="assets/ui/currency/icon_currency_001.png" alt="" /><b>+${formatNumber(result.prize)}</b></div>
       <div class="contest-judge-results">${result.judges.map((judge) => `<article class="${judge.extraMatch ? "is-perfect" : judge.recipeMatch ? "is-good" : ""}"><span>${judge.icon}</span><strong>${judge.name}</strong><small>${judge.reaction}</small><b>+${judge.points}</b></article>`).join("")}</div>
-      ${result.rank === 1 && nextTier ? `<p>${nextUnlocked ? `${nextTier.name} 참가 자격 획득!` : `다음 목표 · 레시피 ${nextTier.recipeRequirement}개`}</p>` : ""}
+      ${result.rank === 1 && nextTier ? `<p>${nextUnlocked ? `${nextTier.name} 참가 자격 획득!` : `다음 목표 · 요리 ${nextTier.recipeRequirement}개`}</p>` : ""}
       <button type="button" class="contest-result-close" data-action="contest-result-close">대회 목록으로</button>
     </section>`;
     return;
@@ -4097,7 +4159,7 @@ function renderContestMenu() {
     <div class="contest-tier-list">${tierButtons}</div>
     <section class="contest-tier-summary"><div><span>현재 대회</span><strong>${tier.name}</strong><small>1등 기준 ${tier.firstPlaceScore}점 · 상금 ${formatNumber(Math.round(tier.prizes[0] * contestPrizeMultiplier()))}${contestPrizeMultiplier() > 1 ? ` (노하우 +${Math.round((contestPrizeMultiplier() - 1) * 100)}%)` : ""}</small></div><b>${state.contest.firstPlaceTierIds.includes(tier.id) ? "🏆" : ""}</b></section>
     <h3 class="contest-section-title">심사위원 취향</h3><div class="contest-judge-list">${judgeCards}</div>
-    <h3 class="contest-section-title">출품할 레시피</h3><div class="contest-choice-list">${recipeCards}</div>
+    <h3 class="contest-section-title">출품할 요리</h3><div class="contest-choice-list">${recipeCards}</div>
     <h3 class="contest-section-title">추가 재료 1개 <small>출품 시 소비</small></h3><div class="contest-ingredient-list">${ingredientCards || `<p class="contest-empty">보유한 재료가 없어요.</p>`}</div>
     <button type="button" class="contest-submit" data-action="contest-submit" ${canSubmit ? "" : "disabled"}>${entryCost === 0 ? "무료로 출품하기" : `보석 ${entryCost}개로 다시 출품`}</button>`;
 }
@@ -4168,10 +4230,17 @@ function recipeCatalogCard(route, index) {
   const owned = recipeData(route.recipeId);
   const requirements = craftIngredientRequirements(route);
   if (owned) {
-    const formula = requirements.map((requirement) => `<span title="${requirement.name}">${requirement.emoji}${requirement.count > 1 ? `<b>×${requirement.count}</b>` : ""}</span>`).join(`<i>+</i>`);
+    const recipe = getRecipe(route.recipeId);
+    const currentPrice = Math.round(recipeLevelPrice(recipe, owned));
+    const canUpgrade = canManualUpgradeRecipe(route.recipeId);
+    const formula = requirements.map((requirement) => {
+      const amount = ingredientAmount(requirement.ingredientId);
+      return `<span class="${amount >= requirement.count ? "is-ready" : ""}" title="${requirement.name} ${amount}/${requirement.count}">${requirement.emoji}<b>${amount}/${requirement.count}</b></span>`;
+    }).join(`<i>+</i>`);
     return `<article class="recipe-catalog-card is-discovered" data-recipe-id="${route.recipeId}">
       <div class="recipe-catalog-icon"><img src="${routeRecipeIcon(route.recipeId)}" alt="" /></div>
-      <div class="recipe-catalog-copy"><small>NO.${String(index + 1).padStart(2, "0")} · Lv.${owned.level}</small><strong>${routeRecipeName(route.recipeId)}</strong><div class="recipe-catalog-formula">${formula}</div></div>
+      <div class="recipe-catalog-copy"><small>NO.${String(index + 1).padStart(2, "0")} · Lv.${owned.level}</small><strong>${routeRecipeName(route.recipeId)}</strong><small class="recipe-catalog-price">가격 ${formatNumber(currentPrice)} · 다음 +${Math.round(RECIPE_LEVEL_PRICE_BONUS * 100)}%</small><div class="recipe-catalog-formula">${formula}</div></div>
+      <div class="recipe-catalog-actions">${!owned.codexClaimed ? `<button type="button" class="is-secondary" data-action="codex" data-id="${route.recipeId}">도감 보상</button>` : ""}<button type="button" data-action="manual-upgrade" data-id="${route.recipeId}" ${canUpgrade ? "" : "disabled"}>${canUpgrade ? "레벨업" : "재료 부족"}</button></div>
     </article>`;
   }
   const hintCounts = new Map();
@@ -4201,8 +4270,8 @@ function recipeCatalogCard(route, index) {
 
 function renderRecipeMenu() {
   dom.menuKicker.textContent = "아이템 주방";
-  dom.menuTitle.textContent = "레시피";
-  renderTabs([["craft", "제작"], ["owned", `레시피 ${unlockedRecipeCount()}`], ["ingredients", "재료 보관함"]]);
+  dom.menuTitle.textContent = "요리 연구";
+  renderTabs([["craft", "연구"], ["ingredients", "재료 보관함"]]);
   if (state.ui.tab === "craft") {
     const visibleIngredients = Object.values(GAME_INGREDIENTS)
       .filter((ingredient) => ingredientAmount(ingredient.id) > 0 || selectedIngredientCount(ingredient.id) > 0);
@@ -4214,8 +4283,25 @@ function renderRecipeMenu() {
     ];
     const bowlIngredients = selected.map((ingredient, index) => {
       const position = bowlPositions[index % bowlPositions.length];
-      return `<button type="button" class="bowl-ingredient ${index === mixingDropIndex ? "is-dropping" : ""}" style="--x:${position.x}%;--y:${position.y}%;--r:${position.r}deg" data-action="remove-selected-ingredient" data-id="${ingredient.id}" aria-label="${ingredient.ingredientName} 빼기"><span>${ingredient.emoji}</span><small>${ingredient.ingredientName}</small></button>`;
+      return `<span class="bowl-ingredient ${index === mixingDropIndex ? "is-dropping" : ""}" style="--x:${position.x}%;--y:${position.y}%;--r:${position.r}deg"><span>${ingredient.emoji}</span><small>${ingredient.ingredientName}</small></span>`;
     }).join("");
+    const selectedPickerItems = selected.length
+      ? selected.map((ingredient, index) => `<button type="button" data-action="remove-selected-ingredient" data-id="${ingredient.id}" aria-label="${ingredient.ingredientName} 빼기"><span>${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><small>${index + 1}</small></button>`).join("")
+      : `<p>아직 담은 재료가 없어요.</p>`;
+    const ingredientPicker = state.ui.recipeIngredientPickerOpen ? `<div class="recipe-ingredient-modal" role="presentation">
+      <button type="button" class="recipe-ingredient-backdrop" data-action="close-ingredient-picker" aria-label="재료 선택 닫기"></button>
+      <section class="recipe-ingredient-dialog" role="dialog" aria-modal="true" aria-label="보울에 재료 넣기">
+        <header><div><small>보울 ${selected.length}/${capacity}</small><h3>재료 넣기</h3></div><button type="button" data-action="close-ingredient-picker" aria-label="닫기">×</button></header>
+        <div class="recipe-picker-selected" aria-label="선택한 재료">${selectedPickerItems}</div>
+        <strong class="recipe-picker-label">보유 재료</strong>
+        <div class="combination-picker recipe-picker-grid">${visibleIngredients.length ? visibleIngredients.map((ingredient) => {
+          const selectedCount = selectedIngredientCount(ingredient.id);
+          const available = ingredientAmount(ingredient.id) - selectedCount;
+          return `<button type="button" data-action="select-ingredient" data-id="${ingredient.id}" ${available > 0 && selected.length < capacity ? "" : "disabled"}><span>${ingredient.emoji}</span><strong>${ingredient.name}</strong><small>${available}/${ingredientAmount(ingredient.id)}</small></button>`;
+        }).join("") : `<p>보관함에 재료가 없어요.</p>`}</div>
+        <button type="button" class="recipe-picker-done" data-action="close-ingredient-picker">담기 완료 · ${selected.length}/${capacity}</button>
+      </section>
+    </div>` : "";
     const autoUnlocked = unlockedRecipeCount() >= 5;
     const researchProgress = recipeResearch
       ? Math.round(Math.min(1, recipeResearch.elapsed / recipeResearch.duration) * 100)
@@ -4233,30 +4319,22 @@ function renderRecipeMenu() {
         <div><strong>보울 확장</strong><small>${capacity}/${BOWL_CAPACITY_MAX}칸</small></div>
         <button type="button" data-action="expand-bowl-capacity" ${capacity >= BOWL_CAPACITY_MAX || state.resources.gems < BOWL_CAPACITY_EXPANSION_GEM_COST ? "disabled" : ""}>${capacity >= BOWL_CAPACITY_MAX ? `<strong>최대 용량</strong>` : `<img src="assets/ui/currency/icon_currency_002.png" alt="보석"/><span>${BOWL_CAPACITY_EXPANSION_GEM_COST}</span><strong>+${BOWL_CAPACITY_EXPANSION_AMOUNT}칸</strong>`}</button>
       </div>
-      <div class="mixing-board">
+      <button type="button" class="mixing-board" data-action="open-ingredient-picker" aria-label="보울을 열어 재료 넣기">
         <span class="board-grain grain-one" aria-hidden="true"></span><span class="board-grain grain-two" aria-hidden="true"></span>
         <div class="mixing-bowl" aria-label="재료를 담는 보울">
           <div class="mixing-bowl-rim"></div>
-          <div class="mixing-bowl-contents">${bowlIngredients || `<span class="empty-bowl-hint">재료를 넣어주세요</span>`}</div>
+          <div class="mixing-bowl-contents">${bowlIngredients || `<span class="empty-bowl-hint">눌러서 재료 넣기</span>`}</div>
           <div class="mixing-bowl-front"><span aria-hidden="true">♨</span></div>
         </div>
         <div class="bowl-capacity" aria-label="보울 용량">${Array.from({ length: capacity }, (_, index) => `<i class="${index < selected.length ? "is-filled" : ""}"></i>`).join("")}</div>
-      </div>
-      <div class="ingredient-shelf-title"><strong>재료 넣기</strong><small>재료를 누르면 보울에 담겨요</small></div>
-      <div class="combination-picker">${visibleIngredients.length ? visibleIngredients.map((ingredient) => {
-        const selectedCount = selectedIngredientCount(ingredient.id);
-        const available = ingredientAmount(ingredient.id) - selectedCount;
-        return `<button type="button" data-action="select-ingredient" data-id="${ingredient.id}" ${available > 0 && selected.length < capacity ? "" : "disabled"}><span>${ingredient.emoji}</span><strong>${ingredient.name}</strong><small>${available}/${ingredientAmount(ingredient.id)}</small></button>`;
-      }).join("") : `<p>보관함에 재료가 없어요.</p>`}</div>
+      </button>
+      <div class="ingredient-shelf-title"><strong>보울을 눌러 재료 넣기</strong><small>${selected.length}/${capacity}</small></div>
       <button class="research-button combination-discover" data-action="discover-combination" ${selected.length >= 2 ? "" : "disabled"}><span aria-hidden="true">🥄</span> 보울 섞기</button>
-      <button class="research-button auto-research-button" data-action="auto-craft" ${autoUnlocked && !recipeResearch ? "" : "disabled"}>${autoUnlocked ? "자동 요리 연구" : `자동 연구 · 레시피 ${unlockedRecipeCount()}/5`}</button>
+      <button class="research-button auto-research-button" data-action="auto-craft" ${autoUnlocked && !recipeResearch ? "" : "disabled"}>${autoUnlocked ? "자동 요리 연구" : `자동 연구 · 요리 ${unlockedRecipeCount()}/5`}</button>
       ${researchOverlay}
-    </section>
-    <div class="recipe-discovery-status"><strong>레시피 목록</strong><span>${unlockedRecipeCount()}/${RECIPE_PROGRESSION.length} 발견</span></div>
+    </section>${ingredientPicker}
+    <div class="recipe-discovery-status"><strong>발견 가능한 요리</strong><span>${unlockedRecipeCount()}/${RECIPE_PROGRESSION.length} 발견</span></div>
     <div class="recipe-catalog-grid">${discoveryOrderedRecipeRoutes().map(recipeCatalogCard).join("")}</div>`;
-  } else if (state.ui.tab === "owned") {
-    const owned = Object.keys(state.ownedRecipes).map((id) => getRecipe(Number(id))).filter(Boolean);
-    dom.menuContent.innerHTML = `<p class="section-note">발견한 레시피 ${owned.length}</p>${owned.map(recipeCard).join("")}`;
   } else {
     const ingredients = storedIngredientIds()
       .map((id) => ingredientData(id))
@@ -4827,6 +4905,22 @@ function renderGameToText() {
           .map((item) => item.id).filter((id) => isInstalled(id)),
       })),
     },
+    facilityInteractions: {
+      sinkWater: {
+        installed: installedRows(7).length > 0,
+        ingredientId: GAME_INGREDIENTS.water.id,
+        ingredientName: GAME_INGREDIENTS.water.name,
+        chance: SINK_WATER_DROP_CHANCE,
+        cooldownSeconds: SINK_WATER_COOLDOWN_SECONDS,
+        remainingCooldown: Number(Math.max(0, state.facilityInteractions.sinkWater.readyAt - state.clock).toFixed(2)),
+        attempts: state.facilityInteractions.sinkWater.attempts,
+        collected: state.facilityInteractions.sinkWater.collected,
+      },
+      countertop: {
+        installed: installedRows(8).length > 0,
+        tapAction: "open-recipe-crafting-sheet",
+      },
+    },
     tutorial: {
       activeId: state.tutorial?.activeId || null,
       text: TUTORIAL_DIALOGUES[state.tutorial?.activeId] || null,
@@ -5065,6 +5159,7 @@ function renderGameToText() {
       presentation: "bottom-half-sheet",
       sheetStartPercent: 52,
       restaurantVisibleAbove: true,
+      outsideTapDismiss: true,
       defaultCardContent: "price-or-owned-or-active-only",
       incomeVisibility: state.ui.themePartId ? "detail-popup" : "hidden",
       completionEffect: {
@@ -5087,6 +5182,12 @@ function renderGameToText() {
     recipes: {
       systemUnlocked: isRecipeSystemUnlocked(),
       unlockFacility: "도마 테이블",
+      displayName: "요리 연구",
+      presentation: "bottom-sheet",
+      sheetStartPercent: 38,
+      sheetHeightPercent: 62,
+      restaurantVisibleAbove: true,
+      outsideTapDismiss: true,
       owned: Object.keys(state.ownedRecipes).length,
       combinationCapacity: recipeCombinationCapacity(),
       combinationCapacityGrowth: "gem-upgrade-only",
@@ -5094,6 +5195,8 @@ function renderGameToText() {
       combinationCapacityMax: BOWL_CAPACITY_MAX,
       combinationCapacityExpansion: { gems: BOWL_CAPACITY_EXPANSION_GEM_COST, amount: BOWL_CAPACITY_EXPANSION_AMOUNT },
       selectedIngredients: [...state.crafting.selected],
+      ingredientPickerOpen: Boolean(state.ui.recipeIngredientPickerOpen),
+      ingredientSelection: "tap-bowl-then-popup",
       mixingPresentation: "cutting-board-and-bowl",
       research: recipeResearch ? {
         recipeId: recipeResearch.recipeId,
@@ -5105,6 +5208,8 @@ function renderGameToText() {
       } : null,
       catalogTotal: RECIPE_PROGRESSION.length,
       catalogSort: "earliest-ingredient-discovery-stage",
+      catalogPresentation: "merged-discovery-and-manual-upgrade",
+      tabs: ["craft", "ingredients"],
       catalogOrder: discoveryOrderedRecipeRoutes().map((route) => route.recipeId),
       reveal: recipeReveal ? {
         recipeId: recipeReveal.recipeId,
@@ -5176,6 +5281,8 @@ function renderGameToText() {
         knowhowReduction: knowhowCookingReduction(),
       },
       recipeLevelPriceBonus: RECIPE_LEVEL_PRICE_BONUS,
+      levelLimit: null,
+      levelGrowthRule: "unlimited-while-ingredients-available",
       craftable: RECIPE_PROGRESSION.filter((route) => canCraftRecipe(route.recipeId)).map((route) => route.recipeId),
       searchScope: "all-recipes-by-owned-ingredients",
       craftCosts: Object.fromEntries(RECIPE_PROGRESSION.map((route) => [route.recipeId, craftIngredientCost(route)])),
@@ -5388,6 +5495,7 @@ dom.menuTabs.addEventListener("click", (event) => {
   const button = event.target.closest("[data-tab]");
   if (!button) return;
   state.ui.tab = button.dataset.tab;
+  state.ui.recipeIngredientPickerOpen = false;
   renderMenu();
 });
 dom.menuContent.addEventListener("click", (event) => {
@@ -5401,17 +5509,27 @@ dom.menuContent.addEventListener("click", (event) => {
   }
   if (button.dataset.action === "knowhow-upgrade") upgradeKnowhowSkill(button.dataset.skillId);
   if (button.dataset.action === "research") doResearch();
+  if (button.dataset.action === "open-ingredient-picker") {
+    state.ui.recipeIngredientPickerOpen = true;
+    renderMenu();
+  }
+  if (button.dataset.action === "close-ingredient-picker") {
+    state.ui.recipeIngredientPickerOpen = false;
+    saveState();
+    renderMenu();
+  }
   if (button.dataset.action === "select-ingredient") addSelectedIngredient(id);
   if (button.dataset.action === "remove-selected-ingredient") removeSelectedIngredient(id);
   if (button.dataset.action === "clear-combination") { state.crafting.selected = []; mixingDropIndex = -1; saveState(); renderMenu(); }
   if (button.dataset.action === "discover-combination") discoverSelectedCombination();
   if (button.dataset.action === "auto-craft") {
     if (!tryAutoCraft()) showToast(unlockedRecipeCount() < 5
-      ? "레시피 5개 발견 후 자동 연구가 열려요."
+      ? "요리 5개 발견 후 자동 연구가 열려요."
       : "자동 연구에는 재료가 2개 이상 필요해요.");
     renderMenu();
   }
   if (button.dataset.action === "codex") claimCodexReward(id);
+  if (button.dataset.action === "manual-upgrade") manualUpgradeRecipe(id);
   if (button.dataset.action === "claim-mission") claimMission(button.dataset.kind, id);
   if (button.dataset.action === "daily-bonus") claimDailyBonus();
   if (button.dataset.action === "hire-staff") hireStaff(id);
@@ -5454,6 +5572,11 @@ dom.recipeReveal.addEventListener("click", (event) => {
   if (event.target === dom.recipeReveal || event.target.closest('[data-action="dismiss-recipe-reveal"]')) dismissRecipeReveal();
 });
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.ui.screen === "recipe" && state.ui.recipeIngredientPickerOpen) {
+    state.ui.recipeIngredientPickerOpen = false;
+    renderMenu();
+    return;
+  }
   if (event.key === "Escape" && state.ui.screen === "theme" && state.ui.themePartId) {
     const partId = Number(state.ui.themePartId);
     state.ui.themePartId = null;

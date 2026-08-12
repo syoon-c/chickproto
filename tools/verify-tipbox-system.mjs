@@ -93,13 +93,13 @@ try {
   const beforeAcorns = current.resources.acorns;
   await page.locator("#tipbox-collect").click();
   current = await gameState();
-  if (current.tipbox !== 0 || current.resources.acorns !== beforeAcorns + 450 || !current.tipboxSystem.panelVisible
-    || !await page.locator("#tipbox-collect").isDisabled()) {
+  if (current.tipbox !== 0 || current.resources.acorns !== beforeAcorns + 450 || current.tipboxSystem.panelVisible
+    || await page.locator("#tipbox-panel").isVisible()) {
     throw new Error(`Tip collection through popup failed: ${JSON.stringify({ tipbox: current.tipboxSystem, acorns: current.resources.acorns })}`);
   }
 
   if (errors.length) throw new Error(`Browser errors: ${errors.join(" | ")}`);
-  console.log("TIPBOX_SYSTEM_OK popup=touch-only capacity=500 expand=500/10gems all-normal-tip=yes disappointed=no auto-excluded=yes");
+  console.log("TIPBOX_SYSTEM_OK popup=touch-only closeAfterClaim=yes capacity=500 expand=500/10gems all-normal-tip=yes disappointed=no auto-excluded=yes");
 } finally {
   await browser.close();
 }

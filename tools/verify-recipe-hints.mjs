@@ -51,8 +51,10 @@ try {
   const mysteryNames = await page.locator(".recipe-catalog-card.is-mystery .recipe-catalog-copy > strong").allTextContents();
   if (mysteryNames.some((name) => name !== "???")) throw new Error("A locked recipe name was exposed");
 
+  await page.locator('[data-action="open-ingredient-picker"]').click();
   await page.locator(`[data-action="select-ingredient"][data-id="${recipeInfo.bread.id}"]`).click();
   await page.locator(`[data-action="select-ingredient"][data-id="${recipeInfo.rice.id}"]`).click();
+  await page.locator('[data-action="close-ingredient-picker"]').last().click();
   await page.locator('[data-action="discover-combination"]').click();
   await page.evaluate(() => window.advanceTime(2500));
   await page.locator('[data-action="dismiss-recipe-reveal"]').click();
@@ -97,8 +99,10 @@ try {
   }, recipeInfo);
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
+  await page.locator('[data-action="open-ingredient-picker"]').click();
   await page.locator(`[data-action="select-ingredient"][data-id="${recipeInfo.bread.id}"]`).click();
   await page.locator(`[data-action="select-ingredient"][data-id="${recipeInfo.leaf.id}"]`).click();
+  await page.locator('[data-action="close-ingredient-picker"]').last().click();
   await page.locator('[data-action="discover-combination"]').click();
   await page.evaluate(() => window.advanceTime(2500));
   current = await gameState();

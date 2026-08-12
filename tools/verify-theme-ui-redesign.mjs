@@ -62,11 +62,10 @@ try {
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "02-part-detail.png") });
 
   await modal.locator(`[data-action="buy-theme"][data-id="${lockedId}"]`).click();
-  await page.locator(".theme-part-modal").waitFor({ state: "visible" });
-  if (!(await page.locator(".theme-part-modal").innerText()).includes("현재 적용 중")) {
-    throw new Error("Purchased theme part did not switch to the active state in its popup.");
+  await page.locator(".theme-part-modal").waitFor({ state: "detached" });
+  if (!await page.locator("#menu-screen").isVisible() || JSON.parse(await page.evaluate(() => window.render_game_to_text())).currentScreen !== "theme") {
+    throw new Error("Buying a theme part closed more than the purchase popup.");
   }
-  await page.locator('[data-action="theme-part-close"]').last().click();
   const purchasedCard = page.locator(`.theme-part-card[data-id="${lockedId}"]`);
   if ((await purchasedCard.innerText()).trim() !== "적용 중") throw new Error("Purchased theme card did not show only the active status.");
   if (await page.locator(".theme-part-modal").count()) throw new Error("Theme part popup did not close.");
