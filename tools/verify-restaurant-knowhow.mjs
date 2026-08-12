@@ -128,7 +128,9 @@ try {
   }, saveKey);
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
+  await page.locator('[data-action="open-ingredient-picker"]').click();
   for (const ingredientId of invalidPair) await page.locator(`[data-action="select-ingredient"][data-id="${ingredientId}"]`).first().click();
+  await page.locator('[data-action="close-ingredient-picker"]').last().click();
   await page.locator('[data-action="discover-combination"]').click();
   await page.evaluate(() => window.advanceTime(3000));
   current = await gameState();
@@ -157,20 +159,24 @@ try {
   await page.locator('[data-screen="knowhow"]').click();
   await upgrade("auto_collect_1");
   if ((await gameState()).knowhow.automation.paymentInterval !== 30) throw new Error("Auto payment stage I is not 30 seconds");
-  await upgrade("auto_payment_2");
-  if ((await gameState()).knowhow.automation.paymentInterval !== 20) throw new Error("Auto payment stage II is not 20 seconds");
-  await upgrade("auto_payment_3");
-  if ((await gameState()).knowhow.automation.paymentInterval !== 10) throw new Error("Auto payment stage III is not 10 seconds");
   await upgrade("auto_collect_2");
   if ((await gameState()).knowhow.automation.ingredientInterval !== 30) throw new Error("Auto ingredient stage I is not 30 seconds");
+  await upgrade("auto_promotion_1");
+  await upgrade("auto_order_1");
+  await upgrade("auto_payment_2");
+  if ((await gameState()).knowhow.automation.paymentInterval !== 20) throw new Error("Auto payment stage II is not 20 seconds");
   await upgrade("auto_ingredient_2");
   if ((await gameState()).knowhow.automation.ingredientInterval !== 20) throw new Error("Auto ingredient stage II is not 20 seconds");
+  await upgrade("auto_calm_1");
+  await upgrade("auto_promotion_2");
+  await upgrade("auto_order_2");
+  await upgrade("auto_payment_3");
+  if ((await gameState()).knowhow.automation.paymentInterval !== 10) throw new Error("Auto payment stage III is not 10 seconds");
   await upgrade("auto_ingredient_3");
   if ((await gameState()).knowhow.automation.ingredientInterval !== 10) throw new Error("Auto ingredient stage III is not 10 seconds");
-  for (const id of ["drop_bonus_1", "drop_bonus_2", "drop_bonus_3", ...Array.from({ length: 10 }, (_, index) => `double_drop_${index + 1}`), "storage_bonus_1", "storage_bonus_2", "merchant_discount_1", "merchant_discount_2",
-    "auto_collect_3", "auto_buffet_2", "auto_buffet_3", "auto_order_1", "auto_order_2", "auto_order_3", "auto_calm_1", "auto_calm_2", "auto_calm_3", "auto_promotion_1", "auto_promotion_2", "auto_promotion_3",
-    "cooking_speed_1", "cooking_speed_2", "cooking_speed_3", "research_speed_1", "research_speed_2", "research_speed_3",
-    "offline_bonus_1", "offline_bonus_2", "contest_prize_1", "contest_prize_2", "buffet_income_1", "buffet_income_2"]) await upgrade(id);
+  for (const id of ["auto_calm_2", "auto_promotion_3", "auto_order_3", "auto_calm_3", "auto_collect_3", "auto_buffet_2", "auto_buffet_3",
+    "drop_bonus_1", "double_drop_1", "storage_bonus_1", "drop_bonus_2", "double_drop_2", "merchant_discount_1", "drop_bonus_3", "double_drop_3", "storage_bonus_2", "double_drop_4", "merchant_discount_2", "double_drop_5", "double_drop_6", "double_drop_7", "double_drop_8", "double_drop_9", "double_drop_10",
+    "cooking_speed_1", "research_speed_1", "offline_bonus_1", "cooking_speed_2", "contest_prize_1", "research_speed_2", "buffet_income_1", "cooking_speed_3", "offline_bonus_2", "research_speed_3", "contest_prize_2", "buffet_income_2"]) await upgrade(id);
   current = await gameState();
   if (Math.abs(current.knowhow.effects.ingredientDropChance - .22) > .0001
     || current.knowhow.effects.buffetOfflineCapSeconds !== 14400

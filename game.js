@@ -171,7 +171,7 @@ const KNOWHOW_XP_BASE = 100;
 const KNOWHOW_XP_GROWTH = 25;
 const KNOWHOW_RESEARCH_XP = 20;
 const KNOWHOW_SERVICE_XP = 1;
-const KNOWHOW_SKILLS = Object.freeze([
+const KNOWHOW_SKILL_DEFINITIONS = Object.freeze([
   { id: "restaurant_basics", name: "식당 노하우", icon: "📒", maxLevel: 1, costs: [], x: 240, y: 52, prerequisites: [], effect: () => "요리하며 식당 운영 경험을 쌓아요" },
 
   { id: "auto_collect_1", name: "도토리 정산 I", icon: "🪙", maxLevel: 1, costs: [1], x: 80, y: 170, prerequisites: [{ id: "restaurant_basics", level: 1 }], effect: () => "30초마다 테이블 도토리 1개 자동 회수" },
@@ -224,6 +224,37 @@ const KNOWHOW_SKILLS = Object.freeze([
   { id: "buffet_income_1", name: "진열 감각", icon: "🍽️", maxLevel: 1, costs: [2], x: 400, y: 1320, prerequisites: [{ id: "contest_prize_2", level: 1 }], effect: () => "야외 뷔페 분당 수익 +10%" },
   { id: "buffet_income_2", name: "인기 진열", icon: "🥂", maxLevel: 1, costs: [2], x: 400, y: 1435, prerequisites: [{ id: "buffet_income_1", level: 1 }], effect: () => "야외 뷔페 분당 수익 추가 +10%" },
 ]);
+const KNOWHOW_BALANCED_BRANCHES = Object.freeze([
+  Object.freeze([
+    "auto_collect_1", "auto_collect_2", "auto_promotion_1", "auto_order_1",
+    "auto_payment_2", "auto_ingredient_2", "auto_calm_1", "auto_promotion_2",
+    "auto_order_2", "auto_payment_3", "auto_ingredient_3", "auto_calm_2",
+    "auto_promotion_3", "auto_order_3", "auto_calm_3", "auto_collect_3",
+    "auto_buffet_2", "auto_buffet_3",
+  ]),
+  Object.freeze([
+    "drop_bonus_1", "double_drop_1", "storage_bonus_1", "drop_bonus_2",
+    "double_drop_2", "merchant_discount_1", "drop_bonus_3", "double_drop_3",
+    "storage_bonus_2", "double_drop_4", "merchant_discount_2", "double_drop_5",
+    "double_drop_6", "double_drop_7", "double_drop_8", "double_drop_9", "double_drop_10",
+  ]),
+  Object.freeze([
+    "cooking_speed_1", "research_speed_1", "offline_bonus_1", "cooking_speed_2",
+    "contest_prize_1", "research_speed_2", "buffet_income_1", "cooking_speed_3",
+    "offline_bonus_2", "research_speed_3", "contest_prize_2", "buffet_income_2",
+  ]),
+]);
+const KNOWHOW_BALANCED_LAYOUT = new Map(KNOWHOW_BALANCED_BRANCHES.flatMap((branch) => branch.map((id, index) => [
+  id,
+  {
+    y: 170 + index * 115,
+    prerequisites: [{ id: index === 0 ? "restaurant_basics" : branch[index - 1], level: 1 }],
+  },
+])));
+const KNOWHOW_SKILLS = Object.freeze(KNOWHOW_SKILL_DEFINITIONS.map((skill) => Object.freeze({
+  ...skill,
+  ...(KNOWHOW_BALANCED_LAYOUT.get(skill.id) || {}),
+})));
 const CONTEST_JUDGE_PREFERENCES = Object.freeze({
   fresh: { name: "새싹 심사위원", icon: "🥬", hint: "싱그러운 채소가 좋아요", ingredientKeys: ["leaf", "lettuce", "tomato", "mixedVeg", "carrot", "cabbage", "cucumber", "broccoli", "avocado"] },
   rich: { name: "고소미 심사위원", icon: "🧀", hint: "고소하고 부드러운 맛!", ingredientKeys: ["cheese", "egg", "butter", "milk", "cream", "seed", "tofu", "corn"] },
@@ -4950,6 +4981,8 @@ function renderGameToText() {
       xpRewards: { recipeResearchSuccessOrFailure: KNOWHOW_RESEARCH_XP, guestMealCooking: KNOWHOW_SERVICE_XP },
       selectedSkillId: state.knowhow.selectedSkillId,
       graphPresentation: "connected-mind-map",
+      progressionPattern: "balanced-interleaved-categories",
+      branchSequences: KNOWHOW_BALANCED_BRANCHES.map((branch) => [...branch]),
       effects: {
         ingredientDropChance: currentIngredientDropChance(),
         bonusIngredientChance: knowhowBonusIngredientChance(),

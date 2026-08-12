@@ -1894,3 +1894,11 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 요리 카드에서 `Lv.현재/최대`와 `최대 레벨` 상태를 제거하고 `Lv.현재`만 표시한다. 재료가 충분하면 레벨과 관계없이 항상 `레벨업` 버튼이 활성화된다.
 - 과거 상한이었던 Lv.20 상태도 자동 연구 후보에 포함되고, 수동 레벨업으로 Lv.21 이상 성장하며 기존 가격 +10% 규칙과 연출을 그대로 사용한다.
 - 검증: `MANUAL_DISH_UPGRADE_OK unlimited=yes ... level=20->21 ingredients=2->0 price=116->120`, `RECIPE_RESEARCH_WEIRD_DISH_OK` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/manual-dish-upgrade/`.
+
+## 2026-08-12 노하우 교차 성장 구조
+
+- 한 효과의 I·II·III를 연속으로 끝내야 다음 종류를 배울 수 있던 선행 조건을 제거하고, 세 갈래 모두 서로 다른 효과가 번갈아 등장하도록 순서와 마인드맵 좌표를 재배치했다.
+- 자동 운영은 `도토리 정산 I → 재료 정리 I → 홍보 I → 주문 I → 정산 II…`, 재료 수급은 `드랍 확률 → 추가 드랍 → 보관함 → 드랍 확률…`, 요리 성장은 `조리 → 연구 → 오프라인 → 조리 → 대회…` 순으로 진행된다.
+- 기존 노하우 ID, 포인트 비용, 효과 수치와 저장 데이터는 유지한다. 이미 습득한 노하우도 회수되거나 초기화되지 않는다.
+- `render_game_to_text`에 `progressionPattern`과 세 갈래의 실제 순서를 추가해 선행 조건을 자동 검증할 수 있게 했다.
+- 검증: `BALANCED_KNOWHOW_OK branches=3 automation=payment>ingredient>promotion>order growth=cooking>research>offline`, `RESTAURANT_KNOWHOW_OK ... nodes=48 ...` 통과. 공식 웹게임 클라이언트 실행 및 콘솔 오류 없음 확인. 화면: `output/balanced-knowhow-progression/`.
