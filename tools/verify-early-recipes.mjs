@@ -17,33 +17,33 @@ const earlyIngredientIds = new Set(CORE_PROGRESSION
 const earlyRecipes = RECIPE_PROGRESSION.filter((route) => route.ingredientRequirements
   .every((ingredient) => earlyIngredientIds.has(ingredient.id)));
 const expectedEarlyNames = [
-  "샐러드", "버섯전", "샌드위치", "버터 토스트", "토마토 샌드위치", "달걀 샌드위치", "토마토 달걀볶음", "버터빵",
-  "새싹 샐러드", "양상추 샌드위치", "버섯 토스트", "달걀밥", "버터 라이스", "토마토 리조또",
+  "샐러드", "버섯전", "샌드위치", "폭탄 계란찜", "버터 토스트", "토마토 샌드위치", "달걀 샌드위치", "토마토 달걀볶음",
+  "버터빵", "버섯 토스트", "달걀밥", "버터 라이스", "토마토 리조또",
 ];
-if (CORE_PROGRESSION.length !== 45 || RECIPE_PROGRESSION.length !== 64 || EARLY_RECIPE_CATALOG.length !== 19) {
+if (CORE_PROGRESSION.length !== 45 || RECIPE_PROGRESSION.length !== 72 || EARLY_RECIPE_CATALOG.length !== 27) {
   throw new Error(`Recipe/chick totals are incorrect: ${CORE_PROGRESSION.length}/${RECIPE_PROGRESSION.length}/${EARLY_RECIPE_CATALOG.length}`);
 }
-if (earlyIngredientIds.size !== 9 || JSON.stringify(earlyRecipes.map((route) => route.recipeName)) !== JSON.stringify(expectedEarlyNames)) {
-  throw new Error(`Expected fourteen early recipes from nine ingredients: ${JSON.stringify({ ingredients: [...earlyIngredientIds], recipes: earlyRecipes.map((route) => route.recipeName) })}`);
+if (earlyIngredientIds.size !== 12 || JSON.stringify(earlyRecipes.map((route) => route.recipeName)) !== JSON.stringify(expectedEarlyNames)) {
+  throw new Error(`Expected thirteen early recipes from twelve ingredients: ${JSON.stringify({ ingredients: [...earlyIngredientIds], recipes: earlyRecipes.map((route) => route.recipeName) })}`);
 }
 const combinations = RECIPE_PROGRESSION.map((route) => route.ingredientRequirements.map((ingredient) => ingredient.id).sort().join("+"));
 if (new Set(combinations).size !== combinations.length) throw new Error("An early recipe duplicates an existing ingredient combination");
-if (EARLY_RECIPE_CATALOG.some((recipe) => recipe.foodPrice > 80)) throw new Error("An early recipe exceeds the intended starter price band");
+if (EARLY_RECIPE_CATALOG.some((recipe) => recipe.foodPrice > 105)) throw new Error("A supplemental recipe exceeds the intended price band");
 const earlyPrices = Object.fromEntries(earlyRecipes.map((route) => {
   const sourceId = Number(route.baseRecipeId || route.recipeId);
   const rawPrice = Number(rawRecipeById.get(sourceId)?.foodPrice || 0) + ([1, 4].includes(sourceId) ? 10 : 0);
   return [route.recipeName, Number(route.foodPrice || rawPrice)];
 }));
 const expectedEarlyPrices = {
-  "샐러드": 40, "버섯전": 48, "샌드위치": 52, "버터 토스트": 60, "토마토 샌드위치": 54,
-  "달걀 샌드위치": 56, "토마토 달걀볶음": 56, "버터빵": 72, "새싹 샐러드": 45,
-  "양상추 샌드위치": 50, "버섯 토스트": 52, "달걀밥": 65, "버터 라이스": 68, "토마토 리조또": 78,
+  "샐러드": 40, "버섯전": 48, "샌드위치": 52, "폭탄 계란찜": 250, "버터 토스트": 60, "토마토 샌드위치": 54,
+  "달걀 샌드위치": 56, "토마토 달걀볶음": 56, "버터빵": 72, "버섯 토스트": 52,
+  "달걀밥": 65, "버터 라이스": 68, "토마토 리조또": 78,
 };
 if (JSON.stringify(earlyPrices) !== JSON.stringify(expectedEarlyPrices)) {
   throw new Error(`Early recipe prices are not normalized: ${JSON.stringify(earlyPrices)}`);
 }
 const twoIngredientPrices = earlyRecipes
-  .filter((route) => Number(route.ingredientCount) === 2)
+  .filter((route) => route.isEarlyRecipe && Number(route.ingredientCount) === 2)
   .map((route) => earlyPrices[route.recipeName]);
 if (Math.min(...twoIngredientPrices) < 40 || Math.max(...twoIngredientPrices) > 68) {
   throw new Error(`Two-ingredient early recipe price outlier: ${JSON.stringify(earlyPrices)}`);
@@ -78,16 +78,17 @@ try {
   }, { breadId: GAME_INGREDIENTS.bread.id, butterId: GAME_INGREDIENTS.butter.id });
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
-  if (await page.locator(".recipe-catalog-card").count() !== 64) throw new Error("The UI recipe catalog did not expand to 64 cards");
+  if (await page.locator(".recipe-catalog-card").count() !== 72) throw new Error("The UI recipe catalog did not expand to 72 cards");
+  await page.locator('[data-action="open-ingredient-picker"]').click();
   await page.locator(`[data-action="select-ingredient"][data-id="${GAME_INGREDIENTS.bread.id}"]`).click();
   await page.locator(`[data-action="select-ingredient"][data-id="${GAME_INGREDIENTS.butter.id}"]`).click();
-  await page.locator('[data-action="discover-combination"]').click();
+  await page.locator('.recipe-picker-mix').click();
   await page.evaluate(() => window.advanceTime(2500));
   let current = await state();
-  if (current.recipes.catalogTotal !== 64
+  if (current.recipes.catalogTotal !== 72
     || current.recipes.levels["20001"] !== 1
     || current.recipes.prices["20001"] !== 60
-    || current.recipes.mysteryRecipeCount !== 62) {
+    || current.recipes.mysteryRecipeCount !== 70) {
     throw new Error(`Butter toast was not discovered at its balanced early price: ${JSON.stringify(current.recipes)}`);
   }
   const revealText = await page.locator("#recipe-reveal").innerText();

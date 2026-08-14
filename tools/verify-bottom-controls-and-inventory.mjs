@@ -24,7 +24,7 @@ try {
   await page.reload({ waitUntil: "load" });
 
   const labels = await page.locator(".bottom-nav .nav-button strong").allTextContents();
-  if (labels.join(",") !== "테마,레시피,손님,노하우") throw new Error(`Unexpected bottom navigation: ${labels.join(",")}`);
+  if (labels.join(",") !== "테마,요리 연구,손님,노하우") throw new Error(`Unexpected bottom navigation: ${labels.join(",")}`);
   if (await page.locator("[data-screen='missions'],[data-screen='staff'],#collection-btn").count()) {
     throw new Error("Removed task/staff/top collection controls remain");
   }
@@ -57,7 +57,7 @@ try {
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
   const recipeTabs = await page.locator("#menu-tabs button").allTextContents();
-  if (recipeTabs.join(",") !== "제작,레시피 1,재료 보관함") throw new Error(`Unexpected recipe tabs: ${recipeTabs.join(",")}`);
+  if (recipeTabs.join(",") !== "연구,냉장고") throw new Error(`Unexpected recipe tabs: ${recipeTabs.join(",")}`);
   await page.locator('[data-tab="ingredients"]').click();
   if (!(await page.locator(".ingredient-inventory-grid").isVisible())) throw new Error("Ingredient inventory category did not open");
   await page.locator("#menu-close-btn").click();

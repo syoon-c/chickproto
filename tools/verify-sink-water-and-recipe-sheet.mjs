@@ -57,7 +57,7 @@ try {
     throw new Error(`Sink interaction was not configured: ${JSON.stringify(current.facilityInteractions.sinkWater)}`);
   }
 
-  await clickCanvas(274, 174);
+  await clickCanvas(178, 174);
   current = await gameState();
   let savedWaterAmount = await page.evaluate(() => Number(JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")).crafting.ingredients[30067] || 0));
   if (savedWaterAmount !== 0 || current.facilityInteractions.sinkWater.attempts !== 0
@@ -71,7 +71,7 @@ try {
   }
   await page.locator(".game-frame").screenshot({ path: path.join(out, "00-sink-water-ready.png") });
 
-  await clickCanvas(274, 174);
+  await clickCanvas(178, 174);
   current = await gameState();
   const savedAfterWater = await page.evaluate(() => JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")));
   if (savedAfterWater.crafting.ingredients[30067] !== 1
@@ -83,7 +83,7 @@ try {
   }
   if (!current.toast.text?.includes("물 ×1 획득")) throw new Error(`Sink success feedback is missing: ${JSON.stringify(current.toast)}`);
 
-  await clickCanvas(274, 174);
+  await clickCanvas(178, 174);
   current = await gameState();
   const savedDuringCooldown = await page.evaluate(() => JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")));
   if (savedDuringCooldown.crafting.ingredients[30067] !== 1 || current.facilityInteractions.sinkWater.attempts !== 1
@@ -92,14 +92,14 @@ try {
   }
 
   await page.evaluate(() => window.advanceTime(8100));
-  await clickCanvas(274, 174);
+  await clickCanvas(178, 174);
   current = await gameState();
   savedWaterAmount = await page.evaluate(() => Number(JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")).crafting.ingredients[30067] || 0));
   if (savedWaterAmount !== 2 || current.facilityInteractions.sinkWater.collected !== 2) {
     throw new Error("Sink did not grant guaranteed water again after the next timer.");
   }
 
-  await clickCanvas(178, 174);
+  await clickCanvas(274, 174);
   current = await gameState();
   if (current.currentScreen !== "recipe" || current.recipes.presentation !== "bottom-sheet") {
     throw new Error(`Countertop did not open the recipe sheet: ${JSON.stringify({ screen: current.currentScreen, recipes: current.recipes })}`);

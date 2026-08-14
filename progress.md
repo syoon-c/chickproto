@@ -1962,3 +1962,24 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - `바로 섞기`를 누르면 선택 팝업이 즉시 닫히고 재료가 소비되며 요리 연구 로딩 연출로 전환된다. 신규 발견, 기존 요리 레벨업, 괴식과 힌트 규칙은 그대로 유지한다.
 - `render_game_to_text`에 `ingredientSelection=\"tap-bowl-popup-mix-inside\"`, `outsideMixButton=false`를 추가해 UI 흐름을 검증할 수 있게 했다.
 - 검증: `SINK_WATER_RECIPE_SHEET_OK ... mix=inside-popup`, `RECIPE_LAB_THEME_SHEET_OK`, `RECIPE_RESEARCH_WEIRD_DISH_OK`, `SPECIAL_PROMOTION_OK`, `INGREDIENT_DEMAND_BALANCE_OK` 통과. 공식 웹게임 클라이언트 콘솔 오류 없음. 화면: `output/sink-water-and-recipe-sheet/02c-bowl-capacity-full.png`, `02d-popup-mix-started.png`, `output/bowl-popup-mix-smoke/shot-0.png`.
+
+## 2026-08-14 물 활용 요리 8종 확장
+
+- 싱크대에서 확정 획득하는 물이 다양한 단계에서 소비되도록 요리 8종을 추가했다.
+  - 2재료: 쌀죽(물+쌀), 삶은 달걀(물+달걀)
+  - 3재료: 맑은 국수(물+면+소금), 토마토 수프(물+토마토+양파), 감자 수프(물+감자+우유), 채소죽(물+쌀+모둠 채소), 두부 장국(물+두부+간장)
+  - 4재료: 양배추 피클(물+양배추+식초+설탕)
+- 전체 발견 가능 요리는 64종에서 72종, 물을 쓰는 요리는 2종에서 10종으로 늘어났다.
+- 모든 72개 재료 조합이 중복되지 않음을 확인했다.
+- `verify-water-recipes.mjs`에서 쌀죽과 양배추 피클을 실제 보울 UI로 조합해 신규 발견 연출까지 확인했다.
+- 재료 수요 균형 및 초반 요리 회귀 검사를 72개 기준으로 갱신하고 통과했다.
+- 공식 `develop-web-game` 클라이언트에서 `catalogTotal=72`, `mysteryRecipeCount=71`, 콘솔 오류 없음과 초기 화면 렌더링을 확인했다.
+
+## 2026-08-14 냉장고 명칭·주인공 설비 이동
+
+- 사용자에게 보이는 `재료 보관함` 명칭을 `냉장고`로 통일했다. 요리 연구의 두 탭은 `연구 / 냉장고`이며 냉장고 탭에서는 패널 제목도 `냉장고`로 바뀐다. 용량·빈 상태·가득 참·확장 안내와 노하우 효과도 냉장고 표현을 사용한다.
+- 요리 연구 패널을 열면 주인공 요리사 병아리가 도마 테이블 앞으로 부드럽게 이동한다. 냉장고 탭으로 바꾸면 냉장고 앞으로 이동하고, 패널 닫기·다른 화면 전환 시 기존 위치 `(400,330)`으로 복귀한다.
+- 필드 상단 설비 배치를 `싱크대 x=178 / 도마 테이블 x=274 / 냉장고 x=370` 순으로 변경했다. 싱크대 물 획득과 도마 테이블 연구 진입의 터치 위치도 함께 교환했다.
+- `render_game_to_text`에 주인공 현재·목표 위치, 활성 설비와 이동 여부 및 세 설비 좌표를 추가했다.
+- 검증: `CHEF_STATION_NAVIGATION_OK`, `SINK_WATER_RECIPE_SHEET_OK`, `BOTTOM_CONTROLS_INVENTORY_OK`, `INGREDIENT_STORAGE_EXPANSION_OK`, `BOTTOM_SHEET_OUTSIDE_DISMISS_OK`, `FACILITY_TUTORIAL_UNLOCKS_OK`, `WATER_RECIPES_OK` 통과.
+- 공식 `develop-web-game` 클라이언트에서 전체 설비 설치 후 연구 탭 진입, 주인공 도마 테이블 도착 `(274,248)`, 새 설비 배치와 콘솔 오류 없음 확인.

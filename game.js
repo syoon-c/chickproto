@@ -121,6 +121,10 @@ let recipeResearch = null;
 let specialPromotionDetailIngredientId = null;
 let knowhowMapScroll = { left: 30, top: 0 };
 let themeMenuScrollTop = 0;
+const CHEF_HOME_POSITION = Object.freeze({ x: 400, y: 330 });
+const CHEF_STATION_OFFSET_Y = 74;
+const CHEF_MOVE_SPEED = 520;
+let chefPosition = { ...CHEF_HOME_POSITION };
 const RECIPE_RESEARCH_DURATION = 2.4;
 const THEME_COMPLETION_MENU_PRICE_BONUS = .2;
 const SINK_WATER_COOLDOWN_SECONDS = 8;
@@ -206,8 +210,8 @@ const KNOWHOW_SKILL_DEFINITIONS = Object.freeze([
   { id: "double_drop_8", name: "두 손 가득 III", icon: "✚", maxLevel: 1, costs: [1], x: 240, y: 1320, prerequisites: [{ id: "double_drop_7", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
   { id: "double_drop_9", name: "두 손 가득 IV", icon: "✚", maxLevel: 1, costs: [1], x: 240, y: 1435, prerequisites: [{ id: "double_drop_8", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
   { id: "double_drop_10", name: "풍성한 선물", icon: "🎁", maxLevel: 1, costs: [2], x: 240, y: 1550, prerequisites: [{ id: "double_drop_9", level: 1 }], effect: () => "재료 1개 추가 드랍 확률 +0.5%p" },
-  { id: "storage_bonus_1", name: "알뜰한 정리", icon: "🧊", maxLevel: 1, costs: [1], x: 240, y: 1665, prerequisites: [{ id: "double_drop_10", level: 1 }], effect: () => "재료 보관함 +5칸" },
-  { id: "storage_bonus_2", name: "넉넉한 보관", icon: "📦", maxLevel: 1, costs: [2], x: 240, y: 1780, prerequisites: [{ id: "storage_bonus_1", level: 1 }], effect: () => "재료 보관함 +5칸" },
+  { id: "storage_bonus_1", name: "알뜰한 정리", icon: "🧊", maxLevel: 1, costs: [1], x: 240, y: 1665, prerequisites: [{ id: "double_drop_10", level: 1 }], effect: () => "냉장고 용량 +5칸" },
+  { id: "storage_bonus_2", name: "넉넉한 보관", icon: "📦", maxLevel: 1, costs: [2], x: 240, y: 1780, prerequisites: [{ id: "storage_bonus_1", level: 1 }], effect: () => "냉장고 용량 +5칸" },
   { id: "merchant_discount_1", name: "상인과 안면", icon: "💬", maxLevel: 1, costs: [2], x: 240, y: 1895, prerequisites: [{ id: "storage_bonus_2", level: 1 }], effect: () => "재료 상인 가격 -10%" },
   { id: "merchant_discount_2", name: "흥정 요령", icon: "🪙", maxLevel: 1, costs: [2], x: 240, y: 2010, prerequisites: [{ id: "merchant_discount_1", level: 1 }], effect: () => "재료 상인 가격 추가 -10%" },
 
@@ -2220,7 +2224,7 @@ function buySpecialVisitorOffer(offerId) {
   const offer = actor?.offers?.find((item) => item.id === Number(offerId));
   if (!offer || offer.sold) return false;
   if (state.resources.acorns < offer.price) return showToast("도토리가 부족해요.");
-  if (ingredientStorageStatus().remaining < offer.quantity) return showToast("재료 보관함이 부족해요.");
+  if (ingredientStorageStatus().remaining < offer.quantity) return showToast("냉장고에 자리가 부족해요.");
   state.resources.acorns -= offer.price;
   state.crafting.ingredients[offer.ingredientId] = ingredientAmount(offer.ingredientId) + offer.quantity;
   offer.sold = true;
@@ -2718,7 +2722,7 @@ function collectIngredientDrop(drop) {
   const storage = ingredientStorageStatus();
   const incomingCount = items.reduce((sum, item) => sum + Math.max(1, Number(item.count || 1)), 0);
   if (storage.totalItems + incomingCount > storage.capacity) {
-    showToast(`재료 보관함이 가득 찼어요. (${storage.totalItems}/${storage.capacity}칸)`, 3);
+    showToast(`냉장고가 가득 찼어요. (${storage.totalItems}/${storage.capacity}칸)`, 3);
     return false;
   }
   for (const item of items) {
@@ -3113,6 +3117,7 @@ function updateKnowhowAutomation(dt) {
 
 function update(dt) {
   state.clock += dt;
+  updateChefMovement(dt);
   if (toastTimer > 0) {
     toastTimer -= dt;
     if (toastTimer <= 0) dom.toast.hidden = true;
@@ -3168,7 +3173,7 @@ function expandIngredientStorage() {
   }
   state.resources.gems -= INGREDIENT_STORAGE_EXPANSION_GEM_COST;
   state.crafting.storageCapacity = storage.baseCapacity + INGREDIENT_STORAGE_EXPANSION_AMOUNT;
-  showToast(`재료 보관함 ${ingredientStorageStatus().capacity}칸으로 확장!`);
+  showToast(`냉장고 용량 ${ingredientStorageStatus().capacity}칸으로 확장!`);
   saveState();
   updateHud();
   renderMenu();
@@ -3276,9 +3281,40 @@ function drawInstallZone(row) {
   ctx.restore();
 }
 
+function chefMovementTarget() {
+  if (!state || !tables || dom.menuScreen.hidden || state.ui.screen !== "recipe") {
+    return { ...CHEF_HOME_POSITION, station: "home", facilityType: null };
+  }
+  const facilityType = state.ui.tab === "ingredients" ? 6 : 8;
+  const row = installedRows(facilityType)[0]
+    || tables.installs.find((item) => Number(item.facilityType) === facilityType);
+  if (!row) return { ...CHEF_HOME_POSITION, station: "home", facilityType: null };
+  const placement = facilityPlacement(row);
+  return {
+    x: placement.x,
+    y: placement.y + CHEF_STATION_OFFSET_Y,
+    station: facilityType === 6 ? "fridge" : "countertop",
+    facilityType,
+  };
+}
+
+function updateChefMovement(dt) {
+  const target = chefMovementTarget();
+  const dx = target.x - chefPosition.x;
+  const dy = target.y - chefPosition.y;
+  const distance = Math.hypot(dx, dy);
+  if (distance <= .01) {
+    chefPosition.x = target.x;
+    chefPosition.y = target.y;
+    return;
+  }
+  const step = Math.min(distance, CHEF_MOVE_SPEED * Math.max(0, dt));
+  chefPosition.x += dx / distance * step;
+  chefPosition.y += dy / distance * step;
+}
+
 function drawChef() {
-  const x = 400;
-  const y = 330;
+  const { x, y } = chefPosition;
   const bob = Math.sin(state.clock * 3.4) * 2;
   drawShadow(x, y + 31, 25, 7);
   drawImage("assets/ui/chick/icon_chick_chef.png", x, y + bob, 82, 82);
@@ -3707,7 +3743,7 @@ function collectSinkWater() {
     return false;
   }
   if (ingredientStorageStatus().remaining < 1) {
-    showToast("재료 보관함이 가득 찼어요.");
+    showToast("냉장고가 가득 찼어요.");
     return false;
   }
 
@@ -4312,9 +4348,10 @@ function recipeCatalogCard(route, index) {
 }
 
 function renderRecipeMenu() {
-  dom.menuKicker.textContent = "아이템 주방";
-  dom.menuTitle.textContent = "요리 연구";
-  renderTabs([["craft", "연구"], ["ingredients", "재료 보관함"]]);
+  const fridgeTab = state.ui.tab === "ingredients";
+  dom.menuKicker.textContent = fridgeTab ? "재료 관리" : "도마 테이블";
+  dom.menuTitle.textContent = fridgeTab ? "냉장고" : "요리 연구";
+  renderTabs([["craft", "연구"], ["ingredients", "냉장고"]]);
   if (state.ui.tab === "craft") {
     const visibleIngredients = Object.values(GAME_INGREDIENTS)
       .filter((ingredient) => ingredientAmount(ingredient.id) > 0 || selectedIngredientCount(ingredient.id) > 0);
@@ -4346,7 +4383,7 @@ function renderRecipeMenu() {
           const selectedCount = selectedIngredientCount(ingredient.id);
           const available = ingredientAmount(ingredient.id) - selectedCount;
           return `<button type="button" data-action="select-ingredient" data-id="${ingredient.id}" ${available > 0 && selected.length < capacity ? "" : "disabled"}><span>${ingredient.emoji}</span><strong>${ingredient.name}</strong><small>${available}/${ingredientAmount(ingredient.id)}</small></button>`;
-        }).join("") : `<p>보관함에 재료가 없어요.</p>`}</div>
+        }).join("") : `<p>냉장고에 재료가 없어요.</p>`}</div>
         <button type="button" class="recipe-picker-mix" data-action="discover-combination" ${selected.length >= 2 && !recipeResearch ? "" : "disabled"}><span aria-hidden="true">🥄</span> ${selected.length >= 2 ? `바로 섞기 · ${selected.length}/${capacity}` : `재료를 2개 이상 담아주세요 · ${selected.length}/${capacity}`}</button>
       </section>
     </div>` : "";
@@ -4390,11 +4427,11 @@ function renderRecipeMenu() {
     const storage = ingredientStorageStatus();
     const fillRatio = storage.capacity ? Math.min(100, storage.totalItems / storage.capacity * 100) : 0;
     dom.menuContent.innerHTML = `<section class="ingredient-storage-panel">
-      <div class="ingredient-inventory-summary"><span>보관 용량</span><strong>${formatNumber(storage.totalItems)}/${formatNumber(storage.capacity)}칸</strong></div>
+      <div class="ingredient-inventory-summary"><span>냉장고 용량</span><strong>${formatNumber(storage.totalItems)}/${formatNumber(storage.capacity)}칸</strong></div>
       <div class="ingredient-storage-track"><span style="width:${fillRatio}%"></span></div>
       <div class="ingredient-storage-actions"><small>남은 ${formatNumber(storage.remaining)}칸</small><button type="button" data-action="expand-ingredient-storage" ${state.resources.gems >= storage.expansionGemCost ? "" : "disabled"}><img src="assets/ui/currency/icon_currency_002.png" alt="보석"/><span>${storage.expansionGemCost}</span><strong>+${storage.expansionAmount}칸</strong></button></div>
     </section>
-      <div class="ingredient-inventory-grid">${ingredients.length ? ingredients.map((ingredient) => `<article class="ingredient-inventory-item" data-ingredient-id="${ingredient.id}"><span class="ingredient-emoji">${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><b>${formatNumber(ingredientAmount(ingredient.id))}개</b></article>`).join("") : `<p class="ingredient-storage-empty">보관 중인 재료가 없어요.</p>`}</div>`;
+      <div class="ingredient-inventory-grid">${ingredients.length ? ingredients.map((ingredient) => `<article class="ingredient-inventory-item" data-ingredient-id="${ingredient.id}"><span class="ingredient-emoji">${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><b>${formatNumber(ingredientAmount(ingredient.id))}개</b></article>`).join("") : `<p class="ingredient-storage-empty">냉장고가 비어 있어요.</p>`}</div>`;
   }
 }
 
@@ -4793,6 +4830,7 @@ function resetGame() {
   toggleDebugPanel(false);
   dismissRecipeReveal();
   state = createInitialState();
+  chefPosition = { ...CHEF_HOME_POSITION };
   closeMenu();
   showToast("새 식당을 시작합니다.");
   saveState();
@@ -4917,6 +4955,11 @@ function renderGameToText() {
       position,
     };
   });
+  const chefTarget = chefMovementTarget();
+  const stationPositions = Object.fromEntries([[6, "fridge"], [7, "sink"], [8, "countertop"]].map(([facilityType, key]) => {
+    const row = tables.installs.find((item) => Number(item.facilityType) === facilityType);
+    return [key, row ? facilityPlacement(row) : null];
+  }));
   return JSON.stringify({
     coordinateSystem: "canvas 480x900; origin top-left; x right; y down",
     mode: state.ui.area,
@@ -4966,11 +5009,26 @@ function renderGameToText() {
         ready: state.facilityInteractions.sinkWater.readyAt <= state.clock,
         attempts: state.facilityInteractions.sinkWater.attempts,
         collected: state.facilityInteractions.sinkWater.collected,
+        placement: stationPositions.sink,
       },
       countertop: {
         installed: installedRows(8).length > 0,
         tapAction: "open-recipe-crafting-sheet",
+        placement: stationPositions.countertop,
       },
+      fridge: {
+        installed: installedRows(6).length > 0,
+        tapAction: "open-recipe-fridge-tab",
+        placement: stationPositions.fridge,
+      },
+    },
+    chef: {
+      position: { x: Number(chefPosition.x.toFixed(1)), y: Number(chefPosition.y.toFixed(1)) },
+      target: { x: chefTarget.x, y: chefTarget.y },
+      station: chefTarget.station,
+      moving: Math.hypot(chefTarget.x - chefPosition.x, chefTarget.y - chefPosition.y) > 1,
+      home: { ...CHEF_HOME_POSITION },
+      behavior: "move-to-countertop-or-fridge-and-return-home-on-close",
     },
     tutorial: {
       activeId: state.tutorial?.activeId || null,

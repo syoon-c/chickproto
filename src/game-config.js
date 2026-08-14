@@ -291,6 +291,14 @@ const EARLY_RECIPE_CATALOG = [
   { recipeId: 20017, recipeName: "달걀밥", keys: ["rice", "egg"], baseRecipeId: 22, foodPrice: 40 },
   { recipeId: 20018, recipeName: "버터 라이스", keys: ["rice", "butter"], baseRecipeId: 8, foodPrice: 38 },
   { recipeId: 20019, recipeName: "토마토 리조또", keys: ["rice", "tomato", "butter"], baseRecipeId: 8, foodPrice: 50 },
+  { recipeId: 20020, recipeName: "쌀죽", keys: ["water", "rice"], baseRecipeId: 35, foodPrice: 46 },
+  { recipeId: 20021, recipeName: "삶은 달걀", keys: ["water", "egg"], baseRecipeId: 21, foodPrice: 48 },
+  { recipeId: 20022, recipeName: "맑은 국수", keys: ["water", "noodles", "salt"], baseRecipeId: 37, foodPrice: 65 },
+  { recipeId: 20023, recipeName: "토마토 수프", keys: ["water", "tomato", "onion"], baseRecipeId: 4, foodPrice: 68 },
+  { recipeId: 20024, recipeName: "감자 수프", keys: ["water", "potato", "milk"], baseRecipeId: 4, foodPrice: 74 },
+  { recipeId: 20025, recipeName: "채소죽", keys: ["water", "rice", "mixedVeg"], baseRecipeId: 35, foodPrice: 72 },
+  { recipeId: 20026, recipeName: "두부 장국", keys: ["water", "tofu", "soy"], baseRecipeId: 39, foodPrice: 92 },
+  { recipeId: 20027, recipeName: "양배추 피클", keys: ["water", "cabbage", "vinegar", "sugar"], baseRecipeId: 26, foodPrice: 105 },
 ];
 
 const EARLY_RECIPE_PROGRESSION = EARLY_RECIPE_CATALOG.map((recipe) => ({
@@ -383,7 +391,7 @@ const FACILITY_META = {
   4: { key: "entrance", name: "출입구", description: "손님이 들어오고 나가는 레스토랑의 입구예요.", icon: "assets/ui/facility/icon_facility_1_entrance_stone.png" },
   5: { key: "stage", name: "무대", description: "공연팀이 수익 버프 공연을 진행하는 공간이에요.", icon: "assets/ui/facility/icon_facility_1_stage_stone.png" },
   6: { key: "fridge", name: "냉장고", description: "터치하면 보유한 재료를 확인할 수 있어요.", icon: "assets/ui/facility/icon_facility_1_fridge_stone.png" },
-  7: { key: "sink", name: "싱크대", description: "터치하면 가끔 물 재료를 얻을 수 있어요.", icon: "assets/ui/facility/icon_facility_1_sink_stone.png" },
+  7: { key: "sink", name: "싱크대", description: "시간이 지나면 터치해 물을 받을 수 있어요.", icon: "assets/ui/facility/icon_facility_1_sink_stone.png" },
   8: { key: "countertop", name: "도마 테이블", description: "터치하면 요리 연구 화면을 열 수 있어요.", icon: "assets/ui/facility/icon_facility_1_countertop_stone.png" },
   9: { key: "kitchenware", name: "조리도구함", description: "주방 공간을 채우는 장식 설비예요.", icon: "assets/ui/facility/icon_facility_1_kitchenware_stone.png" },
   10: { key: "lighting", name: "조명", description: "주방의 분위기를 밝혀 주는 장식 설비예요.", icon: "assets/ui/facility/icon_facility_1_lighting_stone.png" },
@@ -407,8 +415,8 @@ function facilityPlacement(row) {
   if (row.facilityType === 4) return { x: 240, y: 830, w: 128, h: 120 };
   if (row.facilityType === 5) return { x: 70, y: 405, w: 100, h: 84 };
   if (row.facilityType === 6) return { x: 370, y: 174, w: 78, h: 94 };
-  if (row.facilityType === 7) return { x: 274, y: 174, w: 78, h: 82 };
-  if (row.facilityType === 8) return { x: 178, y: 174, w: 78, h: 82 };
+  if (row.facilityType === 7) return { x: 178, y: 174, w: 78, h: 82 };
+  if (row.facilityType === 8) return { x: 274, y: 174, w: 78, h: 82 };
   if (row.facilityType === 9) return { x: 82, y: 174, w: 78, h: 82 };
   if (row.facilityType === 10) return { x: row.facilityGroup === 2 ? 430 : 400, y: 112, w: 68, h: 82 };
   if (row.facilityType === 11) return { x: row.facilityGroup === 2 ? 418 : 62, y: 815, w: 118, h: 42 };

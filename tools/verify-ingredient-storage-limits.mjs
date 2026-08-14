@@ -84,7 +84,7 @@ try {
   await page.locator('[data-screen="recipe"]').click();
   await page.locator('[data-tab="ingredients"]').click();
   const summary = await page.locator(".ingredient-inventory-summary").innerText();
-  if (!summary.includes("보관 용량") || !summary.includes("20/20칸")) throw new Error(`Storage summary mismatch: ${summary}`);
+  if (!summary.includes("냉장고 용량") || !summary.includes("20/20칸")) throw new Error(`Storage summary mismatch: ${summary}`);
   const expandButton = page.locator('[data-action="expand-ingredient-storage"]');
   if (await expandButton.isDisabled() || !(await expandButton.innerText()).includes("10") || !(await expandButton.innerText()).includes("+5칸")) {
     throw new Error("Storage expansion button is incorrect");
