@@ -54,12 +54,12 @@ const THEME_CHICK_PURCHASE_REQUIREMENTS = Object.freeze({
 });
 
 const GUEST_GRADES = [
-  { id: 1, name: "첫 방문", minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
-  { id: 2, name: "단골", minVisits: 40, primaryCount: 1, secondaryCount: 1, rareCount: 0 },
-  { id: 3, name: "최고의 단골", minVisits: 150, primaryCount: 1, secondaryCount: 1, rareCount: 1 },
+  { id: 1, name: "첫 방문", minVisits: 1 },
+  { id: 2, name: "단골", minVisits: 40 },
+  { id: 3, name: "최고의 단골", minVisits: 150 },
 ];
 const GUEST_INGREDIENT_DROP_CHANCE = 0.15;
-const INGREDIENT_SLOT_WEIGHTS = Object.freeze({ primary: 0.5, secondary: 0.3, special: 0.2 });
+const INGREDIENT_SLOT_WEIGHTS = Object.freeze({ base: 0.7, special: 0.3 });
 const INGREDIENT_STORAGE_INITIAL_CAPACITY = 20;
 const INGREDIENT_STORAGE_EXPANSION_AMOUNT = 5;
 const INGREDIENT_STORAGE_EXPANSION_GEM_COST = 10;
@@ -119,42 +119,45 @@ const GAME_INGREDIENTS = {
   cannedCorn: { id: 30077, name: "통조림 옥수수", emoji: "🥫" }, soda: { id: 30078, name: "탄산음료", emoji: "🥤" },
 };
 
-// 첫 테마는 ABC/DEF/GHI, 이후 테마는 기존 재료와 신규 3개만 교차 배치한다.
-const THEME_NEW_INGREDIENT_KEYS = {
-  1: ["leaf", "lettuce", "tomato", "mushroom", "flour", "meat", "bread", "egg", "butter"],
-  2: ["rice", "oil", "mixedVeg"],
-  3: ["potato", "cheese", "sausage"],
-  4: ["broth", "noodles", "seaweed"],
-  5: ["tortilla", "beef", "chili"],
-  6: ["breadcrumbs", "pork", "cabbage"],
-  7: ["pasta", "garlic", "paprika"],
-  8: ["fish", "soy", "vinegar"],
-  9: ["carrot", "sugar", "avocado"],
-  10: ["milk", "cream", "seed"],
-  11: ["tofu", "acorn", "corn"],
-  12: ["ham", "ketchup", "fruit"],
-  13: ["curry", "onion", "water"],
-  14: ["strawberry", "apple", "truffle"],
-  15: ["pepper", "rosemary", "salt"],
+// 모든 손님은 자주 쓰이는 기본 재료 1종과 손님 고유의 특별 재료 1종만 가진다.
+// 기본 재료는 여러 병아리가 공유하므로 필요한 재료를 꾸준히 수급할 수 있다.
+const CHICK_BASE_INGREDIENT_KEYS = {
+  // 돌 테마만 완료해도 샐러드·버섯전·샌드위치 계열 6종을 연구할 수 있다.
+  1: ["leaf", "flour", "bread"],
+  // 나무 테마는 버터 요리와 달걀 육수 요리를 바로 확장한다.
+  2: ["butter", "pork", "rice"],
+  3: ["leaf", "leaf", "noodles"],
+  4: ["milk", "sugar", "salt"],
+  5: ["rice", "bread", "oil"],
+  6: ["meat", "garlic", "butter"],
+  7: ["milk", "flour", "sugar"],
+  8: ["onion", "rice", "garlic"],
+  9: ["leaf", "oil", "sugar"],
+  10: ["flour", "bread", "milk"],
+  11: ["rice", "oil", "garlic"],
+  12: ["onion", "sugar", "salt"],
+  13: ["butter", "milk", "sugar"],
+  14: ["salt", "leaf", "garlic"],
+  15: ["onion", "bread", "rice"],
 };
 
-// 사용 레시피가 많은 재료를 후속 병아리의 주·보조 재료로 다시 공급한다.
-// 각 배열은 slot0의 3종, slot1의 보조 1종, slot2의 주·보조 2종 순서다.
-const THEME_REPEAT_INGREDIENT_KEYS = {
-  2: ["egg", "butter", "meat", "bread", "tomato", "flour"],
-  3: ["oil", "mixedVeg", "rice", "egg", "tomato", "butter"],
-  4: ["cheese", "rice", "egg", "bread", "mushroom", "mixedVeg"],
-  5: ["broth", "egg", "rice", "noodles", "sausage", "seaweed"],
-  6: ["beef", "chili", "butter", "flour", "oil", "rice"],
-  7: ["pork", "cabbage", "bread", "egg", "potato", "beef"],
-  8: ["garlic", "butter", "bread", "egg", "rice", "tomato"],
-  9: ["vinegar", "soy", "lettuce", "flour", "mixedVeg", "bread"],
-  10: ["avocado", "broth", "leaf", "egg", "cheese", "butter"],
-  11: ["cream", "seed", "milk", "egg", "oil", "tomato"],
-  12: ["corn", "milk", "rice", "bread", "flour", "beef"],
-  13: ["fruit", "ketchup", "acorn", "paprika", "rice", "egg"],
-  14: ["onion", "water", "broth", "rice", "butter", "cream"],
-  15: ["truffle", "apple", "leaf", "meat", "onion", "pork"],
+// 특별 재료는 45마리 전체에서 중복되지 않는다. 외형과 역할에 가까운 재료를 우선 배치했다.
+const CHICK_SPECIAL_INGREDIENT_KEYS = {
+  1: ["tomato", "mushroom", "egg"],
+  2: ["acorn", "broth", "truffle"],
+  3: ["avocado", "cabbage", "chili"],
+  4: ["water", "rosemary", "cheese"],
+  5: ["corn", "sausage", "mixedVeg"],
+  6: ["beef", "lamb", "paprika"],
+  7: ["cream", "pepper", "lettuce"],
+  8: ["ketchup", "curry", "pasta"],
+  9: ["seed", "carrot", "apple"],
+  10: ["ham", "tortilla", "banana"],
+  11: ["seaweed", "breadcrumbs", "bean"],
+  12: ["vinegar", "soda", "potato"],
+  13: ["mandrake", "strawberry", "fruit"],
+  14: ["ginseng", "fish", "tofu"],
+  15: ["dragonFruit", "starFruit", "soy"],
 };
 
 // 레시피는 테마가 아니라 재료 조합만으로 이해할 수 있도록 직접 정의한다.
@@ -207,20 +210,11 @@ const GAME_RECIPE_CATALOG = [
   { name: "아보카도 샐러드", keys: ["avocado", "lettuce", "tomato", "oil"], iconRecipeId: 1 },
 ];
 
-function themeRewardIngredientKeys(themeId, slot) {
-  if (Number(themeId) === 3) {
-    return [
-      ["leaf", "oil", "rice"],
-      ["potato", "leaf", "cheese"],
-      ["tomato", "leaf", "sausage"],
-    ][Number(slot)];
-  }
-  const current = THEME_NEW_INGREDIENT_KEYS[themeId];
-  if (themeId === 1) return current.slice(slot * 3, slot * 3 + 3);
-  const repeated = THEME_REPEAT_INGREDIENT_KEYS[themeId];
-  if (slot === 0) return repeated.slice(0, 3);
-  if (slot === 1) return [current[0], repeated[3], current[1]];
-  return [repeated[4], repeated[5], current[2]];
+function chickRewardIngredientKeys(themeId, slot) {
+  return [
+    CHICK_BASE_INGREDIENT_KEYS[themeId][slot],
+    CHICK_SPECIAL_INGREDIENT_KEYS[themeId][slot],
+  ];
 }
 
 const THEME_CHICK_PROFILES = {
@@ -247,7 +241,7 @@ const CORE_PROGRESSION = Object.keys(THEME_NAMES).flatMap((themeIdText) => {
     const globalIndex = (themeId - 1) * 3 + slot;
     const catalogRecipe = GAME_RECIPE_CATALOG[globalIndex];
     const profile = THEME_CHICK_PROFILES[themeId][slot];
-    const rewardIngredients = themeRewardIngredientKeys(themeId, slot).map((key) => GAME_INGREDIENTS[key]);
+    const rewardIngredients = chickRewardIngredientKeys(themeId, slot).map((key) => GAME_INGREDIENTS[key]);
     const dropIngredient = rewardIngredients[0];
     const ingredientRequirements = catalogRecipe.keys.map((key) => GAME_INGREDIENTS[key]);
     const isBase = themeId === 1 && slot === 0;

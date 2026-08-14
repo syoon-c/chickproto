@@ -802,16 +802,22 @@ button.combination-slot { cursor: pointer; }
 .recipe-ingredient-dialog > header small { color: #a06a38; font-size: 10px; font-weight: 1000; }
 .recipe-ingredient-dialog > header h3 { margin: 1px 0 0; color: #56371f; font-size: 20px; }
 .recipe-ingredient-dialog > header button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: #ead8b9; color: #74543a; font-size: 22px; font-weight: 1000; cursor: pointer; }
-.recipe-picker-selected { min-height: 55px; display: flex; gap: 5px; margin: 8px 0; padding: 6px; overflow-x: auto; border-radius: 13px; background: rgba(111,72,35,.11); }
+.recipe-picker-capacity { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 2px 4px; color: #684629; }
+.recipe-picker-capacity strong { font-size: 11px; }
+.recipe-picker-capacity span { padding: 3px 7px; border-radius: 99px; background: #f0dca9; color: #8b5b30; font-size: 10px; font-weight: 1000; }
+.recipe-picker-selected { min-height: 60px; display: flex; justify-content: center; gap: 6px; margin: 0 0 8px; padding: 7px; overflow-x: auto; border-radius: 13px; background: rgba(111,72,35,.11); }
 .recipe-picker-selected button { position: relative; flex: 0 0 55px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; border: 2px solid #a16b37; border-radius: 11px; background: #fff9e7; cursor: pointer; }
 .recipe-picker-selected button span { font: 21px/1 "Segoe UI Emoji",sans-serif; }
 .recipe-picker-selected button strong { width: 100%; margin-top: 2px; overflow: hidden; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
 .recipe-picker-selected button small { position: absolute; top: -4px; right: -3px; width: 15px; height: 15px; display: grid; place-items: center; border-radius: 50%; background: #e77c38; color: white; font-size: 8px; font-weight: 1000; }
-.recipe-picker-selected p { width: 100%; margin: auto; color: #8a7058; font-size: 10px; font-weight: 900; text-align: center; }
+.recipe-picker-empty-slot { flex: 0 0 55px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 2px dashed rgba(126,91,58,.42); border-radius: 11px; background: rgba(255,255,255,.35); color: #9a826a; }
+.recipe-picker-empty-slot b { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: rgba(126,91,58,.13); font-size: 10px; }
+.recipe-picker-empty-slot small { font-size: 8px; font-weight: 900; }
 .recipe-picker-label { margin: 0 2px 5px; color: #684629; font-size: 11px; }
 .recipe-ingredient-dialog .recipe-picker-grid { max-height: none; min-height: 0; flex: 1; grid-template-columns: repeat(4,minmax(0,1fr)); padding-right: 2px; overflow-y: auto; }
 .recipe-ingredient-dialog .recipe-picker-grid > button { min-height: 62px; }
-.recipe-picker-done { width: 100%; min-height: 41px; margin-top: 9px; border: 2px solid #875126; border-radius: 14px; background: linear-gradient(#ffd65e,#f1a333); box-shadow: 0 3px 0 #99591f; color: #603817; font-size: 12px; font-weight: 1000; cursor: pointer; }
+.recipe-picker-mix { width: 100%; min-height: 44px; margin-top: 9px; border: 2px solid #875126; border-radius: 14px; background: linear-gradient(#ffd65e,#f1a333); box-shadow: 0 3px 0 #99591f; color: #603817; font-size: 12px; font-weight: 1000; cursor: pointer; }
+.recipe-picker-mix:disabled { border-color: #b9ab99; background: #ded7ca; box-shadow: none; color: #8f8578; cursor: default; }
 .combination-discover,.auto-research-button { width: 100%; margin-top: 8px; }
 .combination-discover { min-height: 45px; font-size: 14px; }
 .combination-discover span { display: inline-block; margin-right: 3px; font-size: 19px; vertical-align: -2px; }

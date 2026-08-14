@@ -98,23 +98,20 @@ try {
     || current.progression.ingredientDropRule.unlockFacility !== "냉장고"
     || current.progression.ingredientDropRule.overallChance !== 0.15
     || current.progression.ingredientDropRule.ingredientTypesOnSuccess !== 1
-    || JSON.stringify(current.progression.ingredientDropRule.slotChances) !== JSON.stringify({ primary: 0.5, secondary: 0.3, special: 0.2 })
-    || JSON.stringify(current.progression.ingredientDropRule.grades) !== JSON.stringify([
-      { minVisits: 1, primaryCount: 1, secondaryCount: 0, rareCount: 0 },
-      { minVisits: 40, primaryCount: 1, secondaryCount: 1, rareCount: 0 },
-      { minVisits: 150, primaryCount: 1, secondaryCount: 1, rareCount: 1 },
-    ])) {
+    || current.progression.ingredientDropRule.visitIndependent !== true
+    || JSON.stringify(current.progression.ingredientDropRule.slotChances) !== JSON.stringify({ base: 0.7, special: 0.3 })
+    || JSON.stringify(current.progression.ingredientDropRule.countsOnSuccess) !== JSON.stringify({ base: 1, special: 1 })) {
     throw new Error(`Drop rule mismatch: ${JSON.stringify(current.progression.ingredientDropRule)}`);
   }
 
-  const first = await runVisitGroup(1, { 30039: 1 });
-  const regular = await runVisitGroup(40, { 30039: 1, 30001: 1 });
-  const best = await runVisitGroup(150, { 30039: 1, 30001: 1, 30002: 1 });
+  const first = await runVisitGroup(1, { 30039: 1, 30002: 1 });
+  const regular = await runVisitGroup(40, { 30039: 1, 30002: 1 });
+  const best = await runVisitGroup(150, { 30039: 1, 30002: 1 });
   current = best.current;
   await page.evaluate(() => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
-    const secondaryDrop = saved.ingredientDrops.find((drop) => drop.ingredientId === 30001 && drop.totalCount === 1);
+    const secondaryDrop = saved.ingredientDrops.find((drop) => drop.ingredientId === 30002 && drop.totalCount === 1);
     saved.guests = [];
     saved.orders = [];
     saved.cooking = [];
@@ -127,14 +124,14 @@ try {
 
   const result = {
     configuredChance: current.progression.ingredientDropRule.overallChance,
-    first: { hits: first.hits, misses: first.misses, rate: first.rate, counts: { 30039: 1 } },
-    regular: { hits: regular.hits, misses: regular.misses, rate: regular.rate, counts: { 30039: 1, 30001: 1 } },
-    best: { hits: best.hits, misses: best.misses, rate: best.rate, counts: { 30039: 1, 30001: 1, 30002: 1 } },
+    first: { hits: first.hits, misses: first.misses, rate: first.rate, counts: { 30039: 1, 30002: 1 } },
+    regular: { hits: regular.hits, misses: regular.misses, rate: regular.rate, counts: { 30039: 1, 30002: 1 } },
+    best: { hits: best.hits, misses: best.misses, rate: best.rate, counts: { 30039: 1, 30002: 1 } },
   };
   fs.writeFileSync(path.join(out, "result.json"), JSON.stringify(result, null, 2));
   fs.writeFileSync(path.join(out, "console-errors.json"), JSON.stringify(errors, null, 2));
   if (errors.length) throw new Error(`Browser errors: ${JSON.stringify(errors)}`);
-  console.log(`INGREDIENT_DROP_15_PERCENT_QUANTITY_OK first=${first.hits}/600 regular=${regular.hits}/600 best=${best.hits}/600`);
+  console.log(`INGREDIENT_DROP_VISIT_INDEPENDENT_OK first=${first.hits}/600 regular=${regular.hits}/600 best=${best.hits}/600 base70-special30=from-first-visit`);
 } finally {
   await browser.close();
 }

@@ -12,20 +12,23 @@ const { CORE_PROGRESSION, INGREDIENT_SLOT_WEIGHTS } = globalThis.CHICK_CONFIG;
 if (CORE_PROGRESSION.length !== 45) throw new Error(`Expected 45 theme chicks, got ${CORE_PROGRESSION.length}`);
 if (new Set(CORE_PROGRESSION.map((route) => route.commonId)).size !== 45) throw new Error("Theme chick resources are not uniquely assigned");
 const seenIngredientIds = new Set();
+const seenSpecialIngredientIds = new Set();
 for (let themeId = 1; themeId <= 15; themeId += 1) {
   const routes = CORE_PROGRESSION.filter((route) => route.themeId === themeId);
   if (routes.length !== 3) throw new Error(`Theme ${themeId} does not have three chicks`);
+  if (routes.some((route) => route.rewardIngredients.length !== 2)) throw new Error(`Theme ${themeId} does not use the two-material guest structure`);
   const themeIngredients = new Set(routes.flatMap((route) => route.rewardIngredients.map((ingredient) => ingredient.id)));
-  const newIngredientIds = [...themeIngredients].filter((id) => !seenIngredientIds.has(id));
-  const expectedNewCount = themeId === 1 ? 9 : 3;
-  if (newIngredientIds.length !== expectedNewCount) throw new Error(`Theme ${themeId} adds ${newIngredientIds.length}, expected ${expectedNewCount}`);
+  const themeSpecialIds = routes.map((route) => route.rewardIngredients[1].id);
+  if (themeSpecialIds.some((id) => seenSpecialIngredientIds.has(id))) throw new Error(`Theme ${themeId} repeats a special ingredient`);
+  themeSpecialIds.forEach((id) => seenSpecialIngredientIds.add(id));
   themeIngredients.forEach((id) => seenIngredientIds.add(id));
   if (routes.some((route) => Number(route.ingredientCount || 0) < 2)) throw new Error(`Theme ${themeId} has a recipe using fewer than two items`);
 }
-const woodPattern = CORE_PROGRESSION.filter((route) => route.themeId === 2).map((route) => route.rewardIngredients.map((ingredient) => ingredient.id));
-if (woodPattern[0][0] !== 30005 || woodPattern[1][0] !== 30009 || woodPattern[2][0] !== 30002 || woodPattern[2][2] !== 30023
-  || seenIngredientIds.size !== 51) throw new Error("Demand-balanced repeated material pattern is incorrect");
-if (JSON.stringify(INGREDIENT_SLOT_WEIGHTS) !== JSON.stringify({ primary: 0.5, secondary: 0.3, special: 0.2 })) {
+const baseIngredientIds = CORE_PROGRESSION.map((route) => route.rewardIngredients[0].id);
+if (new Set(baseIngredientIds).size !== 14 || seenSpecialIngredientIds.size !== 45 || seenIngredientIds.size !== 59) {
+  throw new Error("Base-overlap/unique-special ingredient structure is incorrect");
+}
+if (JSON.stringify(INGREDIENT_SLOT_WEIGHTS) !== JSON.stringify({ base: 0.7, special: 0.3 })) {
   throw new Error(`Ingredient slot weights mismatch: ${JSON.stringify(INGREDIENT_SLOT_WEIGHTS)}`);
 }
 
@@ -95,13 +98,12 @@ try {
   for (const requirement of routes.wood[0].ingredientRequirements) {
     await page.locator(`[data-action="select-ingredient"][data-id="${requirement.id}"]`).click();
   }
-  await page.locator('[data-action="close-ingredient-picker"]').last().click();
-  current = await state();
-  if (current.recipes.combinationCapacity !== 3 || current.recipes.selectedIngredients.length !== 3) {
-    throw new Error("Manual ingredient selection did not fill the unlocked three slots");
-  }
   await page.screenshot({ path: path.join(out, "01-manual-combination-ready.png"), fullPage: true });
-  await page.locator('[data-action="discover-combination"]').click();
+  await page.locator('.recipe-picker-mix').click();
+  current = await state();
+  if (current.recipes.combinationCapacity !== 3 || current.recipes.selectedIngredients.length || !current.recipes.research) {
+    throw new Error("Mixing inside the ingredient popup did not consume the selected three slots");
+  }
   await page.evaluate(() => window.advanceTime(2500));
   current = await state();
   if (!current.recipes.levels[routes.wood[0].recipeId] || current.recipes.owned !== 4) throw new Error("Manual combination did not discover a recipe");
@@ -179,11 +181,10 @@ try {
   current = await state();
   const slotCounts = current.ingredientDrops.reduce((result, drop) => ({ ...result, [drop.slot]: (result[drop.slot] || 0) + 1 }), {});
   const hits = current.ingredientDrops.length;
-  const ratios = Object.fromEntries(["primary", "secondary", "special"].map((slot) => [slot, Number(slotCounts[slot] || 0) / hits]));
+  const ratios = Object.fromEntries(["base", "special"].map((slot) => [slot, Number(slotCounts[slot] || 0) / hits]));
   if (hits / 600 < 0.11 || hits / 600 > 0.19
-    || ratios.primary < 0.36 || ratios.primary > 0.64
-    || ratios.secondary < 0.18 || ratios.secondary > 0.42
-    || ratios.special < 0.09 || ratios.special > 0.31) {
+    || ratios.base < 0.55 || ratios.base > 0.85
+    || ratios.special < 0.15 || ratios.special > 0.45) {
     throw new Error(`Drop probability distribution mismatch: ${JSON.stringify({ hits, ratios })}`);
   }
 

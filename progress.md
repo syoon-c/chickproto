@@ -1902,3 +1902,63 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 기존 노하우 ID, 포인트 비용, 효과 수치와 저장 데이터는 유지한다. 이미 습득한 노하우도 회수되거나 초기화되지 않는다.
 - `render_game_to_text`에 `progressionPattern`과 세 갈래의 실제 순서를 추가해 선행 조건을 자동 검증할 수 있게 했다.
 - 검증: `BALANCED_KNOWHOW_OK branches=3 automation=payment>ingredient>promotion>order growth=cooking>research>offline`, `RESTAURANT_KNOWHOW_OK ... nodes=48 ...` 통과. 공식 웹게임 클라이언트 실행 및 콘솔 오류 없음 확인. 화면: `output/balanced-knowhow-progression/`.
+
+## 2026-08-13 레시피 시스템 UX 점검 (코드 변경 없음)
+
+- 요리 연구 진입부터 재료 선택, 수동 연구, 신규 발견, 괴식·힌트, 레벨업, 자동 연구까지 현재 브라우저 상태에서 점검하고 `output/recipe-system-audit-2026-08-13/`에 화면과 메모를 저장했다.
+- 핵심 조합과 성공·실패 피드백은 정상 작동하며 브라우저 콘솔 오류도 없었다.
+- 다음 우선순위 후보는 레벨업 팝업 하단 버튼 가림, 64개 목록 필터 부재, 보울 용량 잠금 안내 부재, 5·6개 요리 해금 안내 충돌, 자동 연구의 희귀 재료 보호 부재, 스크롤 위치에 따른 연구 연출 잘림이다.
+
+## 2026-08-13 재료 넣기 팝업 보울 용량 표시
+
+- 재료 넣기 팝업의 작은 `0/2` 텍스트만으로 용량을 판단하던 구조를 보완해 `보울 용량`, 현재/최대 개수, 남은 칸 또는 `가득 참` 상태를 한 줄로 표시한다.
+- 선택 영역을 실제 보울 용량만큼의 슬롯으로 구성했다. 빈 슬롯은 번호와 `빈 칸`으로 보이고, 재료를 넣으면 해당 슬롯이 재료 카드로 바뀌며 누르면 다시 뺄 수 있다.
+- 빈 상태 `0/2 · 남은 2칸`, 한 개 선택 `1/2 · 남은 1칸`, 가득 찬 상태 `2/2 · 가득 참`과 추가 재료 비활성화를 자동 검증했다.
+- 검증: `SINK_WATER_RECIPE_SHEET_OK`, `RECIPE_LAB_THEME_SHEET_OK` 통과 및 공식 웹게임 클라이언트 콘솔 오류 없음 확인. 화면: `output/sink-water-and-recipe-sheet/02a-bowl-capacity-empty.png`, `02b-bowl-capacity-one-left.png`, `02c-bowl-capacity-full.png`.
+
+## 2026-08-13 싱크대 물 확정 획득
+
+- 싱크대를 눌렀을 때 물을 확률로 주던 방식을 제거하고, 설치 후 8초가 지나면 다음 터치에서 물 1개를 반드시 획득하도록 변경했다.
+- 준비 전 터치에는 남은 시간을 안내하며 획득 시도나 재료가 소모되지 않는다. 물을 받으면 곧바로 다음 8초 타이머가 시작된다.
+- 싱크대 위의 작은 상태 표시를 준비 중에는 남은 초, 준비 완료 시에는 물방울 아이콘으로 표시해 획득 가능 시점을 필드에서 확인할 수 있게 했다.
+- 검증: 준비 전 차단, 8초 후 확정 획득, 즉시 재획득 차단, 다음 8초 후 두 번째 확정 획득을 확인했다. `SINK_WATER_RECIPE_SHEET_OK guaranteed=yes cooldown=8s repeated=2`, `FACILITY_TUTORIAL_UNLOCKS_OK` 통과 및 공식 웹게임 클라이언트 실행 오류 없음 확인. 화면: `output/sink-water-and-recipe-sheet/00-sink-water-ready.png`.
+
+## 2026-08-13 유니티 UI 스프라이트 재동기화
+
+- 유니티 원본 `C:\Users\Soyoon Bang\Documents\projectchick\Assets\98_UI\Sprite`는 읽기만 하고, 웹 표시용 이미지 630개를 프로젝트 `assets/ui`에 복사했다. `.meta`, 프리팹과 유니티 원본 파일은 건드리지 않았다.
+- 실제 Git 변경 기준으로 기존 이미지 105개가 최신 원본으로 교체되고 새 이미지 133개가 추가되었다. 원본과 프로젝트 복사본 630개의 SHA-256을 비교해 누락 0개, 불일치 0개를 확인했다.
+- 신규 병아리 아이콘 `icon_chick_046.png`~`icon_chick_050.png` 5개를 추가하고, 향후 고객 데이터가 1046~1050을 참조하면 즉시 표시할 수 있도록 병아리 아이콘 지원 범위를 50까지 확장했다.
+- 현재 최신 `tables_chick/json/Customer.json`은 특수 손님 2명과 일반 손님 45명까지만 정의하므로, 신규 아이콘 5개에는 이름·테마·재료를 임의로 연결하지 않았다. 해당 데이터가 갱신되면 별도 반영이 필요하다.
+- 검증: 신규 아이콘 5개 HTTP 200, `CUSTOMER_CODEX_UI_OK roster=45 detail=1 grades=1/40/150 dropQuantity=1`, 공식 develop-web-game 클라이언트 콘솔 오류 없음. 상태 출력에서 `assetLibrary.chickIconRange=[1,50]` 확인. 화면: `output/unity-ui-sprite-sync/official-final/shot-0.png`.
+
+## 2026-08-14 손님 재료 2종 구조
+
+- 45마리 손님의 드랍 후보를 `기본 재료 1종 + 고유 특별 재료 1종`으로 축소했다. 기본 재료는 나뭇잎·쌀·빵·버터·밀가루·양파·우유·설탕·소금·기름·토마토·마늘의 12종을 여러 손님이 공유한다.
+- 특별 재료는 45마리 전체에서 중복되지 않도록 배치했다. 현재 발견 가능한 모든 레시피 재료는 새 손님 드랍표에서도 계속 획득 가능하다. 아보카도·양배추·선인장 병아리는 나뭇잎을 공통 기본 재료로 유지한다.
+- 방문 단계는 3단계를 유지하되 `첫 방문: 기본 1개`, `40회: 기본 2개`, `150회: 기본 2개/특별 1개`로 변경했다. 성공한 드랍에서는 항상 한 종류만 나오며, 150회 이후 선택 비율은 기본 80%/특별 20%다. 전체 드랍 성공률은 기존 15%를 유지한다.
+- 손님 도감과 특별 홍보 재료 출처를 2종 구조에 맞춰 `기본/특별`로 정리하고, 상태 출력과 회귀 검증도 새 필드(`baseCount`, `specialCount`)로 교체했다.
+- 검증: `GUEST_GRADES_OK routes=45 baseTypes=12 uniqueSpecials=45`, `INGREDIENT_DROP_15_PERCENT_QUANTITY_OK`, `CUSTOMER_CODEX_UI_OK ... rewards=base+unique-special`, `GREEN_CHICK_LEAF_DROPS_OK`, `RECIPE_LAB_THEME_SHEET_OK`, `SPECIAL_PROMOTION_OK` 통과. 공식 develop-web-game 클라이언트 실행과 화면 확인 완료. 화면: `output/customer-codex-clean-ui/01-clean-customer-profile.png`, `output/two-ingredient-smoke/shot-0.png`.
+
+## 2026-08-14 재료 드랍의 방문 횟수 의존 제거
+
+- 바로 위의 방문 단계별 재료 해금·수량 증가는 사용자 요청에 따라 폐기했다. 첫 방문부터 모든 병아리가 기본 재료와 고유 특별 재료를 모두 드랍 후보로 가진다.
+- 전체 드랍 성공률은 15%를 유지하며, 성공 시 한 종류 1개만 나온다. 재료 선택 비율은 기본 70% / 특별 30%로 변경했다. 1회·40회·150회 방문 상태에서 로직과 확률이 모두 동일하다.
+- 40회·150회 단골 단계는 손님 도감의 만남 기록으로만 유지하며 재료 드랍에는 영향을 주지 않는다. 도감 재료 행도 두 종류 모두 `처음부터 · 1개`로 표시한다.
+- 특별 홍보에서도 두 재료 모두 첫 방문부터 출처로 인정되며, 레시피 발견 순서 계산에서 특별 재료의 방문 지연값을 제거했다.
+- 검증: `GUEST_DROPS_OK ... slotWeights=70/30 visitIndependent=yes`, `INGREDIENT_DROP_VISIT_INDEPENDENT_OK`, `CUSTOMER_CODEX_UI_OK ... visitIndependent=yes`, `GREEN_CHICK_LEAF_DROPS_OK`, `RECIPE_LAB_THEME_SHEET_OK`, `SPECIAL_PROMOTION_OK`, `INGREDIENT_DEMAND_BALANCE_OK` 통과. 공식 웹게임 클라이언트 콘솔 오류 없음 및 도감 화면 확인 완료. 화면: `output/customer-codex-clean-ui/01-clean-customer-profile.png`, `output/guest-drops-70-30-smoke/shot-0.png`.
+
+## 2026-08-14 초반 레시피 역산 재료 재배치
+
+- 앞서 만든 2종 드랍표의 초반 배치가 레시피 해금 흐름을 충분히 고려하지 못해 돌·나무·초록 줄무늬 테마의 9마리를 레시피 조합 기준으로 다시 배치했다.
+- 돌 테마는 `기본 병아리: 나뭇잎+토마토`, `공룡 병아리: 밀가루+버섯`, `알껍질 병아리: 빵+달걀`이다. 등장 순서대로 누적 발견 가능 요리가 1→2→7개가 되어, 돌 테마 완료 즉시 자동 요리 연구의 5개 조건을 넘는다.
+- 나무 테마는 `도토리: 버터+도토리`, `난쟁이: 돼지고기+육수`, `광부: 쌀+트러플`로 조정해 누적 9→10→13개가 된다. 초록 줄무늬는 `아보카도: 나뭇잎+아보카도`, `양배추: 나뭇잎+양배추`, `선인장: 면+고추`로 조정해 누적 14→15→16개가 된다.
+- 초반 9마리는 새 병아리가 한 마리 등장할 때마다 최소 한 가지 이상 실제 제작 가능한 새 조합이 추가된다. 전체 45마리의 특별 재료 중복 금지, 모든 레시피 재료 획득 가능, 전체 드랍 15%와 기본 70%/특별 30% 규칙은 유지했다.
+- 검증: `GUEST_DROPS_OK ... earlyRecipes=7/13/16 milestones=1/2/7/9/10/13/14/15/16`, `INGREDIENT_DROP_VISIT_INDEPENDENT_OK`, `CUSTOMER_CODEX_UI_OK ... stonePairs=leaf+tomato/flour+mushroom/bread+egg`, `GREEN_CHICK_EARLY_RECIPE_DROPS_OK`, `RECIPE_LAB_THEME_SHEET_OK`, `SPECIAL_PROMOTION_OK`, `INGREDIENT_DEMAND_BALANCE_OK` 통과. 공식 웹게임 클라이언트 콘솔 오류 없음. 화면: `output/customer-codex-clean-ui/02-stone-eggshell-early-pair.png`, `output/early-recipe-aligned-drops-smoke/shot-0.png`.
+
+## 2026-08-14 보울 팝업 내부 즉시 섞기
+
+- 요리 연구 본 화면에 있던 별도 `보울 섞기` 버튼을 제거했다. 이제 보울을 눌러 연 재료 선택 팝업 안에서 재료 선택부터 연구 시작까지 완료한다.
+- 팝업 하단 버튼은 재료 0~1개일 때 `재료를 2개 이상 담아주세요`로 비활성화되고, 2개 이상이면 `바로 섞기 · 현재/용량`으로 활성화된다.
+- `바로 섞기`를 누르면 선택 팝업이 즉시 닫히고 재료가 소비되며 요리 연구 로딩 연출로 전환된다. 신규 발견, 기존 요리 레벨업, 괴식과 힌트 규칙은 그대로 유지한다.
+- `render_game_to_text`에 `ingredientSelection=\"tap-bowl-popup-mix-inside\"`, `outsideMixButton=false`를 추가해 UI 흐름을 검증할 수 있게 했다.
+- 검증: `SINK_WATER_RECIPE_SHEET_OK ... mix=inside-popup`, `RECIPE_LAB_THEME_SHEET_OK`, `RECIPE_RESEARCH_WEIRD_DISH_OK`, `SPECIAL_PROMOTION_OK`, `INGREDIENT_DEMAND_BALANCE_OK` 통과. 공식 웹게임 클라이언트 콘솔 오류 없음. 화면: `output/sink-water-and-recipe-sheet/02c-bowl-capacity-full.png`, `02d-popup-mix-started.png`, `output/bowl-popup-mix-smoke/shot-0.png`.

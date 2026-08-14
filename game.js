@@ -123,8 +123,8 @@ let knowhowMapScroll = { left: 30, top: 0 };
 let themeMenuScrollTop = 0;
 const RECIPE_RESEARCH_DURATION = 2.4;
 const THEME_COMPLETION_MENU_PRICE_BONUS = .2;
-const SINK_WATER_DROP_CHANCE = .2;
 const SINK_WATER_COOLDOWN_SECONDS = 8;
+const CHICK_ICON_MAX_INDEX = 50;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
 const STARTER_INGREDIENTS = Object.freeze({
   [GAME_INGREDIENTS.leaf.id]: 1,
@@ -1178,17 +1178,15 @@ function nextGuestGradeForVisits(visits) {
 }
 
 function guestRewardItems(route, visits) {
-  const grade = guestGradeForVisits(visits);
   const profile = route?.rewardIngredients || route?.ingredientRequirements || [];
-  const counts = [grade.primaryCount, grade.secondaryCount, grade.rareCount];
-  return profile.slice(0, 3).map((ingredient, index) => ({
+  return profile.slice(0, 2).map((ingredient, index) => ({
     ingredientId: ingredient.id,
     name: ingredient.name,
     emoji: ingredient.emoji,
-    count: Number(counts[index] || 0),
-    slot: index === 0 ? "primary" : index === 1 ? "secondary" : "special",
-    weight: index === 0 ? INGREDIENT_SLOT_WEIGHTS.primary : index === 1 ? INGREDIENT_SLOT_WEIGHTS.secondary : INGREDIENT_SLOT_WEIGHTS.special,
-  })).filter((item) => item.count > 0);
+    count: 1,
+    slot: index === 0 ? "base" : "special",
+    weight: index === 0 ? INGREDIENT_SLOT_WEIGHTS.base : INGREDIENT_SLOT_WEIGHTS.special,
+  }));
 }
 
 function unlockedRecipeCount() {
@@ -1766,6 +1764,9 @@ function confirmInstall() {
   state.resources.acorns -= Number(row.facilityPrice);
   state.installed.push(row.id);
   state.installed.sort((a, b) => a - b);
+  if (Number(row.facilityType) === 7) {
+    state.facilityInteractions.sinkWater.readyAt = state.clock + SINK_WATER_COOLDOWN_SECONDS;
+  }
   dispatchAchievement(12, 1, 0, row.id);
   if (Number(row.facilityType) === 8) state.tutorial.activeId = "recipe-unlocked";
   if (Number(row.facilityType) === 6) state.tutorial.activeId = "drops-unlocked";
@@ -1807,9 +1808,8 @@ function specialPromotionChoices() {
 }
 
 const SPECIAL_PROMOTION_SLOT_META = Object.freeze([
-  { key: "primary", label: "주재료", requiredVisits: Number(GUEST_GRADES[0]?.minVisits || 1), weight: INGREDIENT_SLOT_WEIGHTS.primary },
-  { key: "secondary", label: "보조재료", requiredVisits: Number(GUEST_GRADES[1]?.minVisits || 40), weight: INGREDIENT_SLOT_WEIGHTS.secondary },
-  { key: "special", label: "특별재료", requiredVisits: Number(GUEST_GRADES[2]?.minVisits || 150), weight: INGREDIENT_SLOT_WEIGHTS.special },
+  { key: "base", label: "기본 재료", requiredVisits: Number(GUEST_GRADES[0]?.minVisits || 1), weight: INGREDIENT_SLOT_WEIGHTS.base },
+  { key: "special", label: "특별 재료", requiredVisits: Number(GUEST_GRADES[0]?.minVisits || 1), weight: INGREDIENT_SLOT_WEIGHTS.special },
 ]);
 
 function specialPromotionIngredientSources(ingredientId) {
@@ -3228,6 +3228,24 @@ function drawFacility(row) {
     roundRect(p.x - p.w / 2, p.y - p.h / 2, p.w, p.h, 14);
     ctx.fill();
   }
+  if (Number(row.facilityType) === 7) {
+    const remaining = Math.max(0, state.facilityInteractions.sinkWater.readyAt - state.clock);
+    ctx.save();
+    ctx.translate(p.x + p.w * .28, p.y - p.h * .34);
+    ctx.fillStyle = remaining > 0 ? "rgba(255,250,226,.92)" : "#fff6bd";
+    ctx.strokeStyle = remaining > 0 ? "rgba(108,84,58,.56)" : "#467fa1";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 13, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = remaining > 0 ? "#806d5b" : "#3984b3";
+    ctx.font = remaining > 0 ? "900 9px sans-serif" : '15px "Segoe UI Emoji",sans-serif';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(remaining > 0 ? String(Math.ceil(remaining)) : "💧", 0, 1);
+    ctx.restore();
+  }
 }
 
 function drawInstallZone(row) {
@@ -3288,7 +3306,7 @@ function drawStoveProgress() {
 function guestIcon(guest) {
   const customer = tables.customers.find((row) => row.id === Number(guest.customerId));
   const commonId = Number(guest.commonId || (customer?.assetType === 105 ? customer.assetId : 1001));
-  const index = Math.max(1, Math.min(45, commonId - 1000));
+  const index = Math.max(1, Math.min(CHICK_ICON_MAX_INDEX, commonId - 1000));
   return `assets/ui/chick/icon_chick_${String(index).padStart(3, "0")}.png`;
 }
 
@@ -3695,12 +3713,6 @@ function collectSinkWater() {
 
   interaction.readyAt = state.clock + SINK_WATER_COOLDOWN_SECONDS;
   interaction.attempts += 1;
-  if (random() >= SINK_WATER_DROP_CHANCE) {
-    showToast("싱크대에 아직 물이 모이지 않았어요.");
-    saveState();
-    return false;
-  }
-
   const water = GAME_INGREDIENTS.water;
   state.crafting.ingredients[water.id] = ingredientAmount(water.id) + 1;
   interaction.collected += 1;
@@ -4201,7 +4213,7 @@ function expandedCraftIngredientIds(route) {
 }
 
 function ingredientDiscoveryStage(ingredientId) {
-  const visitStageOffsets = [0, 1, 4];
+  const visitStageOffsets = [0, 0];
   return CORE_PROGRESSION.reduce((earliestStage, chickRoute) => {
     const rewardIndex = chickRoute.rewardIngredients.findIndex((ingredient) => ingredient.id === Number(ingredientId));
     if (rewardIndex < 0) return earliestStage;
@@ -4316,21 +4328,26 @@ function renderRecipeMenu() {
       const position = bowlPositions[index % bowlPositions.length];
       return `<span class="bowl-ingredient ${index === mixingDropIndex ? "is-dropping" : ""}" style="--x:${position.x}%;--y:${position.y}%;--r:${position.r}deg"><span>${ingredient.emoji}</span><small>${ingredient.ingredientName}</small></span>`;
     }).join("");
-    const selectedPickerItems = selected.length
-      ? selected.map((ingredient, index) => `<button type="button" data-action="remove-selected-ingredient" data-id="${ingredient.id}" aria-label="${ingredient.ingredientName} 빼기"><span>${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><small>${index + 1}</small></button>`).join("")
-      : `<p>아직 담은 재료가 없어요.</p>`;
+    const remainingPickerCapacity = Math.max(0, capacity - selected.length);
+    const selectedPickerItems = Array.from({ length: capacity }, (_, index) => {
+      const ingredient = selected[index];
+      return ingredient
+        ? `<button type="button" data-action="remove-selected-ingredient" data-id="${ingredient.id}" aria-label="${index + 1}번 칸 ${ingredient.ingredientName} 빼기"><span>${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><small>${index + 1}</small></button>`
+        : `<span class="recipe-picker-empty-slot" aria-hidden="true"><b>${index + 1}</b><small>빈 칸</small></span>`;
+    }).join("");
     const ingredientPicker = state.ui.recipeIngredientPickerOpen ? `<div class="recipe-ingredient-modal" role="presentation">
       <button type="button" class="recipe-ingredient-backdrop" data-action="close-ingredient-picker" aria-label="재료 선택 닫기"></button>
       <section class="recipe-ingredient-dialog" role="dialog" aria-modal="true" aria-label="보울에 재료 넣기">
-        <header><div><small>보울 ${selected.length}/${capacity}</small><h3>재료 넣기</h3></div><button type="button" data-action="close-ingredient-picker" aria-label="닫기">×</button></header>
-        <div class="recipe-picker-selected" aria-label="선택한 재료">${selectedPickerItems}</div>
+        <header><div><small>최대 ${capacity}개</small><h3>재료 넣기</h3></div><button type="button" data-action="close-ingredient-picker" aria-label="닫기">×</button></header>
+        <div class="recipe-picker-capacity" aria-label="보울 용량 ${selected.length}/${capacity}, ${remainingPickerCapacity ? `남은 ${remainingPickerCapacity}칸` : "가득 참"}"><strong>보울 용량</strong><span>${selected.length}/${capacity} · ${remainingPickerCapacity ? `남은 ${remainingPickerCapacity}칸` : "가득 참"}</span></div>
+        <div class="recipe-picker-selected" aria-label="선택한 재료 ${selected.length}/${capacity}">${selectedPickerItems}</div>
         <strong class="recipe-picker-label">보유 재료</strong>
         <div class="combination-picker recipe-picker-grid">${visibleIngredients.length ? visibleIngredients.map((ingredient) => {
           const selectedCount = selectedIngredientCount(ingredient.id);
           const available = ingredientAmount(ingredient.id) - selectedCount;
           return `<button type="button" data-action="select-ingredient" data-id="${ingredient.id}" ${available > 0 && selected.length < capacity ? "" : "disabled"}><span>${ingredient.emoji}</span><strong>${ingredient.name}</strong><small>${available}/${ingredientAmount(ingredient.id)}</small></button>`;
         }).join("") : `<p>보관함에 재료가 없어요.</p>`}</div>
-        <button type="button" class="recipe-picker-done" data-action="close-ingredient-picker">담기 완료 · ${selected.length}/${capacity}</button>
+        <button type="button" class="recipe-picker-mix" data-action="discover-combination" ${selected.length >= 2 && !recipeResearch ? "" : "disabled"}><span aria-hidden="true">🥄</span> ${selected.length >= 2 ? `바로 섞기 · ${selected.length}/${capacity}` : `재료를 2개 이상 담아주세요 · ${selected.length}/${capacity}`}</button>
       </section>
     </div>` : "";
     const autoUnlocked = unlockedRecipeCount() >= 5;
@@ -4360,7 +4377,6 @@ function renderRecipeMenu() {
         <div class="bowl-capacity" aria-label="보울 용량">${Array.from({ length: capacity }, (_, index) => `<i class="${index < selected.length ? "is-filled" : ""}"></i>`).join("")}</div>
       </button>
       <div class="ingredient-shelf-title"><strong>보울을 눌러 재료 넣기</strong><small>${selected.length}/${capacity}</small></div>
-      <button class="research-button combination-discover" data-action="discover-combination" ${selected.length >= 2 ? "" : "disabled"}><span aria-hidden="true">🥄</span> 보울 섞기</button>
       <button class="research-button auto-research-button" data-action="auto-craft" ${autoUnlocked && !recipeResearch ? "" : "disabled"}>${autoUnlocked ? "자동 요리 연구" : `자동 연구 · 요리 ${unlockedRecipeCount()}/5`}</button>
       ${researchOverlay}
     </section>${ingredientPicker}
@@ -4488,15 +4504,12 @@ function renderCollectionMenu() {
     ? 50 + (visits - regularVisitGoal) / (bestVisitGoal - regularVisitGoal) * 50
     : Math.max(0, (visits - 1) / (regularVisitGoal - 1) * 50);
   const dropRows = selectedKnown ? (selected.rewardIngredients || []).map((ingredient, index) => {
-    const countKey = index === 0 ? "primaryCount" : index === 1 ? "secondaryCount" : "rareCount";
-    const firstStage = GUEST_GRADES.find((stage) => Number(stage[countKey] || 0) > 0);
-    const currentCount = Number(grade?.[countKey] || 0);
-    const chance = index === 0 ? INGREDIENT_SLOT_WEIGHTS.primary : index === 1 ? INGREDIENT_SLOT_WEIGHTS.secondary : INGREDIENT_SLOT_WEIGHTS.special;
-    const slotName = index === 0 ? "주재료" : index === 1 ? "부재료" : "특별";
-    return `<div class="customer-drop-row ${currentCount ? "is-active" : ""}">
+    const chance = index === 0 ? INGREDIENT_SLOT_WEIGHTS.base : INGREDIENT_SLOT_WEIGHTS.special;
+    const slotName = index === 0 ? "기본" : "특별";
+    return `<div class="customer-drop-row is-active">
       <span class="customer-drop-kind">${slotName}<b>${Math.round(chance * 100)}%</b></span>
       <i>${ingredient.emoji}</i><strong>${ingredient.name}</strong>
-      <small>${firstStage.minVisits === 1 ? "첫 방문" : `${firstStage.minVisits}회`} · ${currentCount ? `현재 ${currentCount}개` : "잠김"}</small>
+      <small>처음부터 · 1개</small>
     </div>`;
   }).join("") : "";
   const gradeSteps = GUEST_GRADES.map((stage) => `<div class="customer-grade-step ${visits >= stage.minVisits ? "is-reached" : ""}">
@@ -4912,6 +4925,11 @@ function renderGameToText() {
     visibleThemeType: "restaurant",
     objective: currentObjective(),
     resources: state.resources,
+    assetLibrary: {
+      unityUiSpritesSynced: true,
+      chickIconRange: [1, CHICK_ICON_MAX_INDEX],
+      latestChickIcons: [46, 47, 48, 49, 50].map((index) => `assets/ui/chick/icon_chick_${String(index).padStart(3, "0")}.png`),
+    },
     debug: {
       panelVisible: !dom.debugPanel.hidden,
       installedFacilities: tables.installs.filter((row) => isInstalled(row.id)).length,
@@ -4941,9 +4959,11 @@ function renderGameToText() {
         installed: installedRows(7).length > 0,
         ingredientId: GAME_INGREDIENTS.water.id,
         ingredientName: GAME_INGREDIENTS.water.name,
-        chance: SINK_WATER_DROP_CHANCE,
+        acquisition: "guaranteed-after-timer",
+        chance: 1,
         cooldownSeconds: SINK_WATER_COOLDOWN_SECONDS,
         remainingCooldown: Number(Math.max(0, state.facilityInteractions.sinkWater.readyAt - state.clock).toFixed(2)),
+        ready: state.facilityInteractions.sinkWater.readyAt <= state.clock,
         attempts: state.facilityInteractions.sinkWater.attempts,
         collected: state.facilityInteractions.sinkWater.collected,
       },
@@ -5229,7 +5249,8 @@ function renderGameToText() {
       combinationCapacityExpansion: { gems: BOWL_CAPACITY_EXPANSION_GEM_COST, amount: BOWL_CAPACITY_EXPANSION_AMOUNT },
       selectedIngredients: [...state.crafting.selected],
       ingredientPickerOpen: Boolean(state.ui.recipeIngredientPickerOpen),
-      ingredientSelection: "tap-bowl-then-popup",
+      ingredientSelection: "tap-bowl-popup-mix-inside",
+      outsideMixButton: false,
       mixingPresentation: "cutting-board-and-bowl",
       research: recipeResearch ? {
         recipeId: recipeResearch.recipeId,
@@ -5350,7 +5371,7 @@ function renderGameToText() {
         ingredientId: chick.ingredientId,
         ingredientName: chick.ingredientName,
         rewardItems: chick.rewardIngredients.map((ingredient, index) => ({
-          slot: index === 0 ? "primary" : index === 1 ? "secondary" : "special",
+          slot: index === 0 ? "base" : "special",
           ingredientId: ingredient.id,
           name: ingredient.name,
         })),
@@ -5390,13 +5411,9 @@ function renderGameToText() {
         knowhowBonusPercentagePoints: Math.round(knowhowDropBonus() * 100),
         bonusIngredientChance: knowhowBonusIngredientChance(),
         ingredientTypesOnSuccess: 1,
+        visitIndependent: true,
         slotChances: { ...INGREDIENT_SLOT_WEIGHTS },
-        grades: GUEST_GRADES.map((grade) => ({
-          minVisits: grade.minVisits,
-          primaryCount: grade.primaryCount,
-          secondaryCount: grade.secondaryCount,
-          rareCount: grade.rareCount,
-        })),
+        countsOnSuccess: { base: 1, special: 1 },
       },
       ingredients: { ...state.crafting.ingredients },
       autoCraft: unlockedRecipeCount() >= 5 ? "new-first-then-lowest-level" : "locked-until-5-recipes",
@@ -5554,7 +5571,10 @@ dom.menuContent.addEventListener("click", (event) => {
   if (button.dataset.action === "select-ingredient") addSelectedIngredient(id);
   if (button.dataset.action === "remove-selected-ingredient") removeSelectedIngredient(id);
   if (button.dataset.action === "clear-combination") { state.crafting.selected = []; mixingDropIndex = -1; saveState(); renderMenu(); }
-  if (button.dataset.action === "discover-combination") discoverSelectedCombination();
+  if (button.dataset.action === "discover-combination") {
+    state.ui.recipeIngredientPickerOpen = false;
+    discoverSelectedCombination();
+  }
   if (button.dataset.action === "auto-craft") {
     if (!tryAutoCraft()) showToast(unlockedRecipeCount() < 5
       ? "요리 5개 발견 후 자동 연구가 열려요."

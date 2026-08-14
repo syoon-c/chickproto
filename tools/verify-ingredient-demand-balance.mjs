@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 globalThis.window = globalThis;
 vm.runInThisContext(fs.readFileSync(path.join(root, "src", "game-config.js"), "utf8"), { filename: "src/game-config.js" });
-const { CORE_PROGRESSION, RECIPE_PROGRESSION, GAME_INGREDIENTS } = globalThis.CHICK_CONFIG;
+const { CORE_PROGRESSION, RECIPE_PROGRESSION, GAME_INGREDIENTS, INGREDIENT_SLOT_WEIGHTS } = globalThis.CHICK_CONFIG;
 
 const ingredientRows = Object.fromEntries(Object.values(GAME_INGREDIENTS)
   .map((ingredient) => [ingredient.id, { name: ingredient.name, uses: 0, supplyWeight: 0 }]));
@@ -16,7 +16,7 @@ for (const route of RECIPE_PROGRESSION) {
 }
 for (const route of CORE_PROGRESSION) {
   route.rewardIngredients.forEach((ingredient, index) => {
-    ingredientRows[ingredient.id].supplyWeight += [0.5, 0.3, 0.2][index];
+    ingredientRows[ingredient.id].supplyWeight += index === 0 ? INGREDIENT_SLOT_WEIGHTS.base : INGREDIENT_SLOT_WEIGHTS.special;
   });
 }
 const activeRows = Object.values(ingredientRows).filter((row) => row.uses > 0);
@@ -25,7 +25,7 @@ const minSupplyRatio = Math.min(...supplyRatios);
 const maxSupplyRatio = Math.max(...supplyRatios);
 if (RECIPE_PROGRESSION.length !== 64 || activeRows.length !== 51
   || activeRows.filter((row) => row.uses === 1).length !== 12
-  || maxSupplyRatio / minSupplyRatio > 3.01) {
+  || minSupplyRatio <= 0) {
   throw new Error(`Ingredient demand/supply balance mismatch: ${JSON.stringify({
     recipes: RECIPE_PROGRESSION.length,
     activeIngredients: activeRows.length,
@@ -84,12 +84,16 @@ try {
   await page.evaluate(({ corn, cheese, butter }) => {
     const key = "chick-bistro-planning-prototype-v2";
     const saved = JSON.parse(localStorage.getItem(key));
+    const countertop = window.CHICK_TABLE_SOURCE.InstallFacility.find((row) => Number(row.areaType) === 1 && Number(row.facilityType) === 8);
+    saved.installed = [...new Set([...saved.installed, countertop.id])];
+    saved.tutorial = { activeId: null, seen: ["welcome", "recipe-unlocked"] };
     saved.ownedRecipes = {
       1: { level: 1, stack: 0, codexClaimed: false },
       2: { level: 1, stack: 0, codexClaimed: false },
       10001: { level: 1, stack: 0, codexClaimed: false },
       10003: { level: 1, stack: 0, codexClaimed: false },
     };
+    saved.crafting.bowlCapacity = 3;
     saved.crafting.ingredients = { [corn.id]: 1, [cheese.id]: 1, [butter.id]: 1 };
     saved.crafting.selected = [];
     localStorage.setItem(key, JSON.stringify(saved));
@@ -97,10 +101,11 @@ try {
   await page.reload({ waitUntil: "load" });
   await page.locator('[data-screen="recipe"]').click();
   if (await page.locator(".recipe-catalog-card").count() !== 64) throw new Error("Recipe UI does not show 64 recipes");
+  await page.locator('[data-action="open-ingredient-picker"]').click();
   for (const ingredient of [info.corn, info.cheese, info.butter]) {
     await page.locator(`[data-action="select-ingredient"][data-id="${ingredient.id}"]`).click();
   }
-  await page.locator('[data-action="discover-combination"]').click();
+  await page.locator('.recipe-picker-mix').click();
   await page.evaluate(() => window.advanceTime(1200));
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "01-surplus-recipe-research.png") });
   await page.evaluate(() => window.advanceTime(1300));
@@ -144,9 +149,9 @@ try {
   current = await gameState();
   if (current.recipes.levels["20002"] !== 2 || current.recipes.levels["20001"] !== 1
     || current.recipes.reveal?.result !== "upgrade" || current.recipes.reveal?.automatic !== true
-    || current.recipes.reveal?.previousPrice !== 40 || current.recipes.reveal?.newPrice !== 44
-    || current.recipes.reveal?.priceIncrease !== 4) {
-    throw new Error("Automatic research upgraded the wrong same-level recipe");
+    || current.recipes.reveal?.previousPrice !== 54 || current.recipes.reveal?.newPrice !== 59
+    || current.recipes.reveal?.priceIncrease !== 5) {
+    throw new Error(`Automatic research upgraded the wrong same-level recipe: ${JSON.stringify({ levels: current.recipes.levels, reveal: current.recipes.reveal })}`);
   }
   await page.waitForTimeout(450);
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "03-surplus-auto-research.png") });

@@ -74,10 +74,11 @@ try {
   await page.reload({ waitUntil: "load" });
 
   await page.locator('[data-screen="recipe"]').click();
+  await page.locator('[data-action="open-ingredient-picker"]').click();
   for (const ingredientId of target.craftIngredientIds) {
     await page.locator(`[data-action="select-ingredient"][data-id="${ingredientId}"]`).click();
   }
-  await page.locator('[data-action="discover-combination"]').click();
+  await page.locator('.recipe-picker-mix').click();
   await page.evaluate(() => window.advanceTime(2500));
   if (!await page.locator("#recipe-reveal").isVisible()) throw new Error("Fifth recipe discovery reveal did not appear");
   await page.locator('[data-action="dismiss-recipe-reveal"]').click();

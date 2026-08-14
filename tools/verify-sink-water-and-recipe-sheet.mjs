@@ -43,19 +43,33 @@ try {
     saved.crafting.ingredients = { 30001: 1 };
     saved.crafting.storageCapacity = 20;
     saved.tutorial = { activeId: null, seen: ["welcome", "recipe-unlocked", "fridge-next", "drops-unlocked"] };
-    // Make the next LCG result fall below the 20% sink success threshold.
-    let seed = 0;
-    while ((((Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296) >= .2) seed += 1;
-    saved.rng = seed;
+    saved.facilityInteractions.sinkWater.readyAt = Number(saved.clock || 0) + 8;
     localStorage.setItem(key, JSON.stringify(saved));
   });
   await page.reload({ waitUntil: "load" });
   await page.waitForFunction(() => [...document.images].every((image) => image.complete));
 
   let current = await gameState();
-  if (!current.facilityInteractions.sinkWater.installed || current.facilityInteractions.sinkWater.chance !== .2) {
+  if (!current.facilityInteractions.sinkWater.installed
+    || current.facilityInteractions.sinkWater.acquisition !== "guaranteed-after-timer"
+    || current.facilityInteractions.sinkWater.chance !== 1
+    || current.facilityInteractions.sinkWater.ready !== false) {
     throw new Error(`Sink interaction was not configured: ${JSON.stringify(current.facilityInteractions.sinkWater)}`);
   }
+
+  await clickCanvas(274, 174);
+  current = await gameState();
+  let savedWaterAmount = await page.evaluate(() => Number(JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")).crafting.ingredients[30067] || 0));
+  if (savedWaterAmount !== 0 || current.facilityInteractions.sinkWater.attempts !== 0
+    || !current.toast.text?.includes("초 후")) {
+    throw new Error("Sink granted water before its guaranteed timer completed.");
+  }
+  await page.evaluate(() => window.advanceTime(8100));
+  current = await gameState();
+  if (!current.facilityInteractions.sinkWater.ready || current.facilityInteractions.sinkWater.remainingCooldown !== 0) {
+    throw new Error("Sink did not become ready after eight seconds.");
+  }
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "00-sink-water-ready.png") });
 
   await clickCanvas(274, 174);
   current = await gameState();
@@ -63,8 +77,9 @@ try {
   if (savedAfterWater.crafting.ingredients[30067] !== 1
     || current.facilityInteractions.sinkWater.attempts !== 1
     || current.facilityInteractions.sinkWater.collected !== 1
+    || current.facilityInteractions.sinkWater.ready !== false
     || current.facilityInteractions.sinkWater.remainingCooldown < 7) {
-    throw new Error(`Sink did not grant exactly one water and start cooldown: ${JSON.stringify({ sink: current.facilityInteractions.sinkWater, water: savedAfterWater.crafting.ingredients[30067] })}`);
+    throw new Error(`Sink did not grant guaranteed water and restart its timer: ${JSON.stringify({ sink: current.facilityInteractions.sinkWater, water: savedAfterWater.crafting.ingredients[30067] })}`);
   }
   if (!current.toast.text?.includes("물 ×1 획득")) throw new Error(`Sink success feedback is missing: ${JSON.stringify(current.toast)}`);
 
@@ -74,6 +89,14 @@ try {
   if (savedDuringCooldown.crafting.ingredients[30067] !== 1 || current.facilityInteractions.sinkWater.attempts !== 1
     || !current.toast.text?.includes("초 후")) {
     throw new Error("Sink cooldown did not block immediate repeated collection.");
+  }
+
+  await page.evaluate(() => window.advanceTime(8100));
+  await clickCanvas(274, 174);
+  current = await gameState();
+  savedWaterAmount = await page.evaluate(() => Number(JSON.parse(localStorage.getItem("chick-bistro-planning-prototype-v2")).crafting.ingredients[30067] || 0));
+  if (savedWaterAmount !== 2 || current.facilityInteractions.sinkWater.collected !== 2) {
+    throw new Error("Sink did not grant guaranteed water again after the next timer.");
   }
 
   await clickCanvas(178, 174);
@@ -107,13 +130,12 @@ try {
     throw new Error("Ingredient choices should stay hidden until the bowl is tapped.");
   }
   const bottomControlsBox = await page.locator("#bottom-controls").boundingBox();
-  const manualButtonBox = await page.locator(".combination-discover").boundingBox();
   const autoButtonBox = await page.locator(".auto-research-button").boundingBox();
   const recipeScrollTop = await page.locator("#menu-content").evaluate((element) => element.scrollTop);
-  if (!bottomControlsBox || !manualButtonBox || !autoButtonBox || recipeScrollTop !== 0
-    || manualButtonBox.y + manualButtonBox.height > bottomControlsBox.y
+  if (!bottomControlsBox || !autoButtonBox || recipeScrollTop !== 0
+    || await page.locator(".combination-lab > .combination-discover").count() !== 0
     || autoButtonBox.y + autoButtonBox.height > bottomControlsBox.y) {
-    throw new Error(`Recipe action buttons are not all visible when the sheet opens: ${JSON.stringify({ bottomControlsBox, manualButtonBox, autoButtonBox, recipeScrollTop })}`);
+    throw new Error(`The outside mix button was not removed or auto research is clipped: ${JSON.stringify({ bottomControlsBox, autoButtonBox, recipeScrollTop })}`);
   }
 
   await page.locator(".game-frame").screenshot({ path: path.join(out, "01-countertop-recipe-sheet.png") });
@@ -125,15 +147,41 @@ try {
     || (await picker.locator("h3").innerText()).trim() !== "재료 넣기") {
     throw new Error(`Bowl ingredient picker escaped the cooking-research sheet: ${JSON.stringify({ pickerBox, menuBox })}`);
   }
+  if ((await picker.locator(".recipe-picker-capacity").innerText()).replace(/\s+/g, " ").trim() !== "보울 용량 0/2 · 남은 2칸"
+    || await picker.locator(".recipe-picker-empty-slot").count() !== 2
+    || !await picker.locator(".recipe-picker-mix").isDisabled()) {
+    throw new Error("The ingredient popup does not clearly show its empty 0/2 capacity.");
+  }
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "02a-bowl-capacity-empty.png") });
   await picker.locator('[data-action="select-ingredient"][data-id="30067"]').click();
   if (await picker.locator('.recipe-picker-selected [data-id="30067"]').count() !== 1) {
     throw new Error("Selecting water in the bowl popup did not keep the popup open or update the selection.");
   }
-  await page.locator(".game-frame").screenshot({ path: path.join(out, "02-bowl-ingredient-popup.png") });
-  await picker.locator('[data-action="close-ingredient-picker"]').last().click();
-  if (await picker.count() !== 0) throw new Error("The bowl ingredient picker did not close.");
+  if ((await picker.locator(".recipe-picker-capacity").innerText()).replace(/\s+/g, " ").trim() !== "보울 용량 1/2 · 남은 1칸"
+    || await picker.locator(".recipe-picker-empty-slot").count() !== 1
+    || !await picker.locator(".recipe-picker-mix").isDisabled()) {
+    throw new Error("The ingredient popup did not update its remaining capacity after one selection.");
+  }
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "02b-bowl-capacity-one-left.png") });
+  await picker.locator('[data-action="select-ingredient"][data-id="30001"]').click();
+  if ((await picker.locator(".recipe-picker-capacity").innerText()).replace(/\s+/g, " ").trim() !== "보울 용량 2/2 · 가득 참"
+    || await picker.locator(".recipe-picker-empty-slot").count() !== 0
+    || await picker.locator('[data-action="select-ingredient"]:not([disabled])').count() !== 0
+    || await picker.locator(".recipe-picker-mix").isDisabled()
+    || !(await picker.locator(".recipe-picker-mix").innerText()).includes("바로 섞기")) {
+    throw new Error("The ingredient popup did not show a full 2/2 bowl or disable further selections.");
+  }
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "02c-bowl-capacity-full.png") });
+  await picker.locator(".recipe-picker-mix").click();
+  current = await gameState();
+  if (await picker.count() !== 0 || current.recipes.ingredientPickerOpen || !current.recipes.research
+    || current.recipes.selectedIngredients.length || current.recipes.outsideMixButton !== false
+    || current.recipes.ingredientSelection !== "tap-bowl-popup-mix-inside") {
+    throw new Error(`Mixing inside the ingredient popup did not start research directly: ${JSON.stringify(current.recipes)}`);
+  }
+  await page.locator(".game-frame").screenshot({ path: path.join(out, "02d-popup-mix-started.png") });
   if (errors.length) throw new Error(`Console errors: ${errors.join(" | ")}`);
-  console.log(`SINK_WATER_RECIPE_SHEET_OK chance=20% cooldown=8s start=${startRatio.toFixed(2)} height=${heightRatio.toFixed(2)} water=1 actions=visible picker=popup naming=요리연구`);
+  console.log(`SINK_WATER_RECIPE_SHEET_OK guaranteed=yes cooldown=8s repeated=2 start=${startRatio.toFixed(2)} height=${heightRatio.toFixed(2)} mix=inside-popup naming=요리연구`);
 } finally {
   await browser.close();
 }

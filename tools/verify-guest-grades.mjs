@@ -11,18 +11,15 @@ vm.runInThisContext(fs.readFileSync(path.join(root, "src", "game-config.js"), "u
 
 const { CORE_PROGRESSION, GAME_INGREDIENTS, GUEST_GRADES, GUEST_INGREDIENT_DROP_CHANCE, INGREDIENT_SLOT_WEIGHTS } = globalThis.CHICK_CONFIG;
 const expectedGrades = [
-  [1, "첫 방문", 1, 1, 0, 0],
-  [2, "단골", 40, 1, 1, 0],
-  [3, "최고의 단골", 150, 1, 1, 1],
+  [1, "첫 방문", 1],
+  [2, "단골", 40],
+  [3, "최고의 단골", 150],
 ];
 
 if (JSON.stringify(GUEST_GRADES.map((grade) => [
   grade.id,
   grade.name,
   grade.minVisits,
-  grade.primaryCount,
-  grade.secondaryCount,
-  grade.rareCount,
 ])) !== JSON.stringify(expectedGrades)) {
   throw new Error(`Guest grade table mismatch: ${JSON.stringify(GUEST_GRADES)}`);
 }
@@ -36,10 +33,10 @@ if (GUEST_INGREDIENT_DROP_CHANCE !== 0.15) {
 
 const validIngredientIds = new Set(Object.values(GAME_INGREDIENTS).map((ingredient) => ingredient.id));
 for (const route of CORE_PROGRESSION) {
-  if (route.rewardIngredients.length !== 3) {
-    throw new Error(`Customer ${route.customerId} does not have three reward slots`);
+  if (route.rewardIngredients.length !== 2) {
+    throw new Error(`Customer ${route.customerId} does not have two reward slots`);
   }
-  if (new Set(route.rewardIngredients.map((ingredient) => ingredient.id)).size !== 3) {
+  if (new Set(route.rewardIngredients.map((ingredient) => ingredient.id)).size !== 2) {
     throw new Error(`Customer ${route.customerId} has duplicate reward slots`);
   }
   if (route.rewardIngredients.some((ingredient) => !validIngredientIds.has(ingredient.id))) {
@@ -50,10 +47,45 @@ for (const route of CORE_PROGRESSION) {
   }
 }
 
+const baseIngredientIds = CORE_PROGRESSION.map((route) => route.rewardIngredients[0].id);
+const specialIngredientIds = CORE_PROGRESSION.map((route) => route.rewardIngredients[1].id);
+if (new Set(baseIngredientIds).size >= baseIngredientIds.length) {
+  throw new Error("Base ingredients must overlap between chicks");
+}
+if (new Set(specialIngredientIds).size !== CORE_PROGRESSION.length) {
+  throw new Error("Every chick must have one unique special ingredient");
+}
+if (specialIngredientIds.some((id) => baseIngredientIds.includes(id))) {
+  throw new Error("A unique special ingredient is also used as another chick's base ingredient");
+}
 const assignedIngredientIds = new Set(CORE_PROGRESSION.flatMap((route) => route.rewardIngredients.map((ingredient) => ingredient.id)));
-if (assignedIngredientIds.size !== 51) throw new Error(`Expected 51 introduced ingredients, got ${assignedIngredientIds.size}`);
-if (JSON.stringify(INGREDIENT_SLOT_WEIGHTS) !== JSON.stringify({ primary: 0.5, secondary: 0.3, special: 0.2 })) {
+if (assignedIngredientIds.size !== 59) throw new Error(`Expected 59 introduced ingredients, got ${assignedIngredientIds.size}`);
+const recipeIngredientIds = new Set(globalThis.CHICK_CONFIG.RECIPE_PROGRESSION.flatMap((route) => route.ingredientRequirements.map((ingredient) => ingredient.id)));
+if ([...recipeIngredientIds].some((id) => !assignedIngredientIds.has(id))) {
+  throw new Error("At least one recipe ingredient cannot be obtained from a chick");
+}
+if (JSON.stringify(INGREDIENT_SLOT_WEIGHTS) !== JSON.stringify({ base: 0.7, special: 0.3 })) {
   throw new Error(`Ingredient slot weights mismatch: ${JSON.stringify(INGREDIENT_SLOT_WEIGHTS)}`);
 }
+const cumulativeRecipeCounts = [1, 2, 3].map((themeId) => {
+  const availableIds = new Set(CORE_PROGRESSION.filter((route) => route.themeId <= themeId)
+    .flatMap((route) => route.rewardIngredients.map((ingredient) => ingredient.id)));
+  return globalThis.CHICK_CONFIG.RECIPE_PROGRESSION.filter((route) => route.ingredientRequirements
+    .every((ingredient) => availableIds.has(ingredient.id))).length;
+});
+if (JSON.stringify(cumulativeRecipeCounts) !== JSON.stringify([7, 13, 16])) {
+  throw new Error(`Early recipe progression mismatch: ${JSON.stringify(cumulativeRecipeCounts)}`);
+}
+const milestoneIngredientIds = new Set();
+const earlyMilestoneRecipeCounts = CORE_PROGRESSION.filter((route) => route.themeId <= 3)
+  .sort((a, b) => a.themeId - b.themeId || a.slot - b.slot)
+  .map((route) => {
+    route.rewardIngredients.forEach((ingredient) => milestoneIngredientIds.add(ingredient.id));
+    return globalThis.CHICK_CONFIG.RECIPE_PROGRESSION.filter((recipeRoute) => recipeRoute.ingredientRequirements
+      .every((ingredient) => milestoneIngredientIds.has(ingredient.id))).length;
+  });
+if (JSON.stringify(earlyMilestoneRecipeCounts) !== JSON.stringify([1, 2, 7, 9, 10, 13, 14, 15, 16])) {
+  throw new Error(`Early chick milestone recipes mismatch: ${JSON.stringify(earlyMilestoneRecipeCounts)}`);
+}
 
-console.log(`GUEST_GRADES_OK routes=${CORE_PROGRESSION.length} introducedIngredients=${assignedIngredientIds.size} dropChance=${GUEST_INGREDIENT_DROP_CHANCE} slotWeights=50/30/20 thresholds=${GUEST_GRADES.map((grade) => grade.minVisits).join("/")}`);
+console.log(`GUEST_DROPS_OK routes=${CORE_PROGRESSION.length} baseTypes=${new Set(baseIngredientIds).size} uniqueSpecials=${new Set(specialIngredientIds).size} introducedIngredients=${assignedIngredientIds.size} earlyRecipes=${cumulativeRecipeCounts.join("/")} milestones=${earlyMilestoneRecipeCounts.join("/")} dropChance=${GUEST_INGREDIENT_DROP_CHANCE} slotWeights=70/30 visitIndependent=yes`);
