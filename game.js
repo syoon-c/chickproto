@@ -128,11 +128,12 @@ let chefPosition = { ...CHEF_HOME_POSITION };
 const RECIPE_RESEARCH_DURATION = 2.4;
 const THEME_COMPLETION_MENU_PRICE_BONUS = .2;
 const SINK_WATER_COOLDOWN_SECONDS = 8;
-const CHICK_ICON_MAX_INDEX = 50;
+const CHICK_ICON_MAX_INDEX = 108;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
+const STARTER_CHICKPEA = Object.values(GAME_INGREDIENTS).find((ingredient) => ingredient.name === "병아리콩");
 const STARTER_INGREDIENTS = Object.freeze({
-  [GAME_INGREDIENTS.leaf.id]: 1,
-  [GAME_INGREDIENTS.lettuce.id]: 1,
+  [STARTER_CHICKPEA.id]: 1,
+  [GAME_INGREDIENTS.water.id]: 1,
 });
 const BOWL_CAPACITY_INITIAL = 2;
 const BOWL_CAPACITY_MAX = Math.max(BOWL_CAPACITY_INITIAL, ...RECIPE_PROGRESSION.map((route) => Number(route.ingredientCount
@@ -381,7 +382,7 @@ function initialAcorns() {
 
 function createInitialState() {
   return {
-    version: 22,
+    version: 23,
     clock: 0,
     rng: 20260714,
     resources: {
@@ -491,7 +492,7 @@ function loadState() {
     const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!parsed) return null;
     const defaults = createInitialState();
-    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22].includes(parsed.version)) return null;
+    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].includes(parsed.version)) return null;
     const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
       typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
     const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
@@ -533,7 +534,17 @@ function loadState() {
       ? { activeId: parsed.tutorial.activeId || null, seen: [...new Set(parsed.tutorial.seen || [])] }
       : { activeId: null, seen: ["welcome"] };
     const savedIngredients = { ...(parsed.crafting?.ingredients || {}) };
-    const shouldGrantStarterIngredients = parsed.crafting?.starterIngredientsGranted !== true
+    const shouldReplaceLegacyStarter = Number(parsed.version) < 23
+      && Object.keys(ownedRecipes).length <= 1
+      && Number(parsed.totalResearchCount || 0) === 0
+      && Number(metrics.recipeResearchAttempts || 0) === 0
+      && Number(metrics.ingredientsFound || 0) === 0;
+    if (shouldReplaceLegacyStarter) {
+      Object.keys(savedIngredients).forEach((ingredientId) => delete savedIngredients[ingredientId]);
+      Object.assign(savedIngredients, STARTER_INGREDIENTS);
+    }
+    const shouldGrantStarterIngredients = !shouldReplaceLegacyStarter
+      && parsed.crafting?.starterIngredientsGranted !== true
       && Object.keys(ownedRecipes).length <= 1;
     if (shouldGrantStarterIngredients) {
       Object.entries(STARTER_INGREDIENTS).forEach(([ingredientId, amount]) => {
@@ -609,7 +620,7 @@ function loadState() {
     return {
       ...defaults,
       ...restaurantSave,
-      version: 22,
+      version: 23,
       installed: [...new Set(migratedInstalled)].sort((a, b) => a - b),
       resources: { ...defaults.resources, ...parsed.resources },
       tipbox: Math.max(0, Math.floor(Number(parsed.tipbox || 0))),
@@ -1189,7 +1200,8 @@ function guestRewardItems(route, visits) {
     emoji: ingredient.emoji,
     count: 1,
     slot: index === 0 ? "base" : "special",
-    weight: index === 0 ? INGREDIENT_SLOT_WEIGHTS.base : INGREDIENT_SLOT_WEIGHTS.special,
+    weight: profile.length === 1 ? 1 : index === 0 ? INGREDIENT_SLOT_WEIGHTS.base : INGREDIENT_SLOT_WEIGHTS.special,
+    random: Boolean(ingredient.random),
   }));
 }
 
@@ -1798,6 +1810,7 @@ function specialPromotionChoices() {
   allUnlockedThemeChicks().forEach((chick) => {
     const visits = Number(state.collections.customers[chick.customerId]?.count || 0);
     guestRewardItems(chick, visits).forEach((reward) => {
+      if (reward.random) return;
       const current = choices.get(reward.ingredientId) || {
         ingredientId: reward.ingredientId,
         name: reward.name,
@@ -1819,11 +1832,13 @@ const SPECIAL_PROMOTION_SLOT_META = Object.freeze([
 function specialPromotionIngredientSources(ingredientId) {
   const numericId = Number(ingredientId);
   return allUnlockedThemeChicks().flatMap((chick) => {
-    const slotIndex = (chick.rewardIngredients || []).findIndex((ingredient) => Number(ingredient.id) === numericId);
+    const rewards = guestRewardItems(chick, Number(state.collections.customers[chick.customerId]?.count || 0));
+    const slotIndex = rewards.findIndex((reward) => Number(reward.ingredientId) === numericId);
     if (slotIndex < 0 || slotIndex >= SPECIAL_PROMOTION_SLOT_META.length) return [];
     const visits = Number(state.collections.customers[chick.customerId]?.count || 0);
     const slot = SPECIAL_PROMOTION_SLOT_META[slotIndex];
-    const eligible = guestRewardItems(chick, visits).some((reward) => Number(reward.ingredientId) === numericId);
+    const reward = rewards[slotIndex];
+    const eligible = Boolean(reward);
     return [{
       customerId: chick.customerId,
       customerName: chick.customerName,
@@ -1831,7 +1846,7 @@ function specialPromotionIngredientSources(ingredientId) {
       icon: guestIcon(chick),
       slot: slot.key,
       slotLabel: slot.label,
-      weight: slot.weight,
+      weight: Number(reward?.weight ?? slot.weight),
       visits,
       requiredVisits: slot.requiredVisits,
       eligible,
@@ -2387,12 +2402,20 @@ function craftIngredientRequirements(route) {
   const totalCount = Math.max(Number(route.ingredientCount || 1), ingredients.length);
   const baseCount = Math.floor(totalCount / ingredients.length);
   const remainder = totalCount % ingredients.length;
-  return ingredients.map((ingredient, index) => ({
-    ingredientId: ingredient.id,
-    name: ingredient.name,
-    emoji: ingredient.emoji,
-    count: baseCount + (index < remainder ? 1 : 0),
-  }));
+  const grouped = new Map();
+  ingredients.forEach((ingredient, index) => {
+    const ingredientId = Number(ingredient.id);
+    const count = baseCount + (index < remainder ? 1 : 0);
+    const existing = grouped.get(ingredientId);
+    if (existing) existing.count += count;
+    else grouped.set(ingredientId, {
+      ingredientId,
+      name: ingredient.name,
+      emoji: ingredient.emoji,
+      count,
+    });
+  });
+  return [...grouped.values()];
 }
 
 function craftIngredientCost(route) {
@@ -2682,6 +2705,20 @@ function grantGuestIngredient(guest) {
   for (const item of items) {
     itemRoll -= Number(item.weight || 0);
     if (itemRoll <= 0) { selectedItem = item; break; }
+  }
+  if (selectedItem.random) {
+    const randomPool = [...new Map(allUnlockedThemeChicks()
+      .flatMap((chick) => chick.rewardIngredients || [])
+      .filter((ingredient) => ingredient && !ingredient.random)
+      .map((ingredient) => [Number(ingredient.id), ingredient])).values()];
+    const replacement = randomPool[Math.floor(random() * randomPool.length)];
+    if (replacement) selectedItem = {
+      ...selectedItem,
+      ingredientId: replacement.id,
+      name: replacement.name,
+      emoji: replacement.emoji,
+      random: false,
+    };
   }
   const bonusIngredient = knowhowBonusIngredientChance() > 0 && random() < knowhowBonusIngredientChance();
   const dropCount = Math.max(1, Number(selectedItem.count || 1)) + (bonusIngredient ? 1 : 0);
@@ -4248,33 +4285,11 @@ function expandedCraftIngredientIds(route) {
     .flatMap((requirement) => Array.from({ length: requirement.count }, () => requirement.ingredientId));
 }
 
-function ingredientDiscoveryStage(ingredientId) {
-  const visitStageOffsets = [0, 0];
-  return CORE_PROGRESSION.reduce((earliestStage, chickRoute) => {
-    const rewardIndex = chickRoute.rewardIngredients.findIndex((ingredient) => ingredient.id === Number(ingredientId));
-    if (rewardIndex < 0) return earliestStage;
-    const stage = (chickRoute.themeId - 1) * 9 + chickRoute.slot * 2 + visitStageOffsets[rewardIndex];
-    return Math.min(earliestStage, stage);
-  }, Number.POSITIVE_INFINITY);
-}
-
-function recipeDiscoveryRank(route) {
-  const ingredientStages = craftIngredientRequirements(route).map((requirement) => ingredientDiscoveryStage(requirement.ingredientId));
-  return {
-    stage: Math.max(...ingredientStages),
-    stageSum: ingredientStages.reduce((sum, stage) => sum + stage, 0),
-    ingredientCost: craftIngredientCost(route),
-  };
-}
-
 function discoveryOrderedRecipeRoutes() {
-  return RECIPE_PROGRESSION
-    .map((route, originalIndex) => ({ route, originalIndex, rank: recipeDiscoveryRank(route) }))
-    .sort((a, b) => a.rank.stage - b.rank.stage
-      || a.rank.stageSum - b.rank.stageSum
-      || a.rank.ingredientCost - b.rank.ingredientCost
-      || a.originalIndex - b.originalIndex)
-    .map((entry) => entry.route);
+  // `RECIPE_PROGRESSION` is authored in the same top-to-bottom order as
+  // `레시피(기획)`. Never re-sort it by unlock state: card numbers and positions
+  // must remain stable after discovering or upgrading a recipe.
+  return [...RECIPE_PROGRESSION];
 }
 
 const INGREDIENT_DISCOVERY_CLUES = new Map([
@@ -4540,8 +4555,8 @@ function renderCollectionMenu() {
   const gradeProgress = visits >= bestVisitGoal ? 100 : visits >= regularVisitGoal
     ? 50 + (visits - regularVisitGoal) / (bestVisitGoal - regularVisitGoal) * 50
     : Math.max(0, (visits - 1) / (regularVisitGoal - 1) * 50);
-  const dropRows = selectedKnown ? (selected.rewardIngredients || []).map((ingredient, index) => {
-    const chance = index === 0 ? INGREDIENT_SLOT_WEIGHTS.base : INGREDIENT_SLOT_WEIGHTS.special;
+  const dropRows = selectedKnown ? (selected.rewardIngredients || []).map((ingredient, index, rewardIngredients) => {
+    const chance = rewardIngredients.length === 1 ? 1 : index === 0 ? INGREDIENT_SLOT_WEIGHTS.base : INGREDIENT_SLOT_WEIGHTS.special;
     const slotName = index === 0 ? "기본" : "특별";
     return `<div class="customer-drop-row is-active">
       <span class="customer-drop-kind">${slotName}<b>${Math.round(chance * 100)}%</b></span>
@@ -4695,7 +4710,8 @@ function renderThemeManagement() {
   const requirementVerb = selectedTheme === 1 ? "설치" : "보유";
   const completionAchieved = progress.total > 0 && progress.opened >= progress.total;
   const selectedPart = rows.find((row) => row.id === Number(state.ui.themePartId)) || null;
-  const themeDisplayName = `${String(THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`).replace(/\s*테마$/, "")} 식당`;
+  const themeBaseName = String(THEME_NAMES[selectedTheme] || `테마 ${selectedTheme}`).replace(/\s*테마$/, "");
+  const themeDisplayName = themeBaseName.endsWith("식당") ? themeBaseName : `${themeBaseName} 식당`;
 
   dom.menuContent.innerHTML = `<div class="theme-management">
     <div class="theme-tabs" aria-label="테마 선택">${themeIds.map((themeId) => {
@@ -4971,7 +4987,7 @@ function renderGameToText() {
     assetLibrary: {
       unityUiSpritesSynced: true,
       chickIconRange: [1, CHICK_ICON_MAX_INDEX],
-      latestChickIcons: [46, 47, 48, 49, 50].map((index) => `assets/ui/chick/icon_chick_${String(index).padStart(3, "0")}.png`),
+      latestChickIcons: [104, 105, 106, 107, 108].map((index) => `assets/ui/chick/icon_chick_${String(index).padStart(3, "0")}.png`),
     },
     debug: {
       panelVisible: !dom.debugPanel.hidden,

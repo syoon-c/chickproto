@@ -64,7 +64,7 @@
       specialCustomers: raw.SpecialCustomer.filter((row) => row.areaType === 1),
       restaurantThemes: raw.ThemeFacility
         .filter((row) => row.areaType === 1
-          && Number(row.facilityTheme) <= 15
+          && Number(row.facilityTheme) <= 26
           && !excludedThemeFacilityTypes.has(Number(row.facilityType)))
         .map((row) => ({
           ...row,
