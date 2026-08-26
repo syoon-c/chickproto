@@ -130,6 +130,18 @@ const THEME_COMPLETION_MENU_PRICE_BONUS = .2;
 const SINK_WATER_COOLDOWN_SECONDS = 8;
 const CHICK_ICON_MAX_INDEX = 108;
 const WEIRD_DISH_ICON = "assets/ui/recipe/icon_recipe_weird.png";
+const SAVE_VERSION = 24;
+const RECIPE_ID_MIGRATION_V24 = Object.freeze({
+  1: 1, 12: 2, 9: 3, 2: 4, 3: 5,
+  4: 6, 5: 7, 6: 8, 8: 9, 7: 10, 10: 11, 15: 12,
+  33: 13, 26: 14, 43: 15, 14: 16, 16: 17,
+  19: 18, 18: 19, 20: 20, 21: 21, 22: 22,
+  11: 23, 23: 24, 24: 25, 27: 26, 25: 27,
+  17: 28, 32: 29, 34: 30, 29: 31, 30: 32, 31: 33,
+  36: 34, 38: 35, 37: 36, 42: 37, 39: 38, 40: 39,
+  41: 40, 28: 41, 35: 42, 45: 43, 51: 44,
+  44: 45, 46: 46, 49: 47, 50: 48, 52: 49, 47: 50,
+});
 const STARTER_CHICKPEA = Object.values(GAME_INGREDIENTS).find((ingredient) => ingredient.name === "병아리콩");
 const STARTER_INGREDIENTS = Object.freeze({
   [STARTER_CHICKPEA.id]: 1,
@@ -382,7 +394,7 @@ function initialAcorns() {
 
 function createInitialState() {
   return {
-    version: 23,
+    version: SAVE_VERSION,
     clock: 0,
     rng: 20260714,
     resources: {
@@ -492,9 +504,28 @@ function loadState() {
     const parsed = JSON.parse(localStorage.getItem(SAVE_KEY));
     if (!parsed) return null;
     const defaults = createInitialState();
-    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].includes(parsed.version)) return null;
-    const ownedRecipes = Object.fromEntries(Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).map(([id, value]) => [id,
-      typeof value === "object" ? value : { level: Number(value) || 1, stack: 0, codexClaimed: false }]));
+    if (![2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].includes(parsed.version)) return null;
+    const migrateRecipeId = (recipeId) => {
+      const numericId = Number(recipeId);
+      const migratedId = Number(parsed.version) < SAVE_VERSION ? RECIPE_ID_MIGRATION_V24[numericId] : numericId;
+      return migratedId && progressionForRecipe(migratedId) ? migratedId : null;
+    };
+    const migrateLiveRecipeId = (recipeId) => migrateRecipeId(recipeId) || 1;
+    const ownedRecipes = {};
+    Object.entries(parsed.ownedRecipes || defaults.ownedRecipes).forEach(([id, rawValue]) => {
+      const migratedId = migrateRecipeId(id);
+      if (!migratedId) return;
+      const value = typeof rawValue === "object"
+        ? rawValue
+        : { level: Number(rawValue) || 1, stack: 0, codexClaimed: false };
+      const previous = ownedRecipes[migratedId];
+      ownedRecipes[migratedId] = {
+        level: Math.max(1, Number(previous?.level || 0), Number(value.level || 1)),
+        stack: Math.max(0, Number(previous?.stack || 0), Number(value.stack || 0)),
+        codexClaimed: Boolean(previous?.codexClaimed || value.codexClaimed),
+      };
+    });
+    if (!Object.keys(ownedRecipes).length) ownedRecipes[1] = { ...defaults.ownedRecipes[1] };
     const availableThemePartIds = new Set(tables.restaurantThemes.map((row) => Number(row.id)));
     const openedThemes = [...new Set([
       ...defaults.themes.opened,
@@ -591,19 +622,31 @@ function loadState() {
       : [];
     while (savedQueueTargets.length < Number(savedPromotion.queued || 0)) savedQueueTargets.unshift(null);
     savedQueueTargets.splice(Number(savedPromotion.queued || 0));
+    const migratedGuests = (parsed.guests || []).map((guest) => ({
+      ...guest,
+      recipeId: migrateLiveRecipeId(guest.recipeId),
+    }));
+    const migratedOrders = (parsed.orders || []).map((order) => ({
+      ...order,
+      recipeId: migrateLiveRecipeId(order.recipeId),
+    }));
     const migratedCooking = (parsed.cooking || []).map((task) => {
-      const recipe = getRecipe(task.recipeId);
-      const owned = ownedRecipes[task.recipeId] || { level: 1 };
+      const recipeId = migrateLiveRecipeId(task.recipeId);
+      const recipe = getRecipe(recipeId);
+      const owned = ownedRecipes[recipeId] || { level: 1 };
       const duration = recipe ? recipeCookingDuration(recipe, owned.level, savedKnowhow) : Number(task.duration || COOKING_TIME_MIN_SECONDS);
       const previousProgress = Number(task.duration) > 0
         ? Math.max(0, Math.min(1, Number(task.elapsed || 0) / Number(task.duration)))
         : 0;
-      return { ...task, duration, elapsed: previousProgress * duration };
+      return { ...task, recipeId, duration, elapsed: previousProgress * duration };
     });
     const savedBuffet = { ...defaults.buffet, ...parsed.buffet };
     const buffetStands = (Array.isArray(savedBuffet.stands) ? savedBuffet.stands : [])
       .slice(0, BUFFET_MAX_STAND_COUNT)
-      .map((recipeId) => recipeId && getRecipe(Number(recipeId)) && ownedRecipes[recipeId] ? Number(recipeId) : null);
+      .map((recipeId) => {
+        const migratedId = migrateRecipeId(recipeId);
+        return migratedId && ownedRecipes[migratedId] ? migratedId : null;
+      });
     while (buffetStands.length < BUFFET_MAX_STAND_COUNT) buffetStands.push(null);
     const buffetUnlockedInSave = Object.keys(ownedRecipes).filter((id) => getRecipe(Number(id))).length >= BUFFET_RECIPE_REQUIREMENT
       && savedTutorial.seen.includes("buffet-unlocked");
@@ -614,13 +657,42 @@ function loadState() {
     const buffetOfflineTicks = Math.floor(buffetTotalElapsed / BUFFET_TICK_SECONDS);
     const buffetOfflineEarned = buffetOfflineTicks * buffetYieldFromSnapshot(buffetStands, ownedRecipes, savedKnowhow);
     const savedContest = { ...defaults.contest, ...parsed.contest };
+    const migrateContestRecord = (record) => {
+      if (!record) return null;
+      const recipeId = migrateRecipeId(record.recipeId);
+      return recipeId ? { ...record, recipeId, recipeName: routeRecipeName(recipeId) } : null;
+    };
+    const migratedContestJudging = migrateContestRecord(savedContest.judging);
+    const migratedContestResult = migrateContestRecord(savedContest.result);
+    const migratedContestHistory = (Array.isArray(savedContest.history) ? savedContest.history : [])
+      .map(migrateContestRecord).filter(Boolean).slice(0, 12);
+    const migratedCraftHistory = (Array.isArray(parsed.crafting?.history) ? parsed.crafting.history : [])
+      .map((entry) => {
+        if (Number(entry.recipeId) === 0) return entry;
+        const recipeId = migrateRecipeId(entry.recipeId);
+        return recipeId ? { ...entry, recipeId } : null;
+      }).filter(Boolean).slice(0, 12);
+    const migratedHints = {};
+    Object.entries(parsed.crafting?.hints || {}).forEach(([recipeId, ingredientIds]) => {
+      const migratedId = migrateRecipeId(recipeId);
+      if (!migratedId) return;
+      const validIngredientIds = (Array.isArray(ingredientIds) ? ingredientIds : [])
+        .map(Number).filter((ingredientId) => ingredientData(ingredientId));
+      migratedHints[migratedId] = [...new Set([...(migratedHints[migratedId] || []), ...validIngredientIds])];
+    });
+    const migratedLastResearch = savedUi.lastResearch && Number(savedUi.lastResearch.recipeId) !== 0
+      ? (() => {
+        const recipeId = migrateRecipeId(savedUi.lastResearch.recipeId);
+        return recipeId ? { ...savedUi.lastResearch, recipeId } : null;
+      })()
+      : savedUi.lastResearch || null;
     const contestTierIds = new Set(CONTEST_TIERS.map((tier) => tier.id));
     const contestRecipeIds = new Set(Object.keys(ownedRecipes).map(Number));
     const contestIngredientIds = new Set(Object.keys(normalizedIngredients).map(Number));
     return {
       ...defaults,
       ...restaurantSave,
-      version: 23,
+      version: SAVE_VERSION,
       installed: [...new Set(migratedInstalled)].sort((a, b) => a - b),
       resources: { ...defaults.resources, ...parsed.resources },
       tipbox: Math.max(0, Math.floor(Number(parsed.tipbox || 0))),
@@ -639,6 +711,8 @@ function loadState() {
         cooldown: specialCooldown,
         lastUpdatedAt: Date.now(),
       },
+      guests: migratedGuests,
+      orders: migratedOrders,
       cooking: migratedCooking,
       buffet: {
         ...savedBuffet,
@@ -649,25 +723,29 @@ function loadState() {
         offlineSeconds: Math.max(0, Number(savedBuffet.offlineSeconds || 0)) + buffetOfflineTicks * BUFFET_TICK_SECONDS,
         lastUpdatedAt: Date.now(),
         visitorSequence: Math.max(1, Math.floor(Number(savedBuffet.visitorSequence || 1))),
-        visitors: Array.isArray(savedBuffet.visitors) ? savedBuffet.visitors : [],
+        visitors: (Array.isArray(savedBuffet.visitors) ? savedBuffet.visitors : [])
+          .map((visitor) => {
+            const recipeId = migrateRecipeId(visitor.recipeId);
+            return recipeId ? { ...visitor, recipeId } : null;
+          }).filter(Boolean),
       },
       contest: {
         ...savedContest,
         dayKey: typeof savedContest.dayKey === "string" ? savedContest.dayKey : defaults.contest.dayKey,
         entriesToday: Math.max(0, Math.floor(Number(savedContest.entriesToday || 0))),
         selectedTierId: contestTierIds.has(Number(savedContest.selectedTierId)) ? Number(savedContest.selectedTierId) : 1,
-        selectedRecipeId: contestRecipeIds.has(Number(savedContest.selectedRecipeId)) ? Number(savedContest.selectedRecipeId) : Number(Object.keys(ownedRecipes)[0] || 1),
+        selectedRecipeId: contestRecipeIds.has(Number(migrateRecipeId(savedContest.selectedRecipeId))) ? Number(migrateRecipeId(savedContest.selectedRecipeId)) : Number(Object.keys(ownedRecipes)[0] || 1),
         selectedIngredientId: contestIngredientIds.has(Number(savedContest.selectedIngredientId)) ? Number(savedContest.selectedIngredientId) : Number(Object.keys(normalizedIngredients)[0] || GAME_INGREDIENTS.leaf.id),
         firstPlaceTierIds: [...new Set((savedContest.firstPlaceTierIds || []).map(Number).filter((id) => contestTierIds.has(id)))],
-        judging: savedContest.judging && contestTierIds.has(Number(savedContest.judging.tierId))
-          ? { ...savedContest.judging, elapsed: Math.max(0, Number(savedContest.judging.elapsed || 0)), duration: CONTEST_JUDGING_DURATION }
+        judging: migratedContestJudging && contestTierIds.has(Number(migratedContestJudging.tierId))
+          ? { ...migratedContestJudging, elapsed: Math.max(0, Number(migratedContestJudging.elapsed || 0)), duration: CONTEST_JUDGING_DURATION }
           : null,
-        result: savedContest.result || null,
-        history: Array.isArray(savedContest.history) ? savedContest.history.slice(0, 12) : [],
+        result: migratedContestResult,
+        history: migratedContestHistory,
       },
       knowhow: savedKnowhow,
       specialVisitor: savedSpecialVisitor,
-      ui: { ...defaults.ui, ...savedUi, selectedInstallId: null, screen: "restaurant", tab: "craft", area: buffetUnlockedInSave && savedUi.area === "buffet" ? "buffet" : "restaurant" },
+      ui: { ...defaults.ui, ...savedUi, lastResearch: migratedLastResearch, selectedInstallId: null, screen: "restaurant", tab: "craft", area: buffetUnlockedInSave && savedUi.area === "buffet" ? "buffet" : "restaurant" },
       tutorial: savedTutorial,
       staff: parsed.staff || {},
       performance: { ...defaults.performance, ...parsed.performance },
@@ -683,14 +761,11 @@ function loadState() {
         ...parsed.crafting,
         ingredients: normalizedIngredients,
         starterIngredientsGranted: true,
-        history: parsed.crafting?.history || [],
+        history: migratedCraftHistory,
         selected: (parsed.crafting?.selected || []).map(Number).filter((id) => ingredientData(id)).slice(0, migratedBowlCapacity),
         storageCapacity: migratedStorageCapacity,
         bowlCapacity: migratedBowlCapacity,
-        hints: Object.fromEntries(Object.entries(parsed.crafting?.hints || {})
-          .map(([recipeId, ingredientIds]) => [Number(recipeId), (Array.isArray(ingredientIds) ? ingredientIds : [])
-            .map(Number).filter((ingredientId) => ingredientData(ingredientId))])
-          .filter(([recipeId]) => progressionForRecipe(recipeId))),
+        hints: migratedHints,
       },
       facilityInteractions: {
         ...defaults.facilityInteractions,

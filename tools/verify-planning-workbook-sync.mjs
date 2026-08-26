@@ -20,7 +20,7 @@ const {
 
 assert.equal(Object.keys(THEME_NAMES).length, 26, "기획 테마는 26개여야 합니다.");
 assert.equal(CORE_PROGRESSION.length, 78, "테마당 병아리 3마리여야 합니다.");
-assert.equal(RECIPE_PROGRESSION.length, 54, "기획 시트의 레시피 2~55번만 사용해야 합니다.");
+assert.equal(RECIPE_PROGRESSION.length, 50, "프로토타입 테스트 레시피는 50개여야 합니다.");
 assert.deepEqual({ ...PROTOTYPE_RECIPE_PRICE_OVERRIDES }, { 1: 35 }, "기존 레시피 가격 보정값이 남아 있습니다.");
 
 const expectedThemeOrder = [
@@ -139,27 +139,33 @@ assert.equal(
 
 const recipeByName = new Map(GAME_RECIPE_CATALOG.map((recipe) => [recipe.recipeName, recipe]));
 const expectedRecipeOrder = [
-  "삶은 병아리콩", "병아리콩 팬케이크", "육전", "고기쌈", "도토리묵",
-  "상큼 나뭇잎 샐러드", "벌레 파이", "열매꼬치구이", "삶은 고기", "고단백 식품",
-  "계피차", "병아리콩 가득", "과카몰리", "쌀밥", "벌레먹은 나뭇잎",
-  "병아리콩 밥", "시나몬 롤", "구운 옥수수", "후추 스테이크", "바삭 벌레구이",
-  "콘스프", "트러플 크림 리조또", "생강차", "사과 생강차", "복숭아 요거트",
-  "아보카도 샐러드", "시나몬 사과조림", "규동", "딸기 생크림 케이크", "체리 사탕",
-  "과일 가족 모임", "진저브레드", "어니언 스프", "해바라기씨 파이", "씨앗 샐러드",
-  "김치전", "된장국", "파김치", "계란볶음밥", "김치볶음밥",
-  "딤섬", "불고기", "파전", "간장계란밥", "김치볶음",
-  "연어덮밥", "치즈 오믈렛", "오므라이스", "생선구이", "연어구이",
-  "육회", "연어초밥", "라따뚜이", "어향가지",
+  "삶은 병아리콩", "병아리콩 가득", "삶은 고기", "병아리콩 팬케이크", "육전",
+  "고기쌈", "도토리묵", "상큼 나뭇잎 샐러드", "열매꼬치구이", "벌레 파이", "고단백 식품", "벌레먹은 나뭇잎",
+  "맑은 양파 수프", "아보카도 병아리콩 샐러드", "새싹전", "쌀밥", "병아리콩 밥",
+  "후추 스테이크", "구운 옥수수", "바삭 벌레구이", "콘스프", "트러플 크림 리조또",
+  "계피차", "생강차", "사과 생강차", "시나몬 사과조림", "복숭아 요거트",
+  "시나몬 롤", "진저브레드", "해바라기씨 파이", "딸기 생크림 케이크", "체리 사탕", "과일 가족 모임",
+  "김치전", "파김치", "된장국", "불고기", "계란볶음밥", "김치볶음밥",
+  "양배추 딤섬", "가지 소고기 덮밥", "씨앗 오이 샐러드", "마늘 김치볶음", "마늘 육회",
+  "치즈 간장계란밥", "연어덮밥", "대구구이", "연어구이", "연어초밥", "치즈 오믈렛",
 ];
 assert.equal(recipeByName.has("샐러드"), false, "기존 샐러드가 기획 레시피에 섞여 있습니다.");
 assert.equal(GAME_RECIPE_CATALOG[0].recipeId, 1);
 assert.equal(GAME_RECIPE_CATALOG[0].recipeName, "삶은 병아리콩");
-assert.deepEqual(Array.from(GAME_RECIPE_CATALOG.map((recipe) => recipe.recipeId)), Array.from({ length: 54 }, (_, index) => index + 1));
-assert.deepEqual(Array.from(GAME_RECIPE_CATALOG, (recipe) => recipe.recipeName), expectedRecipeOrder, "레시피 순서가 엑셀 기획 순서와 다릅니다.");
+assert.deepEqual(Array.from(GAME_RECIPE_CATALOG.map((recipe) => recipe.recipeId)), Array.from({ length: 50 }, (_, index) => index + 1));
+assert.deepEqual(Array.from(GAME_RECIPE_CATALOG, (recipe) => recipe.recipeName), expectedRecipeOrder, "레시피 순서가 테마별 테스트 흐름과 다릅니다.");
 assert.deepEqual(Array.from(recipeByName.get("삶은 병아리콩").ingredientNames), ["물", "병아리콩"]);
-assert.deepEqual(Array.from(recipeByName.get("과카몰리").ingredientNames), ["아보카도", "토마토", "양파", "라임", "소금"]);
+assert.deepEqual(Array.from(recipeByName.get("맑은 양파 수프").ingredientNames), ["물", "양파"]);
+assert.deepEqual(Array.from(recipeByName.get("아보카도 병아리콩 샐러드").ingredientNames), ["아보카도", "병아리콩", "나뭇잎"]);
+assert.deepEqual(Array.from(recipeByName.get("새싹전").ingredientNames), ["새싹", "밀가루"]);
+assert.deepEqual(Array.from(recipeByName.get("양배추 딤섬").ingredientNames), ["양배추", "밀가루", "고기", "파"]);
+assert.deepEqual(Array.from(recipeByName.get("가지 소고기 덮밥").ingredientNames), ["가지", "고기", "쌀", "양파", "간장"]);
+assert.deepEqual(Array.from(recipeByName.get("씨앗 오이 샐러드").ingredientNames), ["씨앗", "오이", "나뭇잎"]);
+assert.deepEqual(Array.from(recipeByName.get("치즈 간장계란밥").ingredientNames), ["쌀", "계란", "간장", "치즈"]);
 assert.deepEqual(Array.from(recipeByName.get("김치볶음밥").ingredientNames), ["김치", "식용유", "쌀"]);
-assert.deepEqual(Array.from(recipeByName.get("어향가지").ingredientNames), ["가지", "고기", "파", "마늘", "고추"]);
+for (const removedRecipe of ["과카몰리", "오므라이스", "라따뚜이", "어향가지"]) {
+  assert.equal(recipeByName.has(removedRecipe), false, `${removedRecipe}은(는) 50개 테스트 목록에서 제외되어야 합니다.`);
+}
 
 const obtainableNames = new Set([
   "물",
@@ -168,6 +174,7 @@ const obtainableNames = new Set([
 const missingRecipeIngredients = [...new Set(
   RECIPE_PROGRESSION.flatMap((recipe) => recipe.ingredientRequirements.map((ingredient) => ingredient.name)),
 )].filter((name) => !obtainableNames.has(name));
+assert.deepEqual(missingRecipeIngredients, [], "획득할 수 없는 재료가 필요한 레시피가 있습니다.");
 
 console.log(JSON.stringify({
   themes: Object.keys(THEME_NAMES).length,
