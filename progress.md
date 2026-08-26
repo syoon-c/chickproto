@@ -2017,3 +2017,17 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 같은 공통 목록을 사용하는 요리 연구 힌트, 야외 뷔페 요리 선택, 대회 출품 요리 선택도 엑셀 순서를 그대로 따른다.
 - 요리를 새로 발견하거나 수동 레벨업해도 카드 번호와 위치가 바뀌지 않는다.
 - 검증: 정적 엑셀 순서 54종 전체 대조, `CHICKPEA_STARTER_OK`의 레벨업 전후 카드 순서 대조, `PLANNING_RECIPE_UI_OK`의 실제 DOM 이름·번호 전체 대조를 통과했다. 공식 `develop-web-game` 클라이언트 초기 렌더링과 상태 출력도 오류 없이 완료했다.
+
+## 2026-08-26 장시간 플레이 중단 원인 진단
+
+- 전체 설비·자동화가 활성화된 상태에서 시간을 진행해 특수 손님 생성 경로를 재현했다.
+- 게임 시간 120초에 특수 손님 후보로 재료 상인이 생성되면 `buildMerchantOffers → merchantIngredientUnitPrice → ingredientDiscoveryStage` 순으로 호출된다.
+- 엑셀 기준 레시피 순서 고정 작업에서 `ingredientDiscoveryStage()` 정의를 제거했지만 재료 상인 가격 계산의 호출부가 남아 `ReferenceError`가 발생한다. 이 예외가 애니메이션 프레임의 `update()`를 빠져나가게 만들어 화면은 남아 있지만 게임 시간·손님 이동·입력 반응이 멈춘 것처럼 보인다.
+- 후속 수정에서 재료 상인 전용 단계 계산을 복구하고 120초 자동 등장 회귀 검사를 완료했다.
+
+## 2026-08-26 재료 상인 등장 시 게임 중단 수정
+
+- `ingredientMerchantProgressionStage()`를 추가해 재료 상인의 가격 단계를 병아리의 테마·슬롯 등장 순서로 계산하도록 복구했다.
+- 이 계산은 엑셀 기준 레시피 표시 순서와 완전히 분리되어 있으므로, 레시피 카드 `NO.01~NO.54` 순서는 그대로 유지된다.
+- 강제 재료 상인 등장 → 도착 전 터치 제한 → 팝업 열기 → 재료 구매 → 다른 특수 손님 처리 → 120초 자동 특수 손님 재등장까지 전체 경로를 실행했다.
+- 검증: `SPECIAL_VISITORS_OK interval=120 merchant=progression-priced-arrival-only ...` 통과, 콘솔·페이지 오류 없음. `PLANNING_RECIPE_UI_OK recipes=54 owned=54`와 엑셀 레시피 54종 순서 검증도 재통과했다. 공식 `develop-web-game` 클라이언트 초기 화면과 상태 출력도 정상이다.

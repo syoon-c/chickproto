@@ -2089,8 +2089,19 @@ function futureSpecialVisitorIngredients() {
   return [...future.values()];
 }
 
+function ingredientMerchantProgressionStage(ingredientId) {
+  return CORE_PROGRESSION.reduce((earliestStage, chickRoute) => {
+    const rewardIndex = chickRoute.rewardIngredients.findIndex((ingredient) => ingredient.id === Number(ingredientId));
+    if (rewardIndex < 0) return earliestStage;
+    // Merchant pricing follows the theme/chick acquisition order only. It is
+    // intentionally independent from the Excel-authored recipe display order.
+    const stage = (chickRoute.themeId - 1) * 9 + chickRoute.slot * 2;
+    return Math.min(earliestStage, stage);
+  }, Number.POSITIVE_INFINITY);
+}
+
 function merchantIngredientUnitPrice(ingredientId, knowhow = state?.knowhow) {
-  const rawStage = ingredientDiscoveryStage(ingredientId);
+  const rawStage = ingredientMerchantProgressionStage(ingredientId);
   const stage = Number.isFinite(rawStage) ? Math.max(0, rawStage) : 0;
   const themeIndex = Math.floor(stage / 9);
   const withinThemeStage = stage % 9;
