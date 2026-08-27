@@ -726,7 +726,8 @@ button:focus-visible { outline: 4px solid rgba(255, 255, 255, .92); outline-offs
 .ingredient-storage-actions button img { width: 18px; height: 18px; object-fit: contain; }
 .ingredient-storage-actions button strong { margin-left: 2px; padding-left: 6px; border-left: 1px solid rgba(84,57,35,.25); }
 .ingredient-inventory-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.ingredient-inventory-item { min-height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 9px 5px; border: 2px solid rgba(117,76,38,.28); border-radius: 16px; background: rgba(255,255,255,.72); text-align: center; }
+.ingredient-inventory-item { min-width: 0; min-height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 9px 5px; border: 2px solid rgba(117,76,38,.28); border-radius: 16px; background: rgba(255,255,255,.72); color: #5f3e25; text-align: center; cursor: pointer; }
+.ingredient-inventory-item:active { transform: translateY(1px); border-color: #b77735; background: #fff5cf; }
 .ingredient-inventory-item .ingredient-emoji { font: 30px/1 "Segoe UI Emoji", sans-serif; }
 .ingredient-inventory-item strong { font-size: 11px; }
 .ingredient-inventory-item b { min-width: 34px; padding: 3px 7px; border-radius: 99px; background: #f7c84e; color: #67401f; font-size: 11px; }
@@ -818,6 +819,56 @@ button.combination-slot { cursor: pointer; }
 .recipe-ingredient-dialog .recipe-picker-grid > button { min-height: 62px; }
 .recipe-picker-mix { width: 100%; min-height: 44px; margin-top: 9px; border: 2px solid #875126; border-radius: 14px; background: linear-gradient(#ffd65e,#f1a333); box-shadow: 0 3px 0 #99591f; color: #603817; font-size: 12px; font-weight: 1000; cursor: pointer; }
 .recipe-picker-mix:disabled { border-color: #b9ab99; background: #ded7ca; box-shadow: none; color: #8f8578; cursor: default; }
+.ingredient-detail-modal { position: absolute; z-index: 32; inset: 0; display: grid; place-items: center; padding: 9px; }
+.ingredient-detail-backdrop { position: absolute; inset: 0; border: 0; background: rgba(51,35,23,.6); cursor: pointer; }
+.ingredient-detail-dialog { position: relative; width: min(100%,400px); max-height: calc(100% - 4px); display: flex; flex-direction: column; overflow: hidden; border: 3px solid #8e6747; border-radius: 22px; background: linear-gradient(180deg,#fffdf5,#f5dfaa); box-shadow: 0 16px 36px rgba(43,29,19,.42); }
+.ingredient-detail-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 13px 8px; border-bottom: 1px solid rgba(126,85,48,.2); }
+.ingredient-detail-heading { min-width: 0; display: flex; align-items: center; gap: 9px; }
+.ingredient-detail-heading > span { display: grid; width: 47px; height: 47px; place-items: center; flex: 0 0 auto; border: 2px solid #e0bd75; border-radius: 14px; background: #fff5ca; font: 28px/1 "Segoe UI Emoji",sans-serif; }
+.ingredient-detail-heading > div { min-width: 0; display: grid; gap: 1px; }
+.ingredient-detail-heading small { color: #a06a38; font-size: 9px; font-weight: 1000; }
+.ingredient-detail-heading h3 { margin: 0; overflow: hidden; color: #56371f; font-size: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.ingredient-detail-dialog > header > button { width: 31px; height: 31px; flex: 0 0 auto; border: 0; border-radius: 50%; background: #ead8b9; color: #74543a; font-size: 21px; font-weight: 1000; cursor: pointer; }
+.ingredient-detail-body { min-height: 0; padding: 9px 12px; overflow-y: auto; }
+.ingredient-category-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.ingredient-category-list span { padding: 4px 8px; border: 1px solid #bf8b43; border-radius: 99px; background: #fff0ae; color: #71461e; font-size: 9px; font-weight: 1000; }
+.ingredient-description { margin: 7px 1px 8px; color: #755536; font-size: 10px; font-weight: 850; line-height: 1.45; }
+.ingredient-contest-info { display: grid; grid-template-columns: 65px minmax(0,1fr); align-items: start; gap: 6px; padding: 7px 8px; border-radius: 12px; background: rgba(255,255,255,.62); }
+.ingredient-contest-info > strong { color: #6a4325; font-size: 10px; }
+.ingredient-contest-info > div { display: flex; flex-wrap: wrap; gap: 4px; }
+.ingredient-contest-info span { padding: 3px 6px; border-radius: 8px; background: #e8f4c9; color: #52702d; font-size: 8px; font-weight: 1000; }
+.ingredient-contest-info small { color: #8c735d; font-size: 8px; font-weight: 900; }
+.ingredient-source-section { margin-top: 9px; }
+.ingredient-source-section > strong { display: block; margin: 0 1px 5px; color: #684326; font-size: 10px; }
+.ingredient-source-section > div { display: grid; gap: 5px; }
+.ingredient-source-row { min-height: 47px; display: grid; grid-template-columns: 39px minmax(0,1fr) auto; align-items: center; gap: 7px; padding: 4px 7px; border: 1px solid #d1aa72; border-radius: 12px; background: rgba(255,255,255,.72); }
+.ingredient-source-row > img { width: 39px; height: 39px; object-fit: contain; }
+.ingredient-source-row > span { display: grid; width: 37px; height: 37px; place-items: center; border-radius: 10px; background: #d9eff8; font-size: 23px; }
+.ingredient-source-row > div { min-width: 0; display: grid; gap: 2px; }
+.ingredient-source-row strong { overflow: hidden; color: #603d23; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.ingredient-source-row small { overflow: hidden; color: #8d6d4b; font-size: 7px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+.ingredient-source-row > b { padding: 3px 5px; border-radius: 7px; background: #dff0bd; color: #55752c; font-size: 7px; white-space: nowrap; }
+.ingredient-source-row.is-locked { opacity: .68; }
+.ingredient-source-row.is-locked > b { background: #e6e0d8; color: #766a5f; }
+.ingredient-source-empty { margin: 3px 0; color: #8b725d; font-size: 9px; font-weight: 850; text-align: center; }
+.ingredient-discard-footer { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 7px; padding: 9px 12px 11px; border-top: 1px solid rgba(126,85,48,.22); background: rgba(255,248,222,.88); }
+.ingredient-discard-footer > div:first-child { display: grid; }
+.ingredient-discard-footer > div:first-child strong { color: #684326; font-size: 10px; }
+.ingredient-discard-footer > div:first-child small { color: #977653; font-size: 8px; font-weight: 900; }
+.ingredient-discard-stepper { display: grid; grid-template-columns: 31px 38px 31px; align-items: center; overflow: hidden; border: 2px solid #a17448; border-radius: 11px; background: #fffdf5; }
+.ingredient-discard-stepper button { height: 30px; border: 0; background: #f1dfb8; color: #674428; font-size: 21px; font-weight: 1000; cursor: pointer; }
+.ingredient-discard-stepper button:disabled { color: #b9a991; cursor: default; }
+.ingredient-discard-stepper b { text-align: center; color: #5f3c23; font-size: 12px; }
+.ingredient-discard-request { grid-column: 1/-1; min-height: 38px; border: 2px solid #914538; border-radius: 12px; background: linear-gradient(#ffcf9e,#ed8a67); box-shadow: 0 3px 0 #9b4d3d; color: #6b2f27; font-size: 10px; font-weight: 1000; cursor: pointer; }
+.ingredient-discard-warning { position: absolute; z-index: 3; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(58,35,27,.66); }
+.ingredient-discard-warning > div { width: min(100%,300px); display: grid; justify-items: center; padding: 18px 16px 15px; border: 3px solid #984b3e; border-radius: 20px; background: #fff7e7; box-shadow: 0 10px 24px rgba(40,22,18,.35); text-align: center; }
+.ingredient-discard-warning > div > span { font-size: 34px; }
+.ingredient-discard-warning strong { margin-top: 3px; color: #6f2e28; font-size: 18px; }
+.ingredient-discard-warning p { margin: 7px 0 12px; color: #765048; font-size: 10px; font-weight: 850; line-height: 1.45; }
+.ingredient-discard-warning p b { color: #9c4035; }
+.ingredient-discard-warning > div > div { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.ingredient-discard-warning button { min-height: 38px; border: 2px solid #9a7b5e; border-radius: 11px; background: #f5ead5; color: #674a35; font-size: 10px; font-weight: 1000; cursor: pointer; }
+.ingredient-discard-warning button.is-danger { border-color: #8e3c33; background: linear-gradient(#ffb595,#e96855); color: #662922; }
 .combination-discover,.auto-research-button { width: 100%; margin-top: 8px; }
 .combination-discover { min-height: 45px; font-size: 14px; }
 .combination-discover span { display: inline-block; margin-right: 3px; font-size: 19px; vertical-align: -2px; }
@@ -1107,11 +1158,13 @@ button.combination-slot { cursor: pointer; }
 .special-trade-arrow { color: #a56a25; font-size: 18px; font-weight: 1000; text-align: center; }
 .special-trade-rare { margin: 0; padding: 5px 7px; border-radius: 9px; background: #eadbff; color: #69468a; font-size: 8px; font-weight: 1000; text-align: center; }
 .special-trade-button { width: 100%; margin-top: 2px; }
-.buffet-menu-summary { display: grid; grid-template-columns: 48px 1fr; align-items: center; gap: 9px; margin: 4px 0 10px; padding: 10px; border: 2px solid #b77436; border-radius: 17px; background: linear-gradient(135deg,#fff6c9,#f5d58a); }
+.buffet-menu-summary { display: grid; grid-template-columns: 48px minmax(0,1fr); align-items: center; gap: 9px; margin: 4px 0 10px; padding: 10px; border: 2px solid #b77436; border-radius: 17px; background: linear-gradient(135deg,#fff6c9,#f5d58a); }
 .buffet-menu-summary > span { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 14px; background: rgba(255,255,255,.72); font-size: 28px; }
 .buffet-menu-summary div { min-width: 0; display: grid; gap: 2px; }
 .buffet-menu-summary strong { color: #71421e; font-size: 14px; }
 .buffet-menu-summary small { color: #8b653d; font-size: 9px; font-weight: 900; }
+.buffet-menu-summary > button { grid-column: 1 / -1; width: 100%; min-height: 38px; border: 2px solid #80562b; border-radius: 12px; background: linear-gradient(#ffe475,#f3ad35); box-shadow: 0 3px 0 #93602a; color: #65401d; font-size: 11px; font-weight: 1000; cursor: pointer; }
+.buffet-menu-summary > button:active { transform: translateY(2px); box-shadow: 0 1px 0 #93602a; }
 .buffet-recipe-card { min-height: 72px; display: grid; grid-template-columns: 56px minmax(0,1fr) auto; align-items: center; gap: 9px; margin-bottom: 8px; padding: 8px 9px; border: 2px solid rgba(133,88,43,.34); border-radius: 17px; background: rgba(255,255,255,.78); }
 .buffet-recipe-card img { width: 54px; height: 54px; object-fit: contain; }
 .buffet-recipe-card div { min-width: 0; display: grid; gap: 2px; }

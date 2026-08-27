@@ -119,6 +119,9 @@ let recipeReveal = null;
 let recipeRevealTimer = 0;
 let recipeResearch = null;
 let specialPromotionDetailIngredientId = null;
+let ingredientDetailId = null;
+let ingredientDiscardAmount = 1;
+let ingredientDiscardConfirming = false;
 let knowhowMapScroll = { left: 30, top: 0 };
 let themeMenuScrollTop = 0;
 const CHEF_HOME_POSITION = Object.freeze({ x: 400, y: 330 });
@@ -280,6 +283,28 @@ const CONTEST_JUDGE_PREFERENCES = Object.freeze({
   aroma: { name: "향긋이 심사위원", icon: "🌿", hint: "향신 재료를 찾아요", ingredientKeys: ["garlic", "onion", "pepper", "curry", "chili", "parsley", "basil", "rosemary", "truffle"] },
   sweet: { name: "달콤이 심사위원", icon: "🍓", hint: "달콤한 과일이 좋아요", ingredientKeys: ["fruit", "berry", "sugar", "jam", "cherry", "banana", "strawberry", "apple", "mulberry"] },
   tangy: { name: "새콤이 심사위원", icon: "🍅", hint: "새콤하고 톡 쏘는 맛!", ingredientKeys: ["tomato", "pickle", "ketchup", "vinegar", "olive", "soda"] },
+});
+const INGREDIENT_CATEGORY_META = Object.freeze({
+  fresh: { label: "채소", description: "싱그러운 맛과 식감을 더하는 채소 재료예요." },
+  rich: { label: "고소한 재료", description: "고소하고 부드러운 맛을 더하는 재료예요." },
+  hearty: { label: "곡물·주식", description: "요리의 중심이 되어 든든함을 더하는 재료예요." },
+  savory: { label: "고기·해산물", description: "진한 감칠맛과 포만감을 더하는 재료예요." },
+  aroma: { label: "향신료·허브", description: "향과 풍미를 선명하게 만드는 재료예요." },
+  sweet: { label: "과일·단맛", description: "달콤한 맛과 향을 더하는 재료예요." },
+  tangy: { label: "새콤한 재료", description: "산뜻한 산미와 톡 쏘는 맛을 더하는 재료예요." },
+  helper: { label: "조리 보조", description: "수분, 간, 질감처럼 요리의 기본을 잡아주는 재료예요." },
+  special: { label: "특별 재료", description: "평범한 분류에 담기 어려운 희귀한 재료예요." },
+});
+const INGREDIENT_CATEGORY_NAMES = Object.freeze({
+  fresh: new Set(["양상추", "토마토", "모둠 채소", "당근", "김", "양배추", "나뭇잎", "고사리", "옥수수", "오이", "브로콜리", "아보카도", "파프리카", "가지", "애호박", "호박", "알로에", "파", "김치", "새싹", "연근", "무"]),
+  rich: new Set(["치즈", "계란", "버터", "우유", "생크림", "씨앗", "두부", "옥수수", "요거트", "아몬드", "파마산가루"]),
+  hearty: new Set(["빵", "감자", "쌀", "밀가루", "면", "또띠아", "빵가루", "파스타면", "도토리", "콩", "고구마", "떡", "라이스페이퍼", "렌틸콩", "마카로니", "메밀", "병아리콩", "시리얼", "호밀"]),
+  savory: new Set(["소세지", "고기", "생선", "육수", "간장", "소고기", "돼지고기", "양고기", "햄", "벌레", "새우", "가쓰오부시", "대구", "된장", "미트볼", "연어", "성게", "스팸", "오징어먹물", "조개", "캐비어"]),
+  aroma: new Set(["카레가루", "후추", "마늘", "양파", "고추", "파슬리", "바질", "로즈마리", "트러플", "민트", "녹차", "생강", "세이지", "시나몬", "참기름", "칠리소스", "커피콩", "통겨자", "팔각"]),
+  sweet: new Set(["과일", "산딸기", "설탕", "잼", "체리", "바나나", "딸기", "사과", "오디", "용과", "람부탄", "스타후르츠", "꿀", "검은 쿠키", "복숭아", "마시멜로우", "망고", "열매", "엘더베리", "초콜릿칩", "카라멜시럽", "파인애플"]),
+  tangy: new Set(["토마토", "피클", "케첩", "식초", "올리브", "탄산", "김치", "라임", "요거트"]),
+  helper: new Set(["식용유", "소금", "물", "이스트", "베이킹파우더", "젤라틴", "통조림 옥수수"]),
+  special: new Set(["만드라고라", "인삼", "현자의돌", "랜덤 재료"]),
 });
 const CONTEST_TIERS = Object.freeze([
   { id: 1, name: "동네 새싹 요리대회", shortName: "새싹 대회", recipeRequirement: 6, previousTierId: null, firstPlaceScore: 62, prizes: [800, 400, 200], judges: ["fresh", "hearty", "rich"] },
@@ -1223,6 +1248,58 @@ function ingredientData(ingredientId) {
 
 function ingredientAmount(ingredientId) {
   return Number(state.crafting.ingredients[ingredientId] || 0);
+}
+
+function ingredientCategoryKeys(ingredientId) {
+  const ingredient = ingredientData(ingredientId);
+  if (!ingredient) return ["special"];
+  const ingredientKey = Object.entries(GAME_INGREDIENTS)
+    .find(([, item]) => Number(item.id) === Number(ingredientId))?.[0];
+  const keys = Object.keys(INGREDIENT_CATEGORY_META).filter((key) => (
+    INGREDIENT_CATEGORY_NAMES[key]?.has(ingredient.ingredientName)
+      || Boolean(ingredientKey && CONTEST_JUDGE_PREFERENCES[key]?.ingredientKeys?.includes(ingredientKey))
+  ));
+  return keys.length ? keys : ["special"];
+}
+
+function ingredientCategoryDetails(ingredientId) {
+  return ingredientCategoryKeys(ingredientId).map((key) => ({ key, ...INGREDIENT_CATEGORY_META[key] }));
+}
+
+function ingredientContestJudges(ingredientId) {
+  return ingredientCategoryKeys(ingredientId)
+    .filter((key) => CONTEST_JUDGE_PREFERENCES[key])
+    .map((key) => ({ key, ...CONTEST_JUDGE_PREFERENCES[key] }));
+}
+
+function ingredientSourceChicks(ingredientId) {
+  const numericId = Number(ingredientId);
+  return CORE_PROGRESSION.flatMap((route) => {
+    const rewards = route.rewardIngredients || [];
+    const rewardIndex = rewards.findIndex((ingredient) => Number(ingredient.id) === numericId);
+    if (rewardIndex < 0 || rewardIndex > 1) return [];
+    const unlocked = isProgressionRouteUnlocked(route);
+    return [{
+      customerId: route.customerId,
+      customerName: route.customerName,
+      icon: guestIcon(route),
+      themeName: THEME_NAMES[route.themeId] || `테마 ${route.themeId}`,
+      slotLabel: rewards.length === 1 ? "확정 재료" : rewardIndex === 0 ? "기본 재료" : "특별 재료",
+      weight: rewards.length === 1 ? 1 : rewardIndex === 0 ? INGREDIENT_SLOT_WEIGHTS.base : INGREDIENT_SLOT_WEIGHTS.special,
+      unlocked,
+    }];
+  }).sort((a, b) => Number(b.unlocked) - Number(a.unlocked)
+    || a.themeName.localeCompare(b.themeName, "ko")
+    || a.customerName.localeCompare(b.customerName, "ko"));
+}
+
+function ingredientDescription(ingredientId) {
+  const categories = ingredientCategoryDetails(ingredientId);
+  const judges = ingredientContestJudges(ingredientId);
+  const base = categories.map((category) => category.description).join(" ");
+  return judges.length
+    ? `${base} 대회에서는 ${judges.map((judge) => judge.name).join(", ")}이 좋아해요.`
+    : `${base} 현재 대회 심사위원의 직접 선호 재료는 아니에요.`;
 }
 
 function normalizeIngredientInventory(source = {}) {
@@ -3943,6 +4020,9 @@ function closeMenu() {
   dismissRecipeReveal();
   state.ui.themePartId = null;
   state.ui.recipeIngredientPickerOpen = false;
+  ingredientDetailId = null;
+  ingredientDiscardAmount = 1;
+  ingredientDiscardConfirming = false;
   state.ui.screen = "restaurant";
   dom.menuScreen.hidden = true;
   dom.menuScreen.classList.remove("is-theme-sheet", "is-recipe-sheet");
@@ -4117,6 +4197,29 @@ function clearBuffetStand() {
   return true;
 }
 
+function autoPlaceBuffetRecipes() {
+  const capacity = buffetStandCapacity();
+  const rankedRecipeIds = discoveryOrderedRecipeRoutes()
+    .filter((route) => recipeData(route.recipeId))
+    .sort((a, b) => {
+      const aPrice = recipeLevelPrice(getRecipe(a.recipeId), recipeData(a.recipeId));
+      const bPrice = recipeLevelPrice(getRecipe(b.recipeId), recipeData(b.recipeId));
+      return bPrice - aPrice || Number(a.recipeId) - Number(b.recipeId);
+    })
+    .slice(0, capacity)
+    .map((route) => Number(route.recipeId));
+
+  for (let index = 0; index < capacity; index += 1) {
+    state.buffet.stands[index] = rankedRecipeIds[index] || null;
+  }
+  saveState();
+  showToast(`비싼 요리 ${rankedRecipeIds.length}개를 자동 배치했어요!`, 2.6);
+  updateHud();
+  renderMenu();
+  render();
+  return rankedRecipeIds;
+}
+
 function renderBuffetStandMenu() {
   const capacity = buffetStandCapacity();
   const index = Math.max(0, Math.min(capacity - 1, Number(state.ui.buffetStandIndex || 0)));
@@ -4134,7 +4237,7 @@ function renderBuffetStandMenu() {
     const recipe = getRecipe(route.recipeId);
     return `<article class="buffet-recipe-card"><img src="${routeRecipeIcon(route.recipeId)}" alt="" /><div><strong>${routeRecipeName(route.recipeId)}</strong><small>Lv.${owned.level} · 현재 가격 ${formatNumber(Math.round(recipeLevelPrice(recipe, owned)))}</small><small>뷔페 +${formatNumber(buffetRecipeYield(route.recipeId))}/분</small></div><button type="button" data-action="buffet-place" data-id="${route.recipeId}" ${selectedHere || usedElsewhere ? "disabled" : ""}>${selectedHere ? "진열 중" : usedElsewhere ? "다른 칸" : "진열"}</button></article>`;
   }).join("");
-  dom.menuContent.innerHTML = `<section class="buffet-menu-summary"><span>🍽️</span><div><strong>총 +${formatNumber(buffetPerMinute())}/분 · 진열 ${capacity}/${BUFFET_MAX_STAND_COUNT}</strong><small>${nextRequirement ? `요리 ${nextRequirement}개에 다음 진열대` : "모든 진열대 확장 완료"} · 수집 보너스 +${popularityBonus}%</small></div></section>
+  dom.menuContent.innerHTML = `<section class="buffet-menu-summary"><span>🍽️</span><div><strong>총 +${formatNumber(buffetPerMinute())}/분 · 진열 ${capacity}/${BUFFET_MAX_STAND_COUNT}</strong><small>${nextRequirement ? `요리 ${nextRequirement}개에 다음 진열대` : "모든 진열대 확장 완료"} · 수집 보너스 +${popularityBonus}%</small></div><button type="button" data-action="buffet-auto-place">비싼 요리 자동 배치</button></section>
     ${currentRecipeId ? `<button type="button" class="buffet-clear-button" data-action="buffet-clear">현재 진열 비우기</button>` : ""}
     ${recipeCards}`;
 }
@@ -4148,7 +4251,9 @@ function contestJudgePreference(key) {
   return {
     ...preference,
     key,
-    ingredientIds: (preference?.ingredientKeys || []).map((ingredientKey) => GAME_INGREDIENTS[ingredientKey]?.id).filter(Boolean),
+    ingredientIds: Object.values(GAME_INGREDIENTS)
+      .filter((ingredient) => ingredientCategoryKeys(ingredient.id).includes(key))
+      .map((ingredient) => ingredient.id),
   };
 }
 
@@ -4406,6 +4511,107 @@ function clueWithSubjectParticle(clue) {
   return `${clue}${hasFinalConsonant ? "이" : "가"}`;
 }
 
+function openIngredientDetail(ingredientId) {
+  if (ingredientAmount(ingredientId) <= 0 || !ingredientData(ingredientId)) return false;
+  ingredientDetailId = Number(ingredientId);
+  ingredientDiscardAmount = 1;
+  ingredientDiscardConfirming = false;
+  renderMenu();
+  return true;
+}
+
+function closeIngredientDetail() {
+  ingredientDetailId = null;
+  ingredientDiscardAmount = 1;
+  ingredientDiscardConfirming = false;
+  renderMenu();
+}
+
+function adjustIngredientDiscardAmount(delta) {
+  if (!ingredientDetailId) return false;
+  const owned = ingredientAmount(ingredientDetailId);
+  ingredientDiscardAmount = Math.max(1, Math.min(owned, ingredientDiscardAmount + Number(delta || 0)));
+  ingredientDiscardConfirming = false;
+  renderMenu();
+  return true;
+}
+
+function requestIngredientDiscard() {
+  if (!ingredientDetailId || ingredientAmount(ingredientDetailId) <= 0) return false;
+  ingredientDiscardAmount = Math.max(1, Math.min(ingredientAmount(ingredientDetailId), ingredientDiscardAmount));
+  ingredientDiscardConfirming = true;
+  renderMenu();
+  return true;
+}
+
+function cancelIngredientDiscard() {
+  ingredientDiscardConfirming = false;
+  renderMenu();
+}
+
+function confirmIngredientDiscard() {
+  const ingredientId = Number(ingredientDetailId);
+  const ingredient = ingredientData(ingredientId);
+  const owned = ingredientAmount(ingredientId);
+  if (!ingredient || owned <= 0) return closeIngredientDetail();
+  const amount = Math.max(1, Math.min(owned, ingredientDiscardAmount));
+  const remaining = owned - amount;
+  if (remaining > 0) state.crafting.ingredients[ingredientId] = remaining;
+  else delete state.crafting.ingredients[ingredientId];
+
+  let selectedKept = 0;
+  state.crafting.selected = state.crafting.selected.filter((selectedId) => {
+    if (Number(selectedId) !== ingredientId) return true;
+    selectedKept += 1;
+    return selectedKept <= remaining;
+  });
+  ingredientDetailId = null;
+  ingredientDiscardAmount = 1;
+  ingredientDiscardConfirming = false;
+  saveState();
+  updateHud();
+  renderMenu();
+  showToast(`${ingredient.ingredientName} ${formatNumber(amount)}개를 폐기했어요.`, 2.6);
+  return true;
+}
+
+function renderIngredientDetailModal() {
+  const ingredient = ingredientData(ingredientDetailId);
+  const owned = ingredientAmount(ingredientDetailId);
+  if (!ingredient || owned <= 0) {
+    ingredientDetailId = null;
+    ingredientDiscardConfirming = false;
+    return "";
+  }
+  ingredientDiscardAmount = Math.max(1, Math.min(owned, ingredientDiscardAmount));
+  const categories = ingredientCategoryDetails(ingredient.id);
+  const judges = ingredientContestJudges(ingredient.id);
+  const sources = ingredientSourceChicks(ingredient.id);
+  const sourceRows = sources.map((source) => `<article class="ingredient-source-row ${source.unlocked ? "is-ready" : "is-locked"}">
+    <img src="${source.icon}" alt=""/><div><strong>${source.customerName}</strong><small>${source.themeName} · ${source.slotLabel} ${Math.round(source.weight * 100)}%</small></div><b>${source.unlocked ? "등장 중" : "미등장"}</b>
+  </article>`).join("");
+  const alternativeSource = Number(ingredient.id) === Number(GAME_INGREDIENTS.water.id)
+    ? `<article class="ingredient-source-row is-ready"><span>🚰</span><div><strong>싱크대</strong><small>시간이 지나면 확정 획득</small></div><b>이용 가능</b></article>`
+    : `<p class="ingredient-source-empty">병아리 드랍 정보가 없어요. 상인이나 교환으로 얻을 수 있어요.</p>`;
+  const warning = ingredientDiscardConfirming ? `<div class="ingredient-discard-warning" role="alertdialog" aria-modal="true" aria-label="재료 폐기 확인">
+    <div><span>⚠️</span><strong>정말 폐기할까요?</strong><p><b>${ingredient.ingredientName} ${formatNumber(ingredientDiscardAmount)}개</b>를 버리면 다시 되돌릴 수 없어요.</p><div><button type="button" data-action="ingredient-discard-cancel">취소</button><button type="button" class="is-danger" data-action="ingredient-discard-confirm">버리기</button></div></div>
+  </div>` : "";
+  return `<div class="ingredient-detail-modal" role="presentation">
+    <button type="button" class="ingredient-detail-backdrop" data-action="close-ingredient-detail" aria-label="재료 상세 닫기"></button>
+    <section class="ingredient-detail-dialog" role="dialog" aria-modal="true" aria-label="${ingredient.ingredientName} 재료 상세">
+      <header><div class="ingredient-detail-heading"><span>${ingredient.emoji}</span><div><small>보유 ${formatNumber(owned)}개</small><h3>${ingredient.ingredientName}</h3></div></div><button type="button" data-action="close-ingredient-detail" aria-label="닫기">×</button></header>
+      <div class="ingredient-detail-body">
+        <div class="ingredient-category-list">${categories.map((category) => `<span>${category.label}</span>`).join("")}</div>
+        <p class="ingredient-description">${ingredientDescription(ingredient.id)}</p>
+        <section class="ingredient-contest-info"><strong>대회 선호</strong><div>${judges.length ? judges.map((judge) => `<span>${judge.icon} ${judge.name}</span>`).join("") : `<small>직접 선호하는 심사위원 없음</small>`}</div></section>
+        <section class="ingredient-source-section"><strong>어디서 얻나요?</strong><div>${sourceRows || alternativeSource}</div></section>
+      </div>
+      <footer class="ingredient-discard-footer"><div><strong>폐기 수량</strong><small>보유 ${formatNumber(owned)}개</small></div><div class="ingredient-discard-stepper"><button type="button" data-action="ingredient-discard-decrease" ${ingredientDiscardAmount <= 1 ? "disabled" : ""} aria-label="폐기 수량 줄이기">‹</button><b>${formatNumber(ingredientDiscardAmount)}</b><button type="button" data-action="ingredient-discard-increase" ${ingredientDiscardAmount >= owned ? "disabled" : ""} aria-label="폐기 수량 늘리기">›</button></div><button type="button" class="ingredient-discard-request" data-action="ingredient-discard-request">${formatNumber(ingredientDiscardAmount)}개 폐기하기</button></footer>
+      ${warning}
+    </section>
+  </div>`;
+}
+
 function recipeCatalogCard(route, index) {
   const owned = recipeData(route.recipeId);
   const requirements = craftIngredientRequirements(route);
@@ -4532,7 +4738,8 @@ function renderRecipeMenu() {
       <div class="ingredient-storage-track"><span style="width:${fillRatio}%"></span></div>
       <div class="ingredient-storage-actions"><small>남은 ${formatNumber(storage.remaining)}칸</small><button type="button" data-action="expand-ingredient-storage" ${state.resources.gems >= storage.expansionGemCost ? "" : "disabled"}><img src="assets/ui/currency/icon_currency_002.png" alt="보석"/><span>${storage.expansionGemCost}</span><strong>+${storage.expansionAmount}칸</strong></button></div>
     </section>
-      <div class="ingredient-inventory-grid">${ingredients.length ? ingredients.map((ingredient) => `<article class="ingredient-inventory-item" data-ingredient-id="${ingredient.id}"><span class="ingredient-emoji">${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><b>${formatNumber(ingredientAmount(ingredient.id))}개</b></article>`).join("") : `<p class="ingredient-storage-empty">냉장고가 비어 있어요.</p>`}</div>`;
+      <div class="ingredient-inventory-grid">${ingredients.length ? ingredients.map((ingredient) => `<button type="button" class="ingredient-inventory-item" data-action="ingredient-detail" data-id="${ingredient.id}" data-ingredient-id="${ingredient.id}" aria-label="${ingredient.ingredientName} 상세 보기, ${formatNumber(ingredientAmount(ingredient.id))}개 보유"><span class="ingredient-emoji">${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><b>${formatNumber(ingredientAmount(ingredient.id))}개</b></button>`).join("") : `<p class="ingredient-storage-empty">냉장고가 비어 있어요.</p>`}</div>
+      ${renderIngredientDetailModal()}`;
   }
 }
 
@@ -5229,6 +5436,11 @@ function renderGameToText() {
       maxStandCount: BUFFET_MAX_STAND_COUNT,
       standUnlockRequirements: [...BUFFET_STAND_UNLOCK_REQUIREMENTS],
       nextStandRecipeRequirement: nextBuffetStandRequirement(),
+      autoPlacement: {
+        available: isBuffetUnlocked(),
+        sort: "current-recipe-price-descending",
+        fillsAllUnlockedStands: true,
+      },
       stands: state.buffet.stands.slice(0, buffetStandCapacity()).map((recipeId, standIndex) => {
         const position = buffetStandPositions()[standIndex];
         return {
@@ -5519,6 +5731,24 @@ function renderGameToText() {
       })),
     },
     ingredientStorage: ingredientStorageStatus(),
+    ingredientDetail: ingredientDetailId ? {
+        ingredientId: Number(ingredientDetailId),
+        ingredientName: ingredientData(ingredientDetailId)?.ingredientName || null,
+        amount: ingredientAmount(ingredientDetailId),
+        categories: ingredientCategoryDetails(ingredientDetailId).map((category) => category.label),
+        contestJudges: ingredientContestJudges(ingredientDetailId).map((judge) => judge.name),
+        sources: ingredientSourceChicks(ingredientDetailId).map((source) => ({
+          customerId: source.customerId,
+          customerName: source.customerName,
+          themeName: source.themeName,
+          slotLabel: source.slotLabel,
+          weight: source.weight,
+          unlocked: source.unlocked,
+        })),
+        discardAmount: ingredientDiscardAmount,
+        confirmationVisible: ingredientDiscardConfirming,
+        irreversibleWarning: ingredientDiscardConfirming,
+      } : null,
     progression: {
       unlockedThemes: [...new Set(CORE_PROGRESSION.filter((route) => isThemeUnlocked(route.themeId)).map((route) => route.themeId))],
       activeThemeParts: { ...state.themes.activeByFacility },
@@ -5706,6 +5936,8 @@ dom.menuTabs.addEventListener("click", (event) => {
   if (!button) return;
   state.ui.tab = button.dataset.tab;
   state.ui.recipeIngredientPickerOpen = false;
+  ingredientDetailId = null;
+  ingredientDiscardConfirming = false;
   renderMenu();
 });
 dom.menuContent.addEventListener("click", (event) => {
@@ -5730,6 +5962,13 @@ dom.menuContent.addEventListener("click", (event) => {
   }
   if (button.dataset.action === "select-ingredient") addSelectedIngredient(id);
   if (button.dataset.action === "remove-selected-ingredient") removeSelectedIngredient(id);
+  if (button.dataset.action === "ingredient-detail") openIngredientDetail(id);
+  if (button.dataset.action === "close-ingredient-detail") closeIngredientDetail();
+  if (button.dataset.action === "ingredient-discard-decrease") adjustIngredientDiscardAmount(-1);
+  if (button.dataset.action === "ingredient-discard-increase") adjustIngredientDiscardAmount(1);
+  if (button.dataset.action === "ingredient-discard-request") requestIngredientDiscard();
+  if (button.dataset.action === "ingredient-discard-cancel") cancelIngredientDiscard();
+  if (button.dataset.action === "ingredient-discard-confirm") confirmIngredientDiscard();
   if (button.dataset.action === "clear-combination") { state.crafting.selected = []; mixingDropIndex = -1; saveState(); renderMenu(); }
   if (button.dataset.action === "discover-combination") {
     state.ui.recipeIngredientPickerOpen = false;
@@ -5775,6 +6014,7 @@ dom.menuContent.addEventListener("click", (event) => {
   if (button.dataset.action === "select-customer") { state.ui.collectionCustomerId = id; saveState(); renderMenu(); }
   if (button.dataset.action === "buffet-place") placeBuffetRecipe(id);
   if (button.dataset.action === "buffet-clear") clearBuffetStand();
+  if (button.dataset.action === "buffet-auto-place") autoPlaceBuffetRecipes();
   if (button.dataset.action === "contest-tier") { state.contest.selectedTierId = id; state.contest.result = null; saveState(); renderMenu(); }
   if (button.dataset.action === "contest-recipe") { state.contest.selectedRecipeId = id; saveState(); renderMenu(); }
   if (button.dataset.action === "contest-ingredient") { state.contest.selectedIngredientId = id; saveState(); renderMenu(); }
@@ -5785,6 +6025,14 @@ dom.recipeReveal.addEventListener("click", (event) => {
   if (event.target === dom.recipeReveal || event.target.closest('[data-action="dismiss-recipe-reveal"]')) dismissRecipeReveal();
 });
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && ingredientDiscardConfirming) {
+    cancelIngredientDiscard();
+    return;
+  }
+  if (event.key === "Escape" && ingredientDetailId) {
+    closeIngredientDetail();
+    return;
+  }
   if (event.key === "Escape" && state.ui.screen === "recipe" && state.ui.recipeIngredientPickerOpen) {
     state.ui.recipeIngredientPickerOpen = false;
     renderMenu();
