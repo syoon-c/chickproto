@@ -60,7 +60,7 @@ try {
       throw new Error(`레시피 ${recipeId} 저장 레벨이 보존되지 않았습니다: ${JSON.stringify(state.recipes.levels)}`);
     }
   }
-  if (state.recipes.owned !== 8 || state.recipes.catalogTotal !== 50) {
+  if (state.recipes.owned !== 8 || state.recipes.catalogTotal !== 51) {
     throw new Error(`레시피 저장 마이그레이션 개수가 다릅니다: ${JSON.stringify(state.recipes)}`);
   }
   if (state.guests[0]?.recipeId !== 14 || state.ordersQueued !== 1 || state.cooking[0]?.recipe !== "새싹전") {

@@ -27,7 +27,7 @@ try {
     .filter((ingredient) => ["병아리콩", "물", "나뭇잎"].includes(ingredient.name))
     .map((ingredient) => [ingredient.name, ingredient.id])));
   let current = await state();
-  if (current.recipes.catalogTotal !== 50
+  if (current.recipes.catalogTotal !== 51
     || current.recipes.owned !== 1
     || current.recipes.levels[1] !== 1
     || current.recipes.prices[1] !== 35
@@ -100,7 +100,7 @@ try {
   }
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "02-boiled-chickpeas-upgrade.png") });
   if (errors.length) throw new Error(`브라우저 오류: ${errors.join(" | ")}`);
-  console.log("CHICKPEA_STARTER_OK recipes=50 base=삶은병아리콩 ingredients=병아리콩1+물1 upgrade=1->2");
+  console.log("CHICKPEA_STARTER_OK recipes=51 base=삶은병아리콩 ingredients=병아리콩1+물1 upgrade=1->2");
 } finally {
   await browser.close();
 }

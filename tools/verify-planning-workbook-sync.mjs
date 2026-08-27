@@ -20,7 +20,7 @@ const {
 
 assert.equal(Object.keys(THEME_NAMES).length, 26, "기획 테마는 26개여야 합니다.");
 assert.equal(CORE_PROGRESSION.length, 78, "테마당 병아리 3마리여야 합니다.");
-assert.equal(RECIPE_PROGRESSION.length, 50, "프로토타입 테스트 레시피는 50개여야 합니다.");
+assert.equal(RECIPE_PROGRESSION.length, 51, "프로토타입 테스트 레시피는 51개여야 합니다.");
 assert.deepEqual({ ...PROTOTYPE_RECIPE_PRICE_OVERRIDES }, { 1: 35 }, "기존 레시피 가격 보정값이 남아 있습니다.");
 
 const expectedThemeOrder = [
@@ -71,7 +71,7 @@ const expectedDropOrder = [
   [["나뭇잎"], ["열매", "도토리"], ["벌레", "시나몬"]],
   [["양파", "아보카도"], ["밀가루", "새싹"], ["쌀"]],
   [["밀가루", "후추"], ["소금", "옥수수"], ["트러플", "생크림"]],
-  [["생강", "꿀"], ["사과", "복숭아"], ["식초", "요거트"]],
+  [["생강", "꿀"], ["사과", "복숭아"], ["요거트", "식초"]],
   [["설탕", "씨앗"], ["꿀"], ["체리", "딸기"]],
   [["김치", "파"], ["간장", "된장"], ["계란", "식용유"]],
   [["양배추", "파"], ["가지", "계란"], ["오이", "마늘"]],
@@ -143,7 +143,7 @@ const expectedRecipeOrder = [
   "고기쌈", "도토리묵", "상큼 나뭇잎 샐러드", "열매꼬치구이", "벌레 파이", "고단백 식품", "벌레먹은 나뭇잎",
   "맑은 양파 수프", "아보카도 병아리콩 샐러드", "새싹전", "쌀밥", "병아리콩 밥",
   "후추 스테이크", "구운 옥수수", "바삭 벌레구이", "콘스프", "트러플 크림 리조또",
-  "계피차", "생강차", "사과 생강차", "시나몬 사과조림", "복숭아 요거트",
+  "계피차", "생강차", "사과 생강차", "시나몬 사과조림", "복숭아 요거트", "새콤 양파절임",
   "시나몬 롤", "진저브레드", "해바라기씨 파이", "딸기 생크림 케이크", "체리 사탕", "과일 가족 모임",
   "김치전", "파김치", "된장국", "불고기", "계란볶음밥", "김치볶음밥",
   "양배추 딤섬", "가지 소고기 덮밥", "씨앗 오이 샐러드", "마늘 김치볶음", "마늘 육회",
@@ -152,7 +152,10 @@ const expectedRecipeOrder = [
 assert.equal(recipeByName.has("샐러드"), false, "기존 샐러드가 기획 레시피에 섞여 있습니다.");
 assert.equal(GAME_RECIPE_CATALOG[0].recipeId, 1);
 assert.equal(GAME_RECIPE_CATALOG[0].recipeName, "삶은 병아리콩");
-assert.deepEqual(Array.from(GAME_RECIPE_CATALOG.map((recipe) => recipe.recipeId)), Array.from({ length: 50 }, (_, index) => index + 1));
+assert.deepEqual(
+  Array.from(GAME_RECIPE_CATALOG.map((recipe) => recipe.recipeId)),
+  [...Array.from({ length: 27 }, (_, index) => index + 1), 51, ...Array.from({ length: 23 }, (_, index) => index + 28)],
+);
 assert.deepEqual(Array.from(GAME_RECIPE_CATALOG, (recipe) => recipe.recipeName), expectedRecipeOrder, "레시피 순서가 테마별 테스트 흐름과 다릅니다.");
 assert.deepEqual(Array.from(recipeByName.get("삶은 병아리콩").ingredientNames), ["물", "병아리콩"]);
 assert.deepEqual(Array.from(recipeByName.get("맑은 양파 수프").ingredientNames), ["물", "양파"]);
@@ -163,8 +166,9 @@ assert.deepEqual(Array.from(recipeByName.get("가지 소고기 덮밥").ingredie
 assert.deepEqual(Array.from(recipeByName.get("씨앗 오이 샐러드").ingredientNames), ["씨앗", "오이", "나뭇잎"]);
 assert.deepEqual(Array.from(recipeByName.get("치즈 간장계란밥").ingredientNames), ["쌀", "계란", "간장", "치즈"]);
 assert.deepEqual(Array.from(recipeByName.get("김치볶음밥").ingredientNames), ["김치", "식용유", "쌀"]);
+assert.deepEqual(Array.from(recipeByName.get("새콤 양파절임").ingredientNames), ["양파", "식초"]);
 for (const removedRecipe of ["과카몰리", "오므라이스", "라따뚜이", "어향가지"]) {
-  assert.equal(recipeByName.has(removedRecipe), false, `${removedRecipe}은(는) 50개 테스트 목록에서 제외되어야 합니다.`);
+  assert.equal(recipeByName.has(removedRecipe), false, `${removedRecipe}은(는) 51개 테스트 목록에서 제외되어야 합니다.`);
 }
 
 const obtainableNames = new Set([

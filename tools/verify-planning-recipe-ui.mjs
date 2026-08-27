@@ -14,7 +14,7 @@ const expectedRecipeOrder = [
   "고기쌈", "도토리묵", "상큼 나뭇잎 샐러드", "열매꼬치구이", "벌레 파이", "고단백 식품", "벌레먹은 나뭇잎",
   "맑은 양파 수프", "아보카도 병아리콩 샐러드", "새싹전", "쌀밥", "병아리콩 밥",
   "후추 스테이크", "구운 옥수수", "바삭 벌레구이", "콘스프", "트러플 크림 리조또",
-  "계피차", "생강차", "사과 생강차", "시나몬 사과조림", "복숭아 요거트",
+  "계피차", "생강차", "사과 생강차", "시나몬 사과조림", "복숭아 요거트", "새콤 양파절임",
   "시나몬 롤", "진저브레드", "해바라기씨 파이", "딸기 생크림 케이크", "체리 사탕", "과일 가족 모임",
   "김치전", "파김치", "된장국", "불고기", "계란볶음밥", "김치볶음밥",
   "양배추 딤섬", "가지 소고기 덮밥", "씨앗 오이 샐러드", "마늘 김치볶음", "마늘 육회",
@@ -53,9 +53,9 @@ try {
   await page.waitForFunction(() => [...document.images].every((image) => image.complete));
 
   const cards = page.locator(".recipe-catalog-card");
-  if (await cards.count() !== 50) throw new Error(`요리 연구 카드 수가 50개가 아닙니다: ${await cards.count()}`);
+  if (await cards.count() !== 51) throw new Error(`요리 연구 카드 수가 51개가 아닙니다: ${await cards.count()}`);
   const text = await page.locator("#menu-content").innerText();
-  for (const name of ["삶은 병아리콩", "아보카도 병아리콩 샐러드", "김치볶음밥", "양배추 딤섬", "연어초밥"]) {
+  for (const name of ["삶은 병아리콩", "아보카도 병아리콩 샐러드", "새콤 양파절임", "김치볶음밥", "양배추 딤섬", "연어초밥"]) {
     if (!text.includes(name)) throw new Error(`요리 연구 목록에 ${name}이(가) 없습니다.`);
   }
   const recipeNames = await page.locator(".recipe-catalog-copy > strong").allTextContents();
@@ -63,7 +63,7 @@ try {
     throw new Error(`요리 연구 카드 순서가 테마별 테스트 흐름과 다릅니다: ${JSON.stringify(recipeNames)}`);
   }
   const cardNumbers = await cards.locator(".recipe-catalog-copy > small:first-child").allTextContents();
-  if (!cardNumbers[0]?.startsWith("NO.01") || !cardNumbers.at(-1)?.startsWith("NO.50")) {
+  if (!cardNumbers[0]?.startsWith("NO.01") || !cardNumbers.at(-1)?.startsWith("NO.51")) {
     throw new Error(`요리 연구 카드 번호가 잘못되었습니다: ${cardNumbers[0]} ~ ${cardNumbers.at(-1)}`);
   }
   if (recipeNames.includes("샐러드")) throw new Error("기존 샐러드가 요리 연구 목록에 남아 있습니다.");
@@ -72,12 +72,12 @@ try {
     .map((image) => image.getAttribute("src")));
   if (brokenImages.length) throw new Error(`요리 아이콘이 깨졌습니다: ${brokenImages.join(", ")}`);
   const state = JSON.parse(await page.evaluate(() => window.render_game_to_text()));
-  if (state.recipes.catalogTotal !== 50 || state.recipes.owned !== 50) {
+  if (state.recipes.catalogTotal !== 51 || state.recipes.owned !== 51) {
     throw new Error(`요리 연구 상태가 일치하지 않습니다: ${JSON.stringify({ total: state.recipes.catalogTotal, owned: state.recipes.owned })}`);
   }
   await page.locator("#menu-screen").screenshot({ path: path.join(out, "planning-recipe-catalog.png") });
   if (errors.length) throw new Error(`브라우저 오류: ${errors.join(" | ")}`);
-  console.log("PLANNING_RECIPE_UI_OK recipes=50 owned=50 icons=ok");
+  console.log("PLANNING_RECIPE_UI_OK recipes=51 owned=51 icons=ok");
 } finally {
   await browser.close();
 }

@@ -2060,3 +2060,25 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 이번 50종 테스트 범위에서 `과카몰리`, `오므라이스`, `라따뚜이`, `어향가지`는 제외했다. 획득 경로가 없는 재료를 요구하는 레시피는 0개다.
 - 저장 버전을 24로 올리고 기존 레시피 ID를 같은 이름의 새 ID로 이전했다. 보유 레벨, 진행 중 손님·주문·조리, 뷔페 진열, 대회 선택·결과, 연구 이력·힌트까지 함께 마이그레이션하며 제외된 레시피 참조만 안전하게 정리한다.
 - 검증: `THEME_RECIPE_PACING_OK distribution=5/7/5/5/5/6/6/5/6 total=50`, `RECIPE_CATALOG_V24_MIGRATION_OK`, `CHICKPEA_STARTER_OK recipes=50`, `PLANNING_RECIPE_UI_OK recipes=50 owned=50`, 정적 문법 검사 통과. 공식 웹게임 클라이언트에서 `catalogTotal=50`, `owned=1`, 카드 순서 `1~50`, 콘솔 오류 없음 확인. 화면: `output/theme-recipe-pacing-official/shot-0.png`, `.tmp/web-game-sync/planning-recipe-catalog.png`.
+
+## 2026-08-27 요거트·식초 드랍 비중 및 식초 소비처 보완
+
+- 복숭아 천사 병아리의 재료 순서를 `요거트, 식초`로 바꿔 재료 드랍 성공 시 요거트 70%, 식초 30%가 적용되도록 했다.
+- 그린핑크 테마에서 식초를 얻은 직후 발견할 수 있는 `새콤 양파절임(양파 + 식초)`을 추가했다. 기존 레시피 ID와 저장 데이터는 그대로 유지하고 신규 ID 51을 사용했다.
+- 요리 연구 목록은 신규 요리를 해당 발견 시점인 `복숭아 요거트` 다음에 표시하며, 전체 테스트 레시피는 51종이 됐다.
+- 600회 표본에서 전체 드랍 82회 중 요거트 58회, 식초 24회(70.7% / 29.3%)였고 모든 성공 드랍이 한 종류 1개인지 확인했다.
+- 양파와 식초를 보울에 넣어 `새콤 양파절임`이 발견되고 두 재료가 소비되는 전체 연구 흐름을 확인했다. 화면: `output/yogurt-vinegar-balance/01-onion-vinegar-in-bowl.png`, `02-onion-pickle-discovered.png`.
+- 검증: `YOGURT_VINEGAR_RECIPE_OK`, `PLANNING_RECIPE_UI_OK recipes=51 owned=51`, `CHICKPEA_STARTER_OK recipes=51`, `RECIPE_CATALOG_V24_MIGRATION_OK`, `THEME_RECIPE_PACING_OK distribution=5/7/5/5/6/6/6/5/6 total=51`, 공식 웹게임 클라이언트 실행 및 화면 확인 완료.
+
+## 2026-08-27 아이디어 에너지와 단계별 보석 충전
+
+- 기존 전구 아이콘의 아이디어 재화를 요리 연구 전용 에너지로 변경했다.
+- 아이디어 최대치는 20이며, 30분마다 1개씩 회복되고 오프라인 경과 시간도 반영된다.
+- 기존 저장 데이터에는 아이디어 20개를 지급해 이전 데이터 때문에 연구가 막히지 않도록 했다.
+- 수동 요리 연구, 자동 요리 연구, 괴식 제작, 발견 요리 레벨업마다 아이디어 1개를 소비한다. 손님 주문용 조리는 소비하지 않는다.
+- 아이디어가 없을 때는 재료가 먼저 사라지지 않도록 연구 시작 전에 아이디어 보유량을 검사한다.
+- 보석 충전은 1회당 아이디어 10개이며, 하루 충전 비용은 10개 → 50개 → 100개 → 200개 순서로 증가한다. 네 번째 이후에는 200개를 유지하고 날짜가 바뀌면 10개부터 다시 시작한다.
+- 상단 HUD와 요리 연구 패널에 현재 아이디어, 다음 회복 시간, 충전 비용을 표시했다. 최대치에서는 충전 버튼에 `가득 참`만 표시한다.
+- 보상 및 디버그 추가로 아이디어가 최대치 20을 넘지 않도록 통일했다.
+- `node tools/verify-idea-energy.mjs`, `node tools/verify-debug-panel.mjs`, `node tools/verify-chickpea-starter.mjs`, `node tools/verify-recipe-catalog-v24-migration.mjs`, `node tools/verify-planning-workbook-sync.mjs`, `node tools/verify-theme-recipe-pacing.mjs`, `node tools/verify-planning-recipe-ui.mjs`, `node tools/verify-yogurt-vinegar-recipe.mjs` 검증을 통과했다.
+- 최종 화면은 `output/idea-energy/01-full-energy-panel.png`, `output/idea-energy/02-fourth-refill-next-200.png`, `output/idea-energy-official-final/shot-0.png`에서 확인했다.

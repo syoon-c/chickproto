@@ -34,6 +34,8 @@ const SYSTEM_ENABLED = Object.freeze({ missions: false, staff: false });
 const dom = {
   acorns: document.querySelector("#acorn-count"),
   gems: document.querySelector("#gem-count"),
+  ideas: document.querySelector("#idea-count"),
+  ideaTimer: document.querySelector("#idea-timer"),
   promoButton: document.querySelector("#promotion-btn"),
   specialPromoButton: document.querySelector("#special-promotion-btn"),
   specialPromoLabel: document.querySelector("#special-promotion-label"),
@@ -129,6 +131,11 @@ const CHEF_STATION_OFFSET_Y = 74;
 const CHEF_MOVE_SPEED = 520;
 let chefPosition = { ...CHEF_HOME_POSITION };
 const RECIPE_RESEARCH_DURATION = 2.4;
+const IDEA_ENERGY_MAX = 20;
+const IDEA_ENERGY_REGEN_SECONDS = 30 * 60;
+const IDEA_RESEARCH_COST = 1;
+const IDEA_REFILL_AMOUNT = 10;
+const IDEA_REFILL_GEM_COSTS = Object.freeze([10, 50, 100, 200]);
 const THEME_COMPLETION_MENU_PRICE_BONUS = .2;
 const SINK_WATER_COOLDOWN_SECONDS = 8;
 const CHICK_ICON_MAX_INDEX = 108;
@@ -425,8 +432,14 @@ function createInitialState() {
     resources: {
       acorns: initialAcorns(),
       gems: 0,
-      ideas: 0,
+      ideas: IDEA_ENERGY_MAX,
       stickers: Number(tables.general.StaffStickerDaily || 5),
+    },
+    ideaEnergy: {
+      regenElapsed: 0,
+      lastUpdatedAt: Date.now(),
+      dayKey: localDateKey(),
+      refillsToday: 0,
     },
     installed: [],
     ownedRecipes: { 1: { level: 1, stack: 0, codexClaimed: false } },
@@ -714,12 +727,14 @@ function loadState() {
     const contestTierIds = new Set(CONTEST_TIERS.map((tier) => tier.id));
     const contestRecipeIds = new Set(Object.keys(ownedRecipes).map(Number));
     const contestIngredientIds = new Set(Object.keys(normalizedIngredients).map(Number));
+    const migratedIdeaEnergy = normalizeIdeaEnergy(parsed.ideaEnergy, parsed.resources?.ideas);
     return {
       ...defaults,
       ...restaurantSave,
       version: SAVE_VERSION,
       installed: [...new Set(migratedInstalled)].sort((a, b) => a - b),
-      resources: { ...defaults.resources, ...parsed.resources },
+      resources: { ...defaults.resources, ...parsed.resources, ideas: migratedIdeaEnergy.amount },
+      ideaEnergy: migratedIdeaEnergy.meta,
       tipbox: Math.max(0, Math.floor(Number(parsed.tipbox || 0))),
       tipboxCapacity: Math.max(TIPBOX_INITIAL_CAPACITY, Math.floor(Number(parsed.tipboxCapacity || 0)), Math.ceil(Math.max(0, Number(parsed.tipbox || 0)) / TIPBOX_EXPANSION_AMOUNT) * TIPBOX_EXPANSION_AMOUNT),
       ownedRecipes,
@@ -829,6 +844,7 @@ function saveState() {
     if (state?.specialPromotion) state.specialPromotion.lastUpdatedAt = Date.now();
     if (state?.specialVisitor) state.specialVisitor.lastUpdatedAt = Date.now();
     if (state?.buffet) state.buffet.lastUpdatedAt = Date.now();
+    if (state?.ideaEnergy) state.ideaEnergy.lastUpdatedAt = Date.now();
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   } catch { /* storage is optional */ }
 }
@@ -867,6 +883,107 @@ function recipeData(id) {
 function localDateKey(date = new Date()) {
   const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
   return localTime.toISOString().slice(0, 10);
+}
+
+function normalizeIdeaEnergy(savedEnergy, savedAmount, now = Date.now()) {
+  const hasEnergySave = Boolean(savedEnergy && typeof savedEnergy === "object");
+  let amount = hasEnergySave
+    ? Math.max(0, Math.min(IDEA_ENERGY_MAX, Math.floor(Number(savedAmount || 0))))
+    : IDEA_ENERGY_MAX;
+  let regenElapsed = hasEnergySave ? Math.max(0, Number(savedEnergy.regenElapsed || 0)) : 0;
+  if (hasEnergySave && amount < IDEA_ENERGY_MAX) {
+    regenElapsed += Math.max(0, (now - Number(savedEnergy.lastUpdatedAt || now)) / 1000);
+    const restored = Math.min(IDEA_ENERGY_MAX - amount, Math.floor(regenElapsed / IDEA_ENERGY_REGEN_SECONDS));
+    amount += restored;
+    regenElapsed -= restored * IDEA_ENERGY_REGEN_SECONDS;
+  }
+  if (amount >= IDEA_ENERGY_MAX) regenElapsed = 0;
+  const today = localDateKey(new Date(now));
+  return {
+    amount,
+    meta: {
+      regenElapsed,
+      lastUpdatedAt: now,
+      dayKey: today,
+      refillsToday: savedEnergy?.dayKey === today
+        ? Math.max(0, Math.floor(Number(savedEnergy.refillsToday || 0)))
+        : 0,
+    },
+  };
+}
+
+function ensureIdeaRefillDailyReset() {
+  const today = localDateKey();
+  if (state.ideaEnergy.dayKey === today) return false;
+  state.ideaEnergy.dayKey = today;
+  state.ideaEnergy.refillsToday = 0;
+  saveState();
+  return true;
+}
+
+function ideaRefillGemCost() {
+  ensureIdeaRefillDailyReset();
+  const index = Math.min(IDEA_REFILL_GEM_COSTS.length - 1, Math.max(0, Number(state.ideaEnergy.refillsToday || 0)));
+  return IDEA_REFILL_GEM_COSTS[index];
+}
+
+function ideaEnergyNextIn() {
+  if (Number(state.resources.ideas || 0) >= IDEA_ENERGY_MAX) return 0;
+  return Math.max(1, Math.ceil(IDEA_ENERGY_REGEN_SECONDS - Number(state.ideaEnergy.regenElapsed || 0)));
+}
+
+function hasIdeaEnergy(cost = IDEA_RESEARCH_COST) {
+  return Number(state.resources.ideas || 0) >= Number(cost || 0);
+}
+
+function spendIdeaEnergy(cost = IDEA_RESEARCH_COST) {
+  const amount = Math.max(0, Math.floor(Number(cost || 0)));
+  if (!hasIdeaEnergy(amount)) {
+    showToast(`아이디어가 부족해요. ${formatPromotionTimer(ideaEnergyNextIn())} 후 1개 회복!`);
+    return false;
+  }
+  state.resources.ideas = Math.max(0, Number(state.resources.ideas || 0) - amount);
+  return true;
+}
+
+function rechargeIdeaEnergy() {
+  ensureIdeaRefillDailyReset();
+  if (state.resources.ideas >= IDEA_ENERGY_MAX) {
+    showToast("아이디어가 이미 가득 찼어요.");
+    return false;
+  }
+  const gemCost = ideaRefillGemCost();
+  if (state.resources.gems < gemCost) {
+    showToast(`보석 ${gemCost}개가 필요해요.`);
+    return false;
+  }
+  state.resources.gems -= gemCost;
+  state.resources.ideas = Math.min(IDEA_ENERGY_MAX, Number(state.resources.ideas || 0) + IDEA_REFILL_AMOUNT);
+  state.ideaEnergy.refillsToday += 1;
+  if (state.resources.ideas >= IDEA_ENERGY_MAX) state.ideaEnergy.regenElapsed = 0;
+  showToast(`아이디어 +${IDEA_REFILL_AMOUNT} 충전!`);
+  saveState();
+  updateHud();
+  renderMenu();
+  return true;
+}
+
+function updateIdeaEnergy(dt) {
+  ensureIdeaRefillDailyReset();
+  if (state.resources.ideas >= IDEA_ENERGY_MAX) {
+    state.resources.ideas = IDEA_ENERGY_MAX;
+    state.ideaEnergy.regenElapsed = 0;
+    return;
+  }
+  state.ideaEnergy.regenElapsed += Math.max(0, Number(dt) || 0);
+  const restored = Math.min(IDEA_ENERGY_MAX - state.resources.ideas,
+    Math.floor(state.ideaEnergy.regenElapsed / IDEA_ENERGY_REGEN_SECONDS));
+  if (restored <= 0) return;
+  state.resources.ideas += restored;
+  state.ideaEnergy.regenElapsed -= restored * IDEA_ENERGY_REGEN_SECONDS;
+  if (state.resources.ideas >= IDEA_ENERGY_MAX) state.ideaEnergy.regenElapsed = 0;
+  saveState();
+  if (!dom.menuScreen.hidden && state.ui.screen === "recipe") renderMenu();
 }
 
 function knowhowSkill(id) {
@@ -1376,7 +1493,9 @@ function grantReward(rewardId) {
   const rows = rewardRows(rewardId);
   rows.forEach((row) => {
     const key = RESOURCE_BY_ITEM[row.assetId];
-    if (key) state.resources[key] = (state.resources[key] || 0) + Number(row.assetCount || 0);
+    if (key === "ideas") state.resources.ideas = Math.min(IDEA_ENERGY_MAX,
+      Number(state.resources.ideas || 0) + Number(row.assetCount || 0));
+    else if (key) state.resources[key] = (state.resources[key] || 0) + Number(row.assetCount || 0);
     else {
       state.inventory ||= {};
       state.inventory[row.assetId] = (state.inventory[row.assetId] || 0) + Number(row.assetCount || 0);
@@ -2637,7 +2756,13 @@ function startRecipeResearch(recipeId, automatic, ingredientIds) {
   const route = recipeId == null ? null : progressionForRecipe(recipeId);
   if (recipeId != null && (!route || !canCraftRecipe(recipeId))) return false;
   const consumedIngredients = ingredientIds.map(Number).filter((id) => ingredientData(id));
-  if (consumedIngredients.length < 2 || !consumeResearchIngredients(consumedIngredients)) return false;
+  if (consumedIngredients.length < 2) return false;
+  if (!hasIdeaEnergy()) {
+    showToast(`아이디어가 부족해요. ${formatPromotionTimer(ideaEnergyNextIn())} 후 1개 회복!`);
+    return false;
+  }
+  if (!consumeResearchIngredients(consumedIngredients)) return false;
+  spendIdeaEnergy();
   state.crafting.selected = [];
   mixingDropIndex = -1;
   state.metrics.recipeResearchAttempts += 1;
@@ -3317,6 +3442,7 @@ function updateKnowhowAutomation(dt) {
 
 function update(dt) {
   state.clock += dt;
+  updateIdeaEnergy(dt);
   updateChefMovement(dt);
   if (toastTimer > 0) {
     toastTimer -= dt;
@@ -3876,8 +4002,13 @@ function updateHud() {
   if (!state) return;
   ensureDailyReset();
   ensureContestDailyReset();
+  ensureIdeaRefillDailyReset();
   dom.acorns.textContent = formatNumber(state.resources.acorns);
   dom.gems.textContent = formatNumber(state.resources.gems);
+  dom.ideas.textContent = `${formatNumber(state.resources.ideas)}/${IDEA_ENERGY_MAX}`;
+  dom.ideaTimer.textContent = state.resources.ideas >= IDEA_ENERGY_MAX
+    ? "가득 참"
+    : `+1 ${formatPromotionTimer(ideaEnergyNextIn())}`;
   if (state.ui.area === "buffet" && !isBuffetUnlocked()) state.ui.area = "restaurant";
   const buffetArea = state.ui.area === "buffet";
   dom.areaPrevButton.hidden = !buffetArea;
@@ -4075,7 +4206,7 @@ function renderTabs(items) {
 function researchRequirement() {
   const missing = [8, 7, 6].filter((type) => installedRows(type).length === 0).map((type) => FACILITY_META[type].name);
   if (missing.length) return `${missing.join(" · ")} 설치 필요`;
-  const cost = Number(tables.recipeSetting.ResearchCost || 5);
+  const cost = IDEA_RESEARCH_COST;
   if (state.resources.ideas < cost) return `아이디어 ${cost - state.resources.ideas} 부족`;
   return "연구 준비 완료";
 }
@@ -4086,12 +4217,12 @@ function canResearch() {
     return Boolean(recipe);
   });
   return hasTarget && [8, 7, 6].every((type) => installedRows(type).length > 0)
-    && state.resources.ideas >= Number(tables.recipeSetting.ResearchCost || 5);
+    && state.resources.ideas >= IDEA_RESEARCH_COST;
 }
 
 function doResearch() {
   if (!canResearch()) return showToast(researchRequirement());
-  const cost = Number(tables.recipeSetting.ResearchCost || 5);
+  const cost = IDEA_RESEARCH_COST;
   state.resources.ideas -= cost;
   const pity = [...tables.recipeResearch]
     .filter((row) => state.totalResearchCount + 1 >= row.pityCount && !recipeData(row.recipeId))
@@ -4135,7 +4266,7 @@ function upgradeRecipe(recipeId) {
   renderMenu();
 }
 
-function canManualUpgradeRecipe(recipeId) {
+function hasManualUpgradeIngredients(recipeId) {
   const owned = recipeData(recipeId);
   const recipe = getRecipe(recipeId);
   const route = progressionForRecipe(recipeId);
@@ -4143,10 +4274,15 @@ function canManualUpgradeRecipe(recipeId) {
     && craftIngredientRequirements(route).every((requirement) => ingredientAmount(requirement.ingredientId) >= requirement.count));
 }
 
+function canManualUpgradeRecipe(recipeId) {
+  return hasManualUpgradeIngredients(recipeId) && hasIdeaEnergy();
+}
+
 function manualUpgradeRecipe(recipeId) {
   if (!canManualUpgradeRecipe(recipeId)) return false;
   const ingredientIds = expandedCraftIngredientIds(progressionForRecipe(recipeId));
   if (!consumeResearchIngredients(ingredientIds)) return false;
+  spendIdeaEnergy();
   state.metrics.recipeResearchAttempts += 1;
   grantKnowhowXp(KNOWHOW_RESEARCH_XP);
   completeRecipeCraft(recipeId, false);
@@ -4619,6 +4755,7 @@ function recipeCatalogCard(route, index) {
     const recipe = getRecipe(route.recipeId);
     const currentPrice = Math.round(recipeLevelPrice(recipe, owned));
     const canUpgrade = canManualUpgradeRecipe(route.recipeId);
+    const hasUpgradeMaterials = hasManualUpgradeIngredients(route.recipeId);
     const formula = requirements.map((requirement) => {
       const amount = ingredientAmount(requirement.ingredientId);
       return `<span class="${amount >= requirement.count ? "is-ready" : ""}" title="${requirement.name} ${amount}/${requirement.count}">${requirement.emoji}<b>${amount}/${requirement.count}</b></span>`;
@@ -4626,7 +4763,7 @@ function recipeCatalogCard(route, index) {
     return `<article class="recipe-catalog-card is-discovered" data-recipe-id="${route.recipeId}">
       <div class="recipe-catalog-icon"><img src="${routeRecipeIcon(route.recipeId)}" alt="" /></div>
       <div class="recipe-catalog-copy"><small>NO.${String(index + 1).padStart(2, "0")} · Lv.${owned.level}</small><strong>${routeRecipeName(route.recipeId)}</strong><small class="recipe-catalog-price">가격 ${formatNumber(currentPrice)} · 다음 +${Math.round(RECIPE_LEVEL_PRICE_BONUS * 100)}%</small><div class="recipe-catalog-formula">${formula}</div></div>
-      <div class="recipe-catalog-actions">${!owned.codexClaimed ? `<button type="button" class="is-secondary" data-action="codex" data-id="${route.recipeId}">도감 보상</button>` : ""}<button type="button" data-action="manual-upgrade" data-id="${route.recipeId}" ${canUpgrade ? "" : "disabled"}>${canUpgrade ? "레벨업" : "재료 부족"}</button></div>
+      <div class="recipe-catalog-actions">${!owned.codexClaimed ? `<button type="button" class="is-secondary" data-action="codex" data-id="${route.recipeId}">도감 보상</button>` : ""}<button type="button" data-action="manual-upgrade" data-id="${route.recipeId}" ${canUpgrade ? "" : "disabled"}>${canUpgrade ? "레벨업" : hasUpgradeMaterials ? "아이디어 부족" : "재료 부족"}</button></div>
     </article>`;
   }
   const hintCounts = new Map();
@@ -4664,6 +4801,16 @@ function renderRecipeMenu() {
       .filter((ingredient) => ingredientAmount(ingredient.id) > 0 || selectedIngredientCount(ingredient.id) > 0);
     const capacity = recipeCombinationCapacity();
     const selected = state.crafting.selected.map((id) => ingredientData(id)).filter(Boolean);
+    const ideaAmount = Math.max(0, Number(state.resources.ideas || 0));
+    const ideaFull = ideaAmount >= IDEA_ENERGY_MAX;
+    const ideaRefillCost = ideaRefillGemCost();
+    const ideaRefillGain = Math.min(IDEA_REFILL_AMOUNT, IDEA_ENERGY_MAX - ideaAmount);
+    const ideaEnergyPanel = `<div class="idea-energy-bar">
+      <div class="idea-energy-status"><img src="assets/ui/currency/icon_currency_003.png" alt=""/><span><strong>아이디어 ${formatNumber(ideaAmount)}/${IDEA_ENERGY_MAX}</strong><small>${ideaFull ? "가득 참" : `다음 +1 · ${formatPromotionTimer(ideaEnergyNextIn())}`}</small></span></div>
+      <button type="button" data-action="recharge-ideas" ${ideaFull ? "disabled" : ""}>${ideaFull
+        ? `<strong>가득 참</strong>`
+        : `<img src="assets/ui/currency/icon_currency_002.png" alt="보석"/><span>${formatNumber(ideaRefillCost)}</span><strong>+${ideaRefillGain}</strong>`}</button>
+    </div>`;
     const bowlPositions = [
       { x: 34, y: 45, r: -9 }, { x: 52, y: 34, r: 7 }, { x: 68, y: 49, r: -4 },
       { x: 43, y: 59, r: 5 }, { x: 59, y: 61, r: -7 }, { x: 76, y: 37, r: 8 },
@@ -4691,7 +4838,7 @@ function renderRecipeMenu() {
           const available = ingredientAmount(ingredient.id) - selectedCount;
           return `<button type="button" data-action="select-ingredient" data-id="${ingredient.id}" ${available > 0 && selected.length < capacity ? "" : "disabled"}><span>${ingredient.emoji}</span><strong>${ingredient.name}</strong><small>${available}/${ingredientAmount(ingredient.id)}</small></button>`;
         }).join("") : `<p>냉장고에 재료가 없어요.</p>`}</div>
-        <button type="button" class="recipe-picker-mix" data-action="discover-combination" ${selected.length >= 2 && !recipeResearch ? "" : "disabled"}><span aria-hidden="true">🥄</span> ${selected.length >= 2 ? `바로 섞기 · ${selected.length}/${capacity}` : `재료를 2개 이상 담아주세요 · ${selected.length}/${capacity}`}</button>
+        <button type="button" class="recipe-picker-mix" data-action="discover-combination" ${selected.length >= 2 && !recipeResearch && hasIdeaEnergy() ? "" : "disabled"}><span aria-hidden="true">🥄</span> ${selected.length >= 2 ? hasIdeaEnergy() ? `바로 섞기 · ${selected.length}/${capacity}` : "아이디어가 부족해요" : `재료를 2개 이상 담아주세요 · ${selected.length}/${capacity}`}</button>
       </section>
     </div>` : "";
     const autoUnlocked = unlockedRecipeCount() >= 5;
@@ -4707,6 +4854,7 @@ function renderRecipeMenu() {
     </div>` : "";
     dom.menuContent.innerHTML = `<section class="combination-lab">
       <div class="combination-heading"><div><h3>요리 연구</h3><small>보울 용량 ${selected.length}/${capacity}</small></div><button type="button" data-action="clear-combination" ${selected.length ? "" : "disabled"}>비우기</button></div>
+      ${ideaEnergyPanel}
       <div class="bowl-upgrade-bar">
         <div><strong>보울 확장</strong><small>${capacity}/${BOWL_CAPACITY_MAX}칸</small></div>
         <button type="button" data-action="expand-bowl-capacity" ${capacity >= BOWL_CAPACITY_MAX || state.resources.gems < BOWL_CAPACITY_EXPANSION_GEM_COST ? "disabled" : ""}>${capacity >= BOWL_CAPACITY_MAX ? `<strong>최대 용량</strong>` : `<img src="assets/ui/currency/icon_currency_002.png" alt="보석"/><span>${BOWL_CAPACITY_EXPANSION_GEM_COST}</span><strong>+${BOWL_CAPACITY_EXPANSION_AMOUNT}칸</strong>`}</button>
@@ -4721,7 +4869,7 @@ function renderRecipeMenu() {
         <div class="bowl-capacity" aria-label="보울 용량">${Array.from({ length: capacity }, (_, index) => `<i class="${index < selected.length ? "is-filled" : ""}"></i>`).join("")}</div>
       </button>
       <div class="ingredient-shelf-title"><strong>보울을 눌러 재료 넣기</strong><small>${selected.length}/${capacity}</small></div>
-      <button class="research-button auto-research-button" data-action="auto-craft" ${autoUnlocked && !recipeResearch ? "" : "disabled"}>${autoUnlocked ? "자동 요리 연구" : `자동 연구 · 요리 ${unlockedRecipeCount()}/5`}</button>
+      <button class="research-button auto-research-button" data-action="auto-craft" ${autoUnlocked && !recipeResearch && hasIdeaEnergy() ? "" : "disabled"}>${autoUnlocked ? hasIdeaEnergy() ? "자동 요리 연구" : "아이디어가 부족해요" : `자동 연구 · 요리 ${unlockedRecipeCount()}/5`}</button>
       ${researchOverlay}
     </section>${ingredientPicker}
     <div class="recipe-discovery-status"><strong>발견 가능한 요리</strong><span>${unlockedRecipeCount()}/${RECIPE_PROGRESSION.length} 발견</span></div>
@@ -5186,7 +5334,8 @@ function debugAddResource() {
     dom.debugResourceAmount.focus();
     return;
   }
-  const amount = Math.min(requested, Number.MAX_SAFE_INTEGER - Number(state.resources[resourceKey] || 0));
+  const maximum = resourceKey === "ideas" ? IDEA_ENERGY_MAX : Number.MAX_SAFE_INTEGER;
+  const amount = Math.min(requested, maximum - Number(state.resources[resourceKey] || 0));
   if (amount <= 0) {
     showToast("더 이상 재화를 추가할 수 없어요.");
     return;
@@ -5277,6 +5426,20 @@ function renderGameToText() {
     visibleThemeType: "restaurant",
     objective: currentObjective(),
     resources: state.resources,
+    ideaEnergy: {
+      current: Number(state.resources.ideas || 0),
+      maximum: IDEA_ENERGY_MAX,
+      researchCost: IDEA_RESEARCH_COST,
+      regenSeconds: IDEA_ENERGY_REGEN_SECONDS,
+      nextRecoveryIn: ideaEnergyNextIn(),
+      refillAmount: IDEA_REFILL_AMOUNT,
+      refillCosts: [...IDEA_REFILL_GEM_COSTS],
+      refillsToday: Number(state.ideaEnergy.refillsToday || 0),
+      nextRefillGemCost: ideaRefillGemCost(),
+      dayKey: state.ideaEnergy.dayKey,
+      appliesTo: ["manual-research", "auto-research", "weird-dish", "manual-level-up"],
+      excludedFrom: ["guest-meal-cooking"],
+    },
     assetLibrary: {
       unityUiSpritesSynced: true,
       chickIconRange: [1, CHICK_ICON_MAX_INDEX],
@@ -5977,7 +6140,8 @@ dom.menuContent.addEventListener("click", (event) => {
   if (button.dataset.action === "auto-craft") {
     if (!tryAutoCraft()) showToast(unlockedRecipeCount() < 5
       ? "요리 5개 발견 후 자동 연구가 열려요."
-      : "자동 연구에는 재료가 2개 이상 필요해요.");
+      : !hasIdeaEnergy() ? `아이디어가 부족해요. ${formatPromotionTimer(ideaEnergyNextIn())} 후 1개 회복!`
+        : "자동 연구에는 재료가 2개 이상 필요해요.");
     renderMenu();
   }
   if (button.dataset.action === "codex") claimCodexReward(id);
@@ -6010,6 +6174,7 @@ dom.menuContent.addEventListener("click", (event) => {
   }
   if (button.dataset.action === "expand-ingredient-storage") expandIngredientStorage();
   if (button.dataset.action === "expand-bowl-capacity") expandBowlCapacity();
+  if (button.dataset.action === "recharge-ideas") rechargeIdeaEnergy();
   if (button.dataset.action === "theme-filter") { state.ui.themeFacilityType = id; renderMenu(); }
   if (button.dataset.action === "select-customer") { state.ui.collectionCustomerId = id; saveState(); renderMenu(); }
   if (button.dataset.action === "buffet-place") placeBuffetRecipe(id);
