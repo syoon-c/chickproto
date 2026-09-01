@@ -1,0 +1,486 @@
+{
+  "recipeCount": 51,
+  "ingredientCount": 41,
+  "highest": [
+    {
+      "ingredient": "밀가루",
+      "recipeCount": 11,
+      "slotCount": 11
+    }
+  ],
+  "lowest": [
+    {
+      "ingredient": "가지",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "대구",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "된장",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "새싹",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "아보카도",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "양배추",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "오이",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "요거트",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "우유",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "트러플",
+      "recipeCount": 1,
+      "slotCount": 1
+    },
+    {
+      "ingredient": "후추",
+      "recipeCount": 1,
+      "slotCount": 1
+    }
+  ],
+  "rows": [
+    {
+      "ingredient": "밀가루",
+      "recipeCount": 11,
+      "slotCount": 11,
+      "recipes": [
+        "병아리콩 팬케이크",
+        "육전",
+        "벌레 파이",
+        "새싹전",
+        "바삭 벌레구이",
+        "시나몬 롤",
+        "진저브레드",
+        "해바라기씨 파이",
+        "딸기 생크림 케이크",
+        "김치전",
+        "양배추 딤섬"
+      ]
+    },
+    {
+      "ingredient": "고기",
+      "recipeCount": 10,
+      "slotCount": 10,
+      "recipes": [
+        "삶은 고기",
+        "육전",
+        "고기쌈",
+        "열매꼬치구이",
+        "고단백 식품",
+        "후추 스테이크",
+        "불고기",
+        "양배추 딤섬",
+        "가지 소고기 덮밥",
+        "마늘 육회"
+      ]
+    },
+    {
+      "ingredient": "쌀",
+      "recipeCount": 9,
+      "slotCount": 9,
+      "recipes": [
+        "쌀밥",
+        "병아리콩 밥",
+        "트러플 크림 리조또",
+        "계란볶음밥",
+        "김치볶음밥",
+        "가지 소고기 덮밥",
+        "치즈 간장계란밥",
+        "연어덮밥",
+        "연어초밥"
+      ]
+    },
+    {
+      "ingredient": "설탕",
+      "recipeCount": 6,
+      "slotCount": 6,
+      "recipes": [
+        "시나몬 롤",
+        "진저브레드",
+        "해바라기씨 파이",
+        "딸기 생크림 케이크",
+        "체리 사탕",
+        "연어초밥"
+      ]
+    },
+    {
+      "ingredient": "병아리콩",
+      "recipeCount": 5,
+      "slotCount": 7,
+      "recipes": [
+        "삶은 병아리콩",
+        "병아리콩 가득",
+        "병아리콩 팬케이크",
+        "아보카도 병아리콩 샐러드",
+        "병아리콩 밥"
+      ]
+    },
+    {
+      "ingredient": "꿀",
+      "recipeCount": 5,
+      "slotCount": 5,
+      "recipes": [
+        "계피차",
+        "생강차",
+        "사과 생강차",
+        "시나몬 사과조림",
+        "복숭아 요거트"
+      ]
+    },
+    {
+      "ingredient": "나뭇잎",
+      "recipeCount": 5,
+      "slotCount": 5,
+      "recipes": [
+        "고기쌈",
+        "상큼 나뭇잎 샐러드",
+        "벌레먹은 나뭇잎",
+        "아보카도 병아리콩 샐러드",
+        "씨앗 오이 샐러드"
+      ]
+    },
+    {
+      "ingredient": "양파",
+      "recipeCount": 5,
+      "slotCount": 5,
+      "recipes": [
+        "맑은 양파 수프",
+        "새콤 양파절임",
+        "불고기",
+        "가지 소고기 덮밥",
+        "연어덮밥"
+      ]
+    },
+    {
+      "ingredient": "간장",
+      "recipeCount": 4,
+      "slotCount": 4,
+      "recipes": [
+        "불고기",
+        "가지 소고기 덮밥",
+        "치즈 간장계란밥",
+        "연어덮밥"
+      ]
+    },
+    {
+      "ingredient": "계란",
+      "recipeCount": 4,
+      "slotCount": 4,
+      "recipes": [
+        "계란볶음밥",
+        "마늘 육회",
+        "치즈 간장계란밥",
+        "치즈 오믈렛"
+      ]
+    },
+    {
+      "ingredient": "김치",
+      "recipeCount": 4,
+      "slotCount": 4,
+      "recipes": [
+        "김치전",
+        "파김치",
+        "김치볶음밥",
+        "마늘 김치볶음"
+      ]
+    },
+    {
+      "ingredient": "벌레",
+      "recipeCount": 4,
+      "slotCount": 4,
+      "recipes": [
+        "벌레 파이",
+        "고단백 식품",
+        "벌레먹은 나뭇잎",
+        "바삭 벌레구이"
+      ]
+    },
+    {
+      "ingredient": "소금",
+      "recipeCount": 4,
+      "slotCount": 4,
+      "recipes": [
+        "바삭 벌레구이",
+        "콘스프",
+        "대구구이",
+        "연어구이"
+      ]
+    },
+    {
+      "ingredient": "식용유",
+      "recipeCount": 4,
+      "slotCount": 4,
+      "recipes": [
+        "계란볶음밥",
+        "김치볶음밥",
+        "마늘 김치볶음",
+        "치즈 오믈렛"
+      ]
+    },
+    {
+      "ingredient": "사과",
+      "recipeCount": 3,
+      "slotCount": 3,
+      "recipes": [
+        "사과 생강차",
+        "시나몬 사과조림",
+        "과일 가족 모임"
+      ]
+    },
+    {
+      "ingredient": "생강",
+      "recipeCount": 3,
+      "slotCount": 3,
+      "recipes": [
+        "생강차",
+        "사과 생강차",
+        "진저브레드"
+      ]
+    },
+    {
+      "ingredient": "생크림",
+      "recipeCount": 3,
+      "slotCount": 3,
+      "recipes": [
+        "콘스프",
+        "트러플 크림 리조또",
+        "딸기 생크림 케이크"
+      ]
+    },
+    {
+      "ingredient": "시나몬",
+      "recipeCount": 3,
+      "slotCount": 3,
+      "recipes": [
+        "계피차",
+        "시나몬 사과조림",
+        "시나몬 롤"
+      ]
+    },
+    {
+      "ingredient": "연어",
+      "recipeCount": 3,
+      "slotCount": 3,
+      "recipes": [
+        "연어덮밥",
+        "연어구이",
+        "연어초밥"
+      ]
+    },
+    {
+      "ingredient": "파",
+      "recipeCount": 3,
+      "slotCount": 3,
+      "recipes": [
+        "파김치",
+        "양배추 딤섬",
+        "마늘 육회"
+      ]
+    },
+    {
+      "ingredient": "옥수수",
+      "recipeCount": 2,
+      "slotCount": 3,
+      "recipes": [
+        "구운 옥수수",
+        "콘스프"
+      ]
+    },
+    {
+      "ingredient": "도토리",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "도토리묵",
+        "상큼 나뭇잎 샐러드"
+      ]
+    },
+    {
+      "ingredient": "딸기",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "딸기 생크림 케이크",
+        "과일 가족 모임"
+      ]
+    },
+    {
+      "ingredient": "마늘",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "마늘 김치볶음",
+        "마늘 육회"
+      ]
+    },
+    {
+      "ingredient": "복숭아",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "복숭아 요거트",
+        "과일 가족 모임"
+      ]
+    },
+    {
+      "ingredient": "식초",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "새콤 양파절임",
+        "연어초밥"
+      ]
+    },
+    {
+      "ingredient": "씨앗",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "해바라기씨 파이",
+        "씨앗 오이 샐러드"
+      ]
+    },
+    {
+      "ingredient": "열매",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "상큼 나뭇잎 샐러드",
+        "열매꼬치구이"
+      ]
+    },
+    {
+      "ingredient": "체리",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "체리 사탕",
+        "과일 가족 모임"
+      ]
+    },
+    {
+      "ingredient": "치즈",
+      "recipeCount": 2,
+      "slotCount": 2,
+      "recipes": [
+        "치즈 간장계란밥",
+        "치즈 오믈렛"
+      ]
+    },
+    {
+      "ingredient": "가지",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "가지 소고기 덮밥"
+      ]
+    },
+    {
+      "ingredient": "대구",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "대구구이"
+      ]
+    },
+    {
+      "ingredient": "된장",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "된장국"
+      ]
+    },
+    {
+      "ingredient": "새싹",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "새싹전"
+      ]
+    },
+    {
+      "ingredient": "아보카도",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "아보카도 병아리콩 샐러드"
+      ]
+    },
+    {
+      "ingredient": "양배추",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "양배추 딤섬"
+      ]
+    },
+    {
+      "ingredient": "오이",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "씨앗 오이 샐러드"
+      ]
+    },
+    {
+      "ingredient": "요거트",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "복숭아 요거트"
+      ]
+    },
+    {
+      "ingredient": "우유",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "치즈 오믈렛"
+      ]
+    },
+    {
+      "ingredient": "트러플",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "트러플 크림 리조또"
+      ]
+    },
+    {
+      "ingredient": "후추",
+      "recipeCount": 1,
+      "slotCount": 1,
+      "recipes": [
+        "후추 스테이크"
+      ]
+    }
+  ]
+}

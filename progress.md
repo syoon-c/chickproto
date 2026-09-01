@@ -2082,3 +2082,51 @@ Original prompt: 핵심 플레이 연구 파일에 있는 게임을 리소스만
 - 보상 및 디버그 추가로 아이디어가 최대치 20을 넘지 않도록 통일했다.
 - `node tools/verify-idea-energy.mjs`, `node tools/verify-debug-panel.mjs`, `node tools/verify-chickpea-starter.mjs`, `node tools/verify-recipe-catalog-v24-migration.mjs`, `node tools/verify-planning-workbook-sync.mjs`, `node tools/verify-theme-recipe-pacing.mjs`, `node tools/verify-planning-recipe-ui.mjs`, `node tools/verify-yogurt-vinegar-recipe.mjs` 검증을 통과했다.
 - 최종 화면은 `output/idea-energy/01-full-energy-panel.png`, `output/idea-energy/02-fourth-refill-next-200.png`, `output/idea-energy-official-final/shot-0.png`에서 확인했다.
+
+## 2026-08-27 보울 확장 후 괴식 손실 완화
+
+- 자동 연구가 만들 수 있는 요리가 없을 때 보울 최대 용량만큼 랜덤 재료를 소비하던 원인을 수정했다.
+- 자동 괴식 연구는 보울이 3~5칸으로 확장되어도 항상 재료 2개만 무작위로 사용한다. 괴식 실패 시 투입 재료가 사라지는 기존 학습 규칙은 유지했다.
+- 수동 재료 선택 팝업에 `최대 N개 · 전부 채울 필요 없어요`, `이번 연구 N개 사용 · 최대 N개`를 표시하고 섞기 버튼에도 실제 소비 개수를 표시했다.
+- 5칸 보울에서 자동 괴식이 식초 5개 중 2개만 소비하고, 수동 선택은 2/5만 담은 상태로 바로 연구할 수 있음을 확인했다.
+- 검증: `BOWL_FAILURE_COST_OK capacity=5 auto-weird-cost=2 manual-usage=2/5`, `SINK_WATER_RECIPE_SHEET_OK`, `IDEA_ENERGY_OK`, 정적 문법 검사와 공식 웹게임 클라이언트 부팅 통과.
+- 화면: `output/bowl-failure-cost/01-auto-research-two-ingredients.png`, `02-manual-uses-two-of-five.png`, `output/bowl-failure-cost-official/shot-0.png`.
+- 참고: 오래된 `verify-recipe-research-and-weird-dish.mjs` 전체 검사는 현재 카탈로그에서 제거된 과거 샌드위치 레시피를 찾는 부분에서 중단된다. 자동 괴식 소비 규칙 자체는 새 집중 검사에서 별도로 통과했다.
+
+## 2026-08-27 보울 재료 선택 UI 문구 축소
+
+- 자동 괴식이 재료 2개만 소비하는 내부 규칙은 유지했다.
+- 재료 선택 팝업에서 `전부 채울 필요 없어요`, `이번 연구 N개 사용`, 섞기 버튼의 재료 사용 개수 문구를 제거했다.
+- 팝업에는 `최대 N개`, 재료 슬롯, 보유 재료, `바로 섞기`만 남겼다. 2개 미만 선택 상태의 버튼 문구도 `2개 이상 담기`로 축약했다.
+- `BOWL_FAILURE_COST_OK`, `SINK_WATER_RECIPE_SHEET_OK`, 정적 문법 검사와 공식 웹게임 클라이언트 부팅을 통과했다.
+- 화면: `output/bowl-failure-cost/02-manual-uses-two-of-five.png`, `output/bowl-minimal-ui-official-final/shot-0.png`.
+## 2026-09-01 요리 연구·목록 탭 분리
+
+- 사용자 요청: 요리 연구 화면에 함께 있던 제작 공간과 전체 요리 목록을 별도 탭으로 분리한다.
+- 요리 관련 탭을 `연구 / 요리 목록 / 냉장고`의 3개로 재구성했다.
+- `연구` 탭에는 아이디어 에너지, 보울 확장, 재료 투입, 자동 연구만 남겼다.
+- `요리 목록` 탭에는 발견한 요리의 가격·재료·레벨업과 미발견 요리의 힌트를 한 목록으로 모았다.
+- `냉장고` 탭은 기존 재료 관리 기능만 유지한다.
+- 요리 목록을 보는 동안에는 주인공 병아리가 도마 테이블로 이동하지 않고 제자리로 돌아가도록 동선을 분리했다.
+- `tools/verify-recipe-tab-separation.mjs` 검증 결과: 탭 순서 정상, 연구 화면에 목록 카드 없음, 목록에 51개 카드 표시, 냉장고 화면 분리, 콘솔 오류 없음.
+- 검증 화면: `output/recipe-tab-separation/01-research-only.png`, `02-all-recipes.png`, `03-fridge-only.png`.
+
+## 2026-09-01 재료 팝업의 발견 조합 안내
+
+- 사용자 요청: 수동으로 재료를 담을 때 이미 발견한 요리의 조합을 팝업에서 미리 확인할 수 있게 한다.
+- 재료 넣기 팝업에 `발견한 조합` 가로 목록을 추가하고 요리 아이콘, 요리명, 재료 이름·아이콘·중복 수량을 표시했다.
+- 미발견 요리는 조합 안내에 포함하지 않아 발견 전 정답은 계속 보호한다.
+- 재료를 하나 이상 담으면 선택한 재료와 조합이 맞는 기존 요리를 목록 앞으로 이동하고 강조한다.
+- 카드가 많아지면 가로 스크롤로 탐색하며, 기존 드래그 스크롤 동작을 그대로 사용할 수 있다.
+- 검증: `KNOWN_RECIPE_COMBINATIONS_OK`, `RECIPE_TAB_SEPARATION_OK`, `SINK_WATER_RECIPE_SHEET_OK`, 콘솔 오류 없음.
+- 검증 화면: `output/known-recipe-combinations/01-known-combinations.png`, `02-selected-match-first.png`.
+
+## 2026-09-01 발견 요리 조합 표시 방식 정정
+
+- 사용자 정정: 발견한 요리 목록을 항상 보여주는 방식이 아니라, 현재 넣은 재료가 발견한 요리와 정확히 일치할 때만 해당 요리를 표시한다.
+- 빈 보울과 일부 재료만 선택한 상태에서는 요리 미리보기를 완전히 숨긴다.
+- 재료 종류와 중복 수량을 포함한 전체 조합이 이미 발견한 요리와 정확히 일치하면 요리 아이콘, 이름, 현재 레벨 카드가 나타난다.
+- 정확한 조합에서 재료를 다시 빼면 미리보기 카드도 즉시 사라진다.
+- 미발견 요리는 정확한 조합이어도 이 카드로 정답을 노출하지 않는다.
+- 검증: `KNOWN_RECIPE_COMBINATIONS_OK exact-only=yes partial-hidden=yes recipe=삶은 고기`, 탭 분리 및 보울 연구 회귀 검사 통과, 콘솔 오류 없음.
+- 검증 화면: `output/known-recipe-combinations/01-empty-no-preview.png`, `02-partial-no-preview.png`, `03-exact-known-recipe.png`.

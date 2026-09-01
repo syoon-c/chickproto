@@ -145,10 +145,11 @@ try {
   current = await gameState();
   const fallbackIngredientIds = new Set([info.salt.id, info.pepper.id, info.sugar.id]);
   if (!current.recipes.research?.automatic || current.recipes.research.recipeId !== null
-    || current.recipes.autoResearchWhenNoRecipe !== "random-ingredients-up-to-bowl-capacity-then-weird-dish"
-    || current.recipes.research.ingredientIds.length !== current.recipes.combinationCapacity
+    || current.recipes.autoResearchWhenNoRecipe !== "random-2-ingredients-then-weird-dish"
+    || current.recipes.autoWeirdDishIngredientCost !== 2
+    || current.recipes.research.ingredientIds.length !== 2
     || current.recipes.research.ingredientIds.some((ingredientId) => !fallbackIngredientIds.has(ingredientId))
-    || current.ingredientStorage.totalItems !== 1) {
+    || current.ingredientStorage.totalItems !== 4) {
     throw new Error(`Automatic fallback did not consume random ingredients: ${JSON.stringify(current.recipes)}`);
   }
   await page.evaluate(() => window.advanceTime(1200));

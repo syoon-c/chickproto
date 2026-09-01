@@ -147,7 +147,8 @@ try {
     || (await picker.locator("h3").innerText()).trim() !== "재료 넣기") {
     throw new Error(`Bowl ingredient picker escaped the cooking-research sheet: ${JSON.stringify({ pickerBox, menuBox })}`);
   }
-  if ((await picker.locator(".recipe-picker-capacity").innerText()).replace(/\s+/g, " ").trim() !== "보울 용량 0/2 · 남은 2칸"
+  if ((await picker.locator("header small").innerText()).trim() !== "최대 2개"
+    || await picker.locator(".recipe-picker-capacity").count() !== 0
     || await picker.locator(".recipe-picker-empty-slot").count() !== 2
     || !await picker.locator(".recipe-picker-mix").isDisabled()) {
     throw new Error("The ingredient popup does not clearly show its empty 0/2 capacity.");
@@ -157,15 +158,13 @@ try {
   if (await picker.locator('.recipe-picker-selected [data-id="30067"]').count() !== 1) {
     throw new Error("Selecting water in the bowl popup did not keep the popup open or update the selection.");
   }
-  if ((await picker.locator(".recipe-picker-capacity").innerText()).replace(/\s+/g, " ").trim() !== "보울 용량 1/2 · 남은 1칸"
-    || await picker.locator(".recipe-picker-empty-slot").count() !== 1
+  if (await picker.locator(".recipe-picker-empty-slot").count() !== 1
     || !await picker.locator(".recipe-picker-mix").isDisabled()) {
     throw new Error("The ingredient popup did not update its remaining capacity after one selection.");
   }
   await page.locator(".game-frame").screenshot({ path: path.join(out, "02b-bowl-capacity-one-left.png") });
   await picker.locator('[data-action="select-ingredient"][data-id="30001"]').click();
-  if ((await picker.locator(".recipe-picker-capacity").innerText()).replace(/\s+/g, " ").trim() !== "보울 용량 2/2 · 가득 참"
-    || await picker.locator(".recipe-picker-empty-slot").count() !== 0
+  if (await picker.locator(".recipe-picker-empty-slot").count() !== 0
     || await picker.locator('[data-action="select-ingredient"]:not([disabled])').count() !== 0
     || await picker.locator(".recipe-picker-mix").isDisabled()
     || !(await picker.locator(".recipe-picker-mix").innerText()).includes("바로 섞기")) {

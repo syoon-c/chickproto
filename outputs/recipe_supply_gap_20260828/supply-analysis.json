@@ -1,0 +1,2815 @@
+{
+  "recipeCount": 51,
+  "chickCount": 78,
+  "comparisonCount": 99,
+  "unusedCount": 58,
+  "missingCount": 0,
+  "shortageCount": 26,
+  "topBurden": [
+    {
+      "ingredient": "고기",
+      "burden": 10
+    },
+    {
+      "ingredient": "시나몬",
+      "burden": 10
+    },
+    {
+      "ingredient": "연어",
+      "burden": 10
+    }
+  ],
+  "rows": [
+    {
+      "ingredient": "고기",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 10,
+      "recipeCount": 10,
+      "slots": 10,
+      "recipes": [
+        "삶은 고기",
+        "육전",
+        "고기쌈",
+        "열매꼬치구이",
+        "고단백 식품",
+        "후추 스테이크",
+        "불고기",
+        "양배추 딤섬",
+        "가지 소고기 덮밥",
+        "마늘 육회"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 1,
+      "sources": [
+        {
+          "themeId": 1,
+          "themeName": "돌 테마",
+          "chickName": "공룡 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "돌 테마",
+      "sourceText": "돌 테마·공룡 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "시나몬",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 10,
+      "recipeCount": 3,
+      "slots": 3,
+      "recipes": [
+        "계피차",
+        "시나몬 사과조림",
+        "시나몬 롤"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 2,
+      "sources": [
+        {
+          "themeId": 2,
+          "themeName": "나무 테마",
+          "chickName": "나무둥치 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "나무 테마",
+      "sourceText": "나무 테마·나무둥치 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "연어",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 10,
+      "recipeCount": 3,
+      "slots": 3,
+      "recipes": [
+        "연어덮밥",
+        "연어구이",
+        "연어초밥"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 9,
+      "sources": [
+        {
+          "themeId": 9,
+          "themeName": "블루 땡땡이 테마",
+          "chickName": "고양이 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "블루 땡땡이 테마",
+      "sourceText": "블루 땡땡이 테마·고양이 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "병아리콩",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 7,
+      "recipeCount": 5,
+      "slots": 7,
+      "recipes": [
+        "삶은 병아리콩",
+        "병아리콩 가득",
+        "병아리콩 팬케이크",
+        "아보카도 병아리콩 샐러드",
+        "병아리콩 밥"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 1,
+      "sources": [
+        {
+          "themeId": 1,
+          "themeName": "돌 테마",
+          "chickName": "기본 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "돌 테마",
+      "sourceText": "돌 테마·기본 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "복숭아",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 6.666666666666667,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "복숭아 요거트",
+        "과일 가족 모임"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 5,
+      "sources": [
+        {
+          "themeId": 5,
+          "themeName": "그린핑크 테마",
+          "chickName": "복숭아씨 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "그린핑크 테마",
+      "sourceText": "그린핑크 테마·복숭아씨 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "식초",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 6.666666666666667,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "새콤 양파절임",
+        "연어초밥"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 5,
+      "sources": [
+        {
+          "themeId": 5,
+          "themeName": "그린핑크 테마",
+          "chickName": "복숭아 천사 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "그린핑크 테마",
+      "sourceText": "그린핑크 테마·복숭아 천사 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "씨앗",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 6.666666666666667,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "해바라기씨 파이",
+        "씨앗 오이 샐러드"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 6,
+      "sources": [
+        {
+          "themeId": 6,
+          "themeName": "벚꽃 테마",
+          "chickName": "꽃 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "벚꽃 테마",
+      "sourceText": "벚꽃 테마·꽃 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "간장",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 5.714285714285714,
+      "recipeCount": 4,
+      "slots": 4,
+      "recipes": [
+        "불고기",
+        "가지 소고기 덮밥",
+        "치즈 간장계란밥",
+        "연어덮밥"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 7,
+      "sources": [
+        {
+          "themeId": 7,
+          "themeName": "한식당 테마",
+          "chickName": "장독대 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "한식당 테마",
+      "sourceText": "한식당 테마·장독대 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "김치",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 5.714285714285714,
+      "recipeCount": 4,
+      "slots": 4,
+      "recipes": [
+        "김치전",
+        "파김치",
+        "김치볶음밥",
+        "마늘 김치볶음"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 7,
+      "sources": [
+        {
+          "themeId": 7,
+          "themeName": "한식당 테마",
+          "chickName": "연어 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "한식당 테마",
+      "sourceText": "한식당 테마·연어 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "벌레",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 5.714285714285714,
+      "recipeCount": 4,
+      "slots": 4,
+      "recipes": [
+        "벌레 파이",
+        "고단백 식품",
+        "벌레먹은 나뭇잎",
+        "바삭 벌레구이"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 2,
+      "sources": [
+        {
+          "themeId": 2,
+          "themeName": "나무 테마",
+          "chickName": "나무둥치 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "나무 테마",
+      "sourceText": "나무 테마·나무둥치 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "쌀",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 5.294117647058823,
+      "recipeCount": 9,
+      "slots": 9,
+      "recipes": [
+        "쌀밥",
+        "병아리콩 밥",
+        "트러플 크림 리조또",
+        "계란볶음밥",
+        "김치볶음밥",
+        "가지 소고기 덮밥",
+        "치즈 간장계란밥",
+        "연어덮밥",
+        "연어초밥"
+      ],
+      "baseOrSingleCount": 2,
+      "specialCount": 0,
+      "strength": 1.7,
+      "firstThemeId": 3,
+      "sources": [
+        {
+          "themeId": 3,
+          "themeName": "초록 줄무늬 테마",
+          "chickName": "농부 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        },
+        {
+          "themeId": 9,
+          "themeName": "블루 땡땡이 테마",
+          "chickName": "생쥐 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "초록 줄무늬 테마",
+      "sourceText": "초록 줄무늬 테마·농부 병아리(단일 100%), 블루 땡땡이 테마·생쥐 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "나뭇잎",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 5,
+      "recipeCount": 5,
+      "slots": 5,
+      "recipes": [
+        "고기쌈",
+        "상큼 나뭇잎 샐러드",
+        "벌레먹은 나뭇잎",
+        "아보카도 병아리콩 샐러드",
+        "씨앗 오이 샐러드"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 2,
+      "sources": [
+        {
+          "themeId": 2,
+          "themeName": "나무 테마",
+          "chickName": "나뭇잎 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "나무 테마",
+      "sourceText": "나무 테마·나뭇잎 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "양파",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 5,
+      "recipeCount": 5,
+      "slots": 5,
+      "recipes": [
+        "맑은 양파 수프",
+        "새콤 양파절임",
+        "불고기",
+        "가지 소고기 덮밥",
+        "연어덮밥"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1,
+      "firstThemeId": 3,
+      "sources": [
+        {
+          "themeId": 3,
+          "themeName": "초록 줄무늬 테마",
+          "chickName": "아보카도 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 10,
+          "themeName": "병아리 테마",
+          "chickName": "둥지 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "초록 줄무늬 테마",
+      "sourceText": "초록 줄무늬 테마·아보카도 병아리(기본 70%), 병아리 테마·둥지 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "옥수수",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 5,
+      "recipeCount": 2,
+      "slots": 3,
+      "recipes": [
+        "구운 옥수수",
+        "콘스프"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 2,
+      "strength": 0.6,
+      "firstThemeId": 4,
+      "sources": [
+        {
+          "themeId": 4,
+          "themeName": "블루화이트 테마",
+          "chickName": "까마귀 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 16,
+          "themeName": "톨게이트 테마",
+          "chickName": "러버콘 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "블루화이트 테마",
+      "sourceText": "블루화이트 테마·까마귀 병아리(특별 30%), 톨게이트 테마·러버콘 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "파",
+      "status": "매우 부족",
+      "recommendation": "기본 70% 드랍 경로 추가",
+      "burden": 5,
+      "recipeCount": 3,
+      "slots": 3,
+      "recipes": [
+        "파김치",
+        "양배추 딤섬",
+        "마늘 육회"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 2,
+      "strength": 0.6,
+      "firstThemeId": 7,
+      "sources": [
+        {
+          "themeId": 7,
+          "themeName": "한식당 테마",
+          "chickName": "연어 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 8,
+          "themeName": "채소밭 테마",
+          "chickName": "배추 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "한식당 테마",
+      "sourceText": "한식당 테마·연어 병아리(특별 30%), 채소밭 테마·배추 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "밀가루",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 4.583333333333334,
+      "recipeCount": 11,
+      "slots": 11,
+      "recipes": [
+        "병아리콩 팬케이크",
+        "육전",
+        "벌레 파이",
+        "새싹전",
+        "바삭 벌레구이",
+        "시나몬 롤",
+        "진저브레드",
+        "해바라기씨 파이",
+        "딸기 생크림 케이크",
+        "김치전",
+        "양배추 딤섬"
+      ],
+      "baseOrSingleCount": 3,
+      "specialCount": 0,
+      "strength": 2.4,
+      "firstThemeId": 1,
+      "sources": [
+        {
+          "themeId": 1,
+          "themeName": "돌 테마",
+          "chickName": "쿠키 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        },
+        {
+          "themeId": 3,
+          "themeName": "초록 줄무늬 테마",
+          "chickName": "새싹 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 4,
+          "themeName": "블루화이트 테마",
+          "chickName": "파란 리본 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "돌 테마",
+      "sourceText": "돌 테마·쿠키 병아리(단일 100%), 초록 줄무늬 테마·새싹 병아리(기본 70%), 블루화이트 테마·파란 리본 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "사과",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 4.285714285714286,
+      "recipeCount": 3,
+      "slots": 3,
+      "recipes": [
+        "사과 생강차",
+        "시나몬 사과조림",
+        "과일 가족 모임"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 5,
+      "sources": [
+        {
+          "themeId": 5,
+          "themeName": "그린핑크 테마",
+          "chickName": "복숭아씨 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "그린핑크 테마",
+      "sourceText": "그린핑크 테마·복숭아씨 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "생강",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 4.285714285714286,
+      "recipeCount": 3,
+      "slots": 3,
+      "recipes": [
+        "생강차",
+        "사과 생강차",
+        "진저브레드"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 5,
+      "sources": [
+        {
+          "themeId": 5,
+          "themeName": "그린핑크 테마",
+          "chickName": "복숭아 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "그린핑크 테마",
+      "sourceText": "그린핑크 테마·복숭아 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "소금",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 4,
+      "recipeCount": 4,
+      "slots": 4,
+      "recipes": [
+        "바삭 벌레구이",
+        "콘스프",
+        "대구구이",
+        "연어구이"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1,
+      "firstThemeId": 4,
+      "sources": [
+        {
+          "themeId": 4,
+          "themeName": "블루화이트 테마",
+          "chickName": "까마귀 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 13,
+          "themeName": "캠핑 테마",
+          "chickName": "카우보이 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "블루화이트 테마",
+      "sourceText": "블루화이트 테마·까마귀 병아리(기본 70%), 캠핑 테마·카우보이 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "꿀",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 3.846153846153846,
+      "recipeCount": 5,
+      "slots": 5,
+      "recipes": [
+        "계피차",
+        "생강차",
+        "사과 생강차",
+        "시나몬 사과조림",
+        "복숭아 요거트"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1.3,
+      "firstThemeId": 5,
+      "sources": [
+        {
+          "themeId": 5,
+          "themeName": "그린핑크 테마",
+          "chickName": "복숭아 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 6,
+          "themeName": "벚꽃 테마",
+          "chickName": "꿀벌 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "그린핑크 테마",
+      "sourceText": "그린핑크 테마·복숭아 병아리(특별 30%), 벚꽃 테마·꿀벌 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "도토리",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 3.3333333333333335,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "도토리묵",
+        "상큼 나뭇잎 샐러드"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 2,
+      "strength": 0.6,
+      "firstThemeId": 2,
+      "sources": [
+        {
+          "themeId": 2,
+          "themeName": "나무 테마",
+          "chickName": "도토리 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 17,
+          "themeName": "옛날 사무실 테마",
+          "chickName": "회사원 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "나무 테마",
+      "sourceText": "나무 테마·도토리 병아리(특별 30%), 옛날 사무실 테마·회사원 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "딸기",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 3.3333333333333335,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "딸기 생크림 케이크",
+        "과일 가족 모임"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 2,
+      "strength": 0.6,
+      "firstThemeId": 6,
+      "sources": [
+        {
+          "themeId": 6,
+          "themeName": "벚꽃 테마",
+          "chickName": "체리 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 11,
+          "themeName": "식빵 테마",
+          "chickName": "잼 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "벚꽃 테마",
+      "sourceText": "벚꽃 테마·체리 병아리(특별 30%), 식빵 테마·잼 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "치즈",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 3.3333333333333335,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "치즈 간장계란밥",
+        "치즈 오믈렛"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 2,
+      "strength": 0.6,
+      "firstThemeId": 9,
+      "sources": [
+        {
+          "themeId": 9,
+          "themeName": "블루 땡땡이 테마",
+          "chickName": "생쥐 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 12,
+          "themeName": "이태리 테마",
+          "chickName": "피자 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "블루 땡땡이 테마",
+      "sourceText": "블루 땡땡이 테마·생쥐 병아리(특별 30%), 이태리 테마·피자 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "된장",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 3.3333333333333335,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "된장국"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 7,
+      "sources": [
+        {
+          "themeId": 7,
+          "themeName": "한식당 테마",
+          "chickName": "장독대 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "한식당 테마",
+      "sourceText": "한식당 테마·장독대 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "새싹",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 3.3333333333333335,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "새싹전"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 3,
+      "sources": [
+        {
+          "themeId": 3,
+          "themeName": "초록 줄무늬 테마",
+          "chickName": "새싹 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "초록 줄무늬 테마",
+      "sourceText": "초록 줄무늬 테마·새싹 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "아보카도",
+      "status": "부족",
+      "recommendation": "중복 드랍 경로 검토",
+      "burden": 3.3333333333333335,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "아보카도 병아리콩 샐러드"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 3,
+      "sources": [
+        {
+          "themeId": 3,
+          "themeName": "초록 줄무늬 테마",
+          "chickName": "아보카도 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "초록 줄무늬 테마",
+      "sourceText": "초록 줄무늬 테마·아보카도 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "버섯",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 3,
+      "specialCount": 0,
+      "strength": 2.4,
+      "firstThemeId": 13,
+      "sources": [
+        {
+          "themeId": 13,
+          "themeName": "캠핑 테마",
+          "chickName": "카우보이 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 16,
+          "themeName": "톨게이트 테마",
+          "chickName": "맨홀뚜껑 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 21,
+          "themeName": "버섯 늪 테마",
+          "chickName": "이끼 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "캠핑 테마",
+      "sourceText": "캠핑 테마·카우보이 병아리(기본 70%), 톨게이트 테마·맨홀뚜껑 병아리(기본 70%), 버섯 늪 테마·이끼 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "감자",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 2,
+      "specialCount": 1,
+      "strength": 1.7,
+      "firstThemeId": 10,
+      "sources": [
+        {
+          "themeId": 10,
+          "themeName": "병아리 테마",
+          "chickName": "둥지 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 14,
+          "themeName": "패스트푸드 테마",
+          "chickName": "감자튀김 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 20,
+          "themeName": "오락실 테마",
+          "chickName": "헤드셋 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "병아리 테마",
+      "sourceText": "병아리 테마·둥지 병아리(기본 70%), 패스트푸드 테마·감자튀김 병아리(기본 70%), 오락실 테마·헤드셋 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "당근",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 2,
+      "specialCount": 0,
+      "strength": 1.4,
+      "firstThemeId": 16,
+      "sources": [
+        {
+          "themeId": 16,
+          "themeName": "톨게이트 테마",
+          "chickName": "러버콘 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 19,
+          "themeName": "학교 테마",
+          "chickName": "연필 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "톨게이트 테마",
+      "sourceText": "톨게이트 테마·러버콘 병아리(기본 70%), 학교 테마·연필 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "빵",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 2,
+      "specialCount": 0,
+      "strength": 1.4,
+      "firstThemeId": 11,
+      "sources": [
+        {
+          "themeId": 11,
+          "themeName": "식빵 테마",
+          "chickName": "식빵 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 14,
+          "themeName": "패스트푸드 테마",
+          "chickName": "햄버거 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "식빵 테마",
+      "sourceText": "식빵 테마·식빵 병아리(기본 70%), 패스트푸드 테마·햄버거 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "알로에",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 2,
+      "specialCount": 0,
+      "strength": 1.4,
+      "firstThemeId": 21,
+      "sources": [
+        {
+          "themeId": 21,
+          "themeName": "버섯 늪 테마",
+          "chickName": "개구리 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 25,
+          "themeName": "우주 점성술 테마",
+          "chickName": "외계인 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "버섯 늪 테마",
+      "sourceText": "버섯 늪 테마·개구리 병아리(기본 70%), 우주 점성술 테마·외계인 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "버터",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1.3,
+      "firstThemeId": 11,
+      "sources": [
+        {
+          "themeId": 11,
+          "themeName": "식빵 테마",
+          "chickName": "밀가루 포대 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        },
+        {
+          "themeId": 26,
+          "themeName": "무덤 테마",
+          "chickName": "촛불 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "식빵 테마",
+      "sourceText": "식빵 테마·밀가루 포대 병아리(단일 100%), 무덤 테마·촛불 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "고추",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1,
+      "firstThemeId": 13,
+      "sources": [
+        {
+          "themeId": 13,
+          "themeName": "캠핑 테마",
+          "chickName": "캠프파이어 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 22,
+          "themeName": "해적선 테마",
+          "chickName": "폭탄 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "캠핑 테마",
+      "sourceText": "캠핑 테마·캠프파이어 병아리(기본 70%), 해적선 테마·폭탄 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "녹차",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 15,
+      "sources": [
+        {
+          "themeId": 15,
+          "themeName": "양반집 테마",
+          "chickName": "고려청자 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "양반집 테마",
+      "sourceText": "양반집 테마·고려청자 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "떡",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 15,
+      "sources": [
+        {
+          "themeId": 15,
+          "themeName": "양반집 테마",
+          "chickName": "엽전 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "양반집 테마",
+      "sourceText": "양반집 테마·엽전 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "라이스페이퍼",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 24,
+      "sources": [
+        {
+          "themeId": 24,
+          "themeName": "연금술 테마",
+          "chickName": "마법책 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "연금술 테마",
+      "sourceText": "연금술 테마·마법책 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "랜덤 재료",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 20,
+      "sources": [
+        {
+          "themeId": 20,
+          "themeName": "오락실 테마",
+          "chickName": "오락기 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "오락실 테마",
+      "sourceText": "오락실 테마·오락기 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "마카로니",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 19,
+      "sources": [
+        {
+          "themeId": 19,
+          "themeName": "학교 테마",
+          "chickName": "리코더 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "학교 테마",
+      "sourceText": "학교 테마·리코더 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "민트",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1,
+      "firstThemeId": 18,
+      "sources": [
+        {
+          "themeId": 18,
+          "themeName": "목욕탕 테마",
+          "chickName": "목욕 바구니 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 18,
+          "themeName": "목욕탕 테마",
+          "chickName": "줄무늬 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "목욕탕 테마",
+      "sourceText": "목욕탕 테마·목욕 바구니 병아리(기본 70%), 목욕탕 테마·줄무늬 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "새우",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1,
+      "firstThemeId": 22,
+      "sources": [
+        {
+          "themeId": 22,
+          "themeName": "해적선 테마",
+          "chickName": "후크선장 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 23,
+          "themeName": "바닷속 테마",
+          "chickName": "상어 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "해적선 테마",
+      "sourceText": "해적선 테마·후크선장 병아리(기본 70%), 바닷속 테마·상어 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "소세지",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 21,
+      "sources": [
+        {
+          "themeId": 21,
+          "themeName": "버섯 늪 테마",
+          "chickName": "소세지 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "버섯 늪 테마",
+      "sourceText": "버섯 늪 테마·소세지 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "아몬드",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 10,
+      "sources": [
+        {
+          "themeId": 10,
+          "themeName": "병아리 테마",
+          "chickName": "알껍질 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "병아리 테마",
+      "sourceText": "병아리 테마·알껍질 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "참기름",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 15,
+      "sources": [
+        {
+          "themeId": 15,
+          "themeName": "양반집 테마",
+          "chickName": "양반 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "양반집 테마",
+      "sourceText": "양반집 테마·양반 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "초콜릿칩",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 17,
+      "sources": [
+        {
+          "themeId": 17,
+          "themeName": "옛날 사무실 테마",
+          "chickName": "컴퓨터 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "옛날 사무실 테마",
+      "sourceText": "옛날 사무실 테마·컴퓨터 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "커피콩",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 1,
+      "firstThemeId": 17,
+      "sources": [
+        {
+          "themeId": 17,
+          "themeName": "옛날 사무실 테마",
+          "chickName": "전화기 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "옛날 사무실 테마",
+      "sourceText": "옛날 사무실 테마·전화기 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "토마토",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1,
+      "firstThemeId": 12,
+      "sources": [
+        {
+          "themeId": 12,
+          "themeName": "이태리 테마",
+          "chickName": "피자 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 14,
+          "themeName": "패스트푸드 테마",
+          "chickName": "감자튀김 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "이태리 테마",
+      "sourceText": "이태리 테마·피자 병아리(기본 70%), 패스트푸드 테마·감자튀김 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "고구마",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 20,
+      "sources": [
+        {
+          "themeId": 20,
+          "themeName": "오락실 테마",
+          "chickName": "헤드셋 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "오락실 테마",
+      "sourceText": "오락실 테마·헤드셋 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "렌틸콩",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 25,
+      "sources": [
+        {
+          "themeId": 25,
+          "themeName": "우주 점성술 테마",
+          "chickName": "망원경 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "우주 점성술 테마",
+      "sourceText": "우주 점성술 테마·망원경 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "메밀",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 18,
+      "sources": [
+        {
+          "themeId": 18,
+          "themeName": "목욕탕 테마",
+          "chickName": "줄무늬 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "목욕탕 테마",
+      "sourceText": "목욕탕 테마·줄무늬 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "무",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 24,
+      "sources": [
+        {
+          "themeId": 24,
+          "themeName": "연금술 테마",
+          "chickName": "만드라고라 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "연금술 테마",
+      "sourceText": "연금술 테마·만드라고라 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "성게",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 23,
+      "sources": [
+        {
+          "themeId": 23,
+          "themeName": "바닷속 테마",
+          "chickName": "복어 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "바닷속 테마",
+      "sourceText": "바닷속 테마·복어 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "세이지",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 24,
+      "sources": [
+        {
+          "themeId": 24,
+          "themeName": "연금술 테마",
+          "chickName": "마법사 할아버지 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "연금술 테마",
+      "sourceText": "연금술 테마·마법사 할아버지 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "스팸",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 20,
+      "sources": [
+        {
+          "themeId": 20,
+          "themeName": "오락실 테마",
+          "chickName": "게임 마스터 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "오락실 테마",
+      "sourceText": "오락실 테마·게임 마스터 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "시리얼",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 17,
+      "sources": [
+        {
+          "themeId": 17,
+          "themeName": "옛날 사무실 테마",
+          "chickName": "회사원 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "옛날 사무실 테마",
+      "sourceText": "옛날 사무실 테마·회사원 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "조개",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 23,
+      "sources": [
+        {
+          "themeId": 23,
+          "themeName": "바닷속 테마",
+          "chickName": "열대어 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "바닷속 테마",
+      "sourceText": "바닷속 테마·열대어 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "캐비어",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 23,
+      "sources": [
+        {
+          "themeId": 23,
+          "themeName": "바닷속 테마",
+          "chickName": "상어 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "바닷속 테마",
+      "sourceText": "바닷속 테마·상어 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "탄산",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 14,
+      "sources": [
+        {
+          "themeId": 14,
+          "themeName": "패스트푸드 테마",
+          "chickName": "콜라 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "패스트푸드 테마",
+      "sourceText": "패스트푸드 테마·콜라 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "통겨자",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 22,
+      "sources": [
+        {
+          "themeId": 22,
+          "themeName": "해적선 테마",
+          "chickName": "폭탄 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "해적선 테마",
+      "sourceText": "해적선 테마·폭탄 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "파마산가루",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 19,
+      "sources": [
+        {
+          "themeId": 19,
+          "themeName": "학교 테마",
+          "chickName": "연필깎이 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "학교 테마",
+      "sourceText": "학교 테마·연필깎이 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "파스타면",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 12,
+      "sources": [
+        {
+          "themeId": 12,
+          "themeName": "이태리 테마",
+          "chickName": "파스타 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "이태리 테마",
+      "sourceText": "이태리 테마·파스타 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "파인애플",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 22,
+      "sources": [
+        {
+          "themeId": 22,
+          "themeName": "해적선 테마",
+          "chickName": "앵무새 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "해적선 테마",
+      "sourceText": "해적선 테마·앵무새 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "팔각",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 25,
+      "sources": [
+        {
+          "themeId": 25,
+          "themeName": "우주 점성술 테마",
+          "chickName": "대마법사 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "우주 점성술 테마",
+      "sourceText": "우주 점성술 테마·대마법사 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "호박",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 26,
+      "sources": [
+        {
+          "themeId": 26,
+          "themeName": "무덤 테마",
+          "chickName": "촛불 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "무덤 테마",
+      "sourceText": "무덤 테마·촛불 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "가쓰오부시",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 19,
+      "sources": [
+        {
+          "themeId": 19,
+          "themeName": "학교 테마",
+          "chickName": "연필깎이 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "학교 테마",
+      "sourceText": "학교 테마·연필깎이 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "검은 쿠키",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 16,
+      "sources": [
+        {
+          "themeId": 16,
+          "themeName": "톨게이트 테마",
+          "chickName": "맨홀뚜껑 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "톨게이트 테마",
+      "sourceText": "톨게이트 테마·맨홀뚜껑 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "김",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 23,
+      "sources": [
+        {
+          "themeId": 23,
+          "themeName": "바닷속 테마",
+          "chickName": "열대어 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "바닷속 테마",
+      "sourceText": "바닷속 테마·열대어 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "라임",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 22,
+      "sources": [
+        {
+          "themeId": 22,
+          "themeName": "해적선 테마",
+          "chickName": "후크선장 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "해적선 테마",
+      "sourceText": "해적선 테마·후크선장 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "마시멜로우",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 13,
+      "sources": [
+        {
+          "themeId": 13,
+          "themeName": "캠핑 테마",
+          "chickName": "캠핑 토스트 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "캠핑 테마",
+      "sourceText": "캠핑 테마·캠핑 토스트 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "망고",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 22,
+      "sources": [
+        {
+          "themeId": 22,
+          "themeName": "해적선 테마",
+          "chickName": "앵무새 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "해적선 테마",
+      "sourceText": "해적선 테마·앵무새 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "미트볼",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 20,
+      "sources": [
+        {
+          "themeId": 20,
+          "themeName": "오락실 테마",
+          "chickName": "게임 마스터 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "오락실 테마",
+      "sourceText": "오락실 테마·게임 마스터 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "바나나",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 18,
+      "sources": [
+        {
+          "themeId": 18,
+          "themeName": "목욕탕 테마",
+          "chickName": "바나나 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "목욕탕 테마",
+      "sourceText": "목욕탕 테마·바나나 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "빵가루",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 11,
+      "sources": [
+        {
+          "themeId": 11,
+          "themeName": "식빵 테마",
+          "chickName": "식빵 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "식빵 테마",
+      "sourceText": "식빵 테마·식빵 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "스타후르츠",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 25,
+      "sources": [
+        {
+          "themeId": 25,
+          "themeName": "우주 점성술 테마",
+          "chickName": "망원경 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "우주 점성술 테마",
+      "sourceText": "우주 점성술 테마·망원경 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "엘더베리",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 24,
+      "sources": [
+        {
+          "themeId": 24,
+          "themeName": "연금술 테마",
+          "chickName": "마법사 할아버지 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "연금술 테마",
+      "sourceText": "연금술 테마·마법사 할아버지 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "연근",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 21,
+      "sources": [
+        {
+          "themeId": 21,
+          "themeName": "버섯 늪 테마",
+          "chickName": "개구리 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "버섯 늪 테마",
+      "sourceText": "버섯 늪 테마·개구리 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "오징어먹물",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 23,
+      "sources": [
+        {
+          "themeId": 23,
+          "themeName": "바닷속 테마",
+          "chickName": "복어 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "바닷속 테마",
+      "sourceText": "바닷속 테마·복어 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "올리브",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 12,
+      "sources": [
+        {
+          "themeId": 12,
+          "themeName": "이태리 테마",
+          "chickName": "이탈리아 채소 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "이태리 테마",
+      "sourceText": "이태리 테마·이탈리아 채소 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "육수",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 12,
+      "sources": [
+        {
+          "themeId": 12,
+          "themeName": "이태리 테마",
+          "chickName": "파스타 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "이태리 테마",
+      "sourceText": "이태리 테마·파스타 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "인삼",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 24,
+      "sources": [
+        {
+          "themeId": 24,
+          "themeName": "연금술 테마",
+          "chickName": "만드라고라 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "연금술 테마",
+      "sourceText": "연금술 테마·만드라고라 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "젤라틴",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 25,
+      "sources": [
+        {
+          "themeId": 25,
+          "themeName": "우주 점성술 테마",
+          "chickName": "외계인 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "우주 점성술 테마",
+      "sourceText": "우주 점성술 테마·외계인 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "칠리소스",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 13,
+      "sources": [
+        {
+          "themeId": 13,
+          "themeName": "캠핑 테마",
+          "chickName": "캠프파이어 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "캠핑 테마",
+      "sourceText": "캠핑 테마·캠프파이어 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "카라멜시럽",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 14,
+      "sources": [
+        {
+          "themeId": 14,
+          "themeName": "패스트푸드 테마",
+          "chickName": "콜라 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "패스트푸드 테마",
+      "sourceText": "패스트푸드 테마·콜라 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "현자의돌",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 25,
+      "sources": [
+        {
+          "themeId": 25,
+          "themeName": "우주 점성술 테마",
+          "chickName": "대마법사 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "우주 점성술 테마",
+      "sourceText": "우주 점성술 테마·대마법사 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "호밀",
+      "status": "레시피 미사용",
+      "recommendation": "레시피 추가 또는 드랍 재배치",
+      "burden": 0,
+      "recipeCount": 0,
+      "slots": 0,
+      "recipes": [],
+      "baseOrSingleCount": 0,
+      "specialCount": 1,
+      "strength": 0.3,
+      "firstThemeId": 26,
+      "sources": [
+        {
+          "themeId": 26,
+          "themeName": "무덤 테마",
+          "chickName": "리퍼 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "무덤 테마",
+      "sourceText": "무덤 테마·리퍼 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "설탕",
+      "status": "보통",
+      "recommendation": "유지",
+      "burden": 2.8571428571428577,
+      "recipeCount": 6,
+      "slots": 6,
+      "recipes": [
+        "시나몬 롤",
+        "진저브레드",
+        "해바라기씨 파이",
+        "딸기 생크림 케이크",
+        "체리 사탕",
+        "연어초밥"
+      ],
+      "baseOrSingleCount": 3,
+      "specialCount": 0,
+      "strength": 2.0999999999999996,
+      "firstThemeId": 6,
+      "sources": [
+        {
+          "themeId": 6,
+          "themeName": "벚꽃 테마",
+          "chickName": "꽃 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 11,
+          "themeName": "식빵 테마",
+          "chickName": "잼 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 13,
+          "themeName": "캠핑 테마",
+          "chickName": "캠핑 토스트 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "벚꽃 테마",
+      "sourceText": "벚꽃 테마·꽃 병아리(기본 70%), 식빵 테마·잼 병아리(기본 70%), 캠핑 테마·캠핑 토스트 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "열매",
+      "status": "보통",
+      "recommendation": "유지",
+      "burden": 2.857142857142857,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "상큼 나뭇잎 샐러드",
+        "열매꼬치구이"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 2,
+      "sources": [
+        {
+          "themeId": 2,
+          "themeName": "나무 테마",
+          "chickName": "도토리 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "나무 테마",
+      "sourceText": "나무 테마·도토리 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "체리",
+      "status": "보통",
+      "recommendation": "유지",
+      "burden": 2.857142857142857,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "체리 사탕",
+        "과일 가족 모임"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 6,
+      "sources": [
+        {
+          "themeId": 6,
+          "themeName": "벚꽃 테마",
+          "chickName": "체리 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "벚꽃 테마",
+      "sourceText": "벚꽃 테마·체리 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "생크림",
+      "status": "보통",
+      "recommendation": "유지",
+      "burden": 2.3076923076923075,
+      "recipeCount": 3,
+      "slots": 3,
+      "recipes": [
+        "콘스프",
+        "트러플 크림 리조또",
+        "딸기 생크림 케이크"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1.3,
+      "firstThemeId": 4,
+      "sources": [
+        {
+          "themeId": 4,
+          "themeName": "블루화이트 테마",
+          "chickName": "파란 보닛 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 26,
+          "themeName": "무덤 테마",
+          "chickName": "유령 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "블루화이트 테마",
+      "sourceText": "블루화이트 테마·파란 보닛 병아리(특별 30%), 무덤 테마·유령 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "식용유",
+      "status": "보통",
+      "recommendation": "유지",
+      "burden": 2,
+      "recipeCount": 4,
+      "slots": 4,
+      "recipes": [
+        "계란볶음밥",
+        "김치볶음밥",
+        "마늘 김치볶음",
+        "치즈 오믈렛"
+      ],
+      "baseOrSingleCount": 2,
+      "specialCount": 1,
+      "strength": 2,
+      "firstThemeId": 7,
+      "sources": [
+        {
+          "themeId": 7,
+          "themeName": "한식당 테마",
+          "chickName": "프라이팬 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 12,
+          "themeName": "이태리 테마",
+          "chickName": "이탈리아 채소 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 16,
+          "themeName": "톨게이트 테마",
+          "chickName": "자동차 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        }
+      ],
+      "firstThemeName": "한식당 테마",
+      "sourceText": "한식당 테마·프라이팬 병아리(특별 30%), 이태리 테마·이탈리아 채소 병아리(기본 70%), 톨게이트 테마·자동차 병아리(단일 100%)"
+    },
+    {
+      "ingredient": "마늘",
+      "status": "보통",
+      "recommendation": "유지",
+      "burden": 2,
+      "recipeCount": 2,
+      "slots": 2,
+      "recipes": [
+        "마늘 김치볶음",
+        "마늘 육회"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1,
+      "firstThemeId": 8,
+      "sources": [
+        {
+          "themeId": 8,
+          "themeName": "채소밭 테마",
+          "chickName": "채소 바구니 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 26,
+          "themeName": "무덤 테마",
+          "chickName": "리퍼 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "채소밭 테마",
+      "sourceText": "채소밭 테마·채소 바구니 병아리(특별 30%), 무덤 테마·리퍼 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "계란",
+      "status": "보통",
+      "recommendation": "유지",
+      "burden": 1.7391304347826089,
+      "recipeCount": 4,
+      "slots": 4,
+      "recipes": [
+        "계란볶음밥",
+        "마늘 육회",
+        "치즈 간장계란밥",
+        "치즈 오믈렛"
+      ],
+      "baseOrSingleCount": 2,
+      "specialCount": 2,
+      "strength": 2.3,
+      "firstThemeId": 7,
+      "sources": [
+        {
+          "themeId": 7,
+          "themeName": "한식당 테마",
+          "chickName": "프라이팬 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 8,
+          "themeName": "채소밭 테마",
+          "chickName": "가지 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 10,
+          "themeName": "병아리 테마",
+          "chickName": "닭 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        },
+        {
+          "themeId": 18,
+          "themeName": "목욕탕 테마",
+          "chickName": "목욕 바구니 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "한식당 테마",
+      "sourceText": "한식당 테마·프라이팬 병아리(기본 70%), 채소밭 테마·가지 병아리(특별 30%), 병아리 테마·닭 병아리(단일 100%), 목욕탕 테마·목욕 바구니 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "후추",
+      "status": "보통",
+      "recommendation": "유지",
+      "burden": 1.6666666666666667,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "후추 스테이크"
+      ],
+      "baseOrSingleCount": 0,
+      "specialCount": 2,
+      "strength": 0.6,
+      "firstThemeId": 4,
+      "sources": [
+        {
+          "themeId": 4,
+          "themeName": "블루화이트 테마",
+          "chickName": "파란 리본 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        },
+        {
+          "themeId": 19,
+          "themeName": "학교 테마",
+          "chickName": "연필 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "블루화이트 테마",
+      "sourceText": "블루화이트 테마·파란 리본 병아리(특별 30%), 학교 테마·연필 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "가지",
+      "status": "여유",
+      "recommendation": "유지",
+      "burden": 1.4285714285714286,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "가지 소고기 덮밥"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 8,
+      "sources": [
+        {
+          "themeId": 8,
+          "themeName": "채소밭 테마",
+          "chickName": "가지 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "채소밭 테마",
+      "sourceText": "채소밭 테마·가지 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "대구",
+      "status": "여유",
+      "recommendation": "유지",
+      "burden": 1.4285714285714286,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "대구구이"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 9,
+      "sources": [
+        {
+          "themeId": 9,
+          "themeName": "블루 땡땡이 테마",
+          "chickName": "고양이 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "블루 땡땡이 테마",
+      "sourceText": "블루 땡땡이 테마·고양이 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "양배추",
+      "status": "여유",
+      "recommendation": "유지",
+      "burden": 1.4285714285714286,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "양배추 딤섬"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 8,
+      "sources": [
+        {
+          "themeId": 8,
+          "themeName": "채소밭 테마",
+          "chickName": "배추 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "채소밭 테마",
+      "sourceText": "채소밭 테마·배추 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "요거트",
+      "status": "여유",
+      "recommendation": "유지",
+      "burden": 1.4285714285714286,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "복숭아 요거트"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 5,
+      "sources": [
+        {
+          "themeId": 5,
+          "themeName": "그린핑크 테마",
+          "chickName": "복숭아 천사 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "그린핑크 테마",
+      "sourceText": "그린핑크 테마·복숭아 천사 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "트러플",
+      "status": "여유",
+      "recommendation": "유지",
+      "burden": 1.4285714285714286,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "트러플 크림 리조또"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 0,
+      "strength": 0.7,
+      "firstThemeId": 4,
+      "sources": [
+        {
+          "themeId": 4,
+          "themeName": "블루화이트 테마",
+          "chickName": "파란 보닛 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "블루화이트 테마",
+      "sourceText": "블루화이트 테마·파란 보닛 병아리(기본 70%)"
+    },
+    {
+      "ingredient": "오이",
+      "status": "여유",
+      "recommendation": "유지",
+      "burden": 1,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "씨앗 오이 샐러드"
+      ],
+      "baseOrSingleCount": 1,
+      "specialCount": 1,
+      "strength": 1,
+      "firstThemeId": 8,
+      "sources": [
+        {
+          "themeId": 8,
+          "themeName": "채소밭 테마",
+          "chickName": "채소 바구니 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        },
+        {
+          "themeId": 14,
+          "themeName": "패스트푸드 테마",
+          "chickName": "햄버거 병아리",
+          "chance": 0.3,
+          "slotLabel": "특별 30%"
+        }
+      ],
+      "firstThemeName": "채소밭 테마",
+      "sourceText": "채소밭 테마·채소 바구니 병아리(기본 70%), 패스트푸드 테마·햄버거 병아리(특별 30%)"
+    },
+    {
+      "ingredient": "우유",
+      "status": "여유",
+      "recommendation": "유지",
+      "burden": 0.5882352941176471,
+      "recipeCount": 1,
+      "slots": 1,
+      "recipes": [
+        "치즈 오믈렛"
+      ],
+      "baseOrSingleCount": 2,
+      "specialCount": 0,
+      "strength": 1.7,
+      "firstThemeId": 9,
+      "sources": [
+        {
+          "themeId": 9,
+          "themeName": "블루 땡땡이 테마",
+          "chickName": "잠옷 병아리",
+          "chance": 1,
+          "slotLabel": "단일 100%"
+        },
+        {
+          "themeId": 18,
+          "themeName": "목욕탕 테마",
+          "chickName": "바나나 병아리",
+          "chance": 0.7,
+          "slotLabel": "기본 70%"
+        }
+      ],
+      "firstThemeName": "블루 땡땡이 테마",
+      "sourceText": "블루 땡땡이 테마·잠옷 병아리(단일 100%), 목욕탕 테마·바나나 병아리(기본 70%)"
+    }
+  ]
+}

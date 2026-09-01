@@ -136,6 +136,7 @@ const IDEA_ENERGY_REGEN_SECONDS = 30 * 60;
 const IDEA_RESEARCH_COST = 1;
 const IDEA_REFILL_AMOUNT = 10;
 const IDEA_REFILL_GEM_COSTS = Object.freeze([10, 50, 100, 200]);
+const AUTO_WEIRD_DISH_INGREDIENT_COUNT = 2;
 const THEME_COMPLETION_MENU_PRICE_BONUS = .2;
 const SINK_WATER_COOLDOWN_SECONDS = 8;
 const CHICK_ICON_MAX_INDEX = 108;
@@ -2840,7 +2841,7 @@ function randomAutoResearchIngredients() {
     const randomIndex = Math.floor(Math.random() * (index + 1));
     [pool[index], pool[randomIndex]] = [pool[randomIndex], pool[index]];
   }
-  return pool.slice(0, Math.min(recipeCombinationCapacity(), pool.length));
+  return pool.slice(0, Math.min(AUTO_WEIRD_DISH_INGREDIENT_COUNT, pool.length));
 }
 
 function tryAutoCraft() {
@@ -3609,6 +3610,9 @@ function drawInstallZone(row) {
 
 function chefMovementTarget() {
   if (!state || !tables || dom.menuScreen.hidden || state.ui.screen !== "recipe") {
+    return { ...CHEF_HOME_POSITION, station: "home", facilityType: null };
+  }
+  if (state.ui.tab === "catalog") {
     return { ...CHEF_HOME_POSITION, station: "home", facilityType: null };
   }
   const facilityType = state.ui.tab === "ingredients" ? 6 : 8;
@@ -4791,11 +4795,33 @@ function recipeCatalogCard(route, index) {
   </article>`;
 }
 
+function recipePickerExactKnownMatches() {
+  if (state.crafting.selected.length < 2) return [];
+  const selectedKey = [...state.crafting.selected].map(Number).sort((a, b) => a - b).join(",");
+  return discoveryOrderedRecipeRoutes()
+    .map((route) => {
+      if (!recipeData(route.recipeId)) return null;
+      const requirements = craftIngredientRequirements(route);
+      const recipeKey = expandedCraftIngredientIds(route).sort((a, b) => a - b).join(",");
+      return recipeKey === selectedKey ? { route, requirements } : null;
+    })
+    .filter(Boolean);
+}
+
+function recipePickerKnownCombinationCard(entry) {
+  const owned = recipeData(entry.route.recipeId);
+  return `<article class="recipe-picker-known-card is-exact-match">
+    <img src="${routeRecipeIcon(entry.route.recipeId)}" alt="" />
+    <div><small>이미 발견한 요리</small><strong>${routeRecipeName(entry.route.recipeId)}</strong><span>Lv.${owned?.level || 1}</span></div>
+  </article>`;
+}
+
 function renderRecipeMenu() {
   const fridgeTab = state.ui.tab === "ingredients";
-  dom.menuKicker.textContent = fridgeTab ? "재료 관리" : "도마 테이블";
-  dom.menuTitle.textContent = fridgeTab ? "냉장고" : "요리 연구";
-  renderTabs([["craft", "연구"], ["ingredients", "냉장고"]]);
+  const catalogTab = state.ui.tab === "catalog";
+  dom.menuKicker.textContent = fridgeTab ? "재료 관리" : catalogTab ? "요리 모아보기" : "도마 테이블";
+  dom.menuTitle.textContent = fridgeTab ? "냉장고" : catalogTab ? "요리 목록" : "요리 연구";
+  renderTabs([["craft", "연구"], ["catalog", "요리 목록"], ["ingredients", "냉장고"]]);
   if (state.ui.tab === "craft") {
     const visibleIngredients = Object.values(GAME_INGREDIENTS)
       .filter((ingredient) => ingredientAmount(ingredient.id) > 0 || selectedIngredientCount(ingredient.id) > 0);
@@ -4819,26 +4845,29 @@ function renderRecipeMenu() {
       const position = bowlPositions[index % bowlPositions.length];
       return `<span class="bowl-ingredient ${index === mixingDropIndex ? "is-dropping" : ""}" style="--x:${position.x}%;--y:${position.y}%;--r:${position.r}deg"><span>${ingredient.emoji}</span><small>${ingredient.ingredientName}</small></span>`;
     }).join("");
-    const remainingPickerCapacity = Math.max(0, capacity - selected.length);
     const selectedPickerItems = Array.from({ length: capacity }, (_, index) => {
       const ingredient = selected[index];
       return ingredient
         ? `<button type="button" data-action="remove-selected-ingredient" data-id="${ingredient.id}" aria-label="${index + 1}번 칸 ${ingredient.ingredientName} 빼기"><span>${ingredient.emoji}</span><strong>${ingredient.ingredientName}</strong><small>${index + 1}</small></button>`
         : `<span class="recipe-picker-empty-slot" aria-hidden="true"><b>${index + 1}</b><small>빈 칸</small></span>`;
     }).join("");
+    const exactKnownMatches = recipePickerExactKnownMatches();
+    const knownCombinationGuide = exactKnownMatches.length ? `<section class="recipe-picker-known-recipes" aria-label="현재 조합으로 만들 수 있는 발견한 요리" aria-live="polite">
+      ${exactKnownMatches.map(recipePickerKnownCombinationCard).join("")}
+    </section>` : "";
     const ingredientPicker = state.ui.recipeIngredientPickerOpen ? `<div class="recipe-ingredient-modal" role="presentation">
       <button type="button" class="recipe-ingredient-backdrop" data-action="close-ingredient-picker" aria-label="재료 선택 닫기"></button>
       <section class="recipe-ingredient-dialog" role="dialog" aria-modal="true" aria-label="보울에 재료 넣기">
         <header><div><small>최대 ${capacity}개</small><h3>재료 넣기</h3></div><button type="button" data-action="close-ingredient-picker" aria-label="닫기">×</button></header>
-        <div class="recipe-picker-capacity" aria-label="보울 용량 ${selected.length}/${capacity}, ${remainingPickerCapacity ? `남은 ${remainingPickerCapacity}칸` : "가득 참"}"><strong>보울 용량</strong><span>${selected.length}/${capacity} · ${remainingPickerCapacity ? `남은 ${remainingPickerCapacity}칸` : "가득 참"}</span></div>
         <div class="recipe-picker-selected" aria-label="선택한 재료 ${selected.length}/${capacity}">${selectedPickerItems}</div>
+        ${knownCombinationGuide}
         <strong class="recipe-picker-label">보유 재료</strong>
         <div class="combination-picker recipe-picker-grid">${visibleIngredients.length ? visibleIngredients.map((ingredient) => {
           const selectedCount = selectedIngredientCount(ingredient.id);
           const available = ingredientAmount(ingredient.id) - selectedCount;
           return `<button type="button" data-action="select-ingredient" data-id="${ingredient.id}" ${available > 0 && selected.length < capacity ? "" : "disabled"}><span>${ingredient.emoji}</span><strong>${ingredient.name}</strong><small>${available}/${ingredientAmount(ingredient.id)}</small></button>`;
         }).join("") : `<p>냉장고에 재료가 없어요.</p>`}</div>
-        <button type="button" class="recipe-picker-mix" data-action="discover-combination" ${selected.length >= 2 && !recipeResearch && hasIdeaEnergy() ? "" : "disabled"}><span aria-hidden="true">🥄</span> ${selected.length >= 2 ? hasIdeaEnergy() ? `바로 섞기 · ${selected.length}/${capacity}` : "아이디어가 부족해요" : `재료를 2개 이상 담아주세요 · ${selected.length}/${capacity}`}</button>
+        <button type="button" class="recipe-picker-mix" data-action="discover-combination" ${selected.length >= 2 && !recipeResearch && hasIdeaEnergy() ? "" : "disabled"}><span aria-hidden="true">🥄</span> ${selected.length >= 2 ? hasIdeaEnergy() ? "바로 섞기" : "아이디어가 부족해요" : "2개 이상 담기"}</button>
       </section>
     </div>` : "";
     const autoUnlocked = unlockedRecipeCount() >= 5;
@@ -4871,9 +4900,10 @@ function renderRecipeMenu() {
       <div class="ingredient-shelf-title"><strong>보울을 눌러 재료 넣기</strong><small>${selected.length}/${capacity}</small></div>
       <button class="research-button auto-research-button" data-action="auto-craft" ${autoUnlocked && !recipeResearch && hasIdeaEnergy() ? "" : "disabled"}>${autoUnlocked ? hasIdeaEnergy() ? "자동 요리 연구" : "아이디어가 부족해요" : `자동 연구 · 요리 ${unlockedRecipeCount()}/5`}</button>
       ${researchOverlay}
-    </section>${ingredientPicker}
-    <div class="recipe-discovery-status"><strong>발견 가능한 요리</strong><span>${unlockedRecipeCount()}/${RECIPE_PROGRESSION.length} 발견</span></div>
-    <div class="recipe-catalog-grid">${discoveryOrderedRecipeRoutes().map(recipeCatalogCard).join("")}</div>`;
+    </section>${ingredientPicker}`;
+  } else if (catalogTab) {
+    dom.menuContent.innerHTML = `<div class="recipe-discovery-status recipe-catalog-summary"><strong>요리 목록</strong><span>${unlockedRecipeCount()}/${RECIPE_PROGRESSION.length} 발견</span></div>
+      <div class="recipe-catalog-grid">${discoveryOrderedRecipeRoutes().map(recipeCatalogCard).join("")}</div>`;
   } else {
     const ingredients = storedIngredientIds()
       .map((id) => ingredientData(id))
@@ -5784,6 +5814,13 @@ function renderGameToText() {
       combinationCapacityExpansion: { gems: BOWL_CAPACITY_EXPANSION_GEM_COST, amount: BOWL_CAPACITY_EXPANSION_AMOUNT },
       selectedIngredients: [...state.crafting.selected],
       ingredientPickerOpen: Boolean(state.ui.recipeIngredientPickerOpen),
+      knownCombinationGuide: {
+        visible: Boolean(state.ui.recipeIngredientPickerOpen && recipePickerExactKnownMatches().length),
+        recipeCount: recipePickerExactKnownMatches().length,
+        recipeIds: recipePickerExactKnownMatches().map((entry) => entry.route.recipeId),
+        disclosure: "discovered-recipes-only",
+        trigger: "exact-selected-combination-only",
+      },
       ingredientSelection: "tap-bowl-popup-mix-inside",
       outsideMixButton: false,
       mixingPresentation: "cutting-board-and-bowl",
@@ -5798,7 +5835,8 @@ function renderGameToText() {
       catalogTotal: RECIPE_PROGRESSION.length,
       catalogSort: "earliest-ingredient-discovery-stage",
       catalogPresentation: "merged-discovery-and-manual-upgrade",
-      tabs: ["craft", "ingredients"],
+      tabs: ["craft", "catalog", "ingredients"],
+      tabPurposes: { craft: "research-only", catalog: "all-recipes-and-upgrades", ingredients: "storage" },
       catalogOrder: discoveryOrderedRecipeRoutes().map((route) => route.recipeId),
       reveal: recipeReveal ? {
         recipeId: recipeReveal.recipeId,
@@ -5852,7 +5890,8 @@ function renderGameToText() {
         .filter((route) => canCraftRecipe(route.recipeId))
         .sort(compareAutoResearchRoutes)[0]?.recipeId || null,
       autoResearchPriority: "new-first-lowest-level-then-highest-inventory-pressure",
-      autoResearchWhenNoRecipe: "random-ingredients-up-to-bowl-capacity-then-weird-dish",
+      autoResearchWhenNoRecipe: "random-2-ingredients-then-weird-dish",
+      autoWeirdDishIngredientCost: AUTO_WEIRD_DISH_INGREDIENT_COUNT,
       salePriceFormula: "recipeLevelPrice*restaurantPriceUp*satisfaction*performanceBuff",
       salePriceMultipliers: {
         restaurantPriceUp: restaurantPriceUpMultiplier(),
