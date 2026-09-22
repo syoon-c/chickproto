@@ -1,128 +1,44 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f6c94f" />
-    <meta name="description" content="환경을 가꾸고 친구와 함께 마을을 복구하는 생활 게임 프로토타입" />
-    <title>노랑마을</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='34' r='24' fill='%23F6C94F'/%3E%3Ccircle cx='25' cy='29' r='3' fill='%23352D22'/%3E%3Ccircle cx='39' cy='29' r='3' fill='%23352D22'/%3E%3Cpath d='M27 37h10l-5 6z' fill='%23F07F3C'/%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <main class="app-shell">
-      <header class="topbar">
-        <div class="brand" aria-label="노랑마을">
-          <span class="brand-mark" aria-hidden="true"><i></i></span>
-          <span>
-            <strong>노랑마을</strong>
-            <small>버들숲 복구일지</small>
-          </span>
-        </div>
-
-        <div class="status-strip" aria-label="플레이 상태">
-          <div class="level-pill"><span>환경</span><strong id="level-value">1</strong></div>
-          <div class="energy-wrap">
-            <span>행동 에너지</span>
-            <div class="energy-pips" id="energy-pips" aria-label="행동 에너지 12"></div>
-          </div>
-          <button class="icon-button muted" id="sound-button" aria-label="소리 켜기" title="소리 켜기">
-            <span class="speaker-icon" aria-hidden="true"></span>
-          </button>
-        </div>
-      </header>
-
-      <section class="game-layout">
-        <div class="world-card">
-          <canvas id="game-canvas" width="1000" height="640" aria-label="버들숲 마을 게임 화면"></canvas>
-
-          <div class="weather-chip"><span class="sun-dot"></span>맑음 · 첫째 날</div>
-          <div class="tool-chip" id="tool-chip">정리할 대상을 눌러주세요</div>
-
-          <button class="map-help" id="help-button" aria-label="게임 방법 보기">?</button>
-
-          <div class="arrival-card" id="arrival-card" role="dialog" aria-modal="true" aria-labelledby="arrival-title" hidden>
-            <button class="arrival-close" id="arrival-close" aria-label="닫기">×</button>
-            <div class="arrival-chick" aria-hidden="true"><span></span></div>
-            <p class="eyebrow">새로운 이웃</p>
-            <h2 id="arrival-title">모루가 찾아왔어요</h2>
-            <p>아늑한 둥지를 보고 건축을 좋아하는 병아리 모루가 마을에 왔습니다.</p>
-            <div class="skill-badge"><span class="hammer-mini"></span>특기 · 건축</div>
-            <button class="primary-button" id="welcome-button">함께 다리 고치기</button>
-          </div>
-
-          <div class="completion-card" id="completion-card" role="dialog" aria-modal="true" aria-labelledby="completion-title" hidden>
-            <div class="completion-stamp" aria-hidden="true">완료</div>
-            <p class="eyebrow">버들숲 복구</p>
-            <h2 id="completion-title">다시 길이 이어졌어요</h2>
-            <p>모루의 도움으로 오래된 다리를 고쳤습니다. 물안개 습지로 가는 길이 열렸습니다.</p>
-            <div class="reward-row"><span>환경 경험치</span><strong>+ 40</strong></div>
-            <button class="primary-button" id="continue-button">마을 둘러보기</button>
-          </div>
-        </div>
-
-        <aside class="side-panel" aria-label="마을 관리">
-          <nav class="tabs" aria-label="관리 메뉴">
-            <button class="tab active" data-tab="tasks">할 일</button>
-            <button class="tab" data-tab="craft">제작</button>
-            <button class="tab" data-tab="friends">친구</button>
-          </nav>
-
-          <div class="tab-view active" id="tab-tasks">
-            <section class="quest-card">
-              <div class="quest-heading">
-                <span class="quest-number">01</span>
-                <div><p>오늘의 목표</p><h2>끊어진 다리를 고쳐요</h2></div>
-              </div>
-              <p class="quest-copy" id="quest-copy">주변을 정리해 재료를 모으고, 새 이웃이 머물 서식지를 준비해 주세요.</p>
-              <div class="quest-steps" id="quest-steps"></div>
-              <button class="secondary-button" id="quest-action">정리할 곳 보기</button>
-            </section>
-
-            <section class="habitat-card">
-              <div class="section-title"><h3>햇살 둥지</h3><span id="habitat-progress">1 / 3</span></div>
-              <p>새 이웃이 머물 수 있도록 포근한 환경을 만들어 주세요.</p>
-              <div class="requirements" id="requirements"></div>
-            </section>
-          </div>
-
-          <div class="tab-view" id="tab-craft">
-            <div class="section-title"><div><p class="eyebrow">목공 작업대</p><h2>무엇을 만들까요?</h2></div></div>
-            <p class="panel-intro">정리하며 얻은 재료로 둥지에 필요한 물건을 만들 수 있습니다.</p>
-            <div class="recipe-list" id="recipe-list"></div>
-          </div>
-
-          <div class="tab-view" id="tab-friends">
-            <div class="section-title"><div><p class="eyebrow">함께 사는 친구</p><h2>병아리 수첩</h2></div><span id="friend-count">1 / 2</span></div>
-            <div class="friend-list" id="friend-list"></div>
-          </div>
-
-          <footer class="inventory-bar" aria-label="보유 재료">
-            <div><span class="resource-icon grass"></span><small>풀잎</small><strong id="grass-count">0</strong></div>
-            <div><span class="resource-icon twig"></span><small>나뭇가지</small><strong id="twig-count">0</strong></div>
-            <div><span class="resource-icon stone"></span><small>돌멩이</small><strong id="stone-count">0</strong></div>
-          </footer>
-        </aside>
-      </section>
-    </main>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <div class="help-modal" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
-      <div class="help-content">
-        <button class="arrival-close" id="help-close" aria-label="닫기">×</button>
-        <p class="eyebrow">플레이 방법</p>
-        <h2 id="help-title">마을을 직접 가꿔 보세요</h2>
-        <ol>
-          <li><span>1</span>마을의 풀더미, 나뭇가지, 돌무더기를 눌러 정리합니다.</li>
-          <li><span>2</span>제작 탭에서 방석과 등불을 만들어 둥지에 배치합니다.</li>
-          <li><span>3</span>새 병아리의 건축 특기를 빌려 끊어진 다리를 고칩니다.</li>
-        </ol>
-        <p class="key-note">키보드에서는 숫자 1~3으로 메뉴를 열고, F로 전체 화면을 전환할 수 있습니다.</p>
-        <button class="primary-button" id="help-start">시작하기</button>
-      </div>
-    </div>
-
-    <script src="game.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#dff4ac">
+  <title>병아리 마을</title>
+  <link rel="icon" href="assets/unity/chick-base.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="game-shell" id="game-shell" aria-label="병아리 마을 모바일 게임">
+    <canvas id="game-canvas" width="390" height="844" aria-label="직접 조작하는 병아리 마을"></canvas>
+    <header class="hud" aria-label="마을 상태">
+      <div class="village-badge"><img src="assets/unity/chick-base.png" alt=""><span><small>DAY <b id="day-count">1</b></small><strong>햇살 마을</strong></span></div>
+      <div class="energy-badge" aria-label="남은 기운"><span>기운</span><strong id="energy-count">12</strong><small>/12</small></div>
+    </header>
+    <section class="resource-bar" aria-label="보유 재료">
+      <span><b class="resource-icon wood">◆</b>나무 <strong id="wood-count">2</strong></span>
+      <span><b class="resource-icon stone">●</b>돌 <strong id="stone-count">0</strong></span>
+      <span><b class="resource-icon sprout">♣</b>새싹 <strong id="sprout-count">1</strong></span>
+      <span><b class="resource-icon berry">●</b>열매 <strong id="berry-count">0</strong></span>
+    </section>
+    <button class="quest-chip" id="quest-button" aria-label="오늘의 의뢰 열기"><img src="assets/unity/quest.png" alt=""><span><small>오늘의 의뢰</small><strong id="quest-summary">빈터를 정리해요</strong></span><b id="quest-total">0/3</b></button>
+    <div class="mode-banner" id="mode-banner" hidden><strong id="mode-title">모닥불 놓기</strong><span>빈 잔디를 눌러 설치하세요.</span><button id="cancel-build">취소</button></div>
+    <nav class="game-dock" aria-label="게임 메뉴">
+      <button id="bag-button"><span class="dock-icon">▣</span><b>가방</b></button>
+      <button class="build-main" id="build-button"><span class="dock-icon">⌂</span><b>짓기</b></button>
+      <button id="friends-button"><img src="assets/unity/chick-base.png" alt=""><b>친구</b></button>
+    </nav>
+    <section class="intro-card" id="intro-card" aria-labelledby="intro-title">
+      <span class="day-ribbon">첫째 날</span><img src="assets/unity/chick-base.png" alt="삐약이">
+      <div><small>새 마을에 도착했어요</small><h1 id="intro-title">빈터를 정리하고<br><em>우리 마을</em>을 만들어요!</h1><p>나무, 돌, 풀을 직접 눌러 재료를 모아주세요.</p></div>
+      <button id="start-game">마을 시작</button>
+    </section>
+    <section class="bottom-sheet" id="build-sheet" hidden aria-label="시설 짓기"><button class="sheet-backdrop" data-close="build-sheet" aria-label="닫기"></button><div class="sheet-card"><span class="sheet-handle"></span><header><span><small>BUILD</small><strong>무엇을 지을까요?</strong></span><button data-close="build-sheet" aria-label="닫기">×</button></header><div class="recipe-list" id="recipe-list"></div></div></section>
+    <section class="bottom-sheet" id="friend-sheet" hidden aria-label="병아리와 놀기"><button class="sheet-backdrop" data-close="friend-sheet" aria-label="닫기"></button><div class="sheet-card friend-card"><span class="sheet-handle"></span><header><span><small>MY CHICK</small><strong id="friend-name">삐약이</strong></span><button data-close="friend-sheet" aria-label="닫기">×</button></header><div class="friend-profile"><img id="friend-image" src="assets/unity/chick-base.png" alt=""><p id="friend-status">무엇을 함께 할까요?</p></div><div class="friend-actions"><button data-friend-action="play"><b>♪</b><span>같이 놀기<small>친밀도 +1</small></span></button><button data-friend-action="feed"><b>●</b><span>열매 주기<small>열매 1개</small></span></button><button data-friend-action="rest"><b>☀</b><span>함께 쉬기<small>기운 +2</small></span></button></div></div></section>
+    <section class="bottom-sheet" id="quest-sheet" hidden aria-label="오늘의 의뢰"><button class="sheet-backdrop" data-close="quest-sheet" aria-label="닫기"></button><div class="sheet-card"><span class="sheet-handle"></span><header><span><small>TODAY</small><strong>오늘의 의뢰</strong></span><button data-close="quest-sheet" aria-label="닫기">×</button></header><div class="quest-list" id="quest-list"></div><div class="quest-reward"><span>모두 완료 보상</span><strong>새 주민 + 행복 20</strong></div></div></section>
+    <section class="bottom-sheet" id="bag-sheet" hidden aria-label="가방"><button class="sheet-backdrop" data-close="bag-sheet" aria-label="닫기"></button><div class="sheet-card"><span class="sheet-handle"></span><header><span><small>INVENTORY</small><strong>내 가방</strong></span><button data-close="bag-sheet" aria-label="닫기">×</button></header><div class="bag-grid" id="bag-grid"></div><p class="bag-tip">마을의 나무, 돌, 풀, 열매 덤불을 눌러 재료를 모을 수 있어요.</p></div></section>
+    <div class="speech-bubble" id="speech-bubble" role="status" aria-live="polite"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+  <script src="game.js"></script>
+</body>
 </html>
