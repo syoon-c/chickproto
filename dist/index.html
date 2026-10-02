@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#8fc173">
   <title>삐약마을</title>
-  <link rel="icon" href="assets/unity/chick-base.png">
+  <link rel="icon" href="assets/unity/original/icon_chick_001.png">
   <link rel="stylesheet" href="village-v2.css">
+  <link rel="stylesheet" href="village-contrast.css">
+  <link rel="preload" as="image" href="assets/backgrounds/home-simple.svg">
+  <link rel="preload" as="image" href="assets/backgrounds/forest-simple.svg">
+  <link rel="preload" as="image" href="assets/backgrounds/river-simple.svg">
+  <link rel="preload" as="image" href="assets/backgrounds/ridge-simple.svg">
 </head>
 <body>
   <main class="phone" aria-label="삐약마을 게임">
@@ -15,7 +20,7 @@
     <button class="objective" id="objective-button"><span class="objective-icon">◎</span><span><small>지금 할 일</small><strong id="objective-text">가지를 모아 보세요</strong></span><span>›</span></button>
     <div class="notice" id="notice" role="status" aria-live="polite"></div>
     <div class="placement-controls" id="placement-controls" hidden><strong id="place-name">배치하기</strong><span id="place-message">빈 칸을 눌러 놓으세요</span><div><button id="rotate-button">회전</button><button id="place-cancel">취소</button><button id="place-done">배치 완료</button></div></div>
-    <nav class="dock" aria-label="게임 메뉴"><button data-panel="bag"><span>▣</span>가방</button><button data-panel="craft"><span>⚒</span>만들기</button><button data-panel="storage"><span>▤</span>보관함</button><button data-panel="friends"><span>♟</span>친구</button><button data-panel="goals"><span>✦</span>목표</button></nav>
+    <nav class="dock" aria-label="게임 메뉴"><button data-panel="bag"><span>▣</span>가방</button><button data-panel="craft"><span>⚒</span>시설</button><button data-panel="storage"><span>▤</span>보관함</button><button data-panel="friends"><span>♟</span>친구</button><button data-panel="goals"><span>✦</span>목표</button></nav>
     <section class="sheet" id="sheet" hidden><button class="sheet-backdrop" id="sheet-backdrop" aria-label="닫기"></button><div class="sheet-inner"><div class="sheet-grip"></div><header><div><small id="sheet-kicker">마을</small><h2 id="sheet-title">가방</h2></div><button id="sheet-close" aria-label="닫기">×</button></header><div id="sheet-content"></div></div></section>
   </main>
   <script src="village-v2.js"></script>

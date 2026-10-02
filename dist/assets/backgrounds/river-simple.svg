@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="700" viewBox="0 0 390 700">
+  <rect width="390" height="700" fill="#d5ecc6"/>
+  <path d="M0 0h180q-14 160-7 339t9 361H0Z" fill="#e2f0cc"/>
+  <path d="M273 0h117v700H287q-11-166-12-354T273 0Z" fill="#deedc2"/>
+  <path d="M225-20C229 145 235 290 240 425s12 211 5 295" fill="none" stroke="#e9dfc0" stroke-width="88"/>
+  <path d="M225-20C229 145 235 290 240 425s12 211 5 295" fill="none" stroke="#9bd6e4" stroke-width="70"/>
+  <path d="M225-20C229 145 235 290 240 425s12 211 5 295" fill="none" stroke="#b6e5ed" stroke-width="49"/>
+  <g fill="#b8dbad">
+    <circle cx="0" cy="108" r="43"/><circle cx="390" cy="142" r="39"/>
+    <circle cx="0" cy="491" r="37"/><circle cx="389" cy="526" r="45"/>
+    <circle cx="0" cy="648" r="52"/><circle cx="390" cy="645" r="52"/>
+  </g>
+  <path d="M103 700q-12-70 0-122" fill="none" stroke="#f4e6c3" stroke-width="55" stroke-linecap="round"/>
+  <g fill="none" stroke="#e3f7f4" stroke-width="4" stroke-linecap="round" opacity=".85">
+    <path d="M218 150q18 8 36 0M220 310q18 8 37 0M226 489q17 8 35 0M227 619q17 8 35 0"/>
+  </g>
+</svg>
