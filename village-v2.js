@@ -235,6 +235,152 @@ function selectPoint(e){let p=svgPoint(e);placement.col=Math.max(0,Math.min((sta
 document.querySelectorAll('.dock [data-panel]').forEach(b=>b.addEventListener('click',()=>{if(placement){tell('배치를 완료하거나 취소해 주세요.');return}({bag:showBag,craft:showCraft,storage:showStorage,friends:showFriends,goals:showGoals})[b.dataset.panel]()}));$('region-button').onclick=showMap;$('map-button').onclick=showMap;$('objective-button').onclick=showJobPanel;$('sheet-close').onclick=close;$('sheet-backdrop').onclick=close;
 $('rotate-button').onclick=()=>{if(!placement)return;[placement.w,placement.h]=[placement.h,placement.w];placement.rotated=!placement.rotated;draw()};$('place-cancel').onclick=()=>{placement=null;draw()};$('place-done').onclick=()=>{if(!placement)return;let bad=blockReason(placement.col,placement.row,placement.w,placement.h,placement.moveId);if(bad){tell(bad);return}if(placement.moveId){let source=state.placements[placement.sourceRegion],index=source.findIndex(x=>x.id===placement.moveId),o=source[index];if(!o)return;source.splice(index,1);Object.assign(o,{col:placement.col,row:placement.row,w:placement.w,h:placement.h});state.placements[state.region].push(o)}else{if((state.stock[placement.kind]||0)<1)return;state.stock[placement.kind]--;state.placements[state.region].push({id:`p${++state.seq}`,kind:placement.kind,col:placement.col,row:placement.row,w:placement.w,h:placement.h})}tell(`${KIND[placement.kind].name}을 놓았어요.`);placement=null;save();scheduleVisit();draw()};
 window.render_game_to_text=()=>JSON.stringify({coordinates:'SVG 390×700, origin top-left',region:state.region,player:state.player,visibleResidents:state.residents.filter(id=>(state.residentHomes[id]||'home')===state.region).map(id=>({id,x:Math.round(residentPositions[id]?.x||0),y:Math.round(residentPositions[id]?.y||0)})),happinessLevel:happinessLevel(),stars:state.stars,totalStars:totalStars(),coins:state.coins,inventory:state.inventory,stock:state.stock,tools:state.tools,processing:state.processing,placements:state.placements,unlocked:state.unlocked,job:state.job,invitation:state.invitation,guest:state.guest,residents:state.residents,requests:state.requests,objective:objective(),panel,placement},null,2);
+// Connected village loop: specialties, regional workshops and renewable requests.
+const SPECIALTIES={
+ scout:{label:'발견',verb:'새 채집 자리 찾기',features:['play','rest'],cost:{berry:2},reward:{wood:3},detail:'주변 자연물을 다시 찾고 나무를 가져옵니다.'},
+ grow:{label:'돌보기',verb:'씨앗 함께 돌보기',features:['plant','farm'],cost:{berry:1},reward:{herb:2},detail:'이 지역의 심은 밭을 수확 가능하게 돌봅니다.'},
+ make:{label:'만들기',verb:'판자 함께 다듬기',features:['craft'],cost:{wood:2},reward:{plank:2},detail:'나무를 판자로 바꿉니다. 작업대 가공과 병행할 수 있습니다.'},
+ carry:{label:'운반',verb:'완성품 모아 오기',features:['rest'],cost:{berry:1},reward:{reed:2},detail:'이 지역 설비의 완성된 가공품과 음식을 한 번에 받습니다.'},
+ gather:{label:'어울리기',verb:'작은 모임 열기',features:['meal','music','hot','rest'],cost:{tea:1},reward:{feather:1},detail:'가구에 친구를 모으고 행복 깃털을 남깁니다.'},
+ light:{label:'꾸미기',verb:'반짝 장식 손질하기',features:['light','music'],cost:{ore:1},reward:{charm:1},detail:'가구 개선에 쓰는 반짝 장식을 만듭니다.'}
+};
+const ROLE={kong:'scout',tori:'gather',sprout:'grow',naru:'carry',bori:'grow',mori:'make',sori:'gather',mulgyeol:'grow',banjjak:'light',dami:'make',oni:'gather',gureum:'carry',dali:'light',podo:'gather',jami:'scout',pico:'scout',maru:'carry',byeoli:'light'};
+const STATIONS={
+ gardenbench:{name:'원예 작업대',region:'forest',item:'essence',input:{herb:2},products:['flower'],seconds:20},
+ loombench:{name:'엮는 작업대',region:'river',item:'cloth',input:{reed:2},products:['reedMat'],seconds:25},
+ metalbench:{name:'금속 작업대',region:'ridge',item:'fitting',input:{ore:2},products:['lantern','windchime'],seconds:30}
+};
+Object.assign(NAMES,{essence:'향기 재료',cloth:'엮은 천',fitting:'금속 부품',charm:'반짝 장식',coin:'마을 동전'});
+for(const [id,s] of Object.entries(STATIONS)){
+ KIND[id]={name:s.name,feature:'craft',size:[2,2],cost:{plank:2,stone:2,coin:3},time:30,rep:0,icon:'제작',desc:`${REGION[s.region]}에서 ${NAMES[s.item]}와 지역 가구를 만듭니다.`};
+ FACILITY_IDS.add(id);
+}
+Object.assign(KIND.flower.cost,{essence:1});delete KIND.flower.cost.herb;
+Object.assign(KIND.reedMat.cost,{cloth:1});delete KIND.reedMat.cost.reed;
+Object.assign(KIND.lantern.cost,{fitting:1});delete KIND.lantern.cost.ore;
+Object.assign(KIND.windchime.cost,{fitting:1});
+state.stationJobs ||= {};state.specialtyJobs ||= {};state.specialtyCooldowns ||= {};state.upgrades ||= {};state.orders ||= {};state.roleUses ||= {};
+for(const item of ['essence','cloth','fitting','charm'])state.inventory[item] ||= 0;
+// Old completed requests keep their rewards and unlock their recurring role immediately.
+state.version=4;
+const stationFor=id=>Object.keys(STATIONS).find(key=>STATIONS[key].products.includes(id))||'workbench';
+const objectById=id=>Object.values(state.placements).flat().find(o=>o.id===id);
+const homeOf=id=>state.residentHomes[id]||'home';
+const specialty=id=>SPECIALTIES[ROLE[id]];
+const roleTarget=id=>state.placements[homeOf(id)].find(o=>specialty(id).features.includes(KIND[o.kind]?.feature));
+const regionOf=o=>Object.keys(REGION).find(r=>state.placements[r].some(p=>p.id===o.id));
+const activeStation=()=>panel==='object'?objectById(window._selectedObject):null;
+const stationBusy=o=>state.stationJobs[o?.id]||(state.job?.stationId===o?.id?state.job:null);
+const previousCraftUnlocked=craftUnlocked;
+craftUnlocked=(id,r)=>STATIONS[id]?state.unlocked[STATIONS[id].region]:previousCraftUnlocked(id,r);
+const previousRecipeRow=recipeRow;
+recipeRow=(id,r)=>{
+ const o=activeStation(),local=!FACILITY_IDS.has(id),busy=local?stationBusy(o):state.job;
+ const globalJob=state.job;state.job=busy;
+ let html;try{html=previousRecipeRow(id,r)}finally{state.job=globalJob}
+ return html;
+};
+const oldWorkbenchMenu=workbenchMenu;
+workbenchMenu=o=>{
+ const originalJob=state.job;state.job=stationBusy(o);let html;
+ try{html=oldWorkbenchMenu(o)}finally{state.job=originalJob}
+ // Products are rendered by their own station, never duplicated at the wood bench.
+ const container=document.createElement('div');container.innerHTML=html;
+ container.querySelectorAll('[data-craft]').forEach(b=>{if(stationFor(b.dataset.craft)!=='workbench')b.closest('.row')?.remove()});
+ return container.innerHTML.replaceAll('판자 2개',`판자 ${2+(state.upgrades[o.id]||0)}개`);
+};
+function regionalMenu(o){
+ const s=STATIONS[o.kind],p=state.processing[o.id],j=stationBusy(o),rightRegion=regionOf(o)===s.region;
+ if(!rightRegion)return `<div class="callout">${REGION[s.region]}에 놓아 사용하세요. 보관함에서 무료로 옮길 수 있습니다.</div>`;
+ return `${j?`<div class="callout">${j.name} 제작 중</div>`:''}<div class="callout">${costText(s.input)} → ${NAMES[s.item]} ${2+(state.upgrades[o.id]||0)}개 · ${s.seconds}초</div><button class="primary" data-regional-process="${o.id}" ${p||!enough(s.input)?'disabled':''}>재료 가공하기</button>${p?`<button class="primary" data-regional-collect="${o.id}" ${p.end>state.clock?'disabled':''}>${p.end>state.clock?'가공 중':`${NAMES[s.item]} 받기`}</button>`:''}<div class="section-title">지역 가구</div>${s.products.map(id=>recipeRow(id,KIND[id])).join('')}`;
+}
+function upgradeCost(o){return {coin:5+5*(state.upgrades[o.id]||0),plank:2,...((state.upgrades[o.id]||0)>0?{charm:1}:{})}}
+const previousShowObject=showObject;
+showObject=()=>{
+ const o=objectById(window._selectedObject);if(!o)return;
+ if(STATIONS[o.kind]){panel='object';open('object',KIND[o.kind].name,regionalMenu(o))}else previousShowObject();
+ const level=state.upgrades[o.id]||0;
+ const crop=state.farms[o.id];
+ if(o.kind==='farm'&&state.tools.water&&crop&&crop.readyAt>state.clock)content.insertAdjacentHTML('beforeend',`<button class="secondary" data-water="${o.id}" ${crop.watered?'disabled':''}>${crop.watered?'물을 주었습니다':'물 주기 · 15초 빨리 자랍니다'}</button>`);
+ if(o.kind==='workbench'||STATIONS[o.kind])content.insertAdjacentHTML('beforeend',`<div class="section-title">작업대 개선 ${level}/2</div><p class="muted">개선마다 가공 수량 +1 · 이 작업대의 제작 시간 15% 단축</p>${level<2?`<button class="secondary" data-upgrade="${o.id}" ${enough(upgradeCost(o))?'':'disabled'}>${costText(upgradeCost(o))} · 개선</button>`:''}`);
+ const friends=state.residents.filter(id=>homeOf(id)===state.region&&specialty(id).features.includes(KIND[o.kind].feature));
+ if(friends.length)content.insertAdjacentHTML('beforeend',`<div class="section-title">여기서 함께할 친구</div>${friends.map(id=>`<button class="secondary" data-friend="${id}">${ROSTER.find(r=>r.id===id).name} · ${specialty(id).label}</button>`).join('')}`);
+};
+const previousProfile=showProfile;
+showProfile=()=>{
+ previousProfile();const id=window._selectedFriend;if(!state.residents.includes(id))return;
+ const s=specialty(id),r=ROSTER.find(r=>r.id===id),j=state.specialtyJobs[id],target=roleTarget(id),first=!state.requests[id],cool=Math.max(0,Math.ceil(((state.specialtyCooldowns[id]||0)-state.clock)/1000));
+ const old=content.querySelector('[data-action="fulfill"]');if(old){old.previousElementSibling?.remove();old.previousElementSibling?.remove();old.remove()}
+ const cost=first?r.ask:s.cost;
+ const card=`<section class="role-card"><small>${first?'첫 공동 행동':`특기 · ${s.label}`}</small><h3>${s.verb}</h3><p>${s.detail}</p><p class="muted">${target?KIND[target.kind].name:'같은 지역에 '+s.features.map(f=>({play:'놀이 가구',rest:'쉼터',craft:'작업대',plant:'화분',farm:'밭',meal:'식탁',music:'음악 가구',hot:'온수 탕',light:'등불'}[f])).join(' / ')} · ${REGION[homeOf(id)]}</p>${j?`<button class="primary" data-role-collect="${id}" ${j.end>state.clock?'disabled':''}>${j.end>state.clock?'함께 작업 중 · '+remainingText(Math.ceil((j.end-state.clock)/1000)):'함께한 결과 받기'}</button>`:homeOf(id)!==state.region?`<button class="primary" data-region="${homeOf(id)}">친구가 있는 곳으로</button>`:`<p class="muted">${costText(cost)||'준비물 없음'} · 12초${first?' · 행복 별 2개와 특기 개방':''}</p><button class="primary" data-role-start="${id}" ${!target||cool||!enough(cost)?'disabled':''}>${cool?'다음 활동까지 '+remainingText(cool):s.verb}</button>`}</section>`;
+ content.insertAdjacentHTML('afterbegin',card);
+ if(j&&homeOf(id)!==state.region){const button=content.querySelector('[data-role-collect]');button.outerHTML=`<button class="primary" data-region="${homeOf(id)}">친구가 있는 곳으로</button>`}
+};
+function collectProcess(o){const p=state.processing[o.id];if(!p||p.end>state.clock)return false;earn({[p.item||'plank']:2+(state.upgrades[o.id]||0)});delete state.processing[o.id];return true}
+function finishRole(id){
+ const j=state.specialtyJobs[id];if(!j||j.end>state.clock||homeOf(id)!==state.region)return;
+ const s=specialty(id),region=j.region;delete state.specialtyJobs[id];
+ if(j.first&&!state.requests[id]){state.requests[id]=true;state.stars[id]=Math.min(5,(state.stars[id]||1)+2);state.coins+=5;earn({feather:2});if(id==='kong')state.tools.axe=true;if(id==='tori')state.tools.water=true;if(id==='naru')state.tools.pickaxe=true}
+ earn(s.reward);
+ if(ROLE[id]==='scout')for(const n of NODE_TEMPLATE[region])delete state.nodes[`${region}:${n[0]}`];
+ if(ROLE[id]==='grow')for(const o of state.placements[region])if(state.farms[o.id])state.farms[o.id].readyAt=state.clock;
+ if(ROLE[id]==='carry')for(const o of state.placements[region]){collectProcess(o);const c=state.stoves[o.id];if(c?.readyAt<=state.clock){earn({[c.kind]:1});delete state.stoves[o.id]}}
+ state.roleUses[id]=(state.roleUses[id]||0)+1;state.specialtyCooldowns[id]=state.clock+120000;
+ updateHappiness();save();tell(`${ROSTER.find(r=>r.id===id).name}와 ${s.verb} 완료 · ${costText(s.reward)}`);showProfile();draw();
+}
+const oldPosition=residentPosition;
+residentPosition=(id,index,clock=state.clock)=>{
+ const target=objectById(state.specialtyJobs[id]?.target)||roleTarget(id);
+ if(!target)return oldPosition(id,index,clock);
+ const working=state.specialtyJobs[id],cycle=(clock/1000+index*5)%24;
+ if(working||cycle>5&&cycle<18)return{x:gridX(target.col)+target.w*CELL/2+Math.sin(clock/2200+index)*4,y:gridY(target.row)+target.h*CELL-8,use:true};
+ return oldPosition(id,index,clock);
+};
+const oldResidentArt=residentArt;
+residentArt=(id,index,region)=>{let html=oldResidentArt(id,index,region);const j=state.specialtyJobs[id];return j?html.replace('</g>',`<text x="0" y="-64" text-anchor="middle" class="role-label">${j.end<=state.clock?'완료':specialty(id).label+' 중'}</text></g>`):html};
+const oldObjectArt=objectArt;
+objectArt=o=>{
+ if(!STATIONS[o.kind])return oldObjectArt(o);
+ const x=gridX(o.col)+o.w*CELL/2,y=gridY(o.row)+o.h*CELL;
+ const accent={gardenbench:'#93ad71',loombench:'#bba47b',metalbench:'#879da1'}[o.kind];
+ const top=o.kind==='gardenbench'?sprite('petal-planter.svg',x,y-27,37,37):o.kind==='metalbench'?sprite('rocks.png',x,y-27,37,32):`<path d="M${x-15} ${y-50}h30v22h-30Z" fill="#ecdcb3" stroke="#a28d69" stroke-width="2"/><path d="M${x-13} ${y-44}h26m-26 7h26m-19-12v20m9-20v20" stroke="#baa176" stroke-width="2"/>`;
+ return `<g class="world-object" data-object="${o.id}">${sprite('workbench.png',x,y+4,78,70)}<path d="M${x-25} ${y-20}h50v9h-50Z" fill="${accent}"/>${top}<text x="${x}" y="${y+18}" text-anchor="middle" class="world-label">${KIND[o.kind].name}</text><rect x="${x-30}" y="${y-68}" width="60" height="85" fill="transparent" pointer-events="all"/></g>`;
+};
+const oldBag=showBag;
+showBag=()=>{oldBag();content.innerHTML=content.innerHTML.replace('물가 제작','밭 물주기').replace('행복 깃털은 친구의 부탁 보상으로 얻습니다.','행복 깃털은 친구와의 모임과 지역 의뢰에서도 얻습니다.')};
+const ORDERS={home:[{wood:6},{plank:2},{tea:1}],forest:[{herb:4},{hardwood:3},{essence:2}],river:[{reed:4},{cloth:2},{tea:2}],ridge:[{ore:3},{fitting:2},{hardwood:4}]};
+function orderMenu(){const r=state.region,o=state.orders[r]||{count:0,next:0},cost=ORDERS[r][o.count%3],wait=Math.max(0,Math.ceil((o.next-state.clock)/1000));return `<section class="role-card"><small>${REGION[r]} · 반복 의뢰 ${o.count+1}</small><h3>마을에 필요한 재료</h3><p>${costText(cost)}</p><p class="muted">마을 동전 4개 · 행복 깃털 1개</p><button class="primary" data-order="${r}" ${!state.residents.length||wait||!enough(cost)?'disabled':''}>${!state.residents.length?'첫 친구를 맞이하면 열립니다':wait?'새 의뢰까지 '+remainingText(wait):'전달하기'}</button></section>`}
+const oldGoals=showGoals;
+showGoals=()=>{oldGoals();content.insertAdjacentHTML('afterbegin',orderMenu())};
+// Capture at the sheet boundary so legacy menu handlers cannot double-spend.
+sheet.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b||b.disabled)return;const d=b.dataset;
+ const handled=d.roleStart||d.roleCollect||d.regionalProcess||d.regionalCollect||d.upgrade||d.order||d.craft||d.water||['process-plank','collect-plank'].includes(d.action);
+ if(!handled)return;e.stopImmediatePropagation();
+ if(d.roleStart){const id=d.roleStart,r=ROSTER.find(r=>r.id===id),target=roleTarget(id);if(!state.residents.includes(id)||homeOf(id)!==state.region||!target||state.specialtyJobs[id]||(state.specialtyCooldowns[id]||0)>state.clock)return;const first=!state.requests[id];if(!spend(first?r.ask:specialty(id).cost))return;state.specialtyJobs[id]={first,region:state.region,target:target.id,end:state.clock+12000};tell('친구가 가구로 향합니다. 그동안 다른 일을 할 수 있습니다.');showProfile()}
+ else if(d.roleCollect){finishRole(d.roleCollect);return}
+ else if(d.water){const crop=state.farms[d.water],o=objectById(d.water);if(!o||regionOf(o)!==state.region||!state.tools.water||!crop||crop.watered||crop.readyAt<=state.clock)return;crop.watered=true;crop.readyAt=Math.max(state.clock,crop.readyAt-15000);showObject();tell('물을 주어 당근이 빨리 자랍니다.')}
+ else if(d.order){const r=d.order;if(r!==state.region||!state.residents.length)return;const o=state.orders[r]||{count:0,next:0};if(o.next>state.clock||!spend(ORDERS[r][o.count%3]))return;state.coins+=4;earn({feather:1});state.orders[r]={count:o.count+1,next:state.clock+60000};tell('의뢰 완료 · 동전 4개 · 깃털 1개');showGoals()}
+ else if(d.upgrade){const o=objectById(d.upgrade);if(!o||regionOf(o)!==state.region||(state.upgrades[o.id]||0)>=2||!spend(upgradeCost(o)))return;state.upgrades[o.id]=(state.upgrades[o.id]||0)+1;showObject();tell('작업대를 개선했습니다.')}
+ else if(d.craft){const id=d.craft,r=KIND[id]||TOOLS[id],facility=FACILITY_IDS.has(id),o=activeStation();if(!r||!craftUnlocked(id,r)||TOOLS[id]&&state.tools[id])return;if(facility?panel!=='craft'||state.job:!o||o.kind!==stationFor(id)||stationBusy(o))return;if(o&&STATIONS[o.kind]&&regionOf(o)!==STATIONS[o.kind].region)return;if(id==='stage'&&(state.residents.length<18||Object.values(state.unlocked).some(v=>!v)))return;if(!spend(r.cost))return;const job={id,name:r.name,end:state.clock+Math.ceil(r.time*(state.tools.carpentry?.65:1)*(1-(state.upgrades[o?.id]||0)*.15))*1000,stationId:facility?null:o.id};if(facility)state.job=job;else state.stationJobs[o.id]=job;tell(`${r.name} 제작을 시작했습니다.`);facility?showCraft():showObject()}
+ else {const o=activeStation();if(!o||regionOf(o)!==state.region)return;const s=STATIONS[o.kind];if(o.kind!=='workbench'&&!s)return;if(s&&s.region!==state.region)return;if(d.regionalCollect||d.action==='collect-plank'){if(!collectProcess(o))return;tell('가공품을 받았습니다.')}else{if(state.processing[o.id]||!spend(s?.input||{wood:2}))return;state.processing[o.id]={item:s?.item||'plank',end:state.clock+(s?.seconds||15)*1000}}showObject();
+ }
+ save();draw();
+},true);
+const oldTick=tick;
+tick=delta=>{
+ oldTick(delta);let changed=false;
+ for(const [key,j] of Object.entries(state.stationJobs))if(j.end<=state.clock){if(TOOLS[j.id])state.tools[j.id]=true;else state.stock[j.id]=(state.stock[j.id]||0)+1;delete state.stationJobs[key];changed=true;tell(`${j.name} 완성 · 보관함을 확인하세요.`)}
+ if(changed)save();
+ if(['object','profile','goals'].includes(panel))renderPanel();
+};
+const oldObjective=objective;
+objective=()=>{const ready=Object.entries(state.specialtyJobs).find(([,j])=>j.end<=state.clock);if(ready)return `${ROSTER.find(r=>r.id===ready[0]).name}와 함께한 결과 받기`;const job=Object.values(state.stationJobs)[0];return job?`${job.name} 제작 중 · 다른 작업대도 사용할 수 있어요`:oldObjective()};
+const oldJobPanel=showJobPanel;
+showJobPanel=()=>{const ready=Object.entries(state.specialtyJobs).find(([,j])=>j.end<=state.clock);const job=Object.values(state.stationJobs)[0];if(ready){switchRegion(homeOf(ready[0]));window._selectedFriend=ready[0];showProfile()}else if(job){const o=objectById(job.stationId);if(o){switchRegion(regionOf(o));window._selectedObject=o.id;showObject()}}else oldJobPanel()};
+$('objective-button').onclick=showJobPanel;
+const oldText=window.render_game_to_text;
+window.render_game_to_text=()=>JSON.stringify({...JSON.parse(oldText()),stationJobs:state.stationJobs,specialtyJobs:state.specialtyJobs,specialtyCooldowns:state.specialtyCooldowns,upgrades:state.upgrades,orders:state.orders,roleUses:state.roleUses});
 window.advanceTime=ms=>advance(ms);
 window.__chickGame={getState:()=>structuredClone(state),advance};
 setInterval(()=>{let now=Date.now(),delta=Math.min(30000,now-lastTick);lastTick=now;tick(delta)},1000);
