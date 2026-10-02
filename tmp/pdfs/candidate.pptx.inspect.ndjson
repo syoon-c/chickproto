@@ -1,0 +1,184 @@
+{"kind":"deck","id":"pr/qph5pj","name":"Deck"}
+{"kind":"layout","layoutId":"afaf37f6-38b0-4ba4-8fe2-09d7ad48f180","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"d4c69162-a0a4-465b-8081-41e7188ce2fa","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/l6lhjf","slide":1,"title":"삐약마을","textShapes":4}
+{"kind":"shape","id":"sh/cj6tgrmt","slide":1,"bbox":[0,0,20,720]}
+{"kind":"textbox","id":"sh/bixcnml8","slide":1,"text":"삐약마을","textPreview":"삐약마을","textChars":4,"textLines":1,"bbox":[76,134,700,94]}
+{"kind":"textbox","id":"sh/qhobeh4n","slide":1,"text":"핵심 시스템과 성장 구조","textPreview":"핵심 시스템과 성장 구조","textChars":13,"textLines":1,"bbox":[78,236,820,77]}
+{"kind":"textbox","id":"sh/pgfulc3i","slide":1,"text":"만든 공간에 병아리가 찾아오고, 함께한 행동이 다음 성장을 엽니다.","textPreview":"만든 공간에 병아리가 찾아오고, 함께한 행동이 다음 성장을 엽니다.","textChars":37,"textLines":1,"bbox":[80,343,770,104]}
+{"kind":"shape","id":"sh/of6tcrmx","slide":1,"bbox":[80,510,680,2]}
+{"kind":"textbox","id":"sh/3excjmlc","slide":1,"text":"기획 방향 초안  ·  2026.10","textPreview":"기획 방향 초안  ·  2026.10","textChars":20,"textLines":1,"bbox":[80,535,600,40]}
+{"kind":"image","id":"im/na1o7adk","slide":1,"name":"","alt":"icon_chick_001.png","bbox":[897,207,290,290]}
+{"kind":"notes","id":"nt/l6lhjf","slide":1,"text":"출처: 삐약마을 핵심 시스템과 성장 구조 기획 초안 및 프로젝트 내 병아리 에셋."}
+{"kind":"slide","id":"sl/8hheip","slide":2,"title":"전체 게임 흐름","textShapes":19}
+{"kind":"textbox","id":"sh/gn2xw3ed","slide":2,"text":"전체 게임 흐름","textPreview":"전체 게임 흐름","textChars":8,"textLines":1,"bbox":[70,47,1100,67]}
+{"kind":"textbox","id":"sh/fmtgnyxs","slide":2,"text":"한 번의 제작이 끝이 아니라 다음 행동의 이유가 됩니다.","textPreview":"한 번의 제작이 끝이 아니라 다음 행동의 이유가 됩니다.","textChars":31,"textLines":1,"bbox":[72,118,1120,48]}
+{"kind":"shape","id":"sh/ulkfutw7","slide":2,"bbox":[70,654,1140,2]}
+{"kind":"textbox","id":"sh/psbyt8fu","slide":2,"text":"삐약마을  ·  핵심 시스템과 성장 구조","textPreview":"삐약마을  ·  핵심 시스템과 성장 구조","textChars":22,"textLines":1,"bbox":[70,665,700,25]}
+{"kind":"textbox","id":"sh/4r2x03e9","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1160,665,50,25]}
+{"kind":"textbox","id":"sh/3qtgryx4","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[76,193,69,42]}
+{"kind":"textbox","id":"sh/2pkfydwj","slide":2,"text":"채집·가공","textPreview":"채집·가공","textChars":5,"textLines":1,"bbox":[157,193,246,43]}
+{"kind":"textbox","id":"sh/5wryhofq","slide":2,"text":"지역 재료를 얻고 설비에서 가공","textPreview":"지역 재료를 얻고 설비에서 가공","textChars":17,"textLines":1,"bbox":[414,196,765,40]}
+{"kind":"shape","id":"sh/kvixoje5","slide":2,"bbox":[157,254,1014,2]}
+{"kind":"textbox","id":"sh/ilwfulwb","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[76,276,69,42]}
+{"kind":"textbox","id":"sh/3m5w36xg","slide":2,"text":"제작·배치","textPreview":"제작·배치","textChars":5,"textLines":1,"bbox":[157,276,246,43]}
+{"kind":"textbox","id":"sh/4nexwbe1","slide":2,"text":"가구와 도구를 만들어 공간에 설치","textPreview":"가구와 도구를 만들어 공간에 설치","textChars":18,"textLines":1,"bbox":[414,279,765,40]}
+{"kind":"shape","id":"sh/5one5gfm","slide":2,"bbox":[157,337,1014,2]}
+{"kind":"textbox","id":"sh/qpwfylw7","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[76,359,69,42]}
+{"kind":"textbox","id":"sh/rqpw7qxs","slide":2,"text":"발견·맞이","textPreview":"발견·맞이","textChars":5,"textLines":1,"bbox":[157,359,246,43]}
+{"kind":"textbox","id":"sh/sryx0ved","slide":2,"text":"달라진 공간을 보고 새 병아리가 방문","textPreview":"달라진 공간을 보고 새 병아리가 방문","textChars":20,"textLines":1,"bbox":[414,362,765,40]}
+{"kind":"shape","id":"sh/ds7e90fy","slide":2,"bbox":[157,420,1014,2]}
+{"kind":"textbox","id":"sh/etgf25w3","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[76,442,69,42]}
+{"kind":"textbox","id":"sh/fupwbqxo","slide":2,"text":"함께 생활","textPreview":"함께 생활","textChars":5,"textLines":1,"bbox":[157,442,246,43]}
+{"kind":"textbox","id":"sh/bi9wzatw","slide":2,"text":"병아리와 작업하고 가구를 사용하는 모습을 봄","textPreview":"병아리와 작업하고 가구를 사용하는 모습을 봄","textChars":24,"textLines":1,"bbox":[414,445,765,40]}
+{"kind":"shape","id":"sh/ah0vq5cb","slide":2,"bbox":[157,503,1014,2]}
+{"kind":"textbox","id":"sh/xkre10b2","slide":2,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[76,525,69,42]}
+{"kind":"textbox","id":"sh/wjidsfuh","slide":2,"text":"새 성장","textPreview":"새 성장","textChars":4,"textLines":1,"bbox":[157,525,246,43]}
+{"kind":"textbox","id":"sh/nupcvqt0","slide":2,"text":"특기와 재료가 다음 제작과 지역을 엶","textPreview":"특기와 재료가 다음 제작과 지역을 엶","textChars":20,"textLines":1,"bbox":[414,528,765,40]}
+{"kind":"notes","id":"nt/8hheip","slide":2,"text":"자료: 현재 기획 초안의 핵심 흐름. 병아리 획득 후 새 행동이 이어지는 점을 강조."}
+{"kind":"slide","id":"sl/69pqkt","slide":3,"title":"성장은 행동과 공간으로 보입니다","textShapes":16}
+{"kind":"textbox","id":"sh/54v61kva","slide":3,"text":"성장은 행동과 공간으로 보입니다","textPreview":"성장은 행동과 공간으로 보입니다","textChars":17,"textLines":1,"bbox":[70,47,1100,67]}
+{"kind":"textbox","id":"sh/i14nq5wj","slide":3,"text":"레벨 수치보다 플레이어가 새로 할 수 있는 일을 늘립니다.","textPreview":"레벨 수치보다 플레이어가 새로 할 수 있는 일을 늘립니다.","textChars":32,"textLines":1,"bbox":[72,118,1120,48]}
+{"kind":"shape","id":"sh/j2dozad4","slide":3,"bbox":[70,654,1140,2]}
+{"kind":"textbox","id":"sh/wzm5ofed","slide":3,"text":"삐약마을  ·  핵심 시스템과 성장 구조","textPreview":"삐약마을  ·  핵심 시스템과 성장 구조","textChars":22,"textLines":1,"bbox":[70,665,700,25]}
+{"kind":"textbox","id":"sh/h0vmx0vy","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1160,665,50,25]}
+{"kind":"shape","id":"sh/ux4nm5wn","slide":3,"bbox":[76,211,13,61]}
+{"kind":"textbox","id":"sh/vyd4vad8","slide":3,"text":"생산 기반","textPreview":"생산 기반","textChars":5,"textLines":1,"bbox":[108,200,263,53]}
+{"kind":"textbox","id":"sh/8b25kveh","slide":3,"text":"채집과 가공 설비","textPreview":"채집과 가공 설비","textChars":9,"textLines":1,"bbox":[424,205,306,44]}
+{"kind":"textbox","id":"sh/9cbmt0v2","slide":3,"text":"직접 만들 수 있는 물건이 늘어남","textPreview":"직접 만들 수 있는 물건이 늘어남","textChars":18,"textLines":1,"bbox":[770,205,398,49]}
+{"kind":"shape","id":"sh/lozmdszi","slide":3,"bbox":[108,283,1065,2]}
+{"kind":"shape","id":"sh/0nql4nix","slide":3,"bbox":[76,314,13,61]}
+{"kind":"textbox","id":"sh/zmh4bihs","slide":3,"text":"생활 공간","textPreview":"생활 공간","textChars":5,"textLines":1,"bbox":[108,303,263,53]}
+{"kind":"textbox","id":"sh/yl832d07","slide":3,"text":"가구·둥지·길의 배치","textPreview":"가구·둥지·길의 배치","textChars":11,"textLines":1,"bbox":[424,308,306,44]}
+{"kind":"textbox","id":"sh/dkzm9szm","slide":3,"text":"빈 땅에 주민 생활이 생김","textPreview":"빈 땅에 주민 생활이 생김","textChars":14,"textLines":1,"bbox":[770,308,398,49]}
+{"kind":"shape","id":"sh/cjql0ni1","slide":3,"bbox":[108,386,1065,2]}
+{"kind":"shape","id":"sh/bih47ihg","slide":3,"bbox":[76,417,13,61]}
+{"kind":"textbox","id":"sh/qho3yd0v","slide":3,"text":"주민 협동","textPreview":"주민 협동","textChars":5,"textLines":1,"bbox":[108,406,263,53]}
+{"kind":"textbox","id":"sh/pgfm58za","slide":3,"text":"새 병아리의 특기","textPreview":"새 병아리의 특기","textChars":9,"textLines":1,"bbox":[424,411,306,44]}
+{"kind":"textbox","id":"sh/ov6lw3i5","slide":3,"text":"기존 설비와 재료의 쓰임이 바뀜","textPreview":"기존 설비와 재료의 쓰임이 바뀜","textChars":17,"textLines":1,"bbox":[770,411,398,49]}
+{"kind":"shape","id":"sh/gzalc3ql","slide":3,"bbox":[108,489,1065,2]}
+{"kind":"shape","id":"sh/h0jml876","slide":3,"bbox":[76,520,13,61]}
+{"kind":"textbox","id":"sh/uxs3ad8v","slide":3,"text":"영역 확장","textPreview":"영역 확장","textChars":5,"textLines":1,"bbox":[108,509,263,53]}
+{"kind":"textbox","id":"sh/fy14jypg","slide":3,"text":"여러 지역의 재료 조합","textPreview":"여러 지역의 재료 조합","textChars":12,"textLines":1,"bbox":[424,514,306,44]}
+{"kind":"textbox","id":"sh/svql83qp","slide":3,"text":"공터와 제작 선택이 늘어남","textPreview":"공터와 제작 선택이 늘어남","textChars":14,"textLines":1,"bbox":[770,514,398,49]}
+{"kind":"notes","id":"nt/69pqkt","slide":3,"text":"자료: 기획 초안의 성장 구조. 수치가 아니라 행동과 공간의 변화를 중심으로 정리."}
+{"kind":"slide","id":"sl/wa99qp","slide":4,"title":"신규 병아리: 방문부터 일상까지","textShapes":20}
+{"kind":"textbox","id":"sh/vqxonixo","slide":4,"text":"신규 병아리: 방문부터 일상까지","textPreview":"신규 병아리: 방문부터 일상까지","textChars":17,"textLines":1,"bbox":[70,47,1100,67]}
+{"kind":"textbox","id":"sh/wr6pgne9","slide":4,"text":"한 병아리의 관심사와 특기가 모든 접점에서 이어집니다.","textPreview":"한 병아리의 관심사와 특기가 모든 접점에서 이어집니다.","textChars":30,"textLines":1,"bbox":[72,118,1120,48]}
+{"kind":"shape","id":"sh/hsf6psfu","slide":4,"bbox":[70,654,1140,2]}
+{"kind":"textbox","id":"sh/ml47adg7","slide":4,"text":"삐약마을  ·  핵심 시스템과 성장 구조","textPreview":"삐약마을  ·  핵심 시스템과 성장 구조","textChars":22,"textLines":1,"bbox":[70,665,700,25]}
+{"kind":"textbox","id":"sh/7mdojixs","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1160,665,50,25]}
+{"kind":"textbox","id":"sh/8nmpcnyd","slide":4,"text":"발견","textPreview":"발견","textChars":2,"textLines":1,"bbox":[78,201,117,31]}
+{"kind":"textbox","id":"sh/9ov6lsfi","slide":4,"text":"무엇에 끌리는가","textPreview":"무엇에 끌리는가","textChars":8,"textLines":1,"bbox":[201,199,410,47]}
+{"kind":"textbox","id":"sh/yh4n6dgv","slide":4,"text":"화분 주변의 발자국","textPreview":"화분 주변의 발자국","textChars":10,"textLines":1,"bbox":[672,201,465,42]}
+{"kind":"shape","id":"sh/zidofyxg","slide":4,"bbox":[78,262,1055,2]}
+{"kind":"textbox","id":"sh/fe1szut8","slide":4,"text":"첫 만남","textPreview":"첫 만남","textChars":4,"textLines":1,"bbox":[78,287,117,31]}
+{"kind":"textbox","id":"sh/udsr69cn","slide":4,"text":"함께 무엇을 해 보는가","textPreview":"함께 무엇을 해 보는가","textChars":12,"textLines":1,"bbox":[201,285,410,47]}
+{"kind":"textbox","id":"sh/103a14be","slide":4,"text":"첫 물 주기와 새싹 확인","textPreview":"첫 물 주기와 새싹 확인","textChars":13,"textLines":1,"bbox":[672,287,465,42]}
+{"kind":"shape","id":"sh/gzu98zut","slide":4,"bbox":[78,348,1055,2]}
+{"kind":"textbox","id":"sh/32ls3et4","slide":4,"text":"일상","textPreview":"일상","textChars":2,"textLines":1,"bbox":[78,373,117,31]}
+{"kind":"textbox","id":"sh/21cra9cj","slide":4,"text":"혼자 무엇을 하는가","textPreview":"혼자 무엇을 하는가","textChars":10,"textLines":1,"bbox":[201,371,410,47]}
+{"kind":"textbox","id":"sh/p43a5oba","slide":4,"text":"화분을 살피고 꽃을 나눔","textPreview":"화분을 살피고 꽃을 나눔","textChars":13,"textLines":1,"bbox":[672,373,465,42]}
+{"kind":"shape","id":"sh/o3utcjup","slide":4,"bbox":[78,434,1055,2]}
+{"kind":"textbox","id":"sh/j6hsrat0","slide":4,"text":"개입","textPreview":"개입","textChars":2,"textLines":1,"bbox":[78,459,117,31]}
+{"kind":"textbox","id":"sh/i58rypcf","slide":4,"text":"플레이어가 무엇을 바꾸는가","textPreview":"플레이어가 무엇을 바꾸는가","textChars":14,"textLines":1,"bbox":[201,457,410,47]}
+{"kind":"textbox","id":"sh/md03mh0f","slide":4,"text":"돌볼 화분과 씨앗 선택","textPreview":"돌볼 화분과 씨앗 선택","textChars":12,"textLines":1,"bbox":[672,459,465,42]}
+{"kind":"shape","id":"sh/7e94vmh0","slide":4,"bbox":[78,520,1055,2]}
+{"kind":"textbox","id":"sh/8filori5","slide":4,"text":"성장","textPreview":"성장","textChars":2,"textLines":1,"bbox":[78,545,117,31]}
+{"kind":"textbox","id":"sh/90rmxwzq","slide":4,"text":"다음에 무엇이 열리는가","textPreview":"다음에 무엇이 열리는가","textChars":12,"textLines":1,"bbox":[201,543,410,47]}
+{"kind":"textbox","id":"sh/y9g3ih03","slide":4,"text":"새 정원 가구·생활 장면","textPreview":"새 정원 가구·생활 장면","textChars":13,"textLines":1,"bbox":[672,545,465,42]}
+{"kind":"textbox","id":"sh/zap4r2ho","slide":4,"text":"예시는 특기 설계 방식의 설명이며 확정된 병아리 사양은 아닙니다.","textPreview":"예시는 특기 설계 방식의 설명이며 확정된 병아리 사양은 아닙니다.","textChars":36,"textLines":1,"bbox":[80,612,1050,34]}
+{"kind":"notes","id":"nt/wa99qp","slide":4,"text":"자료: 기획 초안의 병아리 경험 예시. 식물을 좋아하는 병아리는 설명을 위한 가상 사례."}
+{"kind":"slide","id":"sl/k296r6","slide":5,"title":"병아리 특기는 ‘동사’로 구분","textShapes":16}
+{"kind":"textbox","id":"sh/k3yp072p","slide":5,"text":"병아리 특기는 ‘동사’로 구분","textPreview":"병아리 특기는 ‘동사’로 구분","textChars":16,"textLines":1,"bbox":[70,47,1100,67]}
+{"kind":"textbox","id":"sh/z2p87214","slide":5,"text":"새 병아리는 숫자 보너스보다 새로운 장면이나 선택을 만듭니다.","textPreview":"새 병아리는 숫자 보너스보다 새로운 장면이나 선택을 만듭니다.","textChars":34,"textLines":1,"bbox":[72,118,1120,48]}
+{"kind":"shape","id":"sh/y1g7yhkj","slide":5,"bbox":[70,654,1140,2]}
+{"kind":"textbox","id":"sh/x07q5cjy","slide":5,"text":"삐약마을  ·  핵심 시스템과 성장 구조","textPreview":"삐약마을  ·  핵심 시스템과 성장 구조","textChars":22,"textLines":1,"bbox":[70,665,700,25]}
+{"kind":"textbox","id":"sh/czepw72t","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1160,665,50,25]}
+{"kind":"textbox","id":"sh/by583218","slide":5,"text":"발견·탐색","textPreview":"발견·탐색","textChars":5,"textLines":1,"bbox":[80,200,525,43]}
+{"kind":"textbox","id":"sh/axw7uxkn","slide":5,"text":"숨은 채집처와 병아리 흔적을 찾음","textPreview":"숨은 채집처와 병아리 흔적을 찾음","textChars":18,"textLines":1,"bbox":[80,248,522,70]}
+{"kind":"shape","id":"sh/pwnq1sj2","slide":5,"bbox":[80,311,515,2]}
+{"kind":"textbox","id":"sh/obepsn2h","slide":5,"text":"기르기·돌보기","textPreview":"기르기·돌보기","textChars":7,"textLines":1,"bbox":[80,333,525,43]}
+{"kind":"textbox","id":"sh/m9cj6tw7","slide":5,"text":"자연물과 재배물을 다른 상태로 키움","textPreview":"자연물과 재배물을 다른 상태로 키움","textChars":19,"textLines":1,"bbox":[80,381,522,70]}
+{"kind":"shape","id":"sh/na50fyds","slide":5,"bbox":[80,444,515,2]}
+{"kind":"textbox","id":"sh/obe183ex","slide":5,"text":"만들기·고치기","textPreview":"만들기·고치기","textChars":7,"textLines":1,"bbox":[80,466,525,43]}
+{"kind":"textbox","id":"sh/9cnih8vi","slide":5,"text":"새 가공품을 만들거나 시설을 손봄","textPreview":"새 가공품을 만들거나 시설을 손봄","textChars":18,"textLines":1,"bbox":[80,514,522,70]}
+{"kind":"textbox","id":"sh/elcj2twv","slide":5,"text":"운반·연결","textPreview":"운반·연결","textChars":5,"textLines":1,"bbox":[665,200,525,43]}
+{"kind":"textbox","id":"sh/zml0bydg","slide":5,"text":"지역 사이의 재료 이동을 바꿈","textPreview":"지역 사이의 재료 이동을 바꿈","textChars":16,"textLines":1,"bbox":[665,248,522,70]}
+{"kind":"shape","id":"sh/0nu143e1","slide":5,"bbox":[665,311,515,2]}
+{"kind":"textbox","id":"sh/183id8vm","slide":5,"text":"모으기·어울리기","textPreview":"모으기·어울리기","textChars":8,"textLines":1,"bbox":[665,333,525,43]}
+{"kind":"textbox","id":"sh/qhsjy9wz","slide":5,"text":"공동 가구에 주민을 모음","textPreview":"공동 가구에 주민을 모음","textChars":13,"textLines":1,"bbox":[665,381,522,70]}
+{"kind":"shape","id":"sh/ri107edk","slide":5,"bbox":[665,444,515,2]}
+{"kind":"textbox","id":"sh/vaxojqp0","slide":5,"text":"밝히기·꾸미기","textPreview":"밝히기·꾸미기","textChars":7,"textLines":1,"bbox":[665,466,525,43]}
+{"kind":"textbox","id":"sh/u9o7ql8f","slide":5,"text":"공간의 분위기와 사용 행동을 바꿈","textPreview":"공간의 분위기와 사용 행동을 바꿈","textChars":18,"textLines":1,"bbox":[665,514,522,70]}
+{"kind":"notes","id":"nt/k296r6","slide":5,"text":"자료: 기획 초안의 특기 키워드. 수치·쿨타임·병아리별 배정은 미확정."}
+{"kind":"slide","id":"sl/arnhee","slide":6,"title":"설비·가구·아이템의 역할","textShapes":13}
+{"kind":"textbox","id":"sh/3e5472ls","slide":6,"text":"설비·가구·아이템의 역할","textPreview":"설비·가구·아이템의 역할","textChars":13,"textLines":1,"bbox":[70,47,1100,67]}
+{"kind":"textbox","id":"sh/ozel072d","slide":6,"text":"세 요소가 각각 다른 이유로 필요해야 제작이 재미있습니다.","textPreview":"세 요소가 각각 다른 이유로 필요해야 제작이 재미있습니다.","textChars":32,"textLines":1,"bbox":[72,118,1120,48]}
+{"kind":"shape","id":"sh/p0nm9c3i","slide":6,"bbox":[70,654,1140,2]}
+{"kind":"textbox","id":"sh/q1g32hk3","slide":6,"text":"삐약마을  ·  핵심 시스템과 성장 구조","textPreview":"삐약마을  ·  핵심 시스템과 성장 구조","textChars":22,"textLines":1,"bbox":[70,665,700,25]}
+{"kind":"textbox","id":"sh/b2p4bmlo","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1160,665,50,25]}
+{"kind":"textbox","id":"sh/c3yl4729","slide":6,"text":"설비","textPreview":"설비","textChars":2,"textLines":1,"bbox":[78,195,310,50]}
+{"kind":"textbox","id":"sh/d47mdc3u","slide":6,"text":"무엇을 할 수 있는가","textPreview":"무엇을 할 수 있는가","textChars":11,"textLines":1,"bbox":[78,251,332,42]}
+{"kind":"textbox","id":"sh/y5g36hkf","slide":6,"text":"채집물을 가공하고 가구·도구를 만듭니다. 병아리 특기로 새 제작법이나 작업 방식이 열립니다.","textPreview":"채집물을 가공하고 가구·도구를 만듭니다. 병아리 특기로 새 제작법이나 작업 방식이 열립니다.","textChars":51,"textLines":1,"bbox":[78,309,332,172]}
+{"kind":"textbox","id":"sh/jmp0jydg","slide":6,"text":"가구","textPreview":"가구","textChars":2,"textLines":1,"bbox":[474,195,310,50]}
+{"kind":"textbox","id":"sh/ylgjqdwv","slide":6,"text":"어디서 일이 벌어지는가","textPreview":"어디서 일이 벌어지는가","textChars":12,"textLines":1,"bbox":[474,251,332,42]}
+{"kind":"textbox","id":"sh/lo7il8vm","slide":6,"text":"방문의 실마리이자 입주 후의 생활 무대입니다. 같은 가구도 사용하는 병아리에 따라 장면이 달라집니다.","textPreview":"방문의 실마리이자 입주 후의 생활 무대입니다. 같은 가구도 사용하는 병아리에 따라 장면이 달라집니다.","textChars":56,"textLines":1,"bbox":[474,309,332,172]}
+{"kind":"textbox","id":"sh/bi50fyx4","slide":6,"text":"아이템","textPreview":"아이템","textChars":3,"textLines":1,"bbox":[870,195,310,50]}
+{"kind":"textbox","id":"sh/axwjmtwz","slide":6,"text":"무엇을 다음에 만들까","textPreview":"무엇을 다음에 만들까","textChars":11,"textLines":1,"bbox":[870,251,332,42]}
+{"kind":"textbox","id":"sh/xk7ih8fa","slide":6,"text":"원재료는 가공품이 되고, 가공품은 도구·가구·공동 시설로 이어집니다. 지역 간 제작에도 다시 쓰입니다.","textPreview":"원재료는 가공품이 되고, 가공품은 도구·가구·공동 시설로 이어집니다. 지역 간 제작에도 다시 쓰입니다.","textChars":57,"textLines":1,"bbox":[870,309,332,172]}
+{"kind":"image","id":"im/2ls76d0v","slide":6,"name":"","alt":"workbench.png","bbox":[152,492,184,131]}
+{"kind":"image","id":"im/zmdsva5g","slide":6,"name":"","alt":"garden-swing.png","bbox":[548,492,184,131]}
+{"kind":"image","id":"im/byt8rq54","slide":6,"name":"","alt":"logs.png","bbox":[944,492,184,131]}
+{"kind":"notes","id":"nt/arnhee","slide":6,"text":"자료: 기획 초안과 프로젝트 내 게임 에셋. 가구는 방문 조건 이후에도 반복 사용되어야 함."}
+{"kind":"slide","id":"sl/zp711c","slide":7,"title":"재화는 획득처와 소비처가 분명해야 합니다","textShapes":20}
+{"kind":"textbox","id":"sh/g7ehon2d","slide":7,"text":"재화는 획득처와 소비처가 분명해야 합니다","textPreview":"재화는 획득처와 소비처가 분명해야 합니다","textChars":22,"textLines":1,"bbox":[70,47,1100,67]}
+{"kind":"textbox","id":"sh/f650vils","slide":7,"text":"마을의 성장과 꾸미기에 쓰이는 이유를 먼저 만듭니다.","textPreview":"마을의 성장과 꾸미기에 쓰이는 이유를 먼저 만듭니다.","textChars":29,"textLines":1,"bbox":[72,118,1120,48]}
+{"kind":"shape","id":"sh/e5wzmdk7","slide":7,"bbox":[70,654,1140,2]}
+{"kind":"textbox","id":"sh/pw7i1sju","slide":7,"text":"삐약마을  ·  핵심 시스템과 성장 구조","textPreview":"삐약마을  ·  핵심 시스템과 성장 구조","textChars":22,"textLines":1,"bbox":[70,665,700,25]}
+{"kind":"textbox","id":"sh/ovyhsn29","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1160,665,50,25]}
+{"kind":"textbox","id":"sh/3up0zi1o","slide":7,"text":"재화","textPreview":"재화","textChars":2,"textLines":1,"bbox":[81,188,295,35]}
+{"kind":"textbox","id":"sh/2tgzqdk3","slide":7,"text":"얻는 행동","textPreview":"얻는 행동","textChars":5,"textLines":1,"bbox":[391,188,310,35]}
+{"kind":"textbox","id":"sh/503ypo3q","slide":7,"text":"주요 소비처","textPreview":"주요 소비처","textChars":6,"textLines":1,"bbox":[748,188,415,35]}
+{"kind":"shape","id":"sh/4zuhgj25","slide":7,"bbox":[80,228,1092,2]}
+{"kind":"textbox","id":"sh/m5knax0f","slide":7,"text":"마을 동전","textPreview":"마을 동전","textChars":5,"textLines":1,"bbox":[81,254,285,58]}
+{"kind":"textbox","id":"sh/76do3210","slide":7,"text":"부탁·주문·납품","textPreview":"부탁·주문·납품","textChars":8,"textLines":1,"bbox":[391,254,320,58]}
+{"kind":"textbox","id":"sh/87m5cnil","slide":7,"text":"일반 꾸미기, 설비 개선, 공터 정비","textPreview":"일반 꾸미기, 설비 개선, 공터 정비","textChars":20,"textLines":1,"bbox":[748,254,415,58]}
+{"kind":"shape","id":"sh/98v65sz6","slide":7,"bbox":[80,324,1090,2]}
+{"kind":"textbox","id":"sh/u94nex0r","slide":7,"text":"지역 재료","textPreview":"지역 재료","textChars":5,"textLines":1,"bbox":[81,345,285,58]}
+{"kind":"textbox","id":"sh/vudo72hc","slide":7,"text":"지역별 채집·생산","textPreview":"지역별 채집·생산","textChars":9,"textLines":1,"bbox":[391,345,320,58]}
+{"kind":"textbox","id":"sh/wvmpg7ix","slide":7,"text":"가공품, 도구, 가구, 공동 시설","textPreview":"가공품, 도구, 가구, 공동 시설","textChars":18,"textLines":1,"bbox":[748,345,415,58]}
+{"kind":"shape","id":"sh/hwv69cz2","slide":7,"bbox":[80,415,1090,2]}
+{"kind":"textbox","id":"sh/ix47ih0n","slide":7,"text":"특별 제작 재료","textPreview":"특별 제작 재료","textChars":8,"textLines":1,"bbox":[81,436,285,58]}
+{"kind":"textbox","id":"sh/3yxobmh8","slide":7,"text":"협동·공동 활동·발견","textPreview":"협동·공동 활동·발견","textChars":11,"textLines":1,"bbox":[391,436,320,58]}
+{"kind":"textbox","id":"sh/f2x4zmxg","slide":7,"text":"상위 기능 가구와 개성 있는 제작물","textPreview":"상위 기능 가구와 개성 있는 제작물","textChars":19,"textLines":1,"bbox":[748,436,415,58]}
+{"kind":"shape","id":"sh/e1on6hgv","slide":7,"bbox":[80,506,1090,2]}
+{"kind":"textbox","id":"sh/14f61cfm","slide":7,"text":"유료 재화","textPreview":"유료 재화","textChars":5,"textLines":1,"bbox":[81,527,285,58]}
+{"kind":"textbox","id":"sh/03658ry1","slide":7,"text":"구매","textPreview":"구매","textChars":2,"textLines":1,"bbox":[391,527,320,58]}
+{"kind":"textbox","id":"sh/ryx4v2x4","slide":7,"text":"외형·테마 꾸미기와 선택적 편의","textPreview":"외형·테마 꾸미기와 선택적 편의","textChars":17,"textLines":1,"bbox":[748,527,415,58]}
+{"kind":"textbox","id":"sh/qxon2xgz","slide":7,"text":"행복 별은 소비하는 화폐가 아니라 병아리와 마을의 성장 상태입니다.","textPreview":"행복 별은 소비하는 화폐가 아니라 병아리와 마을의 성장 상태입니다.","textChars":37,"textLines":1,"bbox":[81,615,1080,30]}
+{"kind":"notes","id":"nt/zp711c","slide":7,"text":"자료: 기획 초안의 재화 개념. 재화 명칭은 임시이며 구체 수치는 미정."}
+{"kind":"slide","id":"sl/czcin0","slide":8,"title":"새 콘텐츠는 기존 마을을 다시 움직입니다","textShapes":17}
+{"kind":"textbox","id":"sh/byxsje14","slide":8,"text":"새 콘텐츠는 기존 마을을 다시 움직입니다","textPreview":"새 콘텐츠는 기존 마을을 다시 움직입니다","textChars":22,"textLines":1,"bbox":[70,47,1100,67]}
+{"kind":"textbox","id":"sh/cz6tcj2p","slide":8,"text":"새 병아리 하나가 오래된 가구와 지역에도 새 쓰임을 만들어야 합니다.","textPreview":"새 병아리 하나가 오래된 가구와 지역에도 새 쓰임을 만들어야 합니다.","textChars":38,"textLines":1,"bbox":[72,118,1120,48]}
+{"kind":"shape","id":"sh/d0faloja","slide":8,"bbox":[70,654,1140,2]}
+{"kind":"textbox","id":"sh/294r69kn","slide":8,"text":"삐약마을  ·  핵심 시스템과 성장 구조","textPreview":"삐약마을  ·  핵심 시스템과 성장 구조","textChars":22,"textLines":1,"bbox":[70,665,700,25]}
+{"kind":"textbox","id":"sh/3adsfe18","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1160,665,50,25]}
+{"kind":"textbox","id":"sh/obmt8j2t","slide":8,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[79,199,72,51]}
+{"kind":"textbox","id":"sh/pcvah4je","slide":8,"text":"관심사","textPreview":"관심사","textChars":3,"textLines":1,"bbox":[159,199,231,47]}
+{"kind":"textbox","id":"sh/m58bit0r","slide":8,"text":"어떤 가구·공간을 보고 찾아오는가","textPreview":"어떤 가구·공간을 보고 찾아오는가","textChars":18,"textLines":1,"bbox":[416,202,755,45]}
+{"kind":"shape","id":"sh/n6hsry1c","slide":8,"bbox":[159,269,1014,2]}
+{"kind":"textbox","id":"sh/369k3e9o","slide":8,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[79,297,72,51]}
+{"kind":"textbox","id":"sh/250ja9s3","slide":8,"text":"첫 행동","textPreview":"첫 행동","textChars":4,"textLines":1,"bbox":[159,297,231,47]}
+{"kind":"textbox","id":"sh/p8b25oru","slide":8,"text":"맞이하자마자 무엇을 함께 하는가","textPreview":"맞이하자마자 무엇을 함께 하는가","textChars":17,"textLines":1,"bbox":[416,300,755,45]}
+{"kind":"shape","id":"sh/47i1cja9","slide":8,"bbox":[159,367,1014,2]}
+{"kind":"textbox","id":"sh/ratk7y90","slide":8,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[79,395,72,51]}
+{"kind":"textbox","id":"sh/q9kjytsf","slide":8,"text":"반복 역할","textPreview":"반복 역할","textChars":5,"textLines":1,"bbox":[159,395,231,47]}
+{"kind":"textbox","id":"sh/dwb29orq","slide":8,"text":"어떤 설비·아이템의 쓰임을 바꾸는가","textPreview":"어떤 설비·아이템의 쓰임을 바꾸는가","textChars":19,"textLines":1,"bbox":[416,398,755,45]}
+{"kind":"shape","id":"sh/cv210jal","slide":8,"bbox":[159,465,1014,2]}
+{"kind":"textbox","id":"sh/zytkby9w","slide":8,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[79,493,72,51]}
+{"kind":"textbox","id":"sh/exkj2tsb","slide":8,"text":"주민 관계","textPreview":"주민 관계","textChars":5,"textLines":1,"bbox":[159,493,231,47]}
+{"kind":"textbox","id":"sh/u58vq1gv","slide":8,"text":"기존 병아리와 어떤 장면을 만드는가","textPreview":"기존 병아리와 어떤 장면을 만드는가","textChars":19,"textLines":1,"bbox":[416,496,755,45]}
+{"kind":"shape","id":"sh/v6hwjmxg","slide":8,"bbox":[78,601,1090,3]}
+{"kind":"textbox","id":"sh/w7qdsry1","slide":8,"text":"다음에는 누구와 무엇을 만들어 어떤 장면을 볼까?","textPreview":"다음에는 누구와 무엇을 만들어 어떤 장면을 볼까?","textChars":27,"textLines":1,"bbox":[80,612,1080,41]}
+{"kind":"notes","id":"nt/czcin0","slide":8,"text":"자료: 기획 초안의 신규 콘텐츠 연결 원칙. 병아리 특기, 가구, 아이템, 지역을 한 묶음으로 설계."}
